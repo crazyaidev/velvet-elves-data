@@ -1,0 +1,842 @@
+## Job Details on Upwork:
+```
+Senior Full‑Stack .NET Developer for AI‑Enabled Real Estate Transaction Platform
+
+Summary
+Project Overview
+
+We are a real‑estate brokerage seeking an experienced full‑stack developer (or small team) to rebuild our internal transaction management system. The current platform, Velvet Elves, is implemented in ASP.NET MVC/C# and manages every step of a residential transaction—capturing contracts, orchestrating tasks, coordinating vendors, storing documents, and communicating with clients.
+
+For the rebuild, we are open to the technology stack that best suits the project’s goals and performance requirements. While .NET is familiar, we will consider other modern frameworks and languages (e.g., Python/Django, Node.js, or Java with Spring Boot) if you can demonstrate clear advantages in scalability, efficiency, or integration.
+
+Key objectives for the new system include:
+
+A responsive web application (with future mobile support).
+
+AI‑powered automation for task management and email responses.
+
+Integration with Gmail, MLS feeds, e‑signature providers, CRMs, title-company software, and mortgage‑loan–officer (MLO) platforms.
+
+A payment module to handle transaction fees and commission payouts.
+
+White‑label capabilities so other firms can deploy the platform with custom logos, colors, and domains.
+
+An advertising/sponsorship module allowing local vendors to purchase ad placements within our wizard and task screens.
+
+Robust security, compliance, and multi‑tenant architecture.
+
+Scope of Work
+
+Discovery & Architecture
+
+Review our current ASP.NET MVC codebase and scope document.
+
+Recommend and justify the optimal technology stack for the rebuild, balancing performance, maintainability, cost, and our integration needs.
+
+Plan data migration: only existing task definitions will be migrated (no legacy transactions or docs).
+
+User Management & Role‑Based Access
+
+Implement secure registration, login, password resets, and invite workflows.
+
+Build role‑based permissions for Agents, Team Leaders, Transaction Managers, Clients, and Administrators.
+
+Task Management & Automation
+
+Recreate our wizard-driven task engine with dependencies, floats, and configurable triggers.
+
+Import the legacy task catalogue (50+ tasks) and allow admins to edit or add tasks.
+
+Enable AI‑assisted task creation via natural language and automation of “To Be Automated” tasks.
+
+Transaction & Document Management
+
+Build forms to create/edit transactions (address, buyer/seller representation, financing type, closing date, etc.).
+
+Provide filtered and sortable transaction lists for each role.
+
+Implement secure document storage with versioning, metadata, email delivery, and AI‑assisted data extraction.
+
+Payments & Monetization
+
+Integrate a payment gateway (e.g., Stripe/PayPal) for transaction fees and commissions.
+
+Build an advertising module allowing local vendors to upload creative assets, purchase packages, schedule ads, and view performance metrics. Connect ad billing to the payment system.
+
+Integrations
+
+Connect to Gmail API for sending/receiving emails and calendar events.
+
+Integrate with MLS feeds, e‑sign providers, CRMs, title company software, and MLO platforms.
+
+Design API hooks for additional integrations.
+
+AI & Email Automation
+
+Incorporate generative AI (e.g., OpenAI APIs) to answer routine client emails by pulling relevant transaction data and documents.
+
+Implement predictive analytics to flag at‑risk transactions or deadlines.
+
+Dashboards & White‑Labeling
+
+Create role-specific dashboards summarizing transactions, tasks, payments, and communications.
+
+Support white‑label branding per client (custom logos, colors, domains).
+
+Testing, Deployment & Support
+
+Provide comprehensive unit/integration tests.
+
+Set up CI/CD pipelines and staging environments.
+
+Assist with deployment and provide technical documentation and user training.
+
+Expected Deliverables
+
+Functional MVP within 6 months, aligning with a budget of under USD 40,000.
+
+Source code hosted in our private repository.
+
+Deployment scripts, documentation, and test cases.
+
+A clear timeline with milestones.
+
+Post‑launch support agreement (optional but preferred).
+
+Who You Are
+
+A senior full‑stack developer with proven experience in both .NET and other modern frameworks (e.g., Node.js, Python, Java).
+
+Comfortable recommending and justifying the right tech stack for a complex SaaS rebuild.
+
+Familiar with AI integration and workflow automation.
+
+Experienced with PropTech or real‑estate applications and integrations (MLS, e‑sign, CRM).
+
+Able to architect multi‑tenant, secure applications with robust payment processing and advertising modules.
+
+Able to lead projects independently, communicate clearly, and meet deadlines.
+
+How to Apply
+
+Please submit a proposal that includes:
+
+A brief introduction and relevant experience (especially with cross‑platform or replatforming projects).
+
+Your recommended tech stack and rationale.
+
+An outline of your development approach, including how you’d leverage AI to accelerate delivery.
+
+A rough timeline and cost breakdown (milestones vs. total budget).
+
+Examples (links or portfolios) of similar projects you’ve completed.
+
+Any questions or clarifications you need before starting.
+$40,000.00
+Fixed-price
+Expert
+I am willing to pay higher rates for the most experienced freelancers
+Attachment
+Project Overview.docx (29 KB)
+Project Type:Complex project
+Skills and Expertise
+Mandatory skills
+Web Application
+API Integration
+Amazon Web Services
+
+=========================== Project Overview.docx (29 KB) =======================
+Project Overview
+Velvet Elves is a web‑based transaction management platform designed for real estate brokerages. The current version, implemented in ASP.NET MVC/C#, orchestrates every stage of a residential real‑estate transaction: from creating a deal record, assigning tasks and managing vendors, to storing and emailing documents and communicating with clients. Core functions include document storage, wizard‑generated task lists based on different use cases, a Gmail‑based email API, user accounts, payment processing for transaction fees/commissions, and dashboards tailored for agents, team leaders, transaction managers, clients and administrators. Users log in via account invitations, register or reset passwords, and then work on transactions through a responsive web interface. The application heavily relies on task dependencies, document workflows, contact management and automated email notifications.
+This scope document outlines the functional modules, desired improvements and new AI‑driven features to guide a developer in estimating the cost and timeline of rebuilding Velvet Elves. Where specific details are unknown, reasonable assumptions are noted; please adjust those assumptions as needed.
+Core Modules & Required Features
+1. User Management & Authentication
+Account registration and login – The existing system sends invitation tokens and allows recipients to register or log in through password‑reset workflows. Maintain secure registration, login, password reset and invite‑based onboarding. Consider upgrading to modern authentication (e.g., OAuth2/JWT) for security and future scalability.
+Role‑based access control – Support the following roles: Agent, Team Leader, Transaction Manager, Client (buyer/seller), and Administrator. Each role has distinct permissions for viewing, editing and approving transactions and tasks. Administrators and team leaders can manage other users, assign transactions and configure the system. Vendors (e.g., mortgage/title) may be represented as linked contacts rather than full users, but the design should allow additional roles to be defined or adjusted via configuration.
+Contact management – The current system stores details for co‑agents, loan officers, title reps, buyers and sellers, and provides functions to update names, emails and phone numbers. Maintain a centralized contact directory linked to transactions and vendors.
+2. Transaction Management
+Transaction lifecycle – Users can create, edit and delete transactions. The model includes address fields, representation type (buyer, seller or both), purchase price, financing type (cash or financed), closing date and notes. The system loads incomplete transactions and populates vendor lists, state lists and agent lists. Reimplement this with intuitive forms and built‑in validation.
+Task automation based on wizard inputs – When a transaction is created or edited, the system automatically assigns “generic” tasks based on conditions (e.g., financing type, title order, representation). These tasks include acceptance and closing tasks, financing‑specific tasks, and contingency tasks. The new implementation should preserve this rule engine and make it configurable so that brokers can adjust which tasks are triggered by which conditions.
+Transaction assignment – Transactions can be assigned to an elf or an agent. Assignment triggers notifications and additional task creation. Support reassignment and allow multiple participants per transaction (agents, elves, vendors, buyers, sellers).
+Filtering & reporting – The system currently returns filtered lists of transactions for different roles (elf, agent, vendor, client) with sorting, searching, and pagination. Recreate this functionality with modern data‑table UX (filter by status, closing date, representative, location, etc.) and export capabilities (CSV/Excel/PDF).
+Payment processing – Integrate payment workflows so agents can collect transaction fees and commissions. The existing codebase references a separate payment module. The rebuild should support secure credit‑card processing, invoicing, tracking payments and refunds, and integration with accounting platforms. Payment actions must trigger tasks or status updates as appropriate.
+Dashboards for each role – Provide tailored dashboards for agents, team leaders, transaction managers, vendors, clients, and administrators. These dashboards should summarize active transactions, upcoming deadlines, outstanding payments, and communication status at a glance. Allow customization of widgets and include interactive charts or KPIs.
+3. Task Management
+Task creation & editing – Users can add, edit and delete tasks associated with transactions and the master task lists for each use case. Tasks have due dates, description, dependencies, owners and optional “float” (buffer days). The system also supports tasks that depend on wizard questions or other tasks. Rebuild this module to allow: creation of templates, assignment of tasks to users, and visual management of dependencies (e.g., Gantt or dependency tree).
+Dependency engine – Tasks can depend on other tasks or conditions; they may not start until predecessors complete. Provide a rule builder so administrators can define dependencies without code changes.
+Test task management – The system includes a “Test Task” section allowing creation of generic tasks not tied to any transaction. Decide whether to retain this feature; if retained, move it into a template/task library module.
+Notification & reminders – Tasks trigger email reminders to assignees when due or critical. Implement configurable reminder intervals (e.g., due today, past due), push, and in‑app notifications.
+Reporting – Provide dashboards to show tasks by status (previous, today, upcoming) and highlight tasks with upcoming deadlines. Send a daily summary email when there are tasks that are due and not when there aren’t.
+Comprehensive task catalogue – The legacy REWORKING TASK DB.xlsx file contains a structured catalogue of more than fifty tasks that guide a transaction from contract acceptance through closing and post-closing follow-up. These tasks include, among others:
+Welcome & communication tasks – “Buyer Welcome,” “Seller Welcome,” “Co‑op Agent Welcome,” “Loan Officer Welcome,” and “New Transaction Added” notifications, many of which are automated and triggered on contract acceptance.
+Documentation & compliance tasks – “Review Documentation,” “Request HOA Docs,” “Deliver HOA Docs,” “Order Title,” “Confirm Title Order,” “Buyer Documentation,” “Deliver Title,” “Deliver Utility Info,” “Title Work Completed,” and “Closing Disclosure Delivered.”
+Vendor & contingency tasks – “Order Home Warranty,” “Confirm Home Warranty Order,” “Insurance Reminder,” “Inspection Scheduled,” “Inspection Completed,” “Inspection Response Reminder,” “Inspection Negotiated,” “Appraisal Ordered,” “Appraisal Completed,” and “Clear to Close.”
+Closing & follow‑up tasks – “Schedule Closing,” “Buyer Closing Information,” “Seller Closing Information,” “Buyer's Agent Closing Information,” “Seller's Agent Closing Information,” “Closing Gift,” “Request Referrals,” “Exemptions and Thank You,” “Thank You,” and “Internal Thank You.”
+Meta tasks – “Closing Date,” representing the key date used as a reference for tasks with floats.
+ Each task entry specifies its maturity relative to its dependency (e.g., on/Before/After another task or specific date), the float or offset in days, and the applicable cases (Buy-Fin, Buy-Cash, Sell-Fin, Sell-Cash). Tasks marked as “Automated” or “To Be Automated” indicate opportunities for system automation and AI integration. The rebuilt system should import this catalogue as the default task library, allow administrators to edit task definitions (name, dependencies, float, case applicability, automation flag), and add new tasks as needed.
+4. Document Management
+Upload & storage – Agents, elves, and clients can upload documents (e.g., purchase contracts, disclosures). Store files securely in a document center linked to transactions.
+Document retrieval & metadata – The system provides a “GetDocumentList” API returning document name, type, and ID; users can rename or delete documents. Maintain metadata and versioning so users can track changes and view previous versions.
+Document emailing – The existing controller can send one or more documents via email to selected recipients (transaction participants, clients) and logs each email as a transaction note. Rebuild this with improved UI: choose recipients, subject, body and attachments; use templated emails for consistency.
+AI‑assisted document processing – New feature: integrate AI to read uploaded documents (contracts, PDFs) and auto-extract key fields (buyer names, closing dates) into structured data for easier entry. This will reduce manual data entry and improve accuracy.
+5. Communication & Notifications
+Email notifications – The system sends emails when transactions are created, tasks are assigned or updated, and documents are shared. Use a robust email service with templating and logging. Support CC/BCC and attachments.
+Client onboarding – Clients receive registration or login emails with unique tokens when they are added to a transaction. Maintain this workflow and consider adding two‑factor authentication for improved security.
+Communication log – Maintain a log of all communications per transaction (emails sent, phone calls, notes) for auditability.
+AI‑powered email replies – New feature: integrate generative AI to answer routine client questions and requests via email. For example, a client can email the system asking for a document or status update, and the AI assistant can respond automatically by retrieving the requested information from the transaction records and attaching the correct document. Include fallback to human review for complex inquiries.
+6. Vendor & Integrations
+Vendor management – The system maintains lists of mortgage and title vendors, along with preferred vendors for transactions. Allow administrators to add, edit and deactivate vendors.
+Advertising & sponsorship – Provide the ability to sell advertising space within the wizard and task modules to local vendors (e.g., title companies, mortgage lenders, inspectors, contractors). This requires an ad management interface where administrators can create and price advertising packages, approve vendor creative assets (logos, banners, contextual offers) and schedule where and when ads appear (for example, during task creation for inspections or loan contingency tasks). Track impressions and clicks to report performance to advertisers. Ads should be clearly delineated from system content and must not compromise user experience or security. Support different ad formats (display banners, text links, sponsored suggestions) and ensure they are responsive across devices. A billing component should tie into the payment module to invoice and collect fees from advertisers.
+External integrations – Integrate with third‑party services that are essential to a real‑estate transaction workflow:
+MLS feeds – Pull property and listing data directly from the Multiple Listing Service to pre‑populate transaction details.
+E‑signature providers (e.g., DocuSign, HelloSign) – Obtain digital signatures for contracts and disclosures.
+Customer Relationship Management (CRM) systems – Sync leads, contacts and communications with the brokerage’s CRM. Allow two‑way data flow so new clients in Velvet Elves appear in CRM and vice versa.
+Title company software – Exchange files and status updates with title agencies to streamline escrow and closing. Support common file formats and secure messaging.
+Mortgage Loan Officer (MLO) software – Connect with MLO platforms to share loan status, requirements and documents, reducing manual updates.
+Calendar & email APIs – Leverage Gmail API (existing) and calendar APIs (Google Calendar, Outlook) to schedule appointments, send reminders and manage events.
+Payment module – The original repository includes a separate module (VEPaymentModule). If integrated, specify requirements for invoicing, commission tracking or integration with accounting software.
+7. AI & Automation
+AI‑assisted coding – The development team is expected to use AI coding agents (e.g., Copilot, ChatGPT) to accelerate implementation. Provide guidelines on code quality, documentation and human oversight.
+Natural‑language task creation – Allow users to create tasks by describing them in plain language; an AI agent converts the description into structured task objects. Example: “Send inspection contingency reminder three days before inspection” turns into a task with proper due date and reminder rules.
+Predictive analytics – In later phases, consider using AI to predict closing delays, identify transactions at risk, or prioritize tasks based on historical data.
+8. User Interface & Experience
+Responsive web application – The primary platform should be a responsive web app accessible from desktops and mobile browsers. Use a modern front‑end framework (e.g., React, Angular) and ensure that key dashboards (transactions, tasks, documents) are intuitive and load quickly.
+Mobile support – In addition to the responsive web app, plan for a supporting native or hybrid mobile app in a subsequent phase (assuming the timeline and budget permit). The mobile app should enable agents to view and update transactions, upload documents via camera and receive push notifications.
+Dashboard & reporting – Provide a customizable dashboard summarizing open transactions, upcoming closings, overdue tasks, and new documents. Include filters and quick links to jump into specific transactions or tasks.
+Accessibility & internationalization – Ensure the app meets basic accessibility guidelines (WCAG AA) and allows for multilingual support if your brokerage serves multilingual clients.
+White‑label customization – Allow brokerages or partner companies to purchase and deploy the platform under their own branding (“white‑boxing”). This includes the ability to upload custom logos, set brand colors and themes, and optionally configure a custom domain or subdomain. Each tenant’s branding should be applied across the login screens, dashboards, email templates, and documents without impacting the core functionality. Consider a multi-tenant architecture to isolate data and branding per customer.
+9. Data Migration & Security
+Data migration – Only the task lists from the legacy system will be migrated into the new platform. Because documents, transactions, and user accounts will be recreated or imported manually, the migration scripts should focus on exporting existing task templates and assignments from SQL Server, transforming them to match the new schema, and loading them into the fresh database. Provide tools or guidance for brokers to re‑enter or import transactions and contacts as needed. Ensure that any essential historical data not being migrated is archived and accessible offline.
+Security – Protect personally identifiable information (PII) through encryption at rest and in transit. Enforce least‑privilege access for all roles. Comply with relevant regulations such as CCPA/GDPR. Implement audit logging for critical actions.
+Backup & disaster recovery – Outline backup strategies and disaster recovery plans to ensure business continuity.
+======================= Project Overview.docx (29 KB) ========================= 
+
+```
+
+## Velvet Elves AI-First Transaction Management Platform Master Functional & Architectural Specification:
+```
+Velvet Elves
+AI-First Transaction Management Platform
+Master Functional & Architectural Specification
+1. Purpose & Philosophy of the System
+Velvet LMS is a mostly automated transaction management platform for residential real estate transactions.
+The core goal is to:
+•	Replace manual transaction coordination
+•	Reduce human error
+•	Enforce timelines
+•	Maintain compliance
+•	Adapt dynamically to agent behavior
+•	Leverage AI agents as assistants, not decision-makers
+The system assumes:
+•	Real estate transactions follow repeatable but nuanced workflows
+•	Most steps can be automated if context is understood
+•	Humans retain final authority over:
+o	Legal communications
+o	Ambiguous data
+o	Client-facing messaging that involves inference
+This system is document-first, not form-first.
+2. Core Use Cases (Transaction Types)
+Every transaction must be categorized into one primary use case, determined during intake:
+1.	Buyer – Financing
+2.	Buyer – Cash
+3.	Seller – Financing
+4.	Seller – Cash
+5.	Buyer & Seller – Financing (Both)
+6.	Buyer & Seller – Cash (Both)
+Use case selection governs:
+•	Task templates
+•	Dependencies
+•	Deadlines
+•	Required documents
+•	AI task recommendations
+Use case must be confirmed before tasks are instantiated.
+3. The Wizard (Transaction Intake Engine)
+3.1 Wizard Philosophy
+The wizard is the entry point to the system.
+In the new system:
+•	The wizard is AI-driven
+•	The user uploads documents
+•	The AI extracts structured data
+•	The user confirms or edits
+•	The system builds the transaction automatically
+There should be no mandatory manual form-filling upfront.
+3.2 Wizard Step 1: Document Upload
+The first screen is a single upload interface.
+Accepted documents include:
+•	Purchase agreement
+•	Counteroffers
+•	Amendments
+•	Addenda
+•	Pre-approval letters
+•	Any related transaction documents
+Multiple files allowed.
+Order does not matter.
+3.3 AI Document Parsing Responsibilities
+The AI agent must read all uploaded documents and extract:
+Property Data
+•	Street address
+•	City
+•	State
+•	Zip code
+Transaction Data
+•	Representation type (buyer, seller, both)
+•	Purchase price (latest agreed price)
+•	Financing type (cash or financed)
+•	Earnest money details (if present)
+
+Timeline Data
+•	Contract acceptance date
+•	Inspection deadlines
+•	Financing/appraisal deadlines
+•	Closing date
+•	Any date-based contingencies
+Party Data
+•	Buyer(s)
+•	Seller(s)
+•	Listing agent
+•	Buyer’s agent
+•	Loan officer (if applicable)
+•	Title company (if applicable)
+3.4 Address Confirmation
+The AI must:
+•	Normalize the address
+•	Validate city/state/zip alignment
+•	Flag inconsistencies
+•	Require user confirmation
+The user must confirm the address before proceeding.
+3.5 Purchase Information Validation
+The AI must:
+•	Identify the final purchase price
+•	Track changes across counteroffers and amendments
+•	Contract Acceptance date (the date of acceptance on the purchase agreement or the last counter offer uploaded.)
+•	The closing date, identified in the purchase agreement or in a subsequent counter offer.
+•	The number of days to obtain homeowner’s insurance.
+•	The possession date for the buyer. (The date on the purchase agreement or any counter offer or addendum provided.)
+•	The number of days to complete a home inspection.
+•	If there will be a home warranty purchased, and if so, who orders the home warranty.
+•	The number of days to provide the buyer with any homeowner association documentation.
+•	All documents are signed by all parties. If there are two parties listed on the purchase agreement who have signed, but only one on the counter offers it will highlight that in it’s findings.
+•	Flag discrepancies and outline them to user.
+The confirmation screen must show:
+•	All dates outlined in the purchase agreements & counter offers as outlined above.
+•	Final purchase price.
+•	Request all professional fees and who is paying what. (does seller pay for both buyer and seller fees or does the seller only pay a portion of their broker’s fees and they pay the rest?)
+The user must explicitly confirm the final price and all variable dates outlined in the purchase agreement and counter offers, along with the professional fees, the amount and any transaction fees.
+3.6 Missing Information Handling
+If the required data is missing:
+•	The system prompts the user
+•	If the user does not know:
+o	The AI may search public sources (company websites, licensed contact info – shows a screen stating what the AI is searching)
+o	Results must be clearly labeled as AI-sourced.
+o	User confirmation is required
+No externally sourced data is auto-accepted without confirmation.
+3.7 Wizard Confirmation Page
+Before transaction creation, the user sees a single confirmation page showing:
+•	Address
+•	Purchase price
+•	Closing date
+•	All extracted deadlines
+•	Parties and contact info
+•	Financing status
+•	Appraisal Status (if cash purchase only)
+Actions:
+•	Edit any field
+•	Accept as-is
+Only after confirmation does the system:
+•	Create the transaction
+•	Lock baseline dates
+•	Generate task list based on dates
+4. Task Engine (Most Critical System Component)
+4.1 Task Philosophy
+Tasks are:
+•	Use-case driven
+•	Dependency driven
+•	Mostly automated
+•	Continuously optimized by AI
+Tasks are not static checklists.
+4.2 Task Templates
+The system must include:
+•	A master task library (from uploaded spreadsheets)
+•	Use-case-specific task subsets
+•	Dependency rules
+•	Float rules
+•	Automation flags
+Tasks include:
+•	Name
+•	Description
+•	Target (who the task applies to)
+•	Dependencies (task or date)
+•	Float (days before/after)
+•	Automation level:
+o	Fully automated
+o	AI-assisted
+o	Manual
+4.3 Initial Task Generation
+Upon wizard confirmation:
+•	Tasks are generated strictly from:
+o	Confirmed use case
+o	Confirmed dates
+o	Dependency logic
+No AI creativity at this stage.
+4.4 Dynamic Task Intelligence (AI Agent)
+As the transaction progresses, the AI agent must:
+•	Detect completed steps automatically
+•	Recommend removal of unnecessary tasks
+•	Recommend adding missing tasks
+•	Detect document-based contingencies
+•	Suggest deadline adjustments (never auto-change)
+
+All additions/removals are recommendations, not forced changes.
+The user must approve:
+•	Added tasks for that transaction or for all future transactions (restricted roles)
+•	Removed tasks for that transaction or all future transactions (restricted roles)
+4.5 Task Recommendation Transparency
+When recommending:
+•	Added tasks must include:
+o	Reason
+o	Source (document, pattern, prior behavior)
+o	Suggested deadline
+•	Removed tasks must include:
+o	Reason
+o	Option to restore
+Nothing disappears silently or permanently, just “sleeps”
+4.6 Feedback Loop (Learning System)
+After closing:
+•	The system prompts for quick feedback:
+o	Tasks that were useful
+o	Tasks that were unnecessary
+o	Tasks that were missing
+Over time:
+•	AI adapts task suggestions per agent or per team
+•	Compliance tasks are never fully removable from all transactions.
+5. Communication Engine (AI + Human Controlled)
+5.1 Unified Communication Log
+All communication lives in one master log:
+•	Emails (inbound and outbound)
+•	System messages (completed tasks, modifications to documents, etc.)
+•	Document sends, uploads, deletions, etc.
+•	AI sends
+•	Manual edits and sends
+Each entry logs:
+•	Who
+•	What
+•	When
+•	Direction (inbound/outbound)
+•	Related transaction
+This log is immutable.
+Users can report an error for AI tasks so we can train the AI Agent for future transactions.
+5.2 Email Integration
+The system integrates with:
+•	Gmail (primary) – connects when creating a new account.
+•	Expandable to other providers
+Any message sent inside the system:
+•	Sends via API integration or sends via email within the system.
+•	Is logged internally
+Any inbound email:
+•	Is logged internally
+•	Can trigger AI actions
+5.3 AI Email Responsibilities
+AI may automatically:
+•	Respond to vendor or client document requests. (must always cc: agent & elf)
+•	Respond to client factual questions (must always cc: agent & elf):
+o	Closing date
+o	Closing time
+o	Utility info
+o	Possession Date
+o	Transaction Milestones/Status updates
+Rules:
+•	If requested document exists → send + CC agent + elf
+•	If document missing → notify agent + elf with draft email
+•	If unsure about the request → notify agent + elf with draft email
+5.4 AI Draft Safeguards
+If AI makes:
+•	Assumptions
+•	Inferences
+•	Interpretations
+Then:
+•	The email is drafted but NOT sent
+•	Agent and elf receive:
+o	Draft
+o	“Approve / Edit & Send” button
+•	Button links back into the system
+•	All assumptions, inferences and interpretations should be in bold in the draft.
+Humans always have the final say.
+5.5 Communication Guidelines
+AI email tone must:
+•	Follow predefined style rules
+•	Avoid legal advice
+•	Avoid certainty when data is inferred
+•	Provide a vague disclaimer about verifying the information with their agent, if sent by AI.
+Guidelines are configurable later.
+6. Roles & Permissions
+6.1 Roles
+1.	Agent
+2.	Elf (Transaction Coordinator)
+3.	Team Lead
+4.	Administrator
+5.	Client (Buyer/Seller)
+6.	Vendor
+6.2 Agent
+Can:
+•	Create transactions
+•	Confirm wizard data
+•	Can assign tasks
+•	Modify tasks
+•	Approve AI communications
+•	Upload/delete documents
+•	Communicate with all parties
+•	Set payment information.
+•	Assign Elf’s to their profile.
+Owns their personal task templates unless on a team.
+6.3 Elf (Transaction Coordinator)
+Can:
+•	Manage assigned transactions
+•	Can assign tasks
+•	Complete tasks
+•	Upload/delete documents
+•	Approve AI emails
+•	Communicate with vendors and clients
+•	If they are a stand-alone Elf, set payment information.
+Cannot:
+•	Change master task templates
+•	Override agent decisions
+6.4 Team Lead
+Can:
+•	Control team-wide task templates
+•	Modify dependencies and defaults
+•	Oversee all team transactions and can act as an agent. (all activities are logged in the overview tab.
+•	Can assign tasks
+•	Upload/delete documents
+•	Set payment information.
+•	Assign Elf’s to their team.
+Changes flow down to team members.
+6.5 Administrator
+Can:
+•	Manage users
+•	Set system-wide defaults
+•	Configure AI behavior limits
+•	Access all data
+•	Set payment access (on/off)
+Does not control or override existing team or agent task logic without prompting from the system.
+6.6 Client
+Can:
+•	View documents
+•	View milestones
+•	Ask questions or request information
+•	Upload documents
+Cannot:
+•	Edit tasks
+•	Delete documents
+•	See internal notes
+6.7 Vendor
+Can:
+•	Upload documents (if invited)
+o	Can upload a separate iteration of the same document. (old document remains, just named legacy or something else showing it’s an outdated document)
+•	Receive documents
+•	Request information
+•	Answer requests for task timeline adjustments.
+Cannot:
+•	View full document center
+•	See tasks or timelines
+7. Document Center
+7.1 Visibility
+Visible to:
+•	Agent
+•	Elf
+•	Team Lead
+•	Admin
+•	Client
+Not visible to vendors (unless explicitly shared by team leaders, elfs or agents.)
+7.2 Capabilities
+Documents can be:
+•	Uploaded
+•	Viewed
+•	Downloaded
+•	Emailed
+•	Deleted (restricted roles only)
+7.3 Permissions
+Upload:
+•	Agent
+•	Elf
+•	Client
+•	Team Lead
+•	Vendor
+Delete:
+•	Agent
+•	Team Lead
+•	Admin
+Every action is logged.
+8. Audit & Compliance Logging
+Every action logs:
+•	User
+•	Role
+•	Timestamp
+•	Action type
+•	Before/after state (where applicable)
+•	Message
+This includes:
+•	Task changes
+•	Document changes
+•	Communications
+•	AI recommendations
+Indiana-specific compliance must assume:
+•	Broker responsibility
+•	Clear audit trails
+•	Non-destructive history
+9. Future-Proofing (Non-MVP but Required Hooks)
+The system should be architected to allow:
+•	CRM integrations
+•	Predictive closing risk scoring
+•	Compliance auditing
+•	Pattern detection across teams
+•	Expanded AI agents (voice, SMS, calendar)
+APIs should be modular and documented!
+10. Final Notes to Developers
+•	Do not assume workflows
+•	Do not hardcode logic
+•	Everything must be configurable
+•	AI assists. Humans decide.
+•	Transparency beats automation speed
+•	If you have ideas, please speak up! We are looking for partner, not just a contractor. We love brainstorming on how we can make this software better considering the vast future upon us!
+```
+
+## Questions on the Velvet Elves AI-First Transaction Management Platform Requirements:
+```
+1. Purpose & Philosophy of the System
+1. The philosophy emphasizes a "document-first, not form-first" approach. Could you clarify if there are any scenarios where manual form entry should still be supported as a fallback (e.g., if AI extraction fails or documents are unavailable), and how such fallbacks should integrate with the wizard flow?
+Yes, the user should have to verify all parsed information for the final step of the wizard. The way our system works, there will be additional manual entry information, such as title company name, title company representative name, phone number and email address.
+Jan: Understood, incorporating manual entry for specific fields like title company details makes sense for completeness. In ListedKit AI, we handled similar fallbacks by seamlessly integrating a conditional form step in the wizard: if AI confidence is low or documents are missing, the UI prompts for manual input right after the upload/verification phase, pre-filling any partial extractions. This keeps the flow intuitive without disrupting the document-first philosophy. I'll plan to implement it similarly here, ensuring all entries (AI or manual) route through the final confirmation page for user verification.
+2. Regarding AI agents as "assistants, not decision-makers," are there specific thresholds or confidence scores (e.g., from OpenAI APIs) that should trigger human review, or should this be configurable per role/team?
+Let’s talk more about this so we can answer it more clearly. An idea is listed below.
+Could we build out a two-tiered system for agent scoring confidence levels for teams to configure? (“ship it” (CS = 90% or higher), “I better see it first” (CS = 75% or lower)) Just an idea, not sure how configurable this options is with agents.  
+Jan: I appreciate the suggestion for a two-tiered confidence system, it's a solid idea and fully feasible with APIs like OpenAI, where we can access and set thresholds on response confidence scores. In ListedKit AI, we used configurable thresholds (e.g., via admin settings) to route AI suggestions to human review, which worked well for teams. We can make this role/team-configurable in the UI, with defaults like your proposed levels, and allow overrides per feature (e.g., parsing vs. email drafting). 
+Can we make it where the teams set the threshold but the Admin sets the lowest possible confidence score so the user can not set it below the Admin’s set minimum confidence score.
+Jan: Yes, that's a smart way to enforce minimum standards while allowing customization. We can implement this in the settings interface: admins set a global minimum confidence floor (e.g., 75%), and team leads can configure higher thresholds for their teams but not dip below the admin's limit. The UI will validate inputs in real-time, showing warnings if attempts are made to go lower, and we'll log changes for auditing. This builds on the configurable system I described earlier and ensures consistent safety across the platform.
+	
+
+2. Core Use Cases (Transaction Types)
+3. The use cases are clearly defined, but how should the system handle hybrid or evolving scenarios, such as a transaction starting as "Buyer – Financing" but switching to "Buyer – Cash" mid-process due to changes? Should this trigger a full task regeneration, or just targeted updates?
+Just targeted updates based on what tasks have already been completed. Some tasks will have the same task ID, but belong to multiple use cases. If the task has already been completed, then it should verify if the task ID has been completed and then not regenerate the task. If the task did not exist in the previous use case, then the task should be generated in the updated task list.
+Jan: That aligns perfectly with an efficient approach. In ListedKit AI, we implemented targeted updates for similar workflow shifts by checking task IDs and completion status, only adding/removing differentials while preserving history. I'll design the task engine here to use unique task IDs across use cases, with logic to diff and apply changes non-destructively, logging all updates for audit. This minimizes disruption and maintains compliance.
+
+3. The Wizard (Transaction Intake Engine)
+4. In Step 1 (Document Upload), what are the expected file size limits, supported formats beyond PDF/Doc (e.g., images, scanned files), and any requirements for handling multi-page or bundled documents?
+File sizes can vary based on the ignorance of the user. Sometimes they could run up to 20 MB per file. Supported file types should be any image type file; such as but not limited to, PDF, JPEG, GIF. We can also have files such as .doc, .docx for mortgage pre-approval letters which we will need to parse to obtain the loan officer’s phone, email and name.
+Include in the initial outbound communications to vendors and the co-agents to click a link/button in the email that will redirect them to a “card” to add additional contacts to their portion of the file to be included on all future communications and/or updates to the primary contact. (a processor, partner, etc.)
+Once an additional contact is added, they are “connected” to the primary person for all future transactions and the primary must opt them in to future transactions. They can also add a new contact person. If they have multiple connected to them, they can select all parties to be included for each transaction.
+
+Jan: Got it, supporting up to 20MB per file and a broad range of formats (PDF, JPEG, GIF, DOC, DOCX, etc.) is practical. For multi-page/bundled docs, we'll use libraries like )PDF.js or Tesseract for OCR on scans/images to handle parsing. The contact "card" feature for vendors/co-agents is a great addition; in ListedKit AI, we had similar invite links for collaborations, so I'll integrate this into outbound emails, with persistent connections and opt-in selections stored in the DB for future reuse. This enhances workflow without complicating the upload step.
+If it’s a multi-page document can we separate the documents (e.g., purchase agreement, counter offer in one document to be separated into two separate documents - this will allow the user to email one document at a time or collect signatures for one document and not have to send both for signatures on one document.)
+Can we build a resizer into the system to resize documents over 10MB? (We used a BLOB in our old system and included a link back to the document. This got confusing to the user because some documents were attached to the email and some were links.)
+Jan: Absolutely, document splitting for multi-page files is a valuable feature to add flexibility. After upload and initial parsing, we can include a preview step in the wizard where users select page ranges and split the file into separate documents, assigning names and metadata (e.g., "Purchase Agreement" and "Counter Offer"). This will use libraries like PyPDF or PDFKit for seamless splitting, allowing independent handling for emails or e-signs without re-uploading. For resizing, yes, we'll integrate automatic compression on upload for files over 10MB using tools like Pillow for images or Ghostscript for PDFs, aiming to reduce size while preserving quality. To avoid the confusion you mentioned with links vs. attachments, we'll prioritize direct attachments in emails post-resize, only using secure links as a fallback for edge cases (e.g., if compression doesn't suffice), and provide clear in-app explanations to users.
+5. For AI Document Parsing, which specific AI models or services (e.g., OpenAI GPT-5.2, Azure Document Intelligence) do you prefer, and are there any compliance constraints (e.g., data residency for PII) given the sensitive nature of real estate documents?
+I think we can feel safe to use OpenAI. I don’t see them going away anytime soon. As far as PII, we don’t have any specific guidelines to use, but feel ensuring that data is secure and private should be apart of our build/dev strategy.  If we didn’t answer this clearly, please let us know.
+Jan: OpenAI is a reliable choice, and we'll use their latest models for parsing, combined with secure handling. For compliance, I'll incorporate encryption in transit/rest, anonymize PII where possible, and ensure data residency (e.g., via AWS regions) as part of our dev strategy. In ListedKit AI, we used similar setups with no issues, but I'll add logging for data flows to meet potential future regs like CCPA. This seems clear, thanks!
+6. In Address Confirmation and Purchase Information Validation, the AI must flag discrepancies and outline them. Should these flags include visual annotations (e.g., highlights on the original document) in the UI, similar to how I implemented contract review tools in ListedKit AI?
+We would need to see how that works in the other system to best answer this. I do feel a UI response is definitely warranted. Agents do make mistakes so this could help them catch those sooner rather than later.
+Jan: Absolutely, a strong UI for flagging is key to reducing errors. In ListedKit AI, during contract review, we displayed discrepancies via a verification screen with outlined mismatches (e.g., color-coded alerts next to extracted fields) and linked back to the document preview, no direct highlights on the doc itself due to rendering complexity, but users could hover/click to see source snippets. This helped agents quickly validate. For Velvet Elves, I recommend similar: inline alerts in the confirmation UI with optional document previews showing flagged sections. 
+7. For Missing Information Handling, the AI may search public sources. What are the approved sources (e.g., MLS APIs, public records), and how should user consent be obtained/documented to ensure privacy compliance?
+The missing information we typically run into is contact information for loan officers (pre-approval letters) and title company contact information. Google would suffice for this information. User input may be required before the search can happen. E.g., Name of the Title Company and the Title company’s rep, then the agent can go do the search based on the location of the home. (search: “John Doe, Chicago Title, Indianapolis, IN phone number and email address”)
+Jan: Focusing on contact info via Google searches is straightforward. To comply with privacy, we'll require explicit user consent (e.g., a checkbox/prompt before initiating) and log it in audits. In ListedKit AI, we integrated similar fills from public APIs (like CRM pulls), but here we'll use secure web searches or APIs, pre-filling suggestions for manual confirmation. This ensures no auto-fills without input, aligning with your example.
+8. On the Wizard Confirmation Page, users can edit fields. Should edits trigger a re-scan of documents for consistency checks, or is this a one-time validation?
+ 	Verify with Audri - One-time validation should suffice. 
+Jan: One-time validation keeps the flow efficient, which matches best practices. In ListedKit AI, edits didn't trigger full re-scans to avoid delays, but we ran quick consistency checks on changed fields against originals.
+If we rescan after validation could it teach the agent to get smarter for future document reading, or do you just recommend the single pass because if OCR gets better we will update it at that time?
+Jan: Rescanning after edits could indeed contribute to improving the AI's accuracy over time by using the corrections as training data (anonymized and batched for fine-tuning), but it risks slowing down the wizard flow with additional processing delays, especially for large documents. I recommend the single-pass approach for better user experience, handling improvements through separate feedback mechanisms (e.g., a "Suggest AI Improvement" button on edits that sends data to our backend for model updates). When OCR or models advance, we can roll out global updates without per-transaction rescans. If delays aren't a concern, we could make rescans optional via a toggle, but based on ListedKit AI's usage, single-pass kept things snappy while still allowing iterative enhancements.
+
+4. Task Engine
+9. Task Templates reference an "uploaded spreadsheets" for the master library. Could you provide more details on the spreadsheet structure (e.g., columns for name, dependencies, floats) to ensure accurate import and mapping during development?
+	We can provide you with the template and rework it, if necessary, to work better for you.
+Jan: Excellent, please share the spreadsheet when ready. Based on similar imports in ListedKit AI (columns like Name, Description, Dependencies, Float, UseCase), I'll create a flexible importer with mapping UI, allowing rework for optimal DB structure (e.g., relational tables for dependencies).
+	
+10. For Dynamic Task Intelligence, the AI recommends additions/removals but requires approval. Should approvals be role-specific (e.g., only Team Leads for template-level changes), and how should the system handle bulk approvals across multiple transactions?
+Yes, for individual agents, they can approve. For Teams, only the team leader can approve the changes for the team’s task lists. For master task list additions it should apply that to all transactions in Active status - CHECK WITH AUDRI FOR OTHER TRANSACTION STATUSES.
+Jan: Role-specific approvals make sense for scalability. In ListedKit AI, we had hierarchical approvals, so I'll implement here: agents for their transactions, team leads for team-wide, with bulk options (e.g., select-all apply) filtered by status like Active. We can expand statuses post-Audri's input.
+Add any newly added dynamic tasks to statuses that are active, incomplete and paused transactions. Tasks should not be added retroactively to completed/closed transactions.
+Jan: Got it, that ensures updates are forward-looking and non-disruptive. When a team lead approves a dynamic task addition at the template level, the system will automatically scan and apply it only to transactions in active, incomplete, or paused statuses, calculating deadlines based on each transaction's current state and dependencies. Completed or closed ones will remain untouched. For bulk handling, we'll include a preview screen showing affected transactions before confirmation, with options to exclude specifics if needed, and full logging of additions for compliance.
+11. In the Feedback Loop, AI adapts suggestions per agent/team over time. What data retention period or anonymization rules should apply to this learning (e.g., to comply with GDPR/CCPA), and should it include metrics like task completion rates?
+As of right now, we do not need to comply with GDPR/CCPA, so if we can just use historical data per user, that would be ideal. We will want to track any new tasks added/removed on the Admin side so we can statistically track whether we should globally add or remove tasks for the entire system for specific or all use cases.
+Jan: Using historical user data without immediate compliance mandates is fine; we'll store it securely with options for future anonymization. Include metrics like completion rates and add/remove tracking in admin dashboards, similar to ListedKit AI's analytics, for global insights.
+5. Communication Engine
+12. The Unified Communication Log is immutable. Should it support search/filtering (e.g., by date, party, or keyword) and export options (e.g., PDF for audits), and how should it handle large volumes of logs for performance?
+It should support search/filtering. We would look to you for guidance on large logs. We are initially thinking there is no reason for mass exodus of logs so that may be something we just don’t support. Or, possibly only support if specifically requested  by the user directly to us. Again, up for conversation, but possibly they would need to request a log export that an Admin would execute and deliver to the user per request.
+Jan: Search/filtering by date/party/keyword is essential, I'll use efficient indexing (e.g., Elasticsearch) for performance. For large volumes, we'll paginate results and limit exports to admin-requested (e.g., PDF/CSV via background jobs), avoiding mass downloads. This balances usability and security, as in ListedKit AI's logs.
+Users should be able to download the unified communication log for one transaction at a time. If they need more than one transaction downloaded at a time they will need to make a request to the Admin.
+Jan: Yes, limiting downloads to one transaction at a time for regular users is a good security measure. We'll implement easy export buttons in the log UI for single transactions (in PDF/CSV formats, with filters applied), accessible based on roles (e.g., agents for their own). For multi-transaction requests, users can submit a form in-app specifying the transactions and reason, which notifies admins for review, generation, and secure delivery (e.g., via email or in-app download link). This handles large volumes efficiently by processing in the background, using pagination and indexing for searches to maintain performance, similar to how we managed audit logs in ListedKit AI.
+13. For Email Integration, it's primarily Gmail but expandable. Are there immediate requirements for other providers (e.g., Outlook), and should the system support IMAP/SMTP as a fallback for non-API integrations?
+Could we start with gmail, outlook and apple icloud email addresses? IMAP/SMTP wouldn’t hurt, but I don’t think it should be apart of the MVP.
+Jan: Starting with Gmail, Outlook, and iCloud via their APIs is a good MVP scope. We can add IMAP/SMTP later as fallback. In ListedKit AI, we integrated Gmail/Outlook similarly for seamless sends, so this will be straightforward.
+14. In AI Email Responsibilities, responses must CC agent & elf. Should this include in-app notifications or escalations if no response is received within a certain timeframe?
+This should include all external communications to other parties. (clients, title company’s, mortgage company’s, etc.) This is primarily to keep the agent/elf in the loop for what communications are going out and if AI training is needed for messages on specific topics.
+Jan: Clear, CC for all external comms ensures oversight. I'll add in-app notifications for sent emails, with optional escalations (e.g., reminders after 24-48 hours, configurable). This aids AI refinement, as we did in ListedKit AI for feedback loops.
+15. For AI Draft Safeguards, drafts with assumptions are bolded. Could you specify any additional UI elements (e.g., side-by-side comparison of inferred vs. confirmed data) to aid human review, based on best practices from similar systems like ListedKit AI?
+We would need to see a visual of what you are referencing. Again, just a limited review of what was on the website. We don’t have actual knowledge of the use of the system.
+ Jan: In ListedKit AI, for AI drafts, we used a side-by-side view: left side showed the draft with bolded assumptions, right side displayed source data (e.g., extracted vs. confirmed fields) with tooltips for context. This sped up reviews. For Velvet Elves, I suggest implementing this in the approval UI.
+6. Roles & Permissions
+16. Vendors can upload iterations of documents, marking old ones as "legacy." Should this create version history with diffs, or just rename/metadata updates, and how should access to versions be controlled (e.g., vendors see only their uploads)?
+Version history with diffs, yes. Vendors can only see their own uploads only, unless the agent or elf “shares” a document with them for that transaction.
+Jan: Version history with diffs (e.g., via Git-like tracking or simple text/PDF compares) is ideal. Vendors will see only their uploads by default, with share options for others. In ListedKit AI, we used metadata for versioning, so this will integrate well into the document center.
+17. Clients can upload documents but not delete them. Should they have the ability to flag or request deletion, routing it to an agent/elf for approval?
+ 	Yes
+Jan: Confirmed, adding a "flag for deletion" button that notifies agent/elf for approval, with logs. This maintains control while empowering clients, similar to ListedKit AI's workflows.
+7. Document Center
+18. The Document Center supports emailing documents. Should this integrate with e-signature providers (e.g., DocuSign) directly from the center, or is that handled separately in the wizard/task flows?	
+Yes, this should be supported in the document center. If during upload in the wizard it is found a document isn’t signed by all parties, it should offer to send the document for electronic signature when the transaction is finalized. The document is sent for signature, the user is asked who should receive the fully executed document once signed, and when returned, it replaces the original document (the legacy doc is sent to version history) and that document is sent out to parties identified in the send request with the wizard e-sign request.
+Jan: Integrating e-sign (e.g., DocuSign API) directly in the center and wizard is spot on. We'll trigger prompts for unsigned docs post-upload, handle returns with versioning, and auto-distribute. 
+19. For permissions, deletions are restricted. Should soft deletes (e.g., archiving instead of permanent removal) be the default to maintain audit trails?
+	Yes
+Jan: Soft deletes as default ensures trails, I'll implement archiving with restore options for authorized roles, logging all actions.
+ 
+8. Audit & Compliance Logging
+20. Logs include before/after states. For complex objects like tasks, should this be a full JSON diff, or a human-readable summary? Additionally, are there specific retention periods or auto-purge rules for logs?
+Just human readable logs will work. Ideally, we will keep the logs for 2 years from the last time the user logged in. The login period resets on each login or checks are made monthly or quarterly to verify last login session.
+ Jan: Human-readable summaries (e.g., "Task X due date changed from Y to Z") are user-friendly, I'll generate them from underlying diffs. Retention: 2 years from last login, with quarterly checks for auto-purge, stored efficiently.
+9. Future-Proofing
+21. Hooks for CRM integrations and predictive scoring are mentioned. Should the MVP include basic API endpoints for these (e.g., RESTful hooks with webhooks), even if not fully implemented, to facilitate future expansions?
+Yes, if we build these in, do we have to identify which CRMs or can they be an open API endpoint?
+Jan: Basic open RESTful endpoints/webhooks in MVP allow flexibility without specifying CRMs upfront (e.g., generic sync for contacts/tasks). We can add specific ones (like Follow Up Boss from ListedKit) later.
+ 	
+10. Final Notes to Developers
+22. The notes emphasize configurability and no hardcoding. Could you prioritize which elements (e.g., task dependencies, AI tone guidelines) should be admin-configurable via UI vs. requiring code changes?
+ The task dependencies should be Admin configurable via UI. The AI tone should be - discussion needed.
+Jan: Prioritizing UI config for task dependencies is key, I'll build an admin editor for that. For AI tone, let's discuss: in ListedKit AI, we made it UI-editable via templates, which could work here too, but we can refine based on your needs.
+
+Final Thoughts:
+Would it be more fruitful for you for us to have a discussion about future functionality releases now so you can plan the framework around those items? (or is that something you can build in later with minimal changes to UI?) - e.g., Advertising in portions of the confirmation pages and within the tasks.
+Also, would you also be able to get us an advertising site (consumer facing) with this project?
+Jan: Yes, discussing future features now would help optimize the framework, ads can be planned with modular slots for easy later addition without major UI changes. And sure, I can include a basic consumer-facing ad site in the project scope, integrated with Stripe for MVP.
+
+```
+
+## Additional Requirements:
+```
+BEST PRACTICES FOR WORKFLOWS (AI AGENT SETUP)
+1.	Confidence thresholds should be task-specific.
+ Not all tasks deserve the same risk tolerance.
+•	Signature presence/field completion checks: lower risk.
+•	Legal interpretation, clause meaning, buyer/seller obligations: higher risk and should require stronger certainty or human review.
+1.	Audit logs are not optional.
+ Keep a rigorous log of:
+•	The document received.
+•	What the AI extracted.
+•	What the AI decided.
+•	Why it decided it (top drivers).
+•	Whether a human approved/overrode it.
+ This protects you when a user says, “The elf ruined my life.”
+1.	Guardrails for edge cases.
+ If the doc is blurry, scanned crooked, missing pages, or looks like it was faxed in 1997:
+•	The agent should halt and request a better copy or route to a human.
+
+AI Agent - Wizard
+Train to recognize and ask if the purchase is an owner occupied or investor/second home purchase based on criteria such as purchase agreement marked as "owner occupied" or use is other than "owner occupied" or the down payment is at or greater than 20% so the AI Agent can modify the scripts to send out modified scripts focused more on investor or second home focused.
+ 
+AI Agent - Email Functionality
+Auto-reply to messages sent back.
+Possibly type them out and ask if the user would like to modify or send the response.
+Have an "AI" disclaimer at the bottom of any AI sent messages.
+ 
+AI-Agent - Closing Checklist
+Generate 2 closing sheets - 1 for the agent and 1 for the client
+Have an area for the agent/team lead to include certain data on all closings. (talk about escrow accounts, client parties, filing exemptions, etc.)
+Include dates and utility information on the sheet.
+Changing utilities
+Changing address with USPS and online retailers (Amazon, etc)
+ 
+Wizard Features
+Automatically search the internet for contact information for title and mortgage reps that isn't saved.
+Reps that are saved, search in the background, and offer updates to information. (company, phone, and email)
+Review Information
+Have preferred vendors available to select from agent/team profile.
+Review documents for signatures.
+If a document is found not to have a signature and the user has connected their e-signature platform, then AI will suggest to send it out for signatures on their behalf.
+Once the document is signed and returned, if the document is named PA, C1, Amend, etc. it will send to all parties and vendors. If named other than, it will be sent to agent letting them know it has been completed. (record iterration/audit history)
+If not, then the AI Agent will inform the user to send the document for signatures and remind them if they connect their e-signature account they can help with this kind of task in the future.
+ 
+New User - First Time Login
+Add an overlay tutorial for first time users to walk through, but can skip if they want. The tutorial can be viewed more than one time.
+ 
+Brokerage Profiles
+Can house all Agents and Teams inside one dashboard.
+ 
+Agent/Team - Profiles
+Document Center for recurring use documents (utility companies based on location (county), what to expect when closing, etc.)
+Integrate this internal agent/team doc center with task creation/modification.
+Reminders for Closed Transactions
+Reminder for tax exemptions
+Reminder for reviews
+The ability to turn on/off notifications.
+Preferred Vendors
+ 
+Agent/Team - Dashboard
+"What's the most important thing to do today?" list. (based on overdue, missed, closest to closing date, etc.)
+Sort tasks by vendor in a task screen. (Tasks by vendors - "vendor carts" so all tasks can be followed up in one email for one vendor if you have more than one transaction with one vendor.)
+Reporting Dashboard - in profile?
+Search & sort features
+"Add Additional Vendor" - an agent can manually add an insurance agent, home inspector, general contractor, General Contractors, Home warranty companies, Movers, etc. (can add these as preferred vendors to be added to future scripts to recommend for work or hiring)
+ 
+Full Transaction View
+Overview Tab/Transaction Log - ability to resend emails with one click. (icon to the far right of the note)
+ 
+Client Portal
+The ability to turn on/off notifications.
+Client has the ability to share milestones from their profiles
+Agent BIO "Learn About Your Agent"
+ 
+ 
+ 
+Down the Road Shit
+ 
+Mobile App Creation
+ 
+"Orphan Accounts" Marketing & Dashboard - inviting the other agent to the transaction. They could have a watered down version of a dashboard that would encourage them to create their own account and use the system.
+ 
+AI Agent - Custom video creator. An agent who creates videos for main milestones customized with the client's first names as an intro and information about working with Elfis and their agent's name. 
+ 
+VENDOR COMMUNICATION FEATURE. “LINK RESPONSE” VS “AI READS EMAIL”
+Old system: you emailed vendors with a link they clicked (“done/not done”), and if not done they provided a date, which updated the task maturity date.
+New option you proposed: have AI read the vendor’s email reply and update the task date automatically if it doesn’t violate overall timeline constraints.
+Suggested approach:
+•	Yes, let AI parse the email, but keep it structured.
+ Best practice is a hybrid:
+1.	Email asks for a date in a constrained format (“Reply with: Scheduled: YYYY-MM-DD”).
+2.	AI parses reply and proposes the updated task date.
+3.	If the reply is vague (“soon,” “next week,” “working on it”), the AI either:
+	Sends a clarification email automatically, or
+	Routes to a human, depending on confidence.
+DOUBLE-CHECK MECHANISM
+•	Read the message/doc.
+•	Produce an interpretation.
+•	Re-read and compare against its first interpretation.
+•	Proceed only if both agree with high confidence; otherwise ask for clarification or human review.
+•	Make the second pass use a different method (different prompt strategy, different extraction template) so it’s not just repeating the same mistake confidently.
+•	Require agreement on key fields only (date, party, signature status, requested deliverable), not on every word.
+ 
+ 
+STATE-BASED DIFFERENCES - FOR A MASTER TASK LIST
+You asked about “title vs deed states,” and then pivoted into “title theory vs lien theory vs intermediate theory.” Important note: those are different concepts, and mixing them will create bad automation rules.
+What you actually need for transaction processing is usually:
+A) Closing/settlement model by state (attorney closing vs title/escrow closing)
+This affects:
+•	Who prepares settlement docs.
+•	Who conducts closing.
+•	Where money sits (escrow), how disbursement works, and timing.
+•	Which party manages payoff, recording, and post-close curatives.
+B) Mortgage/foreclosure theory (lien vs title vs intermediate)
+Actionable guidance for Velvet Elves master tasks:
+•	Build state rules around “closing practice” (attorney vs title/escrow), “recording timelines,” and “disbursement timing,” not just lien/title theory labels.
+•	Your workflow differences from pending-to-close should key off:
+1.	Who runs closing (attorney vs title/escrow company).
+2.	Whether there’s required attorney involvement in doc prep/settlement.
+3.	Recording and funding sequence expectations (some places record and disburse quickly, others have timing quirks).
+4.	Local customary forms/requirements and compliance steps (state disclosures, local addenda norms, etc.).
+
+```
+
+## Tech Stacks:
+```
+Frontend: React
+Backend: FastAPI
+AI model: OpenAI's GPT models
+Database: Supabase's Database and Authentication
+Hosting Service: AWS EC2
+```
