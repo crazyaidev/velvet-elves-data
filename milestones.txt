@@ -96,17 +96,17 @@ Deliverables:
       - Task ID comparison for completed status preservation
   [ ] Implement export capabilities API (CSV, Excel, PDF generation)
   [ ] Build dashboard aggregation APIs (per client-approved redesign):
-      - GET /dashboard/triage: overdue, due tomorrow, active, closing soon
-      - GET /dashboard/status-ribbon: overdue tasks, due tomorrow, closing
-        this month, unread messages
-      - GET /dashboard/pipeline-summary: closing/inspection/active/pending
-        counts, total pipeline value, contextual subtitles
-      - GET /dashboard/upcoming-closings: countdown list with urgency tiers
-      - GET /dashboard/needs-attention: cross-deal task list for today
-      - GET /dashboard/transaction-cards: collapsible card data with
-        stage pills, milestone timelines, badges, inline tasks
-      - Support ?view=personal|team, ?filter=, ?sort=urgency, ?search=,
-        ?team_member_id= parameters
+      - Sidebar triage counts (overdue, due tomorrow, active, closing soon)
+      - Header status ribbon data (overdue tasks, due tomorrow, closing
+        this month, unread messages)
+      - Pipeline summary (closing/inspection/active/pending counts,
+        total pipeline value, contextual subtitles)
+      - Upcoming closings countdown list with urgency tiers
+      - Cross-deal "needs attention today" task list
+      - Collapsible transaction card data (stage pills, milestone
+        timelines, badges, inline tasks)
+      - Support personal and team views, filtering, urgency sorting,
+        search, and team member filtering
   [ ] Implement stage pill computation logic:
       - "Response Overdue" (red), "Closing in X Days" (amber),
         "On Track" (green), "In Inspection" (amber), "Pending" (blue)
