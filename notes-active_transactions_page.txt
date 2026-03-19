@@ -1,0 +1,20 @@
+Explanations of Features
+•	“In Inspection” defined: Transactions that haven’t sent their inspection response yet.
+•	Have an AI chatbot that can also act as a filter or sort and make suggestions based on the user's request.
+o	Upon logging into the Dashboard, the chatbot will ask the user if they would like a list of the most important things they need to do today. Then list all overdue tasks, tasks due today and reminders for timelines coming up. If everything is done, offer suggestions on how to spend leisure time or prospecting tips.
+•	In the expanded Transaction View, the “Print closing checklist” button will be fed from a user’s profile. (Include notes that are tagged in the note section to include on this checklist and reminders for escrow overages for sellers, and a template for this should be in the user’s profile to complete for Buyers and Sellers. – 2 different templates) 
+o	Upon account creation, when a user uploads their first transaction, the system will prompt the user to complete their profile and this is included in that process.
+•	Once a new task is being created by a user, the AI searches to see if there is a similar task that hasn’t been completed yet and asks the user if they would like to add, combine or disregard the new task creation.
+•	Deadlines are emailed/texted/push notification the day before and the day of. (compiled into a number – “You have 3 transactions that have deadlines due tomorrow/today”
+•	A user can drag a document anywhere on the the screen and drop it and AI will read the document and verify with the user what the document is and what it should be named, ask if it needs sent for signatures (if it’s verified it hasn’t been signed), and verify what transaction the document is for and automatically send for signatures (if needed), or and add it to the documents repository for that transaction.
+•	When a user clicks on the menu items in the “Deals” section on the left hand side of this page, they will act as a filter to only show the transactions in those states. Defined below:
+o	Active – all active transactions that aren’t closed. (this is a place holder for a future rollout. We are going to utilize this for Active Listings when we build out that functionality in v2 of this application.)
+o	Pending – all active transactions that aren’t closed. 
+o	Closed – all closed transactions.
+o	All Transactions – all transactions regardless of state.
+
+
+
+Questions
+•	Can we connect the app to the User’s text messaging with their phone?
+•	Can we make the phone icon call the user to connect the call to the requested callee?

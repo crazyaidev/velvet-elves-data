@@ -1,0 +1,23 @@
+Color Palette
+
+#E26812
+
+#2C4C7F
+
+#F4F44
+
+Typography Suite
+
+IBM Plex Sans
+
+12,345
+
+Primary UI Font
+
+400 500 600 700
+
+App Header
+
+Velvet Elves
+
+Use across app Ul

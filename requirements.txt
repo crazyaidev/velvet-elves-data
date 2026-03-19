@@ -77,12 +77,18 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
       closing expectations, etc.)
     - Integrate internal doc center with task creation/modification
     - Preferred vendors list
+    - Buyer and Seller closing checklist templates stored in profile settings
+      for "Print Checklist" actions
+    - Tagged note sections that can be injected into printed closing checklists
+    - Seller-specific escrow overage reminders and standard closing guidance
     - Reminders for closed transactions (tax exemptions, reviews)
     - Ability to turn on/off notifications
 
 1.6 New User Experience
     - Overlay tutorial for first-time users (walkthrough)
     - Can be skipped and re-viewed at any time
+    - After the first transaction upload, prompt the user to complete their
+      profile/setup if required fields or checklist templates are missing
 
 1.7 Client Portal
     - Ability to turn on/off notifications
@@ -124,12 +130,19 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Filtered lists per role (elf, agent, vendor, client) with sorting,
       searching, pagination
     - Filter by status, closing date, representative, location, etc.
-    - Filter chip bar on dashboard: All, Overdue, Closing Soon, In Inspection,
-      Pending — with live counts
+    - Left sidebar deal-state filters on the Active Transactions workspace:
+      Active Transactions, Pending, Closed, All Transactions
+    - Active Transactions page tabs: All, Overdue, Due Today, Closing Soon,
+      In Inspection, On Track, Unhealthy — with live counts
+    - "In Inspection" means the transaction has not yet sent the inspection
+      response
     - Default sort by "Urgency" (most overdue and soonest-closing first)
+    - Additional sort options: Close Date, Client Name, Price
     - Inline transaction search bar (next to sort control): search across
       client names, vendor names, companies, dates, addresses, and all
       transaction fields
+    - Preserve future hook for "Active Listings" in the deal-state navigation
+      for v2
     - Export capabilities: CSV, Excel, PDF
     - Modern data-table UX
 
@@ -140,7 +153,7 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Payment actions trigger tasks or status updates
     - Integration with accounting platforms (future hook)
 
-2.6 Role-Specific Dashboards
+2.6 Role-Specific Workspaces & Dashboards
     - Tailored for: agents, team leaders, transaction managers, vendors,
       clients, administrators
     - Summarize: active transactions, upcoming deadlines, outstanding payments,
@@ -148,70 +161,91 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Customizable widgets, interactive charts/KPIs
     - "What's the most important thing to do today?" prioritized list
       (overdue, missed, closest to closing date)
+    - AI assistant can act as a filter/sort/suggestion layer
+    - When the user lands on the Dashboard, AI can offer a "most important
+      things today" briefing covering overdue tasks, due-today tasks, and
+      timeline reminders; if nothing is urgent, it can offer prospecting or
+      low-priority suggestions
     - Search & sort features
+    - Scope note: the currently approved screen is the Active Transactions page;
+      the broader Dashboard page is the next design phase and should reuse the
+      same visual/data patterns
 
-    Agent/Elf Dashboard Layout (per client-approved redesign):
-      a) Dark sidebar with:
-         - "Today's Triage" 2x2 grid (overdue, due tomorrow, active deals,
-           closing soon) — always visible across all pages
-         - Workflow-oriented navigation: Dashboard, Active Deals, Deadlines,
-           Documents, Contacts, Messages — each with live color-coded badges
-         - Pinned "+ New Transaction" CTA at sidebar footer
-         - User profile with role at bottom
-      b) Persistent header bar with:
-         - Greeting line with date and active deal count
-         - Status ribbon (always visible regardless of scroll): overdue tasks,
-           due tomorrow, closing this month, unread messages — color-coded dots
-         - Global search bar: search across client names, vendor names,
-           companies, dates, and all transaction fields
-         - AI Credits pill, notification bell with badge
-      c) Pipeline summary strip (above the fold, 4 cards):
-         - Closing This Month (red accent), In Inspection Period (amber),
-           Total Active Deals (green), Pending Contracts (blue)
-         - Each card shows count + single most relevant contextual detail
-      d) Two-column layout:
-         - Left: Active Transaction cards (collapsible)
-           - Filter chip bar: All, Overdue, Closing Soon, In Inspection, Pending
-           - Inline search bar next to "Sort: Urgency" control for searching
-             anything in transactions (client names, vendor names, companies,
-             dates, addresses)
-           - Expand All / Collapse All toggle
-           - Each card header: left-edge color indicator (red/amber/green),
-             client name, address, stage pill, visual milestone timeline
-             (dots: done/current/upcoming/overdue), next critical date,
-             task/doc/message badges, chevron
-           - Expanded card body (3-column grid): inline tasks with checkboxes,
-             key dates with status coloring, contacts with one-click
-             call/email buttons
-           - Card footer: contextual AI actions ("Summarize this deal",
-             "Draft inspection response", "Closing checklist"), Upload Doc,
-             View Messages, price tag
-         - Right column (340px): Upcoming Closings countdown widget
-           (color-coded tiles: urgent/soon/normal), "Needs Attention Today"
-           cross-deal task widget with deal links
-      e) Semantic color system applied consistently:
-         - Red (#e53b3b): overdue/critical
-         - Amber (#d97706): due soon/warning
-         - Green (#1a9e72): completed/healthy/on-track (brand color)
-         - Blue (#3b82f6): informational/pending
-         - Gray: inactive/empty
-         - All colors as CSS variables for white-label propagation
+    Agent/Elf Active Transactions Workspace (client-approved redesign):
+      a) Topbar with:
+         - Brand lockup + AI indicator
+         - "Today's AI Briefing" chip
+         - Inline AI briefing counts: Critical, Needs Attention, On Track
+         - Global search, notification bell, user chip, + New Transaction CTA
+      b) Dark left sidebar with:
+         - 2x2 KPI tiles: Overdue Tasks, Closing This Week, Active Deals,
+           Pipeline Value
+         - Navigation grouped as Dashboard, Deals, Workflow, Intelligence
+         - Deals: Active Transactions, Pending, Closed, All Transactions
+         - Workflow: My Task Queue, All Documents, Closing Calendar
+         - Intelligence: AI Suggestions, Analytics, Settings
+         - Pinned "+ New Transaction" CTA and profile card at the bottom
+      c) Page header with:
+         - "Active Transactions" title + count pill
+         - Export CSV and Print Report actions
+         - Page-level tabs: All, Overdue, Due Today, Closing Soon,
+           In Inspection, On Track, Unhealthy
+         - Sort control: Urgency (default), Close Date, Client Name, Price
+      d) Transaction card pattern:
+         - Left-edge urgency indicator and status pill
+         - "Why" badges explaining the current risk state
+         - AI next-step banner with contextual CTA (e.g. Send Response)
+         - Inline primary contact with one-click call/email actions
+         - Milestone bar: Contract, EM, Inspection, Appraisal, CD Delivered,
+           CTC, Close
+         - Info badges for tasks, emails, notes, missing docs, client touch,
+           lender touch, and history
+         - Right summary block showing days to close, overdue count / no overdue,
+           and price
+      e) Expanded transaction drawer:
+         - Three-column layout: Tasks, Key Dates, Contacts
+         - Tasks grouped as Overdue / Upcoming / Completed with inline
+           completion status and Add Task CTA
+         - Key dates editable in place with visual urgency states
+         - Contacts grouped by role (Buyer, Listing Agent, Lender, Title, etc.)
+           with expand/collapse, call/email, and add-secondary-contact actions
+         - AI Suggestions panel for the current deal
+         - Footer actions: View/Add Transaction Documents, Print Checklist,
+           Transaction History, price
+      f) Supporting overlays and modal patterns:
+         - Add Task modal with completion-method options (Phone Call, Email,
+           DocuSign/E-Signature, In Person, Upload Document, Online Portal,
+           AI Agent, Other)
+         - AI "how to complete this task" suggestions within the Add Task flow
+         - All Documents modal with AI search across all transactions by
+           document name, buyer, or seller
+         - Transaction Documents modal supporting view/add/rename/history
+      g) Semantic color system aligned to the current brand system:
+         - Primary navy for trust surfaces/navigation
+         - Amber/orange for CTAs and high-importance actions
+         - Critical red / warning amber / healthy green / neutral gray
+         - AI surfaces use subtle champagne glow accents only
 
-    Team Lead Dashboard:
-      - Toggle at top of dashboard: "Team Leader View" / "Agent View"
-        (most TLs also sell real estate and need both perspectives)
-      - Agent View: identical to Agent dashboard above (personal deals)
-      - Team Leader View: aggregated view across all team members
-        - Team-wide triage numbers (overdue, due tomorrow, active, closing)
-        - Pipeline strip reflects team totals
-        - Transaction cards show assignee name on each card
-        - Filter by team member in addition to standard filters
-        - Team task template management access
-        - Activity log overview for all team transactions
+    Team Lead Active Transactions Workspace:
+      - Same page architecture as Agent/Elf view, adapted for team scope
+      - Team-wide KPI tiles and briefing counts
+      - Transaction cards include assignee information
+      - Team member filtering layered on top of deal-state and page tabs
+      - Team activity overview and team task template management shortcuts
+
+    Dashboard (next design phase):
+      - Broader Dashboard page still pending from client and should be planned
+        as a separate screen after Active Transactions
+      - Reuse AI briefing, urgency states, and "most important things today"
+        patterns from the Active Transactions workspace
 
 2.7 Full Transaction View
     - Overview Tab / Transaction Log
     - Ability to resend emails with one click (icon on the far right of note)
+    - "Print Checklist" action pulls from user/team profile templates and
+      generates Buyer vs Seller variants
+    - Tagged notes can be included in printed checklist output
+    - Seller checklist supports escrow overage reminders and closing guidance
 
 
 ================================================================================
@@ -227,6 +261,7 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 3.2 Document Upload (Step 1)
     - Single upload interface for multiple files
+    - Global drag-and-drop support anywhere in the authenticated workspace
     - Accepted formats: PDF, JPEG, GIF, DOC, DOCX, and other image types
     - File size limit: up to 20 MB per file
     - Order does not matter
@@ -236,6 +271,9 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
       ranges and split into separate documents with names/metadata
     - Parse DOC/DOCX files (e.g., pre-approval letters) for loan officer
       contact info
+    - After drop/upload, AI verifies what the document is, proposes a name,
+      asks which transaction it belongs to, and checks whether it should be
+      sent for signature
 
 3.3 AI Document Parsing
     - Using OpenAI GPT models
@@ -349,6 +387,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
       Recommend adding missing tasks
       Detect document-based contingencies
       Suggest deadline adjustments (never auto-change)
+      When a user creates a manual task, search for similar incomplete tasks
+      and offer Add / Combine / Disregard options before saving
     - All additions/removals are RECOMMENDATIONS, not forced
     - Approval rules:
       Individual agents: approve for their transactions
@@ -385,8 +425,11 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 4.8 Notification & Reminders
     - Email reminders for due/critical tasks
-    - Configurable reminder intervals (due today, past due)
+    - Configurable reminder intervals (day before, due today, past due)
     - Push and in-app notifications
+    - SMS reminders when that channel is enabled for the tenant/user
+    - Compiled reminder summaries such as "You have 3 transactions with
+      deadlines due tomorrow/today"
     - Daily summary email (only when tasks are due, not when there are none)
 
 4.9 Task Sorting & Views
@@ -402,6 +445,10 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Include dates and utility information
     - Changing utilities guide
     - Changing address with USPS and online retailers (Amazon, etc.)
+    - Templates are fed from user/team profile settings
+    - Separate Buyer and Seller checklist templates
+    - Support tagged note injection into the checklist
+    - Include seller escrow overage reminders where applicable
 
 4.11 State-Based Task Differences
     - Build state rules around: closing practice (attorney vs title/escrow),
@@ -429,6 +476,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Rename, archive (soft delete) documents
     - Versioning: track changes, view previous versions
     - Vendors see only their own uploads (unless agent/elf shares)
+    - Cross-transaction "All Documents" workspace with AI search by document
+      name, buyer, seller, and related transaction
 
 5.3 Document Emailing
     - Choose recipients, subject, body, attachments
@@ -459,8 +508,9 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 6.1 Unified Communication Log (Immutable)
     - All communication in one master log:
-      Emails (inbound/outbound), system messages, document actions,
-      AI sends, manual edits/sends
+      Emails (inbound/outbound), SMS (when enabled), system messages,
+      document actions, AI sends, manual edits/sends, and future voice-call
+      events
     - Each entry logs: who, what, when, direction, related transaction
     - Immutable record; users can report errors for AI training
     - Search/filtering: by date, party, keyword
@@ -510,7 +560,16 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Optional escalations (reminders after 24-48 hours, configurable)
     - Push notifications support
 
-6.7 Vendor Communication (Hybrid Approach)
+6.7 SMS & Voice Communication Hooks
+    - Communication architecture should support future SMS and call-provider
+      integration without redesigning the transaction UI
+    - Phone icons should support future click-to-call or call-bridge workflows
+      where the user can be connected to the selected contact
+    - SMS hooks should support reminders, replies, and transaction logging
+    - Provider choice can be finalized later, but the data model and logging
+      layer should be provider-agnostic
+
+6.8 Vendor Communication (Hybrid Approach)
     - Email asks for date in constrained format ("Reply with: Scheduled: YYYY-MM-DD")
     - AI parses reply and proposes updated task date
     - Vague replies ("soon", "next week"): AI sends clarification email
@@ -550,6 +609,12 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Invoicing, commission tracking
     - Integration hooks for accounting software
 
+7.8 Communication Providers
+    - Support provider abstraction for future SMS and click-to-call / voice
+      workflows
+    - Initial recommendation: keep the UI and logging layer provider-agnostic
+      while allowing Twilio-style SMS/voice integration later if approved
+
 
 ================================================================================
 8. AI & AUTOMATION
@@ -587,42 +652,51 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 9.1 Responsive Web Application
     - React frontend, accessible from desktops and mobile browsers
-    - Dark sidebar (240px) + persistent header bar (60px) + scrollable content
-    - DM Sans typography (DM Mono for numbers/dates/countdowns)
+    - Dark sidebar + slim topbar + page header + scrollable transaction area
+    - IBM Plex Sans typography throughout the product UI
+    - IBM Plex Mono for numbers, dates, countdowns, and other dense operational
+      values
+    - No serif typography in the application workspace
+    - font-variant-numeric: tabular-nums lining-nums applied anywhere the UI
+      shows money, dates, phones, addresses, file IDs, percentages, or deadlines
+    - 6px radius for professional components
+    - Minimum 48x48px interactive targets for accessibility
     - Fast loading
 
 9.2 Mobile Support (Future Phase)
     - Native or hybrid mobile app (subsequent phase if budget permits)
     - View/update transactions, upload via camera, push notifications
 
-9.3 Dashboard & Reporting
-    - Dashboard layout per client-approved redesign (see Section 2.6 for full spec)
-    - Sidebar navigation organized by workflow stages (not data types):
-      Workspace: Dashboard, Active Deals, Deadlines, Documents, Contacts, Messages
-      Reports: Pipeline, Settings
-    - Each nav item with live data shows a color-coded badge
-      (red for count, amber/warn for deadlines, green for messages)
-    - Pipeline summary strip above the fold with contextual subtitles
-      (e.g., "Next: Mar 6 — Connors", "$2.1M total pipeline")
-    - Transaction stage pills with semantic labels and icons:
-      "Response Overdue" (red), "Closing in X Days" (amber), "On Track" (green),
-      "Pending" (blue) — dynamically computed from transaction state
-    - Pipeline value tracking: total dollar value of active deals
-    - Inline task completion: tasks can be checked off directly from expanded
-      dashboard cards without navigating to transaction detail
-    - Per-transaction message badges: scoped to individual deals, hidden when
-      count = 0, appearing only when there are unread messages
-    - One-click call/email buttons on contacts within expanded transaction cards
-    - Transaction price displayed in card footer
-    - "X need attention" badge on Active Transactions section header
-    - Reporting dashboard in profile
-    - Filters and quick links
+9.3 Active Transactions Workspace & Reporting
+    - The currently approved role-specific page is the Active Transactions
+      workspace (see Section 2.6); the broader Dashboard screen is still pending
+    - Sidebar navigation groups:
+      Dashboard
+      Deals: Active Transactions, Pending, Closed, All Transactions
+      Workflow: My Task Queue, All Documents, Closing Calendar
+      Intelligence: AI Suggestions, Analytics, Settings
+    - Sidebar KPI tiles: Overdue Tasks, Closing This Week, Active Deals,
+      Pipeline Value
+    - Topbar AI briefing row: Today's AI Briefing + Critical / Needs Attention /
+      On Track counts
+    - Page tabs: All, Overdue, Due Today, Closing Soon, In Inspection,
+      On Track, Unhealthy
+    - Transaction stage pills and "why" badges explain current risk, not just
+      status labels
+    - Inline task completion and key-date editing within expanded transaction
+      drawers
+    - One-click call/email buttons and add-contact affordances inside grouped
+      contact panels
+    - Footer actions per transaction: View/Add Documents, Print Checklist,
+      Transaction History
+    - All Documents search should support AI-assisted search across transactions
+    - Reporting dashboard remains available in profile and analytics views
 
-9.3.1 AI Credits Display
-    - AI Credits pill displayed in persistent header bar next to search
-    - Shows remaining AI credit balance (e.g., "250 AI Credits")
-    - Positions AI as a workflow accelerator, always visible
-    - Clickable to view usage details or purchase more credits
+9.3.1 AI Daily Briefing
+    - Persistent topbar chip that surfaces the current AI briefing state
+    - Summary counters for Critical, Needs Attention, and On Track transactions
+    - Should be actionable as a filter/sort shortcut into the current workspace
+    - Serves as the bridge pattern for the future Dashboard landing page
 
 9.4 Accessibility & Internationalization
     - WCAG AA compliance
@@ -696,6 +770,7 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 12.3 AI Agent Custom Video Creator
     - Videos for main milestones customized with client names
 12.4 Expanded AI Agents (voice, SMS, calendar)
+    - Include future click-to-call / call-bridge support for contact actions
 12.5 Predictive Closing Risk Scoring
 12.6 Compliance Auditing
 12.7 Pattern Detection Across Teams

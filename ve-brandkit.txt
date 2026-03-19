@@ -1,0 +1,191 @@
+FULL BRAND KIT
+VELVET ELVES
+
+Here’s the updated style sheet with the typography corrected for the actual product UI, not for a pretend luxury magazine that also happens to manage earnest money deadlines.
+Velvet Elves UI/UX Style Sheet
+The B2B Institutional Trust Pack
+This version is built for a high-trust real estate transaction platform used by agents, transaction coordinators, admins, buyers, and sellers who need clarity fast.
+1. The “Numbers First” Typography Suite
+Primary App Typeface
+IBM Plex Sans
+This is the interface font for the web app. Use it across:
+•	top navigation
+•	page titles
+•	cards
+•	forms
+•	tables
+•	timelines
+•	task lists
+•	contact panels
+•	status pills
+•	modals
+•	deadline widgets
+•	mobile and desktop views
+Why this is the right choice:
+•	Excellent numeral clarity
+•	Strong distinction between 1, I, l, 0, and O
+•	Reads cleanly in dense, operational screens
+•	Feels institutional, modern, and trustworthy without looking sterile
+Approved Weights
+Use only:
+•	400 Regular
+•	500 Medium
+•	600 Semibold
+•	700 Bold
+Do not use ultra-light or thin weights in the app.
+Product UI Type Scale
+Use this as the base system:
+•	Page Title: 28 / 36, 700
+•	Section Header: 22 / 30, 600
+•	Card Title: 18 / 26, 600
+•	Body Text: 16 / 24, 400
+•	Form Label: 14 / 20, 500
+•	Table Text: 14 / 20, 400
+•	Status Pill: 13 / 18, 600
+•	Helper Text: 12 / 16, 400
+Number Handling Rule
+Anywhere the UI shows dates, money, phone numbers, addresses, file IDs, percentages, commissions, or deadlines, enable:
+font-variant-numeric: tabular-nums lining-nums;
+That keeps numbers aligned and scan-friendly. In a transaction platform, that is not a nice extra. That is table stakes.
+Full Number Palette Reference
+Use this for QA and UI review:
+0 1 2 3 4 5 6 7 8 9
+00 11 22 33 44 55 66 77 88 99
+$123,456.78
+04/27/2026
+317-555-0147
+Lot 7 · Unit 11 · File ID 40128
+1 I l | O 0
+Brand / Marketing Typography
+For the logo itself, keep the refined brand wordmark style as its own asset.
+For marketing pages only, you may use a secondary display font if needed, but do not bring serif typography into the application workspace. The product UI should remain IBM Plex Sans throughout.
+CSS Font Stack
+font-family: "IBM Plex Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+2. The Trust-Driven Color Palette
+Core Palette
+•	Primary: Deep Institutional Navy #1B2B3C
+•	Action: Refined Amber Orange #EE7623
+•	Neutral Background: Soft Cool Grey #F5F7FA
+•	AI Pulse: Subtle Champagne Glow #FFEEC2
+•	Primary Text: Max-Contrast Slate Grey #333333
+Usage Rules
+•	Navy anchors navigation, headers, sidebars, and trust-heavy surfaces.
+•	Orange is for CTAs, key highlights, active steps, and important status moments.
+•	Cool Grey is the default page background to reduce glare.
+•	Slate Grey is the default body text color.
+•	Champagne Glow is used sparingly behind AI-generated summaries, computed insights, or AI stamp components.
+Do not overuse the glow. One glow looks intelligent. Ten glows looks like the software swallowed a casino.
+3. Component & Character Rules
+Character Integration
+The Velvet Elves brand mark should support trust, not become a distraction.
+Use the deconstructed AI entity in these ways:
+•	Dashboard header: subtle supporting mark
+•	AI-generated summary blocks: small stamp beside system-generated content
+•	Loading state: pulse or geometric transition
+•	Data computation areas: quiet background accent behind calculated values
+Character Posture Rules
+The brand character should not wave or pose like a children’s cereal mascot.
+Approved states:
+•	stable
+•	upright
+•	symmetrical
+•	observant
+•	fixed and deliberate
+This software is supposed to help close deals, not audition for Saturday morning cartoons.
+4. Layout & Interaction Rules
+Accessibility
+All interactive targets must be at least 48x48px.
+This includes:
+•	buttons
+•	icon buttons
+•	tabs
+•	dropdown triggers
+•	upload controls
+•	row actions
+•	date pickers
+Corner Radius
+Use 6px radius for professional components.
+Do not drift into overly round consumer-app styling.
+Spacing Logic
+Use generous spacing between sections, but keep action clusters tight.
+Priority order on every transaction screen:
+1.	transaction status
+2.	next critical date
+3.	missing items / blockers
+4.	key contacts
+5.	documents
+6.	checklist progress
+7.	communication history
+If a user has to hunt for status or next deadline, the layout failed.
+5. Data Density vs. Clarity Rules
+Default Principle
+Show enough to support action. Hide anything that requires interpretation until requested.
+Surface by Default
+Every transaction card or summary header should show:
+•	address
+•	transaction type
+•	client name(s)
+•	current status
+•	next deadline
+•	checklist completion
+•	missing document count
+•	unread communication indicator
+Use Progressive Disclosure For
+•	full contact histories
+•	full document logs
+•	archived notes
+•	audit trails
+•	long activity streams
+•	version histories
+Users should be able to operate the deal from the main screen without drilling into three layers of drawers and accordions like they’re opening a cursed puzzle box.
+6. Modern Behavior Alignment Rules
+The 2024–2025 Standard
+Interfaces should behave like this:
+•	fast scan first
+•	obvious next action
+•	persistent status visibility
+•	inline edits where safe
+•	dashboard intelligence that explains risk
+•	card-based grouping with strong labels
+•	mobile logic applied to desktop, but without wasting horizontal space
+Required Interface Behaviors
+•	persistent transaction status pill in the header
+•	next deadline always visible above the fold
+•	one-click access to upload docs
+•	one-click access to checklist
+•	one-click access to client contact details
+•	one-click access to communication history
+•	inline update for dates, task owners, and statuses where appropriate
+•	visible “AI suggested next step” module when system confidence is high
+7. UI Writing Rules
+Voice
+•	direct
+•	calm
+•	operational
+•	zero fluff
+Labels
+Use plain language:
+•	“Missing Documents”
+•	“Next Deadline”
+•	“Buyer Contact”
+•	“Awaiting Signature”
+•	“Commission Entered”
+•	“Title Ordered”
+Avoid vague labels like:
+•	“Resources”
+•	“Details”
+•	“Info”
+•	“Management”
+Those are labels written by people who already know the system and assume everyone else enjoys scavenger hunts.
+8. What the Design System Should Feel Like
+The product should feel:
+•	stable
+•	fast
+•	intelligent
+•	legible
+•	low-friction
+•	trustworthy
+Not playful. Not flashy. Not “techy” for its own sake.
+The brand can have personality. The workflow cannot.
+
+

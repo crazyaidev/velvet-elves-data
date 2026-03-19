@@ -165,6 +165,8 @@ CREATE TABLE IF NOT EXISTS public.users (
   bio                    TEXT,                        -- NEW: agent bio for client portal
   avatar_url             TEXT,                        -- NEW: profile photo
   notification_prefs     JSONB DEFAULT '{}'::jsonb,   -- NEW: notification on/off settings
+  profile_settings_json  JSONB DEFAULT '{}'::jsonb,   -- NEW: checklist templates, tagged notes,
+                                                     --      workspace preferences, first-upload prompts
   team_id                UUID,                        -- NEW: FK to teams (nullable)
   created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at             TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -179,6 +181,8 @@ CREATE INDEX idx_users_team_id ON public.users (team_id);
 - `tenant_id` now references `tenants(id)` (was loose UUID)
 - Added `bio`, `avatar_url` for agent profiles / client portal
 - Added `notification_prefs` (JSONB) for per-user notification toggles
+- Added `profile_settings_json` for printable checklist templates and
+  workspace-level preferences
 - Added `team_id` for team membership
 
 #### 2.2.3 `teams` — Agent teams within a brokerage (NEW)
@@ -432,6 +436,10 @@ CREATE TABLE IF NOT EXISTS public.tasks (
   target            TEXT,                             -- who is responsible
   cc_targets        TEXT[],
   milestone_label   TEXT,
+  completion_method TEXT,                             -- 'phone_call','email',
+                                                     -- 'e_signature','in_person',
+                                                     -- 'upload_document','online_portal',
+                                                     -- 'ai_agent','other'
 
   -- Scheduling
   due_date          DATE,
@@ -470,6 +478,7 @@ CREATE INDEX idx_tasks_target ON public.tasks (target);
 **Major changes from current:**
 - Added `template_id` linking back to source template
 - Added `target`, `cc_targets`, `milestone_label` from task DB
+- Added `completion_method` so manual tasks align with the new Add Task flow
 - `due_date` is now proper DATE (was TEXT)
 - Added `completed_at` timestamp
 - `dependencies_json` is now JSONB (was TEXT)
@@ -558,7 +567,8 @@ CREATE TABLE IF NOT EXISTS public.communication_logs (
   cc_emails         TEXT[],
 
   -- What
-  channel           TEXT NOT NULL,                     -- 'email','system','ai_draft','note','document_action'
+  channel           TEXT NOT NULL,                     -- 'email','sms','voice_call','push',
+                                                      -- 'system','ai_draft','note','document_action'
   direction         TEXT NOT NULL,                     -- 'inbound','outbound','internal'
   subject           TEXT,
   body              TEXT,
@@ -574,6 +584,10 @@ CREATE TABLE IF NOT EXISTS public.communication_logs (
   approval_status   TEXT,                              -- 'auto_sent','pending_review','approved','rejected'
   approved_by       UUID REFERENCES public.users(id),
   approved_at       TIMESTAMPTZ,
+
+  -- Provider / external reference tracking
+  provider_name     TEXT,                              -- e.g. gmail, outlook, twilio
+  provider_ref_id   TEXT,                              -- message SID / call SID / external id
 
   -- Status
   status            TEXT DEFAULT 'sent',               -- 'draft','sent','failed','pending_review'
@@ -927,16 +941,21 @@ GET    /api/v1/tasks/{id}                 # Get task detail
 PUT    /api/v1/tasks/{id}                 # Update task
 PUT    /api/v1/tasks/{id}/status          # Change task status
 DELETE /api/v1/tasks/{id}                 # Delete task
+POST   /api/v1/tasks/similar              # Suggest similar incomplete tasks before save
 
 GET    /api/v1/transactions/{id}/tasks    # List tasks for a transaction
 POST   /api/v1/transactions/{id}/tasks/generate  # Generate tasks from use case + wizard data
+GET    /api/v1/transactions/{id}/closing-checklist # Generate printable checklist payload
 ```
 
 #### Documents (`/api/v1/documents`)
 
 ```
 POST   /api/v1/documents/upload           # Upload document(s)
+POST   /api/v1/documents/intake           # Global drag/drop intake: classify, suggest name,
+                                          #   locate transaction, suggest e-sign
 GET    /api/v1/documents                  # List documents (with filters)
+GET    /api/v1/documents/search           # Cross-transaction AI-assisted search
 GET    /api/v1/documents/{id}             # Get document metadata
 GET    /api/v1/documents/{id}/download    # Download/get signed URL
 PUT    /api/v1/documents/{id}             # Update metadata (rename, reclassify)
@@ -961,24 +980,26 @@ GET    /api/v1/audit-logs                  # List audit logs (Admin only)
 GET    /api/v1/audit-logs/{entityType}/{entityId} # Logs for specific entity
 ```
 
-#### Dashboard Aggregation (`/api/v1/dashboard`) — NEW per redesign
+#### Active Transactions Workspace (`/api/v1/dashboard`) — current approved page
 
 ```
-GET    /api/v1/dashboard/triage             # Sidebar triage counts:
-                                            #   overdue, due_tomorrow, active_deals, closing_soon
-GET    /api/v1/dashboard/status-ribbon      # Header ribbon: overdue_tasks, due_tomorrow,
-                                            #   closing_this_month, unread_messages
-GET    /api/v1/dashboard/pipeline-summary   # Pipeline strip: closing_count, inspection_count,
-                                            #   active_count, pending_count, total_pipeline_value,
-                                            #   contextual subtitles per card
-GET    /api/v1/dashboard/upcoming-closings  # Right column: closing countdown list
-                                            #   (days_remaining, urgency_tier, client, address, date)
-GET    /api/v1/dashboard/needs-attention    # Right column: cross-deal tasks needing attention
-                                            #   (task, deal_name, deal_id, due_date, overdue flag)
-GET    /api/v1/dashboard/transaction-cards  # Collapsible card data: client, address, stage_pill,
-                                            #   milestone_timeline, next_deadline, badges,
-                                            #   inline_tasks, key_dates, contacts
-                                            #   Supports: ?view=personal|team, ?filter=, ?sort=,
+GET    /api/v1/dashboard/ai-briefing        # Topbar AI briefing:
+                                            #   critical_count, needs_attention_count,
+                                            #   on_track_count, suggested_focus
+GET    /api/v1/dashboard/sidebar-kpis       # Sidebar KPI tiles:
+                                            #   overdue_tasks, closing_this_week,
+                                            #   active_deals, pipeline_value
+GET    /api/v1/dashboard/deal-state-counts  # Sidebar Deals counts:
+                                            #   active_transactions, pending, closed, all_transactions
+GET    /api/v1/dashboard/transaction-cards  # Active transaction cards:
+                                            #   client, address, status_pill, why_badges,
+                                            #   ai_next_step, milestone_bar, info_badges,
+                                            #   key_dates, grouped_contacts, price,
+                                            #   Supports: ?view=personal|team,
+                                            #   ?state_filter=active|pending|closed|all,
+                                            #   ?tab=all|overdue|today|closing_soon|
+                                            #        in_inspection|on_track|unhealthy,
+                                            #   ?sort=urgency|close_date|client_name|price,
                                             #   ?search=, ?team_member_id=
 ```
 
@@ -987,9 +1008,11 @@ GET    /api/v1/dashboard/transaction-cards  # Collapsible card data: client, add
 - `?view=team` returns all team deals with assignee info (Team Leader View)
 - `?search=` searches across client names, vendor names, companies, dates, addresses
 - `?sort=urgency` (default) sorts by overdue + soonest closing first
-- Pipeline `total_pipeline_value` sums purchase_price of active transactions
-- Stage pills computed server-side from transaction state: `response_overdue`,
-  `closing_in_X_days`, `on_track`, `in_inspection`, `pending_contract`
+- `?tab=in_inspection` means the inspection response has not yet been sent
+- `pipeline_value` sums purchase_price of currently active transactions
+- Status pills and "why" badges are computed server-side from transaction
+  state, task state, due dates, message counts, and missing-doc conditions
+- The future Dashboard landing page should reuse these same aggregation services
 
 #### Health & System
 
@@ -1011,7 +1034,7 @@ GET    /api/v1/health/ready                # Readiness check (DB connectivity)
 | Upload documents | Yes | Yes | Yes | Yes | Yes (no delete) | Yes (own) |
 | Delete documents | Yes | Yes | Yes | Yes | Flag only | No |
 | View documents | All | Team | Own txn | Assigned txn | Own txn | Own uploads |
-| Dashboard aggregation | All | Team + personal toggle | Own | Assigned | Own | No |
+| Active Transactions workspace data | All | Team + personal toggle | Own | Assigned | Own | No |
 | Confidence settings | Global floor | Team threshold | No | No | No | No |
 | Audit logs | Full | Team | No | No | No | No |
 
@@ -1019,208 +1042,230 @@ GET    /api/v1/health/ready                # Readiness check (DB connectivity)
 
 ## 4. Frontend UI/UX Design
 
-### 4.1 Design System (Client-Approved Redesign)
+### 4.1 Design System (Client-Approved Active Transactions Redesign)
 
-**Visual approach:** Clean, modern, minimal — dark sidebar + light content surface.
-**Reference:** `data/velvet-elves-redesign.html` (client-approved Agent dashboard mockup)
+**Visual approach:** B2B institutional trust pack — dark sidebar + light content
+surface + high-density transaction cards.
+**Reference:** `data/velvet-elves-active-transactions.html` plus `data/ve-brandkit.txt`
+and `data/ve-style-sheet.txt`
 
-- **Colors — Full semantic token system (CSS variables, white-label propagation):**
+- **Colors — brand-aligned semantic token system (CSS variables, white-label propagation):**
   ```css
   /* Brand */
-  --brand-green: #1a9e72;          /* primary CTA, success, on-track */
-  --brand-green-light: #e8f7f2;    /* AI button bg, success tint */
-  --brand-green-mid: #c0ead8;      /* expanded card border, contact avatars */
-  --brand-green-dark: #0f7052;     /* dark hover states */
+  --brand-navy: #1b2b3c;           /* primary trust surfaces, nav, headers */
+  --brand-orange: #ee7623;         /* CTAs, key highlights, active states */
+  --brand-orange-dark: #c85f13;    /* CTA hover / pressed */
+  --brand-bg: #f5f7fa;             /* default page background */
+  --brand-ai-glow: #ffeec2;        /* subtle AI surfaces only */
+  --text-primary: #333333;         /* max-contrast slate */
 
-  /* Semantic status — each has a foreground + background variant */
-  --status-critical: #e53b3b;      --status-critical-bg: #fef0f0;
-  --status-warning: #d97706;       --status-warning-bg: #fffbeb;
-  --status-success: #1a9e72;       --status-success-bg: #e8f7f2;
-  --status-info: #3b82f6;          --status-info-bg: #eff6ff;
-  --status-neutral: #6b7280;       --status-neutral-bg: #f3f4f6;
+  /* Functional states */
+  --status-critical: #c8322f;      --status-critical-bg: #fff0f0;
+  --status-warning: #c07a0a;       --status-warning-bg: #fffbf0;
+  --status-success: #1a7a52;       --status-success-bg: #edf7f3;
+  --status-info: #2c4c7f;          --status-info-bg: #eef3fc;
+  --status-neutral: #7a7a7a;       --status-neutral-bg: #f0f0ee;
 
   /* Surfaces */
-  --surface-bg: #f7f8fa;           /* page background */
-  --surface-card: #ffffff;         /* card/widget background */
-  --surface-sidebar: #111827;      /* sidebar background */
-  --surface-sidebar-hover: #1f2937;/* sidebar hover/active states */
-  --surface-border: #e5e7eb;       /* default borders */
-  --surface-border-strong: #d1d5db;/* checkbox borders, dividers */
-
-  /* Typography */
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
-  --text-inverse: #ffffff;
-  --text-brand: #1a9e72;
+  --surface-card: #ffffff;
+  --surface-sidebar: #1e3356;
+  --surface-sidebar-hover: #284168;
+  --surface-border: #e2e2e0;
+  --surface-border-strong: #cacac8;
   ```
-  Status pills use background-tint + border + text approach (not solid fills)
-  for readability while left-edge indicator bars carry urgency weight.
-- **Typography:** DM Sans font family (DM Mono for numbers, dates, countdowns)
-- **Layout:** Dark sidebar (240px) + header bar (60px) + main content area
-- **Components:** shadcn/ui + custom components matching redesign patterns
-- **Responsive:** Desktop-first with mobile breakpoints
+  Status pills use tint + border + text for readability, while card edge bars,
+  briefing badges, and inline urgency states carry stronger emphasis.
+- **Typography:** IBM Plex Sans across the application workspace; IBM Plex Mono
+  for numbers, dates, countdowns, phone numbers, file IDs, and badge counts.
+  No serif typography in the product UI.
+- **Numeric handling:** apply `font-variant-numeric: tabular-nums lining-nums`
+  anywhere the UI displays money, dates, percentages, phone numbers,
+  commissions, file IDs, or deadlines.
+- **Layout:** Dark sidebar + slim topbar + page header + scrollable transaction
+  area.
+- **Interaction rules:** 6px corner radius for professional components and a
+  minimum 48x48px target size for interactive elements.
+- **Components:** shadcn/ui + custom workspace components matching the approved
+  Active Transactions patterns.
+- **Responsive:** Desktop-first with mobile breakpoints; preserve scan density
+  without collapsing the workspace into a consumer-style layout.
 
 ### 4.2 Page Structure
 
-```
+**Scope update (2026-03-19):** The currently approved detailed screen is the
+Active Transactions workspace, not the broader Dashboard landing page. The app
+shell below still applies at a high level, but the detailed role-specific UI
+patterns are now defined by the Active Transactions page and its supporting
+modals, while the full Dashboard remains pending client design.
+
+```text
 App
-├── Auth (public)
-│   ├── Login
-│   ├── Register
-│   ├── Forgot Password
-│   ├── Reset Password
-│   ├── OAuth Callback
-│   └── Invite Accept
-│
-├── Onboarding (protected, standalone)
-│   └── OnboardingWizard (step-by-step setup)
-│
-├── Main App (protected, with dark sidebar)
-│   │
-│   │── Sidebar Navigation (per redesign):
-│   │   ├── Workspace section:
-│   │   │   ├── Dashboard (role-specific, with Team Lead toggle)
-│   │   │   ├── Active Deals (transaction list, badge: deal count)
-│   │   │   ├── Deadlines (cross-deal deadline view, badge: overdue count)
-│   │   │   ├── Documents (cross-transaction view)
-│   │   │   ├── Contacts (directory + vendor list)
-│   │   │   └── Messages (cross-deal messages, badge: unread count)
-│   │   ├── Reports section:
-│   │   │   ├── Pipeline (pipeline analytics + charts)
-│   │   │   └── Settings (account + team)
-│   │   ├── [+ New Transaction] (pinned CTA at sidebar footer)
-│   │   └── User profile (avatar initials, name, role)
-│   │
-│   ├── Dashboard
-│   │   ├── Agent/Elf view (redesign layout)
-│   │   └── Team Lead view (toggle: Team Leader / Agent)
-│   │
-│   ├── Active Deals / Transactions
-│   │   ├── List (filterable, sortable, searchable data table)
-│   │   ├── New Transaction (wizard or manual form)
-│   │   └── Detail
-│   │       ├── Overview Tab (transaction log)
-│   │       ├── Tasks Tab (task list with status)
-│   │       ├── Documents Tab (document center)
-│   │       ├── Parties Tab (contacts for this deal)
-│   │       └── Communications Tab (log view)
-│   │
-│   ├── Deadlines (cross-transaction deadline/task view)
-│   │   ├── Today's Tasks
-│   │   ├── All Tasks (filterable)
-│   │   └── By Vendor ("vendor carts")
-│   │
-│   ├── Messages (cross-transaction communication view)
-│   │
-│   ├── Profile
-│   │   ├── Personal Info
-│   │   ├── Agent Bio
-│   │   ├── Notification Preferences
-│   │   └── Integrations (Gmail/Outlook connection)
-│   │
-│   └── Admin (Admin only)
-│       ├── User Management
-│       ├── Task Templates
-│       │   ├── Master Library
-│       │   └── Import from CSV
-│       ├── Confidence Settings
-│       ├── Tenant/Brokerage Settings
-│       └── Audit Logs
-│
-└── Client Portal (Client role — simplified view)
-    ├── My Transactions
-    ├── Documents
-    ├── Milestones
-    └── Agent Info
+|-- Auth (public)
+|   |-- Login
+|   |-- Register
+|   |-- Forgot Password
+|   |-- Reset Password
+|   |-- OAuth Callback
+|   `-- Invite Accept
+|
+|-- Onboarding (protected, standalone)
+|   `-- OnboardingWizard
+|
+|-- Main App (protected)
+|   |-- Topbar
+|   |   |-- Global search
+|   |   |-- Today's AI Briefing
+|   |   |-- Notifications
+|   |   `-- Profile menu
+|   |
+|   |-- Sidebar
+|   |   |-- Deal states
+|   |   |   |-- Active Transactions
+|   |   |   |-- Pending
+|   |   |   |-- Closed
+|   |   |   `-- All Transactions
+|   |   |-- Workflow
+|   |   |   |-- Task Queue
+|   |   |   |-- Closing Calendar
+|   |   |   `-- All Documents
+|   |   |-- Intelligence
+|   |   |   |-- AI Suggestions
+|   |   |   `-- Analytics
+|   |   |-- Pinned CTA
+|   |   |   `-- New Transaction
+|   |   `-- User profile summary
+|   |
+|   |-- Active Transactions Workspace (current approved detailed screen)
+|   |   |-- Agent/Elf personal view
+|   |   `-- Team Lead team/personal toggle
+|   |
+|   |-- Transaction Detail
+|   |   |-- Overview
+|   |   |-- Tasks
+|   |   |-- Documents
+|   |   |-- Parties
+|   |   `-- Communications
+|   |
+|   |-- Supporting workspaces
+|   |   |-- Task Queue
+|   |   |-- Closing Calendar
+|   |   |-- All Documents
+|   |   |-- Contacts
+|   |   `-- Analytics
+|   |
+|   |-- Profile
+|   |   |-- Personal Info
+|   |   |-- Notification Preferences
+|   |   |-- Checklist Templates
+|   |   `-- Integrations
+|   |
+|   `-- Admin
+|       |-- User Management
+|       |-- Task Templates
+|       |-- Confidence Settings
+|       |-- Tenant/Brokerage Settings
+|       `-- Audit Logs
+|
+`-- Client Portal (simplified)
+    |-- My Transactions
+    |-- Documents
+    |-- Milestones
+    `-- Agent Info
 ```
 
 ### 4.3 Key UI Components (Phase 1)
 
-#### 4.3.1 Agent/Elf Dashboard (Client-Approved Redesign)
+#### 4.3.1 Agent/Elf Active Transactions Workspace (Client-Approved Redesign)
 
-**Reference:** `data/velvet-elves-redesign.html`
+**Reference:** `data/velvet-elves-active-transactions.html`
+**Scope note:** This section supersedes the earlier dashboard-first planning.
+The approved detailed screen is the Active Transactions workspace, while the
+broader Dashboard landing page remains pending.
 
-```
-┌─────────────────┬──────────────────────────────────────────────────────┐
-│  DARK SIDEBAR    │  HEADER BAR                                          │
-│  ┌─────────────┐ │  Good afternoon, Jake   Mon, Mar 2 · 9 active txns  │
-│  │ 🏠 Velvet   │ │  ┌─ Status Ribbon (always visible) ──────────────┐  │
-│  │ Elves [AI]  │ │  │ ● 4 overdue │ ● 5 due tmrw │ ● 3 closing    │  │
-│  ├─────────────┤ │  │             │ ● 2 unread messages             │  │
-│  │TODAY'S TRIAGE│ │  └──────────────────────────────────────────────┘  │
-│  │ 4 Overdue   │ │  [🔍 Search deals, contacts, docs] [✨ 250 AI] 🔔  │
-│  │ 5 Due Tmrw  │ ├──────────────────────────────────────────────────────┤
-│  │ 9 Active    │ │                                                      │
-│  │ 3 Closing   │ │  ┌── Pipeline Strip (4 cards, above the fold) ────┐  │
-│  ├─────────────┤ │  │ [3 Closing] [4 Inspection] [9 Active] [2 Pend] │  │
-│  │ ⊞ Dashboard │ │  └────────────────────────────────────────────────┘  │
-│  │ 🏘 Deals  9 │ │                                                      │
-│  │ 📅 Deadlines│ │  ┌─ LEFT COLUMN ─────────┐ ┌─ RIGHT (340px) ──────┐ │
-│  │ 📄 Documents│ │  │ Active Transactions    │ │ ⌛ Upcoming Closings │ │
-│  │ 👥 Contacts │ │  │ [Filter chips] [Search]│ │ [4d] Connors  Mar 6  │ │
-│  │ 💬 Messages │ │  │ [Sort: Urgency]        │ │ [17d] Young   Mar 19 │ │
-│  ├─────────────┤ │  │                        │ │ [26d] Delgado Mar 28 │ │
-│  │ 📊 Pipeline │ │  │ ┌─ Txn Card (expand) ─┐│ ├─────────────────────┤ │
-│  │ ⚙ Settings  │ │  │ │▌Name │Stage│Timeline││ │ ✅ Needs Attention  │ │
-│  ├─────────────┤ │  │ │▌Addr │Pill │●──●──○ ││ │ ○ Submit insp resp  │ │
-│  │[+ New Txn]  │ │  │ │     Next Date  Badges││ │ ○ Request credits   │ │
-│  ├─────────────┤ │  │ └─ Expanded body: ─────┘│ │ ○ Confirm walkthru  │ │
-│  │ JS Agent    │ │  │   Tasks│Dates│Contacts  │ │ ✓ Clear-to-close    │ │
-│  └─────────────┘ │  │   [AI Assist] [Upload]  │ └─────────────────────┘ │
-│                   │  └────────────────────────┘                          │
-└─────────────────┴──────────────────────────────────────────────────────┘
+```text
++--------------------------------------------------------------------------+
+| SIDEBAR                                                                  |
+| - KPI tiles: Overdue Tasks, Closing This Week, Active Deals, Pipeline    |
+| - Deal states: Active Transactions, Pending, Closed, All Transactions    |
+| - Workflow: Task Queue, Closing Calendar, All Documents                  |
+| - Intelligence: AI Suggestions, Analytics                                |
+| - Footer CTA: New Transaction                                            |
++--------------------------------------------------------------------------+
+| TOPBAR                                                                   |
+| - Greeting + global search                                               |
+| - Today's AI Briefing chip with Critical / Needs Attention / On Track    |
+| - Notification access + profile                                          |
++--------------------------------------------------------------------------+
+| PAGE HEADER                                                              |
+| - Title: Active Transactions                                             |
+| - Search + sort                                                          |
+| - Tabs: All | Overdue | Due Today | Closing Soon | In Inspection |       |
+|         On Track | Unhealthy                                             |
++--------------------------------------------------------------------------+
+| TRANSACTION CARD STACK                                                   |
+| - Header: urgency edge, status pill, address/client summary, why badges  |
+| - Inline AI next step banner                                             |
+| - Milestone bar: Contract, EM, Inspection, Appraisal, CD, CTC, Close     |
+| - Info badges: tasks, unread email, notes, docs, contact touchpoints     |
+| - Expandable drawer: Tasks | Key Dates | Contacts                        |
+| - Footer actions: Add Task, Upload, View Documents, Print Checklist      |
++--------------------------------------------------------------------------+
+| SUPPORTING OVERLAYS                                                      |
+| - Add Task modal with AI similar-task suggestions                        |
+| - Transaction Documents modal                                            |
+| - All Documents AI Search modal                                          |
+| - Global drag-and-drop document intake prompt                            |
++--------------------------------------------------------------------------+
 ```
 
 **Key design patterns:**
-- **Sidebar triage grid** (2x2): overdue/due tomorrow/active/closing — visible on every page
-- **Header status ribbon**: persistent summary, never scrolls away
-- **Pipeline strip**: 4 color-accented cards above the fold with contextual subtitles
-- **Collapsible transaction cards**: left-edge color indicator for rapid triage scanning,
-  inline milestone timeline (done/current/upcoming/overdue dots), expand for 3-column
-  detail (tasks with checkboxes, key dates, contacts with call/email)
-- **Filter chip bar**: All, Overdue, Closing Soon, In Inspection, Pending (with live counts)
-- **Transaction search bar**: next to Sort control, searches client names, vendor names,
-  companies, dates, addresses, and all transaction fields
-- **Sort default**: "Urgency" (most overdue + soonest closing first)
-- **Right column widgets**: closing countdown tiles (urgent/soon/normal coloring),
-  cross-deal "Needs Attention Today" task list with deal links
-- **Contextual AI actions** per card: "Summarize this deal", "Draft inspection response",
-  "Closing checklist"
-- **Section header badge**: "X need attention" count next to "Active Transactions" title
-- **View All links**: each section/widget has a "View All →" link to the full page
-- **Nav active state**: green left-edge bar (3px) on active sidebar link
-- **Notification bell**: badge count in header, hidden when 0
-- **Card hover**: subtle box-shadow on hover; green border + shadow on expand
-- **Inline task completion**: checkbox directly in expanded card; overdue tasks get red
-  checkbox border, warning tasks get amber border, completed get green fill with checkmark
+- **Topbar AI briefing**: "Today's AI Briefing" chip with Critical / Needs
+  Attention / On Track counts, always available as a filter shortcut.
+- **Sidebar KPI tiles**: overdue tasks, closing this week, active deals, and
+  pipeline value presented as actions, not just passive metrics.
+- **Deals / Workflow / Intelligence nav grouping**: the page separates state
+  filters from workflow shortcuts and AI/analytics shortcuts.
+- **Page-level transaction tabs**: All, Overdue, Due Today, Closing Soon,
+  In Inspection, On Track, Unhealthy.
+- **Transaction cards**: left-edge urgency indicator + status pill + "why"
+  badges so the user can understand risk without opening the card.
+- **AI next-step banner**: inline contextual action area at the top of the card
+  that explains what should happen next and why it matters.
+- **Milestone bar**: compact horizontal deal-progress view for Contract, EM,
+  Inspection, Appraisal, CD Delivered, CTC, and Close.
+- **Info badges**: tasks, unread emails, notes, missing docs, client touch,
+  lender touch, and history are surfaced before expansion.
+- **Expanded 3-column drawer**: Tasks, Key Dates, Contacts, followed by an AI
+  suggestions strip and footer actions.
+- **Grouped contact cards**: buyer, listing agent, lender, title, etc. each
+  support expand/collapse, one-click call/email, and add-secondary-contact flows.
+- **Integrated overlays**: Add Task modal, Transaction Documents modal, and
+  All Documents AI Search modal are all part of the primary workspace.
+- **Checklist print action**: each transaction drawer exposes a print action
+  fed from user/team checklist templates.
 
-#### 4.3.1b Team Lead Dashboard
+#### 4.3.1b Team Lead Active Transactions Workspace
 
-```
-┌───────────────────────────────────────────────────────────┐
-│  Dashboard                                                 │
-│  ┌─────────────────────────────────────────────┐           │
-│  │ [Team Leader View]  [Agent View]  ← toggle  │           │
-│  └─────────────────────────────────────────────┘           │
-│                                                             │
-│  Team Leader View:                                          │
-│  - Same layout as Agent dashboard                           │
-│  - Triage numbers reflect team-wide totals                  │
-│  - Pipeline strip aggregates across team members            │
-│  - Transaction cards include assignee name                  │
-│  - Filter by team member (dropdown) + standard filters      │
-│  - Team task template management access                     │
-│  - Activity log overview for all team transactions          │
-│                                                             │
-│  Agent View:                                                │
-│  - Identical to Agent dashboard (personal deals only)       │
-│  - TL's own transactions and tasks                          │
-└───────────────────────────────────────────────────────────┘
+```text
+Team Lead Active Transactions Workspace
+
+- Shared shell:
+  - Same topbar, sidebar, tabs, transaction-card system, and overlays as Agent/Elf view
+  - Toggle allows Team Lead to switch between personal and team scopes
+
+- Team view adjustments:
+  - KPI tiles and AI briefing aggregate across the full team
+  - Transaction cards include assignee name and optional assignee filter
+  - Activity summaries, unhealthy counts, and upcoming closings are team-scoped
+  - Team task-template actions and oversight shortcuts are available
+
+- Personal view adjustments:
+  - Uses the same Active Transactions workspace but scoped to the Team Lead's own deals
 ```
 
 **Why toggle:** Most Team Leads also sell real estate and need both a personal
-agent view (their own deals) and a team oversight view (all team deals).
+Active Transactions view (their own deals) and a team oversight view (all team
+deals).
 
 #### 4.3.2 Transaction Detail — Tabbed View
 
@@ -1283,30 +1328,41 @@ export const ROUTES = {
   ONBOARDING: '/onboarding',
   INVITE_ACCEPT: '/invite/:token',          // NEW
 
-  // Main app — sidebar navigation (per redesign)
+  // Main app — sidebar navigation (current approved Active Transactions page)
   DASHBOARD: '/dashboard',
   PROFILE: '/profile',
 
-  // Workspace section
-  ACTIVE_DEALS: '/deals',                    // NEW: sidebar "Active Deals"
-  TRANSACTIONS: '/transactions',             // alias for /deals (backward compat)
+  // Deals section
+  ACTIVE_TRANSACTIONS: '/transactions/active',
+  PENDING_TRANSACTIONS: '/transactions/pending',
+  CLOSED_TRANSACTIONS: '/transactions/closed',
+  ALL_TRANSACTIONS: '/transactions/all',
+  ACTIVE_DEALS: '/deals',                    // alias / legacy naming
+  TRANSACTIONS: '/transactions',             // backward-compatible base route
   NEW_TRANSACTION: '/transactions/new',
   TRANSACTION_DETAIL: '/transactions/:id',
 
-  DEADLINES: '/deadlines',                   // NEW: sidebar "Deadlines"
+  // Workflow section
+  TASK_QUEUE: '/tasks/queue',
+  CLOSING_CALENDAR: '/closing-calendar',
+  DOCUMENTS: '/documents',
+  ALL_DOCUMENTS: '/documents/all',
+
+  // Existing/future task views
+  DEADLINES: '/deadlines',                   // future dashboard/deadline page
   TASKS: '/tasks',                           // cross-transaction task view
   TASK_DETAIL: '/tasks/:id',
+  
+  // Intelligence / utility section
+  AI_SUGGESTIONS: '/ai-suggestions',
+  ANALYTICS: '/analytics',
+  SETTINGS: '/settings',
 
-  DOCUMENTS: '/documents',
-
+  // Supporting pages retained in overall app shell
   CONTACTS: '/contacts',
   CONTACT_DETAIL: '/contacts/:id',
-
-  MESSAGES: '/messages',                     // NEW: sidebar "Messages"
-
-  // Reports section
-  PIPELINE: '/pipeline',                     // NEW: sidebar "Pipeline"
-  SETTINGS: '/settings',
+  MESSAGES: '/messages',
+  PIPELINE: '/pipeline',
 
   // Admin
   ADMIN_USERS: '/admin/users',              // NEW
@@ -1322,34 +1378,35 @@ export const ROUTES = {
 
 ### 4.5 Frontend State Architecture
 
-```
+```text
 React Query (TanStack Query)
-├── Server State (cached via React Query)
-│   ├── /auth/me                    → current user
-│   ├── /dashboard/triage           → sidebar triage counts (NEW)
-│   ├── /dashboard/status-ribbon    → header ribbon counts (NEW)
-│   ├── /dashboard/pipeline-summary → pipeline strip cards (NEW)
-│   ├── /dashboard/upcoming-closings→ closing countdown widget (NEW)
-│   ├── /dashboard/needs-attention  → cross-deal task widget (NEW)
-│   ├── /dashboard/transaction-cards→ collapsible card data (NEW)
-│   ├── /transactions               → transaction list
-│   ├── /tasks                      → task list
-│   ├── /contacts                   → contact directory
-│   ├── /documents                  → documents
-│   ├── /task-templates             → template library
-│   └── /audit-logs                 → audit trail
-│
-├── Client State (React Context)
-│   ├── AuthContext        → JWT token, user session
-│   ├── ThemeContext       → white-label branding (NEW)
-│   ├── DashboardViewContext → Team Lead toggle state (NEW)
-│   └── NotificationContext → toast/alert state
-│
-└── Form State (React Hook Form)
-    ├── TransactionForm
-    ├── TaskTemplateForm
-    ├── ContactForm
-    └── UserInviteForm
+|-- Server State (cached via React Query)
+|   |-- /auth/me                      -> current user
+|   |-- /dashboard/ai-briefing        -> topbar AI briefing counts
+|   |-- /dashboard/sidebar-kpis       -> sidebar KPI tiles
+|   |-- /dashboard/deal-state-counts  -> Active/Pending/Closed/All counts
+|   |-- /dashboard/transaction-cards  -> collapsible card data
+|   |-- /transactions                 -> transaction list
+|   |-- /tasks                        -> task list
+|   |-- /contacts                     -> contact directory
+|   |-- /documents                    -> transaction documents
+|   |-- /documents/search             -> all-documents AI search
+|   |-- /task-templates               -> template library
+|   `-- /audit-logs                   -> audit trail
+|
+|-- Client State (React Context)
+|   |-- AuthContext                   -> JWT token, user session
+|   |-- ThemeContext                  -> white-label branding
+|   |-- WorkspaceViewContext          -> Team Lead personal/team toggle
+|   |-- WorkspaceFilterContext        -> deal-state + page-tab filters
+|   |-- GlobalDropzoneContext         -> workspace-wide document drop handling
+|   `-- NotificationContext           -> toast/alert state
+|
+`-- Form State (React Hook Form)
+    |-- TransactionForm
+    |-- TaskTemplateForm
+    |-- ContactForm
+    `-- UserInviteForm
 ```
 
 ---

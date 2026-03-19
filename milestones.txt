@@ -95,27 +95,20 @@ Deliverables:
       - Targeted task updates (not full regeneration)
       - Task ID comparison for completed status preservation
   [ ] Implement export capabilities API (CSV, Excel, PDF generation)
-  [ ] Build dashboard aggregation APIs (per client-approved redesign):
-      - Sidebar triage counts (overdue, due tomorrow, active, closing soon)
-      - Header status ribbon data (overdue tasks, due tomorrow, closing
-        this month, unread messages)
-      - Pipeline summary (closing/inspection/active/pending counts,
-        total pipeline value, contextual subtitles)
-      - Upcoming closings countdown list with urgency tiers
-      - Cross-deal "needs attention today" task list
-      - Collapsible transaction card data (stage pills, milestone
-        timelines, badges, inline tasks)
-      - Support personal and team views, filtering, urgency sorting,
-        search, and team member filtering
+  [ ] Build Active Transactions workspace aggregation APIs (per approved Active Transactions redesign):
+      - Topbar AI briefing data (Critical, Needs Attention, On Track)
+      - Sidebar KPI tile data (overdue tasks, closing this week, active deals, pipeline value)
+      - Sidebar Deals counts (Active Transactions, Pending, Closed, All Transactions)
+      - Collapsible transaction card data (status pill, why badges, AI next-step banner, milestone bar, info badges, grouped contacts,
+        editable key dates)
+      - Support personal and team views, deal-state filters, page tabs, urgency sorting, search, and team member filtering
   [ ] Implement stage pill computation logic:
-      - "Response Overdue" (red), "Closing in X Days" (amber),
-        "On Track" (green), "In Inspection" (amber), "Pending" (blue)
-      - Computed from transaction state, task status, and dates
+      - "Critical", "Needs Attention", "On Track", and "Unhealthy"
+      - "In Inspection" computed when inspection response has not yet been sent
+      - Computed from transaction state, task status, dates, message counts, and missing-document conditions
   [ ] Implement pipeline value calculation (sum of active purchase_price)
   [ ] Unit and integration tests for transaction APIs
-Success Criteria: Full transaction lifecycle operational via API,
-                  type switching with targeted updates working,
-                  dashboard aggregation APIs returning correct data.
+Success Criteria: Full transaction lifecycle operational via API, type switching with targeted updates working, Active Transactions workspace APIs returning correct data.
 
 MILESTONE 2.2 - Task Engine Backend (Weeks 5-6)
 -----------------------------------------------------------------------------
@@ -131,8 +124,12 @@ Deliverables:
       - Based on confirmed use case + dates + dependency logic
       - No AI creativity at generation stage
   [ ] Build task template system (per use-case subsets)
+  [ ] Implement manual task similarity checks:
+      - When creating a task, AI searches for similar incomplete tasks
+      - Present Add / Combine / Disregard choices before save
   [ ] Implement task notification engine:
-      - Due today, past due reminders
+      - Day-before, due-today, and past-due reminders
+      - Compiled reminder summaries ("X transactions due tomorrow/today")
       - Configurable reminder intervals
       - Daily summary email (only when tasks due)
   [ ] Build task sorting/views:
@@ -148,65 +145,82 @@ Success Criteria: Tasks auto-generated from use case, dependencies enforced,
 MILESTONE 2.3 - Frontend Foundation & Auth UI (Week 7)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Build React app shell matching client-approved redesign layout:
-      - Dark sidebar (240px) with triage grid, workflow navigation, badges
-      - Persistent header bar with status ribbon, global search, AI credits
-      - Main content area with scroll
-  [ ] Implement semantic color system as CSS variables:
-      - Red (#e53b3b), Amber (#d97706), Green (#1a9e72), Blue (#3b82f6),
-        Gray (#6b7280) — propagated via white-label tokens
+  [ ] Build React app shell matching the approved Active Transactions layout:
+      - Dark sidebar with KPI tiles and grouped navigation
+      - Slim topbar with AI briefing chip, search, notifications, user chip,
+        and New Transaction CTA
+      - Page header + tab bar + scrollable transaction area
+  [ ] Implement brand-aligned design system as CSS variables:
+      - Deep Institutional Navy (#1B2B3C)
+      - Refined Amber Orange (#EE7623)
+      - Soft Cool Grey (#F5F7FA)
+      - Subtle Champagne Glow (#FFEEC2)
+      - Max-Contrast Slate Grey (#333333)
   [ ] Implement login/register/password-reset pages
   [ ] Build invite acceptance flow UI
   [ ] Implement role-based navigation and access control in React
   [ ] Build first-time user overlay tutorial (skippable, re-viewable)
+  [ ] Add first-upload profile completion prompt
   [ ] Create shared UI component library:
-      - Collapsible transaction cards with left-edge color indicator
-      - Visual milestone timeline (done/current/upcoming/overdue dots)
-      - Filter chip bar with live counts
-      - Pipeline summary cards with color-accented top borders
-      - Closing countdown tiles (urgent/soon/normal)
+      - Collapsible transaction cards with left-edge urgency indicator
+      - AI next-step banners and why badges
+      - Visual milestone timeline (Contract, EM, Inspection, Appraisal,
+        CD Delivered, CTC, Close)
+      - Page tab bar with live counts
+      - KPI tiles and AI briefing badges
+      - Grouped contact cards with one-click call/email actions
       - Data tables with sorting/filtering/pagination
       - Forms with validation
       - Modals, notifications, alerts
       - Responsive layout components
+  [ ] Apply typography/accessibility rules from the brand kit:
+      - IBM Plex Sans across app UI
+      - IBM Plex Mono for operational values
+      - tabular-nums/lining-nums for dates, money, phones, file IDs, deadlines
+      - 6px radius and 48x48 minimum interactive targets
   [ ] Implement white-label theming engine:
       - Custom logos, colors, themes per tenant
       - Applied across login, dashboards, email templates
   [ ] Connect frontend to Supabase Auth
 Success Criteria: Users can register, login, navigate by role;
-                  redesign layout shell functional; white-label theming working.
+                  Active Transactions layout shell functional; white-label
+                  theming working.
 
 MILESTONE 2.4 - Transaction & Task UI (Week 8)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Build Agent/Elf dashboard per client-approved redesign:
-      - Sidebar triage grid (overdue, due tomorrow, active, closing)
-      - Persistent header status ribbon (overdue, due tmrw, closing, unread)
-      - Pipeline summary strip (4 color-accented cards above the fold)
-      - Two-column layout: transaction cards (left) + widgets (right)
+  [ ] Build Agent/Elf Active Transactions workspace per approved redesign:
+      - Topbar AI briefing row (Today's AI Briefing + status counters)
+      - Sidebar KPI tiles (overdue, closing this week, active deals, pipeline)
+      - Deals / Workflow / Intelligence navigation groups
+      - Page header with count pill, Export CSV, and Print Report
+      - Page tabs: All, Overdue, Due Today, Closing Soon, In Inspection,
+        On Track, Unhealthy
   [ ] Build collapsible transaction card system:
-      - Header: color indicator, name, address, stage pill, milestone
-        timeline, next date, task/doc/message badges, chevron
-      - Expanded body: 3-column grid (tasks with checkboxes, key dates,
-        contacts with call/email)
-      - Footer: contextual AI actions, upload doc, view messages, price
-  [ ] Build filter chip bar (All, Overdue, Closing Soon, In Inspection,
-      Pending) with live counts + Expand All/Collapse All toggle
-  [ ] Build inline transaction search bar (next to Sort: Urgency):
-      - Searches client names, vendor names, companies, dates, addresses
-  [ ] Build right column widgets:
-      - Upcoming Closings countdown (color-coded: urgent/soon/normal)
-      - "Needs Attention Today" cross-deal task list with deal links
-  [ ] Build Team Lead dashboard toggle (Team Leader View / Agent View):
-      - Team Leader View: team-wide triage, filter by team member,
-        assignee names on cards, team template access, activity log
-      - Agent View: personal deals (identical to Agent dashboard)
-  [ ] Build sidebar navigation pages per redesign:
-      - Active Deals page (/deals): transaction list with filter/sort/search
-      - Deadlines page (/deadlines): cross-deal task/deadline views
-        (today, all, by vendor "carts")
-      - Messages page (/messages): cross-deal communication view
-      - Pipeline page (/pipeline): pipeline analytics and charts
+      - Header: color indicator, name, address, status pill, why badges,
+        AI next-step banner, primary contact, milestone bar, info badges,
+        days-to-close, overdue count, price, chevron
+      - Expanded body: 3-column grid (tasks, key dates, grouped contacts)
+      - AI suggestions strip and footer actions (View/Add Docs, Print Checklist,
+        Transaction History, price)
+  [ ] Build page tab bar and sort controls:
+      - Tabs with live counts
+      - Sort options: Urgency, Close Date, Client Name, Price
+      - Global search across client names, vendor names, companies, dates,
+        and addresses
+  [ ] Build Add Task modal:
+      - Completion methods (Phone Call, Email, E-Sign, In Person,
+        Upload Document, Online Portal, AI Agent, Other)
+      - AI suggestions for how to complete the task
+      - Similar-task Add / Combine / Disregard workflow
+  [ ] Build document overlays:
+      - Transaction Documents modal (view/add/rename/history)
+      - All Documents AI Search modal across transactions
+  [ ] Build Team Lead adaptation of the Active Transactions workspace:
+      - Team-wide KPI tiles and AI briefing counts
+      - Team member filtering
+      - Assignee names on cards
+      - Team task template access and activity overview
   [ ] Build transaction create/edit forms with validation
   [ ] Build transaction detail/overview page (full transaction view)
   [ ] Build task detail/edit UI
@@ -215,10 +229,10 @@ Deliverables:
   [ ] Build dependency rule builder UI for admins
   [ ] Export buttons for transaction lists (CSV, Excel, PDF)
   [ ] Integration tests for frontend-backend flows
-Success Criteria: Agents/elves see redesigned dashboard with collapsible cards,
-                  sidebar navigation pages functional, Team Leads can toggle
-                  views, search/filter/sort operational, admins can configure
-                  task templates via UI.
+Success Criteria: Agents/elves can operate from the approved Active
+                  Transactions workspace end-to-end, Team Leads can switch to
+                  team-scoped transaction views, and admins can configure task
+                  templates via UI.
 
 
 ================================================================================
@@ -256,6 +270,8 @@ MILESTONE 3.2 - Wizard UI & Flow (Week 11)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build wizard Step 1: Document upload interface (drag-drop, multi-file)
+  [ ] Add global drag-and-drop upload from anywhere in the authenticated
+      workspace
   [ ] Build document preview with splitting UI (page ranges)
   [ ] Build wizard Step 2: AI parsing progress/results display
   [ ] Build address confirmation screen (normalized, flagged inconsistencies)
@@ -268,6 +284,11 @@ Deliverables:
       - Prompt for missing data
       - AI public source search UI (show search activity)
       - Results labeled as AI-sourced with confirmation
+  [ ] Build drag/drop intake confirmation flow:
+      - AI identifies what the document is
+      - Suggests a document name
+      - Confirms which transaction it belongs to
+      - Checks if it needs e-signature handling
   [ ] Build wizard confirmation page (all data, edit/accept actions)
   [ ] Build "Suggest AI Improvement" button
   [ ] Connect wizard to transaction + task generation backend
@@ -279,6 +300,7 @@ MILESTONE 3.3 - Document Management System (Week 12)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build document center UI (upload, view, download, email, archive)
+  [ ] Build cross-transaction All Documents UI with AI-assisted search
   [ ] Implement version history with diffs
   [ ] Build vendor document visibility rules (own uploads only, sharing)
   [ ] Implement soft delete with restore for authorized roles
@@ -287,6 +309,8 @@ Deliverables:
   [ ] Implement one-click resend from transaction log
   [ ] Build client "flag for deletion" feature with agent/elf approval workflow
   [ ] Implement document metadata management (rename, type assignment)
+  [ ] Build transaction documents modal flow used by the Active Transactions
+      workspace
   [ ] Role-based permissions for all document actions
   [ ] Document action audit logging
 Success Criteria: Full document lifecycle operational, versioning working,
@@ -305,6 +329,7 @@ Deliverables:
   [ ] Build wizard e-sign integration:
       - Detect unsigned documents during parsing
       - Offer to send for signature on finalization
+      - Reuse same prompt/decision flow for documents dropped into the workspace
   [ ] Implement document naming rules for auto-distribution
       (PA, C1, Amend -> all parties; other -> agent notification)
   [ ] Build prompt for unconnected e-sign users (suggest connecting)
@@ -325,8 +350,11 @@ Deliverables:
   [ ] Integrate Microsoft Graph API for Outlook (OAuth2, send/receive)
   [ ] Integrate Apple iCloud email API
   [ ] Build email connection flow during account creation
+  [ ] Define provider-agnostic hooks for future SMS and click-to-call / voice
+      integrations
   [ ] Build unified communication log backend:
       - Immutable log entries (who, what, when, direction, transaction)
+      - Channel support for email now and SMS/voice-ready metadata fields
       - Search/filtering by date, party, keyword
       - Indexing for performance
   [ ] Implement log download (one transaction at a time per user)
@@ -354,6 +382,8 @@ Deliverables:
   [ ] Build auto-reply feature (AI types response, user modifies or sends)
   [ ] Implement in-app notifications for sent external communications
   [ ] Build optional escalation reminders (24-48 hours, configurable)
+  [ ] Build compiled reminder digests for due-today / due-tomorrow transaction
+      deadlines
   [ ] AI email audit logging (request, response, confidence, human action)
   [ ] Integration tests with email sandbox
 Success Criteria: AI responds to routine emails, drafts flagged for review,
@@ -373,6 +403,8 @@ Deliverables:
       - Connected contacts persist for future transactions
       - Primary opt-in selection per transaction
   [ ] Implement saved vendor rep background search (offer updates to info)
+  [ ] Document future-provider wiring for SMS reminders and phone-icon
+      call-bridge actions
   [ ] Build communication log UI:
       - Unified log view per transaction
       - Search/filter controls
@@ -391,16 +423,17 @@ Weeks 17-19 (Jun 29 - Jul 19)
 MILESTONE 5.1 - Role-Specific Dashboards (Week 17)
 -----------------------------------------------------------------------------
 Deliverables:
-  NOTE: Agent/Elf and Team Lead dashboards are built in Milestone 2.4 (Week 8)
-  per client-approved redesign. This milestone focuses on remaining roles and
-  polish across all dashboards.
-  [ ] Polish Agent/Elf dashboard (built in 2.4):
-      - Finalize AI action buttons (Summarize, Draft Response, Checklist)
-      - Add payment/commission widgets
-      - Add outstanding payments to status ribbon
-  [ ] Polish Team Lead dashboard (toggle built in 2.4):
-      - Add team performance KPIs and charts
-      - Add team member comparison metrics
+  NOTE: The detailed page approved to date is the Active Transactions workspace
+  (built in Milestone 2.4). This milestone covers the broader Dashboard landing
+  page once that design is delivered, plus remaining roles and polish.
+  [ ] Build Agent/Elf Dashboard landing page:
+      - AI "most important things today" entry experience
+      - Shortcuts into Active Transactions filters and task queues
+      - Summary widgets for payments, deadlines, and communications
+  [ ] Build Team Lead Dashboard landing page:
+      - Team performance KPIs and charts
+      - Team member comparison metrics
+      - Shortcuts into the team-scoped Active Transactions workspace
   [ ] Build Admin dashboard:
       - System-wide user management
       - AI confidence threshold configuration
@@ -440,6 +473,9 @@ Deliverables:
   [ ] Build agent/team profile:
       - Internal document center (utility companies by county, etc.)
       - Preferred vendors management
+      - Buyer and Seller closing checklist templates
+      - Tagged note management for checklist printing
+      - Seller escrow-overage reminder defaults
       - Closed transaction reminders (tax exemptions, reviews)
       - Notification preferences (on/off)
   [ ] Build client portal:
@@ -450,6 +486,7 @@ Deliverables:
       - Agent sheet and client sheet
       - Standard data areas per agent/team
       - Dates, utility info, address change guides
+      - Print action sourced from profile templates
   [ ] Implement natural-language task creation:
       - AI converts plain language to structured task objects
       - Due date and reminder rule generation
@@ -600,9 +637,10 @@ KEY DEPENDENCIES & RISKS
 
 4. Client Feedback Loops: Wizard flow (Week 11) requires client review and
    approval within 2-3 business days to avoid timeline slippage.
-   NOTE: Agent/Elf dashboard design approved by client (2026-03-13) and
-   moved to Week 8. Team Lead toggle and remaining role dashboards still
-   need client review during Week 17.
+   NOTE: Active Transactions page design approved by client (2026-03-19) and
+   moved into Week 8 implementation. The broader Dashboard landing page is
+   still pending client design/review and should be approved in time for
+   Milestone 5.1.
 
 5. Third-Party API Limitations: MLS feed access, e-signature provider
    sandbox availability, and email provider OAuth approval processes
