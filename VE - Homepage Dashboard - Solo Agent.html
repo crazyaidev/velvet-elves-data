@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Velvet Elves — Home Dashboard</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Lora:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<style>
+    :root{
+      --orange:#E26812;
+      --orange-dark:#B85107;
+      --orange-light:#FFF2E7;
+      --orange-soft:#FFF9F4;
+      --orange-border:#F1C79E;
+      --navy:#1E3356;
+      --navy-2:#2C4C7F;
+      --navy-3:#315487;
+      --bg:#F4F4F4;
+      --surface:#FFFFFF;
+      --surface-2:#FAFAF8;
+      --line:#E3E2DE;
+      --line-strong:#CEC9C0;
+      --text:#181818;
+      --muted:#686868;
+      --ghost:#929292;
+      --green:#14704B;
+      --green-bg:#EEF8F3;
+      --green-border:#B9DEC9;
+      --amber:#A56A08;
+      --amber-bg:#FFF8EC;
+      --amber-border:#EACB93;
+      --red:#BE3431;
+      --red-bg:#FFF2F2;
+      --red-border:#F0C7C7;
+      --blue:#2C4C7F;
+      --blue-bg:#EEF4FF;
+      --blue-border:#C0D1EF;
+      --purple:#6545B6;
+      --purple-bg:#F5F0FF;
+      --purple-border:#D7C8FF;
+      --shadow:0 10px 34px rgba(20,20,20,.08);
+      --radius:18px;
+      --font-body:'IBM Plex Sans',sans-serif;
+      --font-serif:'Lora',serif;
+      --font-mono:'IBM Plex Mono',monospace;
+      --sidebar:228px;
+      --top:64px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    .sidebar{background:linear-gradient(180deg,var(--navy),#172948);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.08)}
+    .brand{display:flex;align-items:center;gap:12px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:40px;height:40px;border-radius:12px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name{display:flex;flex-direction:column;line-height:1}
+    .brand-name strong{font-family:var(--font-serif);font-size:18px;color:#fff;font-weight:700}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:4px}
+    .side-block{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.58);margin-bottom:10px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .mini{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px}
+    .mini .num{font-family:var(--font-mono);font-size:22px;font-weight:600;line-height:1;margin-bottom:6px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.76);line-height:1.35}
+    .num.red{color:#ff9494}.num.green{color:#82dfb2}.num.orange{color:#ffbf84}.num.blue{color:#9bc4ff}
+    .nav{padding:10px 8px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:rgba(255,255,255,.9);padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;position:relative}
+    .nav a:hover{background:rgba(255,255,255,.06)}
+    .nav a.active{background:rgba(226,104,18,.16);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .side-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+    .btn-primary,.btn-secondary,.btn-ghost,.btn-chip,.btn-outline-orange{border:none;border-radius:12px;cursor:pointer;transition:.16s ease}
+    .btn-primary{background:var(--orange);color:#fff;padding:11px 15px;font-weight:700;box-shadow:0 8px 22px rgba(226,104,18,.25)}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:10px 13px;font-weight:600}
+    .btn-secondary:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 11px;font-weight:600}
+    .btn-ghost:hover{background:#fff}
+    .btn-chip{background:var(--orange-light);border:1px solid var(--orange-border);color:#8f480b;padding:7px 11px;font-size:12px;font-weight:700}
+    .btn-outline-orange{background:#fff;border:1px solid var(--orange-border);color:var(--orange-dark);padding:9px 12px;font-weight:700}
+    .btn-outline-orange:hover{background:var(--orange-soft)}
+
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:var(--top);display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+    .top-title{font-family:var(--font-serif);font-size:22px;font-weight:700;flex:1}
+    .search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:250px;color:var(--ghost)}
+    .search input{border:none;background:transparent;outline:none;width:100%}
+    .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .content{overflow:auto;padding:18px 22px 34px}
+
+    .coach-banner{
+      background:linear-gradient(135deg,#173055 0%, #264878 60%, #31568f 100%);
+      color:#fff;border-radius:20px;padding:18px 20px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.2fr .9fr auto;gap:18px;align-items:center;margin-bottom:16px;position:relative;overflow:hidden
+    }
+    .coach-banner:before{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.05)}
+    .coach-eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:1.9px;text-transform:uppercase;color:rgba(255,255,255,.66);margin-bottom:7px}
+    .coach-copy h1,.coach-copy h2{font-family:var(--font-serif);font-size:28px;line-height:1.08;margin-bottom:8px}
+    .coach-copy p{font-size:14px;line-height:1.5;color:rgba(255,255,255,.84);max-width:760px}
+    .coach-points{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px}
+    .coach-point{display:flex;gap:8px;font-size:12.5px;color:#fff;align-items:flex-start}
+    .coach-point .dot{width:8px;height:8px;border-radius:50%;background:#FFBF84;margin-top:6px;flex-shrink:0}
+    .coach-cta{display:flex;flex-direction:column;gap:10px;align-items:flex-end;position:relative;z-index:1}
+    .coach-price{font-family:var(--font-mono);font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px}
+    .coach-banner .btn-primary{box-shadow:none}
+    .coach-banner .btn-secondary{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.1);color:#fff}
+    .coach-banner .btn-secondary:hover{background:rgba(255,255,255,.16)}
+
+    .command-grid{display:grid;grid-template-columns:1.55fr .95fr .8fr;gap:12px;margin-bottom:16px}
+    .hero-card,.upload-card,.metric-card,.panel,.rail-box,.deal-card,.strip-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+    .hero-card{padding:18px}
+    .hero-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
+    .hero-title h2{font-family:var(--font-serif);font-size:28px;line-height:1.08;margin-bottom:8px}
+    .hero-title p{font-size:14px;color:var(--muted);line-height:1.5;max-width:860px}
+    .hero-health{display:flex;gap:10px;align-items:center;background:var(--surface-2);border:1px solid var(--line);padding:10px 12px;border-radius:14px;min-width:255px}
+    .score-ring{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--orange) 0 68%, #ece7df 68% 100%);position:relative}
+    .score-ring:after{content:'';position:absolute;inset:6px;border-radius:50%;background:#fff}
+    .score-ring span{position:relative;z-index:1;font-family:var(--font-mono);font-size:13px;font-weight:700}
+    .hero-health strong{display:block;font-size:13px}
+    .hero-health span{font-size:11.5px;color:var(--muted);line-height:1.4}
+
+    .hero-grid{display:grid;grid-template-columns:1.15fr .7fr .7fr;gap:12px}
+    .inner-panel{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--surface-2)}
+    .inner-panel h3{font-family:var(--font-mono);font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost);margin-bottom:10px}
+    .action-list{display:flex;flex-direction:column;gap:10px}
+    .action-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 12px}
+    .status-dot{width:10px;height:10px;border-radius:50%}
+    .status-dot.red{background:var(--red)}
+    .status-dot.amber{background:var(--amber)}
+    .status-dot.green{background:var(--green)}
+    .action-main strong{display:block;font-size:13px;margin-bottom:2px}
+    .action-main span{display:block;font-size:11.5px;color:var(--muted);line-height:1.35}
+    .action-side{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 9px;font-family:var(--font-mono);font-size:10px;font-weight:600}
+    .pill.red{background:var(--red-bg);border:1px solid var(--red-border);color:#8a201d}
+    .pill.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+    .pill.green{background:var(--green-bg);border:1px solid var(--green-border);color:#0d5537}
+    .drift-row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}
+    .drift-row:last-child{border-bottom:none;padding-bottom:0}
+    .drift-row strong{font-family:var(--font-mono);font-size:22px}
+    .drift-row span{font-size:11.5px;color:var(--muted);line-height:1.4;max-width:150px;text-align:right}
+    .filter-stack{display:flex;flex-direction:column;gap:10px}
+    .filter-btn{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--orange-border);border-radius:12px;padding:10px 11px;background:var(--orange-soft);font-size:12px;font-weight:700;color:#8c480d;cursor:pointer}
+    .filter-btn:hover{background:var(--orange-light)}
+
+    .upload-card{padding:16px;display:flex;flex-direction:column;gap:12px}
+    .upload-card.full-width{margin:0 0 16px 0}
+    .upload-card.full-width .upload-head p{max-width:760px}
+    .upload-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .upload-head h3{font-family:var(--font-serif);font-size:24px;line-height:1.08}
+    .upload-head p{font-size:13px;color:var(--muted);line-height:1.45;margin-top:7px;max-width:410px}
+    .upload-chooser{display:flex;gap:8px;flex-wrap:wrap}
+    .dropzone{border:1.6px dashed var(--orange-border);background:linear-gradient(135deg,var(--orange-soft),#fff);border-radius:18px;padding:18px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+    .drop-ico{width:50px;height:50px;border-radius:14px;background:#fff;border:1px solid var(--orange-border);display:grid;place-items:center;font-size:22px;color:var(--orange)}
+    .drop-copy strong{display:block;font-size:15px;margin-bottom:4px}
+    .drop-copy span{display:block;font-size:12px;color:var(--muted);line-height:1.45}
+    .drop-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:3px}
+    .drop-meta span{font-family:var(--font-mono);font-size:10px;background:#fff;border:1px solid var(--line);padding:4px 7px;border-radius:999px;color:var(--ghost)}
+
+    .metric-card{padding:16px;margin-bottom:16px}
+    .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .metric-card h3,.section-head .eyebrow,.rail-title strong,.tile h4,.deal-card .eyebrow,.deal-footnote .eyebrow,.compact h4{font-family:var(--font-mono);font-size:10px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost)}
+    .metric-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:12px}
+    .metric-head .copy h3{margin-bottom:7px}
+    .metric-head .copy p{font-size:13px;color:var(--muted);line-height:1.4}
+    .metric-stat{border:1px solid var(--line);background:var(--surface-2);border-radius:16px;padding:14px}
+    .metric-stat .big{display:block;font-family:var(--font-mono);font-size:30px;font-weight:700;line-height:1;margin-bottom:5px}
+    .metric-stat .label{display:block;font-size:12px;font-weight:700;margin-bottom:6px}
+    .metric-stat .sub{display:block;font-size:11px;color:var(--muted);line-height:1.4}
+    .metric-note{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);line-height:1.45}
+
+    .content-layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+    .main-stack{display:flex;flex-direction:column;gap:14px}
+    .section-card{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:16px}
+    .section-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+    .section-head h2{font-family:var(--font-serif);font-size:24px;line-height:1.08;margin-top:5px}
+    .section-head p{font-size:13px;color:var(--muted);line-height:1.45;max-width:760px;margin-top:6px}
+    .mini-tabs{display:flex;gap:8px;flex-wrap:wrap}
+    .mini-tab{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:9px 12px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+    .mini-tab.active{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+    .glance-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .tile{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--surface-2)}
+    .tile h4{margin-bottom:8px}
+    .tile strong.big-num{display:block;font-family:var(--font-mono);font-size:30px;line-height:1;margin-bottom:4px}
+    .tile .tile-sub{font-size:12px;color:var(--text);font-weight:700;margin-bottom:6px}
+    .tile .tile-meta{font-size:11.5px;color:var(--muted);line-height:1.45}
+    .tile-list{display:flex;flex-direction:column;gap:9px;margin-top:10px}
+    .tile-list .line{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--muted);padding-top:8px;border-top:1px solid var(--line)}
+
+    .deal-list{display:flex;flex-direction:column;gap:12px}
+    .deal-card{overflow:hidden}
+    .deal-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:16px;border-left:4px solid transparent}
+    .deal-card.critical .deal-top{border-left-color:var(--red)}
+    .deal-card.attention .deal-top{border-left-color:var(--amber)}
+    .deal-card.track .deal-top{border-left-color:var(--green)}
+    .deal-title-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
+    .deal-name{font-family:var(--font-serif);font-size:22px;line-height:1.08}
+    .deal-address{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+    .next-step{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:12px;border-radius:15px;background:linear-gradient(135deg,var(--orange-light),#fff8f1);border:1px solid var(--orange-border);margin-bottom:10px}
+    .next-ico{width:34px;height:34px;border-radius:12px;border:1px solid var(--orange-border);background:#fff;display:grid;place-items:center;color:var(--orange);font-size:16px}
+    .next-copy strong{display:block;font-size:13px;margin-bottom:3px}
+    .next-copy span{display:block;font-size:11.5px;color:#8c582d;line-height:1.42}
+    .deal-meta{display:flex;gap:8px;flex-wrap:wrap}
+    .meta-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:10px;border:1px solid var(--line);background:var(--surface-2);font-size:11.5px;color:var(--muted);font-weight:600}
+    .deal-side{display:flex;gap:10px;align-items:stretch}
+    .countdown{min-width:90px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+    .countdown strong{font-family:var(--font-mono);font-size:29px;line-height:1}
+    .countdown strong.red{color:var(--red)} .countdown strong.amber{color:var(--amber)} .countdown strong.green{color:var(--green)}
+    .countdown span{font-size:10px;color:var(--ghost);text-transform:uppercase;letter-spacing:1px;margin-top:3px}
+    .countdown small{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-top:4px}
+    .scoreboard{display:grid;grid-template-columns:repeat(2,84px);gap:8px}
+    .score-card{border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;background:#fff}
+    .score-card strong{display:block;font-family:var(--font-mono);font-size:18px;line-height:1;margin-bottom:4px}
+    .score-card span{display:block;font-size:10px;line-height:1.35;color:var(--muted)}
+    .deal-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--line);background:var(--surface-2)}
+    .col{padding:14px 16px;border-right:1px solid var(--line)}
+    .col:last-child{border-right:none}
+    .col-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+    .col-title strong{font-family:var(--font-mono);font-size:10px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ghost)}
+    .linkish{font-size:11px;color:var(--orange);font-weight:700}
+    .task-list,.date-list,.contact-list{display:flex;flex-direction:column;gap:8px}
+    .task,.date-row,.contact{border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px}
+    .task{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:start}
+    .check{width:18px;height:18px;border-radius:6px;border:2px solid var(--line);margin-top:1px}
+    .check.red{border-color:var(--red);background:var(--red-bg)}
+    .check.amber{border-color:var(--amber);background:var(--amber-bg)}
+    .check.green{border-color:var(--green);background:var(--green-bg);position:relative}
+    .check.green:after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:var(--green);font-size:11px;font-weight:700}
+    .task strong,.date-row .left strong,.contact .left strong{display:block;font-size:12.5px;margin-bottom:2px}
+    .task span,.date-row .left span,.contact .left span{font-size:11px;color:var(--muted);line-height:1.4}
+    .due,.date-row .right,.contact .right{font-family:var(--font-mono);font-size:11px;white-space:nowrap;text-align:right}
+    .due.red,.date-row .right.red{color:var(--red)} .due.amber,.date-row .right.amber{color:var(--amber)} .due.green,.date-row .right.green{color:var(--green)}
+    .contact{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .contact-actions{display:flex;gap:6px}
+    .tiny{width:28px;height:28px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
+    .tiny:hover{background:var(--orange-light);border-color:var(--orange-border)}
+    .deal-footer{display:flex;align-items:center;gap:8px;padding:12px 16px;border-top:1px solid var(--line);background:#fff}
+    .deal-footer .foot{font-size:12px;color:var(--muted)}
+    .deal-footer .price{margin-left:auto;font-family:var(--font-mono);font-size:14px;font-weight:700}
+
+    .side-rail{display:flex;flex-direction:column;gap:12px;position:sticky;top:0}
+    .rail-box{padding:14px}
+    .rail-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+    .rail-title a{font-size:11px;color:var(--orange);font-weight:700}
+    .intel-card{padding:12px;border-radius:14px;background:linear-gradient(135deg,#fffaf6,#fff);border:1px solid var(--orange-border);margin-bottom:10px}
+    .intel-card:last-child{margin-bottom:0}
+    .intel-card h4{font-size:13px;margin-bottom:5px}
+    .intel-card p{font-size:11.5px;color:var(--muted);line-height:1.45;margin-bottom:10px}
+    .suggest{display:flex;flex-wrap:wrap;gap:6px}
+    .history-item,.doc-item,.coach-tip,.quick-row{padding:10px 0;border-bottom:1px solid var(--line)}
+    .history-item:last-child,.doc-item:last-child,.coach-tip:last-child,.quick-row:last-child{border-bottom:none;padding-bottom:0}
+    .history-item strong,.doc-item strong,.coach-tip strong{display:block;font-size:12.5px;margin-bottom:2px}
+    .history-item span,.doc-item span,.coach-tip span{display:block;font-size:11px;color:var(--muted);line-height:1.42}
+    .doc-state{display:inline-flex;margin-top:6px;padding:3px 8px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:600}
+    .doc-state.red{background:var(--red-bg);color:#922521}
+    .doc-state.blue{background:var(--blue-bg);color:#23446e}
+    .doc-state.green{background:var(--green-bg);color:#0b5838}
+    .quick-row{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;font-weight:700}
+    .quick-row span{color:var(--muted);font-weight:500;line-height:1.35;font-size:11px}
+    .coach-nudge{padding:12px;border-radius:14px;background:linear-gradient(135deg,var(--navy),var(--navy-3));color:#fff;margin-top:4px}
+    .coach-nudge strong{display:block;font-size:13px;margin-bottom:4px}
+    .coach-nudge span{display:block;font-size:11.5px;color:rgba(255,255,255,.78);line-height:1.45;margin-bottom:10px}
+    .coach-nudge .btn-secondary{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.14)}
+
+    .bottom-banner{margin-top:14px}
+    .floating-ai{position:fixed;right:24px;bottom:24px;display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:16px;background:var(--navy);color:#fff;box-shadow:0 18px 40px rgba(15,20,35,.28)}
+    .floating-ai strong{font-size:13px}
+    .floating-ai span{font-size:11px;color:rgba(255,255,255,.72)}
+
+    .modal-wrap{position:fixed;inset:0;background:rgba(17,24,39,.44);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;backdrop-filter:blur(2px)}
+    .modal-wrap.open{display:flex}
+    .modal{width:min(760px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px rgba(15,20,35,.25);overflow:hidden}
+    .modal-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:18px 18px 14px;border-bottom:1px solid var(--line)}
+    .modal-head h3{font-family:var(--font-serif);font-size:26px;line-height:1.08;margin-bottom:6px}
+    .modal-head p{font-size:13px;color:var(--muted);line-height:1.45;max-width:560px}
+    .close{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--muted);flex-shrink:0}
+    .close:hover{background:var(--surface-2)}
+    .modal-body{padding:18px}
+    .modal-grid{display:grid;grid-template-columns:1fr;gap:12px}
+    .drop-large{border:1.6px dashed var(--orange-border);background:linear-gradient(135deg,var(--orange-soft),#fff);border-radius:18px;padding:20px;min-height:240px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+    .drop-large .drop-ico{margin-bottom:12px}
+    .drop-large strong{display:block;font-size:16px;margin-bottom:6px}
+    .drop-large span{display:block;font-size:12px;color:var(--muted);line-height:1.5;max-width:360px}
+    .form-stack{display:flex;flex-direction:column;gap:10px}
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+    .field input,.field select{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--surface-2);outline:none}
+    .field input:focus,.field select:focus{border-color:var(--orange-border);background:#fff}
+    .modal-foot{padding:14px 18px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+
+    .mini-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .mini-list span{display:block;font-size:12px;color:var(--muted);line-height:1.45;padding:6px 10px;background:#fff;border:1px solid var(--line);border-radius:10px}
+
+    .btn-chip:hover{background:var(--orange-border)}
+
+    @media (max-width: 1320px){
+      .command-grid{grid-template-columns:1fr}
+      .content-layout{grid-template-columns:1fr}
+      .side-rail{position:static}
+      .hero-grid{grid-template-columns:1fr}
+      .glance-grid{grid-template-columns:1fr 1fr}
+      .coach-banner{grid-template-columns:1fr}
+      .coach-cta{align-items:flex-start}
+    }
+    @media (max-width: 980px){
+      .app{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .search{min-width:0;flex:1}
+      .deal-top,.deal-body,.modal-grid{grid-template-columns:1fr}
+      .scoreboard{grid-template-columns:repeat(2,1fr)}
+      .glance-grid,.metric-grid{grid-template-columns:1fr}
+      .deal-side{justify-content:space-between}
+      .col{border-right:none;border-bottom:1px solid var(--line)}
+      .col:last-child{border-bottom:none}
+    }
+    @media (max-width: 700px){
+      .topbar{padding:0 12px}
+      .content{padding:12px 12px 92px}
+      .hero-title h2,.section-head h2,.coach-copy h1,.coach-copy h2{font-size:23px}
+      .dropzone,.next-step{grid-template-columns:1fr}
+      .action-item{grid-template-columns:auto 1fr;gap:8px}
+      .action-side{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap;gap:6px}
+      .glance-grid{grid-template-columns:1fr}
+      .floating-ai{left:12px;right:12px;bottom:12px}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<div class="brand">
+<div class="brand-icon">✦</div>
+<div class="brand-name">
+<strong>Velvet Elves</strong>
+<span>AI Transaction Ops</span>
+</div>
+</div>
+<div class="side-block">
+<div class="side-label">Today at a glance</div>
+<div class="side-summary">
+<div class="mini"><div class="num red">3</div><div class="cap">Need human approval or response today</div></div>
+<div class="mini"><div class="num orange">5</div><div class="cap">Deals drifting from plan</div></div>
+<div class="mini"><div class="num blue">4</div><div class="cap">Docs blocking next milestone</div></div>
+<div class="mini"><div class="num green">9</div><div class="cap">On track and quiet</div></div>
+</div>
+</div>
+<nav class="nav">
+<a class="active" href="#">🏠 Home</a>
+<a href="#">🗂 Active Transactions <span class="badge">17</span></a>
+<a href="#">📤 Add New Transaction</a>
+<a href="#">📄 Documents <span class="badge">6</span></a>
+<a href="#">✅ Tasks <span class="badge">11</span></a>
+<a href="#">💬 Communication Log</a>
+<a href="#">🧠 AI Coach Upsell</a>
+<a href="#">📈 Performance</a>
+<a href="#">⚙ Settings</a>
+</nav>
+<div class="side-footer">
+<button class="btn-primary" onclick="openModal()" style="width:100%">＋ Add Transaction</button>
+</div>
+</aside>
+<main class="main">
+<div class="topbar">
+<div class="top-title">Home Dashboard</div>
+<div class="search">
+<span>⌕</span>
+<input placeholder="Search transactions, clients, docs, dates" type="text"/>
+</div>
+<button class="btn-secondary" onclick="openModal()">+ New Transaction</button>
+<div class="avatar">JS</div>
+</div>
+<div class="content">
+<section class="coach-banner">
+<div class="coach-copy">
+<div class="coach-eyebrow">New monthly add-on</div>
+<h1>Add the AI Real Estate Coach.</h1>
+<p>Turn the dashboard into an accountability engine. Get daily business coaching, lead-gen prompts, listing presentation help, objection handling, CRM follow-up ideas, transaction review, and plain-English advice when the deal starts wobbling.</p>
+</div>
+<div class="coach-points">
+<div class="coach-point"><span class="dot"></span><span>Daily coaching tied to your real transactions and activity gaps</span></div>
+<div class="coach-point"><span class="dot"></span><span>Scripts for price reductions, inspection issues, lenders, FSBOs, and follow-up</span></div>
+<div class="coach-point"><span class="dot"></span><span>Lead-gen and relationship prompts when your pipeline is getting thin</span></div>
+<div class="coach-point"><span class="dot"></span><span>Performance reviews that show what to do next, not just what went wrong</span></div>
+</div>
+<div class="coach-cta">
+<div class="coach-price">Performance mentor + accountability layer</div>
+<button class="btn-primary">Add AI Coach</button>
+<button class="btn-secondary">See how it works</button>
+</div>
+</section>
+<div class="upload-card full-width">
+<div class="upload-head">
+<div>
+<h3>Add a new transaction</h3>
+<p>Drop the signed agreement and let the elves build the file. Or browse your computer like it is still 2014. Both work.</p>
+</div>
+<div class="pill green">AI intake default</div>
+</div>
+<div class="upload-chooser">
+<button class="btn-primary" onclick="openModal()">Drop docs to start</button>
+<button class="btn-secondary" onclick="openModal()">Browse files</button>
+</div>
+<div class="dropzone" onclick="openModal()">
+<div class="drop-ico">⇪</div>
+<div class="drop-copy">
+<strong>Drag purchase agreement, listing paperwork, or addenda here</strong>
+<span>AI will read the documents, build the transaction shell, suggest milestone dates, identify missing docs, and route you to the Active Transactions view already opened to the new file.</span>
+<div class="drop-meta">
+<span>PDF</span>
+<span>DOCX</span>
+<span>Multi-file upload</span>
+<span>Auto date extraction</span>
+</div>
+</div>
+<button class="btn-outline-orange" onclick="event.stopPropagation();openModal()">Open intake</button>
+</div>
+</div>
+<section class="command-grid">
+<div class="hero-card">
+<div class="hero-top">
+<div class="hero-title">
+<h2>Start here. Three deals need intervention today.</h2>
+<p>Your homepage behaves like a ruthless transaction coordinator. It ranks what is most likely to break, surfaces the next human decision, and keeps the rest quiet until it matters.</p>
+</div>
+<div class="hero-health">
+<div class="score-ring"><span>68</span></div>
+<div>
+<strong>Portfolio health score</strong>
+<span>Down 3 points from yesterday. Main drag: missing signatures, lender silence, stale client communication.</span>
+</div>
+</div>
+</div>
+<div class="hero-grid">
+<div class="inner-panel">
+<h3>Today's action queue</h3>
+<div class="action-list">
+<div class="action-item">
+<div class="status-dot red"></div>
+<div class="action-main">
+<strong>Send inspection amendment to buyer and listing side</strong>
+<span>Rogers • 1542 Sugar Maple Ln • Deadline 1:00 PM</span>
+</div>
+<div class="action-side">
+<div class="pill red">Critical</div>
+<button class="btn-primary">Do it now</button>
+</div>
+</div>
+<div class="action-item">
+<div class="status-dot amber"></div>
+<div class="action-main">
+<strong>Upload signed seller disclosure</strong>
+<span>Nguyen • 801 Meadow Walk Dr • Missing doc blocks lender package</span>
+</div>
+<div class="action-side">
+<div class="pill amber">Attention</div>
+<button class="btn-secondary">Upload</button>
+</div>
+</div>
+<div class="action-item">
+<div class="status-dot amber"></div>
+<div class="action-main">
+<strong>Follow up with lender for clear-to-close milestone</strong>
+<span>Patel • 2239 Harbor Pointe Ct • No update in 2 days</span>
+</div>
+<div class="action-side">
+<div class="pill amber">At risk</div>
+<button class="btn-secondary">Call</button>
+</div>
+</div>
+</div>
+</div>
+<div class="inner-panel">
+<h3>Why deals are drifting</h3>
+<div class="drift-row">
+<strong style="color:var(--red)">3</strong>
+<span>overdue tasks inside 48 hours of a deadline</span>
+</div>
+<div class="drift-row">
+<strong style="color:var(--amber)">5</strong>
+<span>transactions with no client touch in 72+ hours</span>
+</div>
+<div class="drift-row">
+<strong style="color:var(--blue)">4</strong>
+<span>files blocked by missing signatures or disclosures</span>
+</div>
+</div>
+<div class="inner-panel">
+<h3>Fast filters</h3>
+<div class="filter-stack">
+<button class="filter-btn">Critical and closing within 7 days <span>→</span></button>
+<button class="filter-btn">Missing lender or title response <span>→</span></button>
+<button class="filter-btn">No communication in 3+ days <span>→</span></button>
+<button class="filter-btn">Documents blocking next milestone <span>→</span></button>
+</div>
+</div>
+</div>
+</div>
+<div class="metric-card">
+<div class="metric-head">
+<div class="copy">
+<h3>Pipeline snapshot</h3>
+<p>For a solo agent, the money metric should be visible. Pending GCI keeps the dashboard tied to what actually hits the bank, while YTD and lifetime numbers stop the homepage from becoming short-term panic theater.</p>
+</div>
+</div>
+<div class="metric-grid">
+<div class="metric-stat">
+<span class="big">$84.5K</span>
+<span class="label">2026 pending GCI</span>
+<span class="sub">Lifetime GCI: $1.84M</span>
+</div>
+<div class="metric-stat">
+<span class="big">$5.72M</span>
+<span class="label">2026 pending volume</span>
+<span class="sub">Lifetime volume: $96.4M</span>
+</div>
+<div class="metric-stat">
+<span class="big">11</span>
+<span class="label">Closings YTD</span>
+<span class="sub">Lifetime closings: 184</span>
+</div>
+<div class="metric-stat">
+<span class="big">17</span>
+<span class="label">Active transactions</span>
+<span class="sub">9 on-track • 5 attention • 3 critical</span>
+</div>
+</div>
+<div class="metric-note">This homepage treats production as context, not decoration. You get pending GCI, pending volume, and closings because solo agents care about income timing almost as much as transaction health.</div>
+</div>
+<div class="rail-box">
+<div class="rail-title"><strong>AI portfolio intelligence</strong><a href="#">See all</a></div>
+<div class="intel-card">
+<h4>Communication drift is your real problem</h4>
+<p>Five transactions have gone more than 72 hours without a logged human touch. That is how clients decide nobody is doing anything, even when the deal is moving.</p>
+<div class="suggest">
+<button class="btn-chip">Draft check-in texts</button>
+<button class="btn-chip">Queue call list</button>
+</div>
+</div>
+<div class="intel-card">
+<h4>Missing docs are concentrated, not random</h4>
+<p>Four files account for nearly all missing-document alerts. A single 20-minute cleanup pass would remove most of the noise.</p>
+<div class="suggest">
+<button class="btn-chip">Open missing docs queue</button>
+</div>
+</div>
+</div>
+</section>
+<section class="content-layout" style="grid-template-columns:1fr">
+
+<aside class="side-rail">
+<div class="rail-box">
+<div class="rail-title"><strong>Coach recommendation</strong><a href="#">Upgrade</a></div>
+<div class="coach-nudge">
+<strong>Today’s coaching move</strong>
+<span>You have enough active deals to create future business risk if you hide inside transaction work all day. The AI Coach would push a 20-minute sphere follow-up block after your action queue is cleared.</span>
+<button class="btn-secondary">Add AI Coach</button>
+</div>
+<div class="coach-tip">
+<strong>High-leverage script ready</strong>
+<span>Use the lender accountability script on Patel after 2 PM if there is still no clear-to-close update.</span>
+</div>
+</div>
+</aside>
+</section>
+<section class="coach-banner bottom-banner">
+<div class="coach-copy">
+<div class="coach-eyebrow">Optional revenue add-on</div>
+<h2>Don’t stop at transaction automation.</h2>
+<p>The base product runs the file. The AI Coach grows the business behind it. That means accountability prompts, objection handling, listing help, follow-up plans, and coaching that actually knows what is clogging your pipeline instead of throwing motivational wallpaper at you.</p>
+</div>
+<div class="coach-points">
+<div class="coach-point"><span class="dot"></span><span>Lead-generation prompts tied to thin future pipeline windows</span></div>
+<div class="coach-point"><span class="dot"></span><span>Conversation coaching based on active transaction pressure and calendar timing</span></div>
+<div class="coach-point"><span class="dot"></span><span>Mentor accountability without waiting for a manager to remember you exist</span></div>
+<div class="coach-point"><span class="dot"></span><span>Daily business reviews grounded in your numbers, not generic guru nonsense</span></div>
+</div>
+<div class="coach-cta">
+<div class="coach-price">Monthly coach add-on for solo agents and team leaders</div>
+<button class="btn-primary">Upgrade this account</button>
+<button class="btn-secondary">Preview coaching dashboard</button>
+</div>
+</section>
+</div>
+</main>
+</div>
+<div class="floating-ai" onclick="openModal()" style="cursor:pointer" title="Ask Velvet Elves AI">
+<div style="font-size:20px">✦</div>
+<div>
+<strong>Ask Velvet Elves</strong>
+<span>Draft emails, chase signatures, explain risk, summarize a file</span>
+</div>
+</div>
+<div class="modal-wrap" id="newTxnModal">
+<div class="modal">
+<div class="modal-head">
+<div>
+<h3>Start a new transaction</h3>
+<p>Upload the full document package and let the AI Agent read the file, extract the key details, identify missing paperwork, and then send you to a verification page so you can confirm everything before the transaction is created.</p>
+</div>
+<button class="close" onclick="closeModal()">✕</button>
+</div>
+<div class="modal-body">
+<div class="modal-grid">
+<div class="drop-large">
+<div class="drop-ico">⇪</div>
+<strong>Drop the full transaction package here</strong>
+<span>Upload everything you have so the AI Agent can read the documents first: agreements, amendments, disclosures, lender letters, title docs, PDFs, and DOCX files.</span>
+<div class="drop-meta" style="justify-content:center;margin-top:12px">
+<span>Multi-document intake</span>
+<span>AI document reading</span>
+<span>Verification before file creation</span>
+</div>
+<div class="field" style="text-align:left;margin-top:16px">
+<label>What happens next</label>
+<div class="mini-list">
+<span>1. AI reads every uploaded document</span>
+<span>2. AI extracts dates, parties, and deal details</span>
+<span>3. You review everything on a verification page</span>
+</div>
+</div>
+<button class="btn-primary" style="margin-top:16px" onclick="document.getElementById('fileInput').click()">Choose files</button>
+<input type="file" id="fileInput" multiple accept=".pdf,.docx,.doc" style="display:none" onchange="handleFileSelect(this)">
+</div>
+</div>
+</div>
+<div class="modal-foot">
+<button class="btn-ghost" onclick="closeModal()">Cancel</button>
+<button class="btn-primary" id="continueBtn" onclick="handleContinue()">Continue to verification →</button>
+</div>
+</div>
+</div>
+<script>
+    // ── Modal open/close ──
+    function openModal(){
+      document.getElementById('newTxnModal').classList.add('open');
+    }
+    function closeModal(){
+      document.getElementById('newTxnModal').classList.remove('open');
+      // Reset file state
+      selectedFiles = [];
+      updateDropUI();
+    }
+    document.getElementById('newTxnModal').addEventListener('click', function(e){
+      if(e.target === this){ closeModal(); }
+    });
+
+    // ── File handling ──
+    let selectedFiles = [];
+
+    function handleFileSelect(input) {
+      if (input.files && input.files.length) {
+        selectedFiles = Array.from(input.files);
+        updateDropUI();
+      }
+    }
+
+    function updateDropUI() {
+      const dropZone = document.querySelector('.drop-large');
+      const strong = dropZone.querySelector('strong');
+      const span = dropZone.querySelector('span');
+      if (selectedFiles.length > 0) {
+        strong.textContent = selectedFiles.length + ' file' + (selectedFiles.length > 1 ? 's' : '') + ' ready';
+        span.textContent = selectedFiles.map(f => f.name).join(', ');
+        dropZone.style.borderColor = 'var(--green-border)';
+        dropZone.style.background = 'linear-gradient(135deg, var(--green-bg), #fff)';
+      } else {
+        strong.textContent = 'Drop the full transaction package here';
+        span.textContent = 'Upload everything you have so the AI Agent can read the documents first: agreements, amendments, disclosures, lender letters, title docs, PDFs, and DOCX files.';
+        dropZone.style.borderColor = '';
+        dropZone.style.background = '';
+      }
+    }
+
+    function handleContinue() {
+      if (selectedFiles.length === 0) {
+        // Prompt user to pick files first
+        const dropZone = document.querySelector('.drop-large');
+        dropZone.style.borderColor = 'var(--red-border)';
+        dropZone.style.background = 'linear-gradient(135deg, var(--red-bg), #fff)';
+        dropZone.querySelector('strong').textContent = 'Please select at least one file to continue';
+        setTimeout(() => {
+          if (selectedFiles.length === 0) {
+            dropZone.style.borderColor = '';
+            dropZone.style.background = '';
+            dropZone.querySelector('strong').textContent = 'Drop the full transaction package here';
+          }
+        }, 2000);
+        return;
+      }
+      // Stub: in production this navigates to the verification page
+      alert('Sending ' + selectedFiles.length + ' file(s) to the AI Agent for processing…\n\nIn production, this would route to the verification page.');
+      closeModal();
+    }
+
+    // ── Drag and drop on the modal drop zone ──
+    document.addEventListener('DOMContentLoaded', function() {
+      const dropLarge = document.querySelector('.drop-large');
+      if (dropLarge) {
+        dropLarge.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.style.borderColor = 'var(--orange)';
+          this.style.background = 'linear-gradient(135deg, var(--orange-light), #fff)';
+        });
+        dropLarge.addEventListener('dragleave', function(e) {
+          if (selectedFiles.length === 0) {
+            this.style.borderColor = '';
+            this.style.background = '';
+          }
+        });
+        dropLarge.addEventListener('drop', function(e) {
+          e.preventDefault();
+          const files = e.dataTransfer.files;
+          if (files && files.length) {
+            selectedFiles = Array.from(files);
+            updateDropUI();
+          }
+        });
+        // Clicking the drop zone opens file picker (but not when clicking the child button)
+        dropLarge.addEventListener('click', function(e) {
+          if (e.target === this || e.target.tagName === 'STRONG' || e.target.tagName === 'SPAN') {
+            document.getElementById('fileInput').click();
+          }
+        });
+      }
+
+      // Drag and drop on the homepage dropzone too
+      const dropZone = document.querySelector('.dropzone');
+      if (dropZone) {
+        dropZone.addEventListener('dragover', function(e) {
+          e.preventDefault();
+          this.style.borderColor = 'var(--orange)';
+        });
+        dropZone.addEventListener('dragleave', function() {
+          this.style.borderColor = '';
+        });
+        dropZone.addEventListener('drop', function(e) {
+          e.preventDefault();
+          openModal();
+        });
+      }
+    });
+  </script>
+</body>
+</html>

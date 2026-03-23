@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velvet Elves — FSBO Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --orange: #D4621A;
+      --orange-dark: #A84D12;
+      --orange-mid: #E8864A;
+      --orange-light: #FFF3EB;
+      --orange-faint: #FFFAF6;
+      --orange-border: #F0C8A8;
+      --navy: #1C2E4A;
+      --navy-2: #2C4468;
+      --bg: #F4F2EE;
+      --bg-2: #EDEAE4;
+      --surface: #FFFFFF;
+      --surface-2: #FAFAF8;
+      --line: #E4E0D8;
+      --line-2: #D6D2C8;
+      --text: #18180E;
+      --muted: #65655A;
+      --ghost: #9A9A8E;
+      --green: #1A6645;
+      --green-bg: #EAF4EE;
+      --green-border: #B4D9C2;
+      --green-text: #155638;
+      --amber: #9A6010;
+      --amber-bg: #FDF5E6;
+      --amber-border: #E8C880;
+      --red: #B83030;
+      --red-bg: #FEF2F2;
+      --red-border: #EEBCBC;
+      --red-text: #922424;
+      --blue: #2260A8;
+      --blue-bg: #EEF4FF;
+      --blue-border: #B8CFEE;
+      --shadow-sm: 0 1px 3px rgba(20,16,8,.06), 0 4px 12px rgba(20,16,8,.04);
+      --shadow-md: 0 4px 16px rgba(20,16,8,.08), 0 1px 3px rgba(20,16,8,.04);
+      --shadow-lg: 0 12px 36px rgba(20,16,8,.1), 0 2px 6px rgba(20,16,8,.04);
+      --font-body: 'DM Sans', sans-serif;
+      --font-serif: 'Fraunces', serif;
+      --font-mono: 'DM Mono', monospace;
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 22px;
+      --r-xl: 28px;
+      --max: 1400px;
+      --transition: .18s cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.5; }
+    button, input { font: inherit; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── TOPBAR ─── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(244,242,238,.94);
+      backdrop-filter: blur(14px) saturate(160%);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
+      max-width: var(--max); margin: 0 auto;
+      padding: 0 24px;
+      height: 60px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .logo {
+      width: 36px; height: 36px; border-radius: 12px;
+      background: var(--orange); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-serif); font-size: 18px; font-weight: 600;
+      box-shadow: 0 2px 8px rgba(212,98,26,.35);
+      flex-shrink: 0;
+    }
+    .brand-name { font-family: var(--font-serif); font-size: 17px; font-weight: 500; letter-spacing: -.01em; }
+    .brand-sub { font-family: var(--font-mono); font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--ghost); display: block; margin-top: 1px; }
+
+    /* ─── PERSISTENT ACTION BANNER ─── */
+    .action-banner {
+      flex: 1;
+      background: linear-gradient(135deg, var(--orange-light) 0%, #fff 100%);
+      border: 1px solid var(--orange-border);
+      border-radius: var(--r-sm);
+      padding: 8px 14px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer;
+      transition: var(--transition);
+      min-width: 0;
+    }
+    .action-banner:hover { border-color: var(--orange-mid); background: var(--orange-light); }
+    .banner-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); flex-shrink: 0; animation: pulse-dot 2.4s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(212,98,26,.4)} 50%{box-shadow:0 0 0 5px rgba(212,98,26,0)} }
+    .banner-text { font-size: 13px; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .banner-text strong { color: var(--orange-dark); }
+    .banner-cta {
+      flex-shrink: 0; font-size: 12px; font-weight: 600;
+      padding: 5px 12px; border-radius: 8px;
+      background: var(--orange); color: #fff; border: none; cursor: pointer;
+      transition: var(--transition);
+    }
+    .banner-cta:hover { background: var(--orange-dark); }
+
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 999px;
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .4px;
+      border: 1px solid;
+    }
+    .status-chip.green { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .status-chip.green::before { content:''; width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0; }
+    .btn-outline {
+      padding: 7px 14px; border-radius: var(--r-sm);
+      background: var(--surface); border: 1px solid var(--line);
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-outline:hover { border-color: var(--line-2); background: var(--surface-2); }
+
+    /* ─── MAIN LAYOUT ─── */
+    .main { max-width: var(--max); margin: 0 auto; padding: 20px 24px 48px; display: grid; gap: 18px; }
+
+    /* ─── PROPERTY TABS ─── */
+    .prop-tabs { display: flex; gap: 8px; align-items: stretch; flex-wrap: wrap; }
+    .prop-tab {
+      flex: 1; min-width: 240px;
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 14px 18px;
+      display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+    .prop-tab:hover { border-color: var(--orange-border); transform: translateY(-1px); box-shadow: var(--shadow-md); }
+    .prop-tab.active { border-color: var(--orange-mid); background: var(--orange-faint); box-shadow: var(--shadow-md); }
+    .prop-tab-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .prop-icon {
+      width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+      background: var(--orange-light); border: 1px solid var(--orange-border);
+    }
+    .prop-tab.inactive .prop-icon { background: var(--surface-2); border-color: var(--line); }
+    .prop-info strong { display: block; font-size: 15px; font-weight: 600; line-height: 1.2; }
+    .prop-info span { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
+    .prop-tab-right { text-align: right; flex-shrink: 0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 999px;
+      font-family: var(--font-mono); font-size: 10px; border: 1px solid;
+    }
+    .pill.amber { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); }
+    .pill.green { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .pill.amber::before { content:''; width:5px;height:5px;border-radius:50%;background:currentColor; }
+    .pill.green::before { content:''; width:5px;height:5px;border-radius:50%;background:currentColor; }
+    .prop-tab-right small { display: block; font-size: 11px; color: var(--muted); margin-top: 6px; }
+
+    /* ─── SUMMARY GRID ─── */
+    .summary-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 14px; }
+    .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+    .card-pad { padding: 20px; }
+
+    /* Next step card */
+    .next-step-card { border-color: var(--orange-border); background: linear-gradient(160deg, #fff 40%, var(--orange-faint) 100%); }
+    .card-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--ghost); margin-bottom: 10px; }
+    .next-step-title { font-family: var(--font-serif); font-size: 22px; font-weight: 500; line-height: 1.15; margin-bottom: 6px; }
+    .next-step-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 16px; }
+    .next-step-action {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 12px 14px;
+      background: #fff; border: 1px solid var(--orange-border);
+      border-radius: var(--r-md);
+    }
+    .next-step-action-copy strong { display: block; font-size: 14px; line-height: 1.3; }
+    .next-step-action-copy span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .btn-primary {
+      flex-shrink: 0; padding: 10px 18px;
+      background: var(--orange); color: #fff;
+      border: none; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(212,98,26,.28);
+    }
+    .btn-primary:hover { background: var(--orange-dark); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(212,98,26,.35); }
+
+    /* Metric cards */
+    .metric-card { display: flex; flex-direction: column; }
+    .metric-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .metric-big { font-family: var(--font-mono); font-size: 40px; font-weight: 500; line-height: 1; letter-spacing: -.02em; }
+    .metric-big.warn { color: var(--amber); }
+    .metric-big.urgent { color: var(--red); }
+    .metric-big.ok { color: var(--green); }
+    .metric-sub { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin-top: 6px; }
+    .metric-detail { margin-top: auto; padding-top: 14px; border-top: 1px solid var(--line); }
+    .metric-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+    .metric-row + .metric-row { border-top: 1px solid var(--line); }
+    .metric-row span { font-size: 12px; color: var(--muted); }
+    .metric-row strong { font-size: 12px; font-weight: 500; }
+    .consequence { font-size: 11px; color: var(--red-text); background: var(--red-bg); border: 1px solid var(--red-border); border-radius: 8px; padding: 7px 10px; margin-top: 10px; line-height: 1.4; }
+    .consequence.amber { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-border); }
+
+    /* ─── INLINE UPLOAD CTA ─── */
+    .upload-cta {
+      display: flex; align-items: center; gap: 10px; margin-top: 12px;
+      padding: 10px 12px; border-radius: var(--r-sm);
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      cursor: pointer; transition: var(--transition);
+    }
+    .upload-cta:hover { border-color: var(--orange-border); background: var(--orange-light); }
+    .upload-cta-icon { width: 30px; height: 30px; border-radius: 8px; background: var(--red); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+    .upload-cta-text strong { display: block; font-size: 13px; color: var(--red); }
+    .upload-cta-text span { display: block; font-size: 11.5px; color: var(--muted); }
+    .upload-btn {
+      margin-left: auto; flex-shrink: 0;
+      padding: 7px 14px; border-radius: 8px;
+      background: var(--red); color: #fff; border: none;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: var(--transition);
+    }
+    .upload-btn:hover { background: #962626; }
+
+    /* ─── DEADLINE URGENCY ─── */
+    .deadline-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-family: var(--font-mono); font-size: 10px;
+      padding: 3px 8px; border-radius: 999px; border: 1px solid;
+    }
+    .deadline-badge.critical { background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); }
+    .deadline-badge.warning { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); }
+    .deadline-badge.ok { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+
+    /* ─── CONTENT GRID ─── */
+    .content-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) 320px; gap: 18px; align-items: start; }
+    .left-col, .right-col { display: grid; gap: 18px; }
+
+    .section-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .section-head h3 { font-family: var(--font-serif); font-size: 20px; font-weight: 500; line-height: 1.15; }
+    .section-head p { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+    .btn-secondary {
+      padding: 8px 16px; border-radius: var(--r-sm);
+      background: var(--surface); border: 1px solid var(--line);
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: var(--transition); flex-shrink: 0;
+    }
+    .btn-secondary:hover { border-color: var(--orange-border); color: var(--orange-dark); }
+
+    /* ─── TIMELINE ─── */
+    .timeline { position: relative; display: grid; gap: 0; }
+    .timeline::before {
+      content: ''; position: absolute; left: 8px; top: 18px; bottom: 18px;
+      width: 2px; background: var(--line); z-index: 0; border-radius: 1px;
+    }
+    .stage { display: grid; grid-template-columns: 18px 1fr auto; gap: 14px; align-items: start; padding: 10px 0; position: relative; z-index: 1; }
+    .stage-marker {
+      width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line);
+      background: var(--surface); margin-top: 2px; flex-shrink: 0; position: relative;
+      transition: var(--transition);
+    }
+    .stage.done .stage-marker { background: var(--green); border-color: var(--green); }
+    .stage.done .stage-marker::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 9px; font-weight: 700; }
+    .stage.active .stage-marker { border-color: var(--orange); background: #fff; box-shadow: 0 0 0 5px var(--orange-light); }
+    .stage.active .stage-marker::after { content: ''; position: absolute; inset: 3px; background: var(--orange); border-radius: 50%; }
+    .stage-body strong { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .stage-body span { display: block; font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+    .stage.active .stage-body strong { color: var(--orange-dark); }
+    .stage-date { font-family: var(--font-mono); font-size: 11px; color: var(--muted); white-space: nowrap; padding-top: 3px; }
+    .stage.active .stage-date { color: var(--orange); font-weight: 500; }
+    .stage.done .stage-date { color: var(--green-text); }
+    .stage.pending .stage-marker { border-color: var(--line); background: var(--surface-2); }
+    .stage.pending .stage-body strong { color: var(--ghost); }
+    .stage.pending .stage-date { color: var(--ghost); }
+
+    /* ─── TASK LIST ─── */
+    .task-list { display: grid; gap: 0; }
+    .task-row {
+      display: grid; grid-template-columns: auto 1fr auto;
+      gap: 14px; align-items: start;
+      padding: 14px 0; border-bottom: 1px solid var(--line);
+    }
+    .task-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .task-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .task-icon.doc { background: var(--red-bg); }
+    .task-icon.inspect { background: var(--amber-bg); }
+    .task-icon.msg { background: var(--blue-bg); }
+    .task-body strong { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; }
+    .task-body span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.45; }
+    .task-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+    .task-btn {
+      padding: 7px 14px; border-radius: 8px;
+      background: var(--surface-2); border: 1px solid var(--line);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: var(--transition); white-space: nowrap;
+    }
+    .task-btn:hover { background: var(--orange-light); border-color: var(--orange-border); color: var(--orange-dark); }
+    .task-btn.primary-task { background: var(--orange); color: #fff; border-color: var(--orange); box-shadow: 0 2px 8px rgba(212,98,26,.22); }
+    .task-btn.primary-task:hover { background: var(--orange-dark); }
+
+    /* ─── CONTACT CARD ─── */
+    .right-col .card { position: sticky; top: 78px; }
+    .contact-list { display: grid; gap: 8px; }
+    .contact {
+      padding: 12px; border: 1px solid var(--line);
+      border-radius: var(--r-md); background: var(--surface-2);
+      transition: var(--transition);
+    }
+    .contact:hover { border-color: var(--line-2); background: var(--surface); }
+    .contact-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .contact-avatar {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: var(--navy-2); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; flex-shrink: 0;
+      font-family: var(--font-mono);
+    }
+    .contact-avatar.buyer { background: #4B6E9E; }
+    .contact-avatar.agent { background: var(--green); }
+    .contact-avatar.title { background: #7B5EA7; }
+    .contact-avatar.attorney { background: #6B6040; }
+    .contact-avatar.support { background: var(--orange); }
+    .contact-info strong { display: block; font-size: 13px; font-weight: 600; line-height: 1.2; }
+    .contact-info span { display: block; font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+    .contact-data { font-size: 12px; color: var(--muted); margin-bottom: 8px; line-height: 1.5; }
+    .contact-data a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+    .contact-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .contact-btn {
+      padding: 6px 12px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--line);
+      font-size: 12px; font-weight: 500; cursor: pointer;
+      transition: var(--transition);
+    }
+    .contact-btn:hover { background: var(--orange-light); border-color: var(--orange-border); color: var(--orange-dark); }
+    .contact-btn.primary { background: var(--navy-2); color: #fff; border-color: var(--navy-2); }
+    .contact-btn.primary:hover { background: var(--navy); }
+
+    /* ─── LEARN CARD ─── */
+    .learn-card {
+      padding: 14px; border: 1px solid var(--orange-border);
+      background: linear-gradient(160deg, #fff 0%, var(--orange-faint) 100%);
+      border-radius: var(--r-md);
+    }
+    .learn-tag {
+      display: inline-flex; padding: 4px 10px;
+      border-radius: 999px; background: #fff;
+      border: 1px solid var(--orange-border);
+      font-size: 10.5px; font-weight: 600;
+      color: var(--orange-dark); margin-bottom: 8px;
+    }
+    .learn-card strong { display: block; font-size: 15px; font-weight: 600; line-height: 1.3; margin-bottom: 6px; }
+    .learn-card p { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+
+    /* ─── CONCIERGE (demoted) ─── */
+    .concierge-strip {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--r-lg); padding: 18px 22px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+      box-shadow: var(--shadow-sm);
+    }
+    .concierge-copy { flex: 1; min-width: 240px; }
+    .concierge-copy strong { display: block; font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .concierge-copy p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .concierge-features { display: flex; gap: 16px; flex-wrap: wrap; flex: 1; min-width: 200px; }
+    .conc-feat { font-size: 12.5px; display: flex; align-items: center; gap: 6px; color: var(--muted); }
+    .conc-feat::before { content: '✓'; color: var(--green); font-weight: 700; font-size: 13px; }
+    .btn-ghost-sm {
+      padding: 9px 18px; border-radius: var(--r-sm); flex-shrink: 0;
+      background: transparent; border: 1px dashed var(--line);
+      font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn-ghost-sm:hover { border-color: var(--orange-border); color: var(--orange-dark); background: var(--orange-light); }
+
+    /* ─── DOCS TABLE ─── */
+    .doc-list { display: grid; gap: 0; }
+    .doc-row {
+      display: grid; grid-template-columns: auto 1fr auto auto;
+      gap: 14px; align-items: center;
+      padding: 13px 0; border-bottom: 1px solid var(--line);
+    }
+    .doc-row:last-child { border-bottom: none; }
+    .doc-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .doc-icon.complete { background: var(--green-bg); }
+    .doc-icon.missing { background: var(--red-bg); }
+    .doc-name strong { display: block; font-size: 14px; font-weight: 500; }
+    .doc-name span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .doc-status { font-family: var(--font-mono); font-size: 11px; white-space: nowrap; }
+    .doc-status.ok { color: var(--green-text); }
+    .doc-status.missing { color: var(--red); }
+    .doc-action-btn {
+      padding: 6px 14px; border-radius: 8px;
+      background: var(--red); color: #fff; border: none;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: var(--transition); white-space: nowrap;
+    }
+    .doc-action-btn:hover { background: #922424; }
+    .doc-action-btn.view {
+      background: var(--surface-2); color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .doc-action-btn.view:hover { border-color: var(--line-2); background: var(--surface); }
+
+    /* ─── COMMS HISTORY ─── */
+    .comms-list { display: grid; gap: 10px; }
+    .comm-item {
+      display: flex; gap: 12px; align-items: flex-start;
+      padding: 12px; border: 1px solid var(--line);
+      border-radius: var(--r-md); background: var(--surface-2);
+      transition: var(--transition); cursor: pointer;
+    }
+    .comm-item:hover { border-color: var(--line-2); background: var(--surface); }
+    .comm-avatar {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; flex-shrink: 0; color: #fff;
+      font-family: var(--font-mono);
+    }
+    .comm-body { flex: 1; min-width: 0; }
+    .comm-body strong { display: block; font-size: 13px; font-weight: 600; }
+    .comm-body span { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .comm-meta { text-align: right; flex-shrink: 0; }
+    .comm-meta time { display: block; font-family: var(--font-mono); font-size: 10.5px; color: var(--ghost); }
+    .comm-unread {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 50%; background: var(--orange); margin-top: 4px;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1180px) {
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .content-grid { grid-template-columns: 1fr; }
+      .right-col .card { position: static; }
+    }
+    @media (max-width: 840px) {
+      .topbar-inner { height: auto; padding: 12px 16px; flex-wrap: wrap; }
+      .action-banner { order: 3; flex-basis: 100%; }
+      .main { padding: 14px 16px 36px; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .prop-tabs { flex-direction: column; }
+      .next-step-action { flex-direction: column; align-items: flex-start; }
+      .btn-primary { width: 100%; text-align: center; }
+      .doc-row { grid-template-columns: auto 1fr auto; }
+      .doc-row .doc-status { display: none; }
+      .concierge-strip { flex-direction: column; }
+    }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(20,16,8,.48);
+      z-index: 200; display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .22s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border-radius: var(--r-xl);
+      padding: 28px; max-width: 480px; width: 100%;
+      box-shadow: var(--shadow-lg); border: 1px solid var(--line);
+      transform: translateY(12px); transition: transform .22s cubic-bezier(.4,0,.2,1);
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h3 { font-family: var(--font-serif); font-size: 22px; font-weight: 500; margin-bottom: 6px; }
+    .modal p { font-size: 13.5px; color: var(--muted); margin-bottom: 20px; line-height: 1.55; }
+    .upload-zone {
+      border: 2px dashed var(--orange-border); border-radius: var(--r-md);
+      padding: 32px; text-align: center; background: var(--orange-faint);
+      margin-bottom: 16px; cursor: pointer; transition: var(--transition);
+    }
+    .upload-zone:hover { border-color: var(--orange-mid); background: var(--orange-light); }
+    .upload-zone span { display: block; font-size: 14px; color: var(--muted); }
+    .upload-zone strong { display: block; font-size: 15px; color: var(--orange-dark); margin-bottom: 4px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+    .modal-close { padding: 10px 18px; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--line); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: var(--transition); }
+    .modal-close:hover { background: var(--surface); }
+
+    /* ─── DEADLINE TOOLTIP (expandable) ─── */
+    .deadline-item {
+      cursor: pointer; border-radius: var(--r-sm);
+      padding: 6px 8px; margin: -6px -8px;
+      transition: var(--transition);
+    }
+    .deadline-item:hover { background: var(--bg-2); }
+    .deadline-expand {
+      font-size: 12px; color: var(--red-text);
+      background: var(--red-bg); border: 1px solid var(--red-border);
+      border-radius: 8px; padding: 7px 10px; margin-top: 8px; line-height: 1.5;
+      display: none;
+    }
+    .deadline-expand.amber { color: var(--amber); background: var(--amber-bg); border-color: var(--amber-border); }
+    .deadline-item.open .deadline-expand { display: block; }
+
+    /* page load animation */
+    .card, .prop-tab, .concierge-strip {
+      animation: fadein .35s ease both;
+    }
+    @keyframes fadein { from { opacity:0; transform:translateY(6px) } to { opacity:1; transform:none } }
+    .summary-grid .card:nth-child(1) { animation-delay: .04s }
+    .summary-grid .card:nth-child(2) { animation-delay: .08s }
+    .summary-grid .card:nth-child(3) { animation-delay: .12s }
+    .summary-grid .card:nth-child(4) { animation-delay: .16s }
+  </style>
+</head>
+<body>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="uploadModal" onclick="closeModal(event)">
+  <div class="modal">
+    <h3>Upload seller disclosure</h3>
+    <p>This document is required for your active transaction on 1542 Sugar Maple Ln. Upload the signed version to keep the file complete.</p>
+    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:32px;margin-bottom:12px">📄</div>
+      <strong>Drag a file here or click to browse</strong>
+      <span>PDF, DOC, or DOCX — up to 20 MB</span>
+    </div>
+    <input type="file" id="fileInput" style="display:none" accept=".pdf,.doc,.docx">
+    <div class="modal-actions">
+      <button class="modal-close" onclick="document.getElementById('uploadModal').classList.remove('open')">Cancel</button>
+      <button class="btn-primary" style="flex-shrink:0" onclick="document.getElementById('uploadModal').classList.remove('open')">Upload file</button>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ─── TOPBAR ─── -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo">✦</div>
+        <div>
+          <span class="brand-name">Velvet Elves</span>
+          <span class="brand-sub">FSBO Dashboard</span>
+        </div>
+      </div>
+
+      <!-- PERSISTENT ACTION BANNER (audit fix #2 / #3) -->
+      <div class="action-banner" onclick="openTransactionView()">
+        <div class="banner-dot"></div>
+        <span class="banner-text">
+          <strong>1542 Sugar Maple Ln</strong> · Respond to inspection by
+          <strong>Friday, Mar 21</strong> · 1 document missing
+        </span>
+        <button class="banner-cta" onclick="event.stopPropagation();openTransactionView()">Open transaction</button>
+      </div>
+
+      <div class="topbar-right">
+        <div class="status-chip green">On track</div>
+        <button class="btn-outline" onclick="alert('Support chat coming soon.')">Support</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+
+    <!-- ─── PROPERTY TABS ─── -->
+    <div class="prop-tabs">
+      <div class="prop-tab active" onclick="selectProperty(this)">
+        <div class="prop-tab-left">
+          <div class="prop-icon">🏡</div>
+          <div class="prop-info">
+            <strong>1542 Sugar Maple Ln</strong>
+            <span>Under contract · Inspection stage · Closing Mar 29</span>
+          </div>
+        </div>
+        <div class="prop-tab-right">
+          <div class="pill amber">Action needed</div>
+          <small>1 document missing</small>
+        </div>
+      </div>
+      <div class="prop-tab inactive" onclick="selectProperty(this)">
+        <div class="prop-tab-left">
+          <div class="prop-icon" style="background:var(--surface-2);border-color:var(--line);">🏠</div>
+          <div class="prop-info">
+            <strong>872 Ridge Hollow Dr</strong>
+            <span>Listing active · Waiting for buyer activity</span>
+          </div>
+        </div>
+        <div class="prop-tab-right">
+          <div class="pill green">On track</div>
+          <small>Nothing due today</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── SUMMARY GRID ─── -->
+    <section class="summary-grid">
+
+      <!-- NEXT STEP (primary CTA) -->
+      <article class="card card-pad next-step-card">
+        <div class="card-label">Next step</div>
+        <h2 class="next-step-title">Respond to inspection issues</h2>
+        <p class="next-step-desc">The buyer submitted inspection requests. Review them and choose how you want to respond — accept, reject, or counter — so the deal keeps moving.</p>
+        <div class="next-step-action">
+          <div class="next-step-action-copy">
+            <strong>Open your transaction and review the inspection response</strong>
+            <span>See the request, review documents, and respond in plain English.</span>
+          </div>
+          <button class="btn-primary" onclick="openTransactionView()">Open transaction</button>
+        </div>
+      </article>
+
+      <!-- MISSING DOCS — with inline upload (audit fix #1) -->
+      <article class="card card-pad metric-card">
+        <div class="card-label">Missing documents</div>
+        <div class="metric-top">
+          <div>
+            <div class="metric-big urgent">1</div>
+            <div class="metric-sub">Document needed to keep your file complete.</div>
+          </div>
+        </div>
+        <!-- INLINE UPLOAD CTA — direct from audit -->
+        <div class="upload-cta" onclick="document.getElementById('uploadModal').classList.add('open')">
+          <div class="upload-cta-icon">⬆</div>
+          <div class="upload-cta-text">
+            <strong>Seller disclosure missing</strong>
+            <span>Tap to upload now — takes under a minute</span>
+          </div>
+          <button class="upload-btn" onclick="event.stopPropagation();document.getElementById('uploadModal').classList.add('open')">Upload now</button>
+        </div>
+      </article>
+
+      <!-- DEADLINES — with consequences (audit fix #3) -->
+      <article class="card card-pad metric-card">
+        <div class="card-label">Upcoming deadlines</div>
+        <div class="metric-top">
+          <div>
+            <div class="metric-big warn">2</div>
+            <div class="metric-sub">Dates needing attention this week.</div>
+          </div>
+        </div>
+        <div class="metric-detail">
+          <div class="deadline-item" onclick="this.classList.toggle('open')">
+            <div class="metric-row">
+              <div>
+                <strong style="font-size:13px">March 21 — Fri</strong>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">Respond to inspection issues</div>
+              </div>
+              <span class="deadline-badge critical">3 days</span>
+            </div>
+            <div class="deadline-expand">⚠ Missing this may allow the buyer to cancel the contract. Act before Friday.</div>
+          </div>
+          <div class="deadline-item" onclick="this.classList.toggle('open')" style="margin-top:8px">
+            <div class="metric-row">
+              <div>
+                <strong style="font-size:13px">March 24 — Mon</strong>
+                <div style="font-size:12px;color:var(--muted);margin-top:2px">Final repair agreement</div>
+              </div>
+              <span class="deadline-badge warning">6 days</span>
+            </div>
+            <div class="deadline-expand amber">Both sides must agree on repairs before this date or renegotiation begins.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- CLOSING COUNTDOWN -->
+      <article class="card card-pad metric-card">
+        <div class="card-label">Closing timeline</div>
+        <div class="metric-top">
+          <div>
+            <div class="metric-big ok" id="daysCounter">11</div>
+            <div class="metric-sub">Days until closing at 1542 Sugar Maple Ln.</div>
+          </div>
+        </div>
+        <div class="metric-detail">
+          <div class="metric-row">
+            <span>Closing target</span>
+            <strong>Saturday, Mar 29</strong>
+          </div>
+          <div class="metric-row">
+            <span>Current stage</span>
+            <strong>Inspection (step 3 of 6)</strong>
+          </div>
+          <div class="metric-row">
+            <span>File status</span>
+            <strong style="color:var(--amber)">1 item needed</strong>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ─── CONTENT GRID ─── -->
+    <section class="content-grid">
+      <div class="left-col">
+
+        <!-- TIMELINE -->
+        <article class="card card-pad">
+          <div class="section-head">
+            <div>
+              <div class="card-label">Closing timeline</div>
+              <h3>Where your sale stands right now</h3>
+              <p>The full path from contract to closing. You are currently at step 3.</p>
+            </div>
+            <button class="btn-secondary" onclick="openTransactionView()">Open transaction view</button>
+          </div>
+          <div class="timeline">
+            <div class="stage done">
+              <div class="stage-marker"></div>
+              <div class="stage-body">
+                <strong>Offer accepted</strong>
+                <span>Buyer and seller agreed to the contract terms.</span>
+              </div>
+              <div class="stage-date">Done · Mar 8</div>
+            </div>
+            <div class="stage done">
+              <div class="stage-marker"></div>
+              <div class="stage-body">
+                <strong>Earnest money received</strong>
+                <span>Buyer's deposit confirmed and held by Premier Title.</span>
+              </div>
+              <div class="stage-date">Done · Mar 11</div>
+            </div>
+            <div class="stage active">
+              <div class="stage-marker"></div>
+              <div class="stage-body">
+                <strong>Inspection issues under review</strong>
+                <span>You need to respond to the buyer's inspection requests before March 21.</span>
+              </div>
+              <div class="stage-date">Current · Due Mar 21</div>
+            </div>
+            <div class="stage pending">
+              <div class="stage-marker"></div>
+              <div class="stage-body">
+                <strong>Repair agreement finalized</strong>
+                <span>After your response is accepted by both sides.</span>
+              </div>
+              <div class="stage-date">Next · ~Mar 24</div>
+            </div>
+            <div class="stage pending">
+              <div class="stage-marker"></div>
+              <div class="stage-body">
+                <strong>Final closing preparation</strong>
+                <span>Final documents reviewed and signed before closing day.</span>
+              </div>
+              <div class="stage-date">Later · ~Mar 27</div>
+            </div>
+            <div class="stage pending">
+              <div class="stage-marker"></div>
+              <div class="stage-body">
+                <strong>Closing day</strong>
+                <span>You sign the final paperwork and complete the sale.</span>
+              </div>
+              <div class="stage-date">Mar 29</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- TASK LIST — with inline actions -->
+        <article class="card card-pad">
+          <div class="section-head">
+            <div>
+              <div class="card-label">Stay on track</div>
+              <h3>What needs your attention now</h3>
+              <p>These are the only things to focus on right now.</p>
+            </div>
+          </div>
+          <div class="task-list">
+            <div class="task-row">
+              <div class="task-icon doc">📄</div>
+              <div class="task-body">
+                <strong>Upload the signed seller disclosure</strong>
+                <span>Missing from your file. Required before the transaction can move to closing prep. Takes under a minute to upload.</span>
+              </div>
+              <div class="task-meta">
+                <span class="deadline-badge critical">Needed now</span>
+                <button class="task-btn primary-task" onclick="document.getElementById('uploadModal').classList.add('open')">Upload now</button>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-icon inspect">🛠</div>
+              <div class="task-body">
+                <strong>Review the buyer's inspection requests</strong>
+                <span>Accept, reject, or counter the requested repairs inside the transaction view. Missing the March 21 deadline may allow the buyer to exit the contract.</span>
+              </div>
+              <div class="task-meta">
+                <span class="deadline-badge critical">By Mar 21</span>
+                <button class="task-btn primary-task" onclick="openTransactionView()">Open transaction</button>
+              </div>
+            </div>
+            <div class="task-row">
+              <div class="task-icon msg">✉</div>
+              <div class="task-body">
+                <strong>New message from Premier Title</strong>
+                <span>They confirmed the next paperwork checkpoint. Read it to stay aligned before the repair agreement deadline.</span>
+              </div>
+              <div class="task-meta">
+                <span class="deadline-badge ok">Helpful</span>
+                <button class="task-btn" onclick="scrollToComms()">Read message</button>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- DOCUMENTS — with inline per-row actions (audit fix #1) -->
+        <article class="card card-pad">
+          <div class="section-head">
+            <div>
+              <div class="card-label">Your documents</div>
+              <h3>Simple document status</h3>
+              <p>What the system has and what is still missing.</p>
+            </div>
+          </div>
+          <div class="doc-list">
+            <div class="doc-row">
+              <div class="doc-icon complete">✅</div>
+              <div class="doc-name">
+                <strong>Purchase agreement</strong>
+                <span>Uploaded Mar 8 · Matched to this transaction</span>
+              </div>
+              <div class="doc-status ok">Complete</div>
+              <button class="doc-action-btn view">View</button>
+            </div>
+            <div class="doc-row">
+              <div class="doc-icon complete">✅</div>
+              <div class="doc-name">
+                <strong>Earnest money receipt</strong>
+                <span>Uploaded Mar 11 · Confirmed by Premier Title</span>
+              </div>
+              <div class="doc-status ok">Complete</div>
+              <button class="doc-action-btn view">View</button>
+            </div>
+            <div class="doc-row">
+              <div class="doc-icon missing">⚠️</div>
+              <div class="doc-name">
+                <strong>Seller disclosure</strong>
+                <span>Still needed — required for closing prep to begin</span>
+              </div>
+              <div class="doc-status missing">Missing</div>
+              <button class="doc-action-btn" onclick="document.getElementById('uploadModal').classList.add('open')">Upload now</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- COMMUNICATION HISTORY (audit fix — added) -->
+        <article class="card card-pad" id="comms-section">
+          <div class="section-head">
+            <div>
+              <div class="card-label">Communication history</div>
+              <h3>Recent messages</h3>
+              <p>All recent activity on this transaction in one place.</p>
+            </div>
+          </div>
+          <div class="comms-list">
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:#7B5EA7">PT</div>
+              <div class="comm-body">
+                <strong>Premier Title</strong>
+                <span>Confirmed next paperwork checkpoint — closing documents ready for review by Mar 26.</span>
+              </div>
+              <div class="comm-meta">
+                <time>Today, 9:14 AM</time>
+                <div class="comm-unread"></div>
+              </div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:var(--green)">LC</div>
+              <div class="comm-body">
+                <strong>Lauren Cole — Buyer's Agent</strong>
+                <span>Sent over the formal inspection response document. Please review when you get a chance.</span>
+              </div>
+              <div class="comm-meta">
+                <time>Yesterday, 3:42 PM</time>
+                <div class="comm-unread"></div>
+              </div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:#6B6040">SL</div>
+              <div class="comm-body">
+                <strong>Stiles Legal Review</strong>
+                <span>Available to review any repair agreement language before you sign. Reach out if needed.</span>
+              </div>
+              <div class="comm-meta">
+                <time>Mar 17</time>
+              </div>
+            </div>
+            <div class="comm-item">
+              <div class="comm-avatar" style="background:var(--orange)">VE</div>
+              <div class="comm-body">
+                <strong>Velvet Elves Support</strong>
+                <span>Your transaction file is set up and ready. Let us know if anything is unclear.</span>
+              </div>
+              <div class="comm-meta">
+                <time>Mar 10</time>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div><!-- /left-col -->
+
+      <!-- ─── RIGHT COLUMN ─── -->
+      <div class="right-col">
+
+        <!-- CONTACTS — with visible data (audit fix #4) -->
+        <article class="card card-pad">
+          <div class="card-label" style="margin-bottom:14px">People involved</div>
+          <div class="contact-list">
+
+            <div class="contact">
+              <div class="contact-head">
+                <div class="contact-avatar buyer">ER</div>
+                <div class="contact-info">
+                  <strong>Emily Rogers</strong>
+                  <span>Buyer</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="contact">
+              <div class="contact-head">
+                <div class="contact-avatar agent">LC</div>
+                <div class="contact-info">
+                  <strong>Lauren Cole</strong>
+                  <span>Buyer's agent — main contract contact</span>
+                </div>
+              </div>
+              <div class="contact-data">
+                📞 <a href="tel:3175550194">(317) 555-0194</a> &nbsp;·&nbsp;
+                ✉ <a href="/cdn-cgi/l/email-protection#1f737c70737a5f6d7a7e736b66317c7072"><span class="__cf_email__" data-cfemail="016d626e6d64417364606d75782f626e6c">[email&#160;protected]</span></a>
+              </div>
+              <div class="contact-actions">
+                <button class="contact-btn primary" onclick="window.location.href='tel:3175550194'">📞 Call</button>
+                <button class="contact-btn" onclick="window.location.href='mailto:lcole@realty.com'">✉ Email</button>
+              </div>
+            </div>
+
+            <div class="contact">
+              <div class="contact-head">
+                <div class="contact-avatar title">PT</div>
+                <div class="contact-info">
+                  <strong>Premier Title</strong>
+                  <span>Title company — closing paperwork</span>
+                </div>
+              </div>
+              <div class="contact-data">
+                📞 <a href="tel:3175550022">(317) 555-0022</a> &nbsp;·&nbsp;
+                ✉ <a href="/cdn-cgi/l/email-protection#16707f7a7365566664737b7f7364627f627a733875797b"><span class="__cf_email__" data-cfemail="52343b3e3721122220373f3b3720263b263e377c313d3f">[email&#160;protected]</span></a>
+              </div>
+              <div class="contact-actions">
+                <button class="contact-btn primary" onclick="window.location.href='tel:3175550022'">📞 Call</button>
+                <button class="contact-btn" onclick="window.location.href='mailto:files@premiertitle.com'">✉ Email</button>
+              </div>
+            </div>
+
+            <div class="contact">
+              <div class="contact-head">
+                <div class="contact-avatar attorney">SL</div>
+                <div class="contact-info">
+                  <strong>Stiles Legal Review</strong>
+                  <span>Attorney — document review</span>
+                </div>
+              </div>
+              <div class="contact-data">
+                ✉ <a href="/cdn-cgi/l/email-protection#5c2e392a35392b1c2f283530392f30393b3d30723f3331"><span class="__cf_email__" data-cfemail="1e6c7b68777b695e6d6a77727b6d727b797f72307d7173">[email&#160;protected]</span></a>
+              </div>
+              <div class="contact-actions">
+                <button class="contact-btn" onclick="window.location.href='mailto:review@stileslegal.com'">✉ Email</button>
+              </div>
+            </div>
+
+            <div class="contact">
+              <div class="contact-head">
+                <div class="contact-avatar support">VE</div>
+                <div class="contact-info">
+                  <strong>Velvet Elves Support</strong>
+                  <span>Help with uploads, timelines, next steps</span>
+                </div>
+              </div>
+              <div class="contact-actions">
+                <button class="contact-btn">💬 Chat with us</button>
+              </div>
+            </div>
+
+          </div>
+        </article>
+
+        <!-- CONTEXTUAL LEARN CARD (stage-aware, not random) -->
+        <article class="card card-pad">
+          <div class="card-label" style="margin-bottom:12px">Helpful right now</div>
+          <div class="learn-card">
+            <div class="learn-tag" id="learnTag">Today's guide</div>
+            <strong id="learnTitle">What happens after you respond to inspection</strong>
+            <p id="learnBody">Once you reply to the buyer's requests, they review your response. If both sides agree, the transaction moves to the repair agreement stage and stays on track for your March 29 closing.</p>
+          </div>
+          <p style="font-size:11.5px;color:var(--ghost);margin-top:10px;line-height:1.5">This card rotates each session to help you learn the process without overwhelming you all at once.</p>
+        </article>
+
+      </div><!-- /right-col -->
+    </section>
+
+    <!-- ─── CONCIERGE STRIP (demoted, not competing — audit fix #5) ─── -->
+    <div class="concierge-strip">
+      <div class="concierge-copy">
+        <strong>Need more hands-on help? Add Closing Concierge.</strong>
+        <p>Higher-touch support for documents, deadlines, and questions — without turning your dashboard into a sales brochure. Which is refreshing.</p>
+      </div>
+      <div class="concierge-features">
+        <div class="conc-feat">Priority help with documents and deadlines</div>
+        <div class="conc-feat">Plain-English guidance at every step</div>
+        <div class="conc-feat">Faster response for active transactions</div>
+      </div>
+      <button class="btn-ghost-sm">Learn about Closing Concierge</button>
+    </div>
+
+  </main>
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  // ─── STAGE-AWARE LEARN CARD (not random — audit fix)
+  const stageCards = [
+    {
+      tag: "Today's guide",
+      title: "What happens after you respond to inspection",
+      body: "Once you reply to the buyer's requests, they review your response. If both sides agree, the transaction moves to the repair agreement stage and stays on track for your March 29 closing."
+    },
+    {
+      tag: "Document help",
+      title: "Why the seller disclosure matters",
+      body: "A seller disclosure tells the buyer about any known issues with the property. It protects you legally and keeps the transaction from running into surprises at closing. Upload the signed copy to stay on track."
+    },
+    {
+      tag: "Quick term",
+      title: "What is earnest money?",
+      body: '"Earnest money" is the buyer\'s deposit that shows they\'re serious. It\'s typically held by the title company until closing, then applied toward the purchase. Your buyer\'s deposit has already been confirmed.'
+    }
+  ];
+  // Use the first card (stage-appropriate) instead of random
+  const card = stageCards[0];
+  document.getElementById('learnTag').textContent = card.tag;
+  document.getElementById('learnTitle').textContent = card.title;
+  document.getElementById('learnBody').textContent = card.body;
+
+  // ─── DAYS TO CLOSING (live count)
+  const closingDate = new Date('2026-03-29T09:00:00');
+  const today = new Date();
+  const diff = Math.ceil((closingDate - today) / (1000 * 60 * 60 * 24));
+  const el = document.getElementById('daysCounter');
+  if (diff > 0) {
+    el.textContent = diff;
+    if (diff <= 5) el.className = 'metric-big urgent';
+    else if (diff <= 10) el.className = 'metric-big warn';
+    else el.className = 'metric-big ok';
+  } else if (diff === 0) {
+    el.textContent = 'Today';
+    el.className = 'metric-big urgent';
+  } else {
+    el.textContent = 'Closed';
+    el.className = 'metric-big ok';
+  }
+
+  // ─── PROPERTY SWITCHER
+  function selectProperty(tab) {
+    document.querySelectorAll('.prop-tab').forEach(t => {
+      t.classList.remove('active');
+      t.classList.add('inactive');
+      t.querySelector('.prop-icon').style.background = 'var(--surface-2)';
+      t.querySelector('.prop-icon').style.borderColor = 'var(--line)';
+    });
+    tab.classList.add('active');
+    tab.classList.remove('inactive');
+    tab.querySelector('.prop-icon').style.background = '';
+    tab.querySelector('.prop-icon').style.borderColor = '';
+  }
+
+  // ─── TRANSACTION VIEW PLACEHOLDER
+  function openTransactionView() {
+    alert('This would open the simplified FSBO transaction view for 1542 Sugar Maple Ln.\n\nIn production: full inspection response workflow, repair acceptance/counter, document viewer.');
+  }
+
+  // ─── CLOSE MODAL
+  function closeModal(e) {
+    if (e.target === document.getElementById('uploadModal')) {
+      document.getElementById('uploadModal').classList.remove('open');
+    }
+  }
+
+  // ─── ESCAPE KEY closes modal
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.getElementById('uploadModal').classList.remove('open');
+    }
+  });
+
+  // ─── SCROLL TO COMMS (was called but never defined)
+  function scrollToComms() {
+    const section = document.getElementById('comms-section');
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // ─── FILE INPUT feedback — show filename after selection
+  document.getElementById('fileInput').addEventListener('change', function() {
+    if (this.files && this.files.length) {
+      const zone = document.querySelector('.upload-zone');
+      zone.querySelector('strong').textContent = this.files[0].name;
+      zone.querySelector('span').textContent = 'Ready to upload — click "Upload file" to confirm.';
+      zone.style.borderColor = 'var(--green)';
+      zone.style.background = 'var(--green-bg)';
+    }
+  });
+
+  // ─── UPLOAD FILE button — validate file selected before closing
+  document.querySelector('.modal-actions .btn-primary').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files || !fileInput.files.length) {
+      const zone = document.querySelector('.upload-zone');
+      zone.style.borderColor = 'var(--red)';
+      zone.style.background = 'var(--red-bg)';
+      zone.querySelector('strong').textContent = 'Please choose a file first';
+      setTimeout(() => {
+        zone.style.borderColor = '';
+        zone.style.background = '';
+        zone.querySelector('strong').textContent = 'Drag a file here or click to browse';
+      }, 2000);
+      return;
+    }
+    document.getElementById('uploadModal').classList.remove('open');
+    // Reset zone for next open
+    setTimeout(() => {
+      const zone = document.querySelector('.upload-zone');
+      zone.style.borderColor = '';
+      zone.style.background = '';
+      zone.querySelector('strong').textContent = 'Drag a file here or click to browse';
+      zone.querySelector('span').textContent = 'PDF, DOC, or DOCX — up to 20 MB';
+      fileInput.value = '';
+    }, 300);
+  });
+
+  // ─── DRAG-AND-DROP on upload zone
+  const uploadZone = document.querySelector('.upload-zone');
+  uploadZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.style.borderColor = 'var(--orange-mid)';
+    this.style.background = 'var(--orange-light)';
+  });
+  uploadZone.addEventListener('dragleave', function() {
+    const fileInput = document.getElementById('fileInput');
+    if (!fileInput.files || !fileInput.files.length) {
+      this.style.borderColor = '';
+      this.style.background = '';
+    }
+  });
+  uploadZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    const files = e.dataTransfer.files;
+    if (files && files.length) {
+      // Assign dropped files to the input where possible, and show feedback
+      this.querySelector('strong').textContent = files[0].name;
+      this.querySelector('span').textContent = 'Ready to upload — click "Upload file" to confirm.';
+      this.style.borderColor = 'var(--green)';
+      this.style.background = 'var(--green-bg)';
+    }
+  });
+
+</script>
+</body>
+</html>

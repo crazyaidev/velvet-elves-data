@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velvet Elves — Team Leader Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --orange:#E26812;
+      --orange-dark:#B85107;
+      --orange-light:#FFF2E7;
+      --orange-soft:#FFF9F4;
+      --orange-border:#F1C79E;
+      --navy:#1E3356;
+      --navy-2:#2C4C7F;
+      --navy-3:#35598d;
+      --bg:#F4F4F4;
+      --surface:#FFFFFF;
+      --surface-2:#FAFAF8;
+      --line:#E3E2DE;
+      --line-strong:#CEC9C0;
+      --text:#181818;
+      --muted:#666666;
+      --ghost:#939393;
+      --green:#14704B;
+      --green-bg:#EEF8F3;
+      --green-border:#B9DEC9;
+      --amber:#A56A08;
+      --amber-bg:#FFF8EC;
+      --amber-border:#EACB93;
+      --red:#BE3431;
+      --red-bg:#FFF2F2;
+      --red-border:#F0C7C7;
+      --blue:#2C4C7F;
+      --blue-bg:#EEF4FF;
+      --blue-border:#C0D1EF;
+      --purple:#6545B6;
+      --purple-bg:#F5F0FF;
+      --purple-border:#D7C8FF;
+      --shadow:0 14px 38px rgba(20,20,20,.08);
+      --shadow-soft:0 10px 28px rgba(20,20,20,.05);
+      --radius:18px;
+      --font-body:'IBM Plex Sans',sans-serif;
+      --font-serif:'Lora',serif;
+      --font-mono:'IBM Plex Mono',monospace;
+      --sidebar:232px;
+      --rail:340px;
+      --top:68px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    /* ── SIDEBAR ── */
+    .sidebar{background:linear-gradient(180deg,var(--navy),#172948);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.08)}
+    .brand{display:flex;align-items:center;gap:12px;padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:40px;height:40px;border-radius:12px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name{display:flex;flex-direction:column;line-height:1}
+    .brand-name strong{font-family:var(--font-serif);font-size:18px;color:#fff;font-weight:700}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.65);margin-top:4px}
+    .side-block{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.58);margin-bottom:10px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .mini{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:10px;cursor:pointer;transition:.14s ease}
+    .mini:hover{background:rgba(255,255,255,.1)}
+    .mini .num{font-family:var(--font-mono);font-size:22px;font-weight:600;line-height:1;margin-bottom:6px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.76);line-height:1.35}
+    .num.red{color:#ff9494}.num.green{color:#82dfb2}.num.orange{color:#ffbf84}.num.blue{color:#9bc4ff}
+    .nav{padding:10px 8px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.9);padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;position:relative}
+    .nav a:hover{background:rgba(255,255,255,.06)}
+    .nav a.active{background:rgba(226,104,18,.16);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .nav .badge.alert{background:rgba(190,52,49,.5);color:#ffcfcf}
+    .side-footer{padding:12px;border-top:1px solid rgba(255,255,255,.08)}
+
+    /* ── BUTTONS ── */
+    .btn-primary,.btn-secondary,.btn-ghost,.btn-chip,.btn-outline-orange,.btn-soft,.btn-contact{border:none;border-radius:12px;cursor:pointer;transition:.16s ease;font-size:13px}
+    .btn-primary{background:var(--orange);color:#fff;padding:10px 14px;font-weight:700;box-shadow:0 8px 22px rgba(226,104,18,.25)}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:9px 13px;font-weight:600}
+    .btn-secondary:hover{border-color:var(--line-strong)}
+    .btn-outline-orange{background:#fff;border:1px solid var(--orange-border);color:var(--orange-dark);padding:9px 13px;font-weight:700}
+    .btn-outline-orange:hover{background:var(--orange-light)}
+    .btn-ghost{background:transparent;border:1px dashed var(--line-strong);color:var(--muted);padding:10px 12px;font-weight:600}
+    .btn-ghost:hover{border-color:var(--orange-border);background:var(--orange-soft);color:var(--orange-dark)}
+    .btn-chip{background:var(--orange-soft);color:var(--orange-dark);border:1px solid var(--orange-border);padding:8px 12px;font-weight:700;border-radius:999px;font-size:12px}
+    .btn-soft{background:var(--navy);color:#fff;padding:9px 12px;font-weight:700}
+    .btn-contact{background:var(--surface-2);border:1px solid var(--line);color:var(--text);padding:7px 11px;font-weight:600;font-size:12px;display:inline-flex;align-items:center;gap:5px}
+    .btn-contact:hover{border-color:var(--orange-border);background:var(--orange-soft);color:var(--orange-dark)}
+
+    /* ── TOP BAR ── */
+    .main-shell{display:flex;flex-direction:column;min-width:0;overflow:hidden}
+    .topbar{height:var(--top);background:rgba(255,255,255,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px 0 22px;flex-shrink:0}
+    .top-left{display:flex;align-items:center;gap:14px}
+    .top-briefing{}
+    .top-dateline{font-family:var(--font-mono);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ghost);margin-bottom:4px}
+    .page-title{font-family:var(--font-serif);font-size:22px;line-height:1;color:var(--text)}
+    .since-badge{display:inline-flex;align-items:center;gap:5px;margin-left:10px;padding:3px 8px;border-radius:999px;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);font-family:var(--font-mono);font-size:10px;font-weight:700;vertical-align:middle}
+    .since-badge.green-badge{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+    .top-right{display:flex;align-items:center;gap:10px}
+    .search{width:240px;display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);padding:9px 12px;border-radius:12px;color:var(--ghost);font-size:13px;cursor:text}
+    .search:hover{border-color:var(--line-strong)}
+    .pill{padding:6px 10px;border-radius:999px;font-family:var(--font-mono);font-size:10px;letter-spacing:.6px}
+    .pill.orange{background:var(--orange-soft);color:var(--orange-dark);border:1px solid var(--orange-border)}
+    .user{display:flex;align-items:center;gap:8px;border:1px solid var(--line);padding:6px 8px 6px 6px;border-radius:999px;background:#fff;cursor:pointer}
+    .user .avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+
+    /* ── LAYOUT ── */
+    .content-wrap{display:grid;grid-template-columns:minmax(0,1fr) var(--rail);gap:18px;padding:18px;overflow:auto;align-items:start}
+    .main-col{display:flex;flex-direction:column;gap:16px;min-width:0}
+    .rail{display:flex;flex-direction:column;gap:14px;min-width:0;position:sticky;top:0}
+
+    /* ── STAT CARDS ── */
+    .stats-grid{display:grid;grid-template-columns:1.2fr 1.2fr .9fr .9fr;gap:12px}
+    .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:var(--shadow-soft);min-width:0}
+    .stat-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .stat-label{font-family:var(--font-mono);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ghost)}
+    .stat-head .delta{font-size:11px;font-weight:700;padding:4px 8px;border-radius:999px}
+    .delta.up{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+    .delta.down{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+    .delta.flat{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+    .stat-big{display:flex;align-items:end;gap:10px;margin-bottom:5px;min-width:0}
+    .stat-big strong{font-family:var(--font-mono);font-size:34px;line-height:1;color:var(--text)}
+    .stat-big small{font-size:12px;color:var(--muted);padding-bottom:4px}
+    .stat-sub{font-size:12px;color:var(--muted);line-height:1.4}
+    .lifetime{display:flex;gap:14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line)}
+    .lifetime .item{flex:1}
+    .lifetime .item strong{display:block;font-family:var(--font-mono);font-size:17px;margin-bottom:3px}
+    .lifetime .item span{font-size:10.5px;color:var(--ghost);text-transform:uppercase;letter-spacing:.8px}
+
+    /* ── PANELS ── */
+    .grid-two{display:grid;grid-template-columns:1.32fr 1fr;gap:14px}
+    .panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-soft);min-width:0}
+    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px 0}
+    .panel-titles h3{font-size:19px;line-height:1.15;font-weight:700}
+    .panel-titles p{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4;max-width:58ch}
+    .panel-inner{padding:14px 18px 18px}
+    .panel-link{font-size:12px;font-weight:700;color:var(--orange-dark);white-space:nowrap;flex-shrink:0}
+
+    /* ── INTERVENTION QUEUE ── */
+    .queue-list{display:grid;gap:10px}
+    .queue-item{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;padding:14px;border:1px solid var(--line);border-radius:16px;background:#fff;transition:.15s ease}
+    .queue-item:hover{border-color:var(--orange-border);box-shadow:var(--shadow-soft)}
+    .queue-dot{width:11px;height:11px;border-radius:50%;margin-top:5px;flex-shrink:0}
+    .queue-dot.red{background:var(--red)} .queue-dot.amber{background:var(--amber)} .queue-dot.blue{background:var(--blue)}
+    .queue-main h4{font-size:15px;font-weight:700;line-height:1.2;margin-bottom:5px}
+    .queue-meta{font-size:12px;color:var(--muted);line-height:1.5}
+    .queue-meta strong{color:var(--text)}
+    /* AUDIT FIX: close date badge inline with meta */
+    .close-date{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;border-radius:999px;font-family:var(--font-mono);font-size:10px;font-weight:700;margin-left:6px;vertical-align:middle}
+    .close-date.urgent{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red)}
+    .close-date.soon{background:var(--amber-bg);border:1px solid var(--amber-border);color:var(--amber)}
+    .close-date.ok{background:var(--green-bg);border:1px solid var(--green-border);color:var(--green)}
+    .queue-actions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;justify-content:flex-end;flex-shrink:0}
+    .tag{padding:4px 8px;border-radius:999px;font-family:var(--font-mono);font-size:10px;letter-spacing:.4px;border:1px solid;white-space:nowrap}
+    .tag.red{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .tag.amber{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+    .tag.blue{background:var(--blue-bg);border-color:var(--blue-border);color:var(--blue)}
+
+    /* ── DRIFT PANEL ── */
+    .drift-list{display:grid;gap:0}
+    .drift-row{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+    .drift-row:last-child{border-bottom:none;padding-bottom:0}
+    .drift-row .n{font-family:var(--font-mono);font-size:30px;line-height:1}
+    .n.red{color:var(--red)} .n.amber{color:var(--amber)} .n.blue{color:var(--blue)} .n.purple{color:var(--purple)}
+    .drift-row .desc{font-size:13px;line-height:1.4;color:var(--text)}
+    .drift-row .hint{font-size:11px;color:var(--muted);line-height:1.3;max-width:14ch;text-align:right}
+
+    /* ── SPLIT TOOLS ── */
+    .split-tools{display:grid;grid-template-columns:1.1fr .95fr;gap:14px}
+    .dropzone{border:2px dashed var(--orange-border);background:#fffaf5;border-radius:18px;padding:18px;display:grid;gap:14px;min-height:200px;transition:.16s ease}
+    .dropzone:hover,.dropzone.drag-over{border-color:var(--orange);background:var(--orange-light)}
+    .dropzone .title{font-size:18px;line-height:1.2;max-width:24ch;font-weight:700}
+    .dropzone .sub{font-size:13px;color:var(--muted);line-height:1.45;max-width:56ch}
+    .drop-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .drop-box{border:1px solid var(--line);background:#fff;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;justify-content:space-between}
+    .drop-box .icon{width:40px;height:40px;border-radius:14px;background:var(--orange-soft);border:1px solid var(--orange-border);display:flex;align-items:center;justify-content:center;font-size:18px}
+    .drop-box h4{font-size:14px;font-weight:700;line-height:1.2}
+    .drop-box p{font-size:12px;color:var(--muted);line-height:1.45}
+    .filters{display:grid;gap:10px}
+    .filter-pill{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);font-size:13px;font-weight:600;color:var(--text);cursor:pointer;transition:.14s ease}
+    .filter-pill:hover{border-color:var(--orange-border);background:var(--orange-soft)}
+    .filter-pill small{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--orange-dark)}
+
+    /* ── AGENT BOARD ── */
+    .agent-board{display:grid;gap:10px}
+    .agent-row{display:grid;grid-template-columns:1.2fr .8fr .8fr .7fr .8fr auto;gap:10px;align-items:center;padding:13px 16px;border:1px solid var(--line);border-radius:18px;background:#fff;cursor:pointer;transition:.16s ease}
+    .agent-row:hover{border-color:var(--orange-border);box-shadow:var(--shadow-soft);transform:translateY(-1px)}
+    .agent-cell small{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ghost);margin-bottom:5px}
+    .agent-name{display:flex;align-items:center;gap:10px}
+    .agent-avatar{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--orange-soft),#fff);border:1px solid var(--orange-border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--orange-dark);flex-shrink:0}
+    .agent-name strong{display:block;font-size:15px;line-height:1.1}
+    .agent-name span{font-size:11px;color:var(--muted)}
+    .mono{font-family:var(--font-mono);font-size:17px}
+    .healthbar{height:9px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+    .healthbar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--green))}
+    .agent-sub{margin-top:5px;font-size:11px;color:var(--muted)}
+    .cell-stack{display:flex;flex-direction:column;gap:4px}
+    .alert-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid}
+    .alert-chip.red{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .alert-chip.amber{background:var(--amber-bg);border-color:var(--amber-border);color:var(--amber)}
+    .alert-chip.green{background:var(--green-bg);border-color:var(--green-border);color:var(--green)}
+
+    /* ── PIPELINE ── */
+    .pipeline-wrap{display:grid;grid-template-columns:1fr .92fr;gap:14px}
+    .stage-list{display:grid;gap:10px}
+    .stage-row{display:grid;grid-template-columns:150px 1fr 44px;gap:12px;align-items:center}
+    .stage-row label{font-size:13px;font-weight:600}
+    .bar{height:10px;background:var(--surface-2);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+    .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--orange),#f39a55);border-radius:999px}
+    .bar.blue span{background:linear-gradient(90deg,var(--blue),#6282b7)}
+    .bar.green span{background:linear-gradient(90deg,var(--green),#5ab68b)}
+    .bar.amber span{background:linear-gradient(90deg,var(--amber),#ddb052)}
+    .bar.purple span{background:linear-gradient(90deg,var(--purple),#9a7ae8)}
+    .scorecard{background:var(--surface-2);border:1px solid var(--line);border-radius:18px;padding:16px}
+    .scorecard h4{font-size:17px;font-weight:700;margin-bottom:10px}
+    .ring{width:72px;height:72px;border-radius:50%;margin-bottom:12px;background:conic-gradient(var(--orange) 0 74%, #ece6de 74% 100%);display:grid;place-items:center}
+    .ring span{width:52px;height:52px;border-radius:50%;background:#fff;display:grid;place-items:center;font-family:var(--font-mono);font-size:19px;font-weight:700}
+    .scorecard .notes{display:grid;gap:8px}
+    .scoreline{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding-bottom:7px;border-bottom:1px solid var(--line)}
+    .scoreline:last-child{border-bottom:none;padding-bottom:0}
+
+    /* ── RAIL ── */
+    .rail-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-soft)}
+    .rail-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px 0}
+    .rail-head h3{font-family:var(--font-mono);font-size:10px;letter-spacing:1.9px;text-transform:uppercase;color:var(--ghost)}
+    .rail-head a{font-size:12px;font-weight:700;color:var(--orange-dark)}
+    .rail-body{padding:12px 16px 16px}
+    .intel-box{border:1px solid var(--orange-border);background:#fffaf5;border-radius:16px;padding:13px;margin-bottom:10px}
+    .intel-box:last-child{margin-bottom:0}
+    .intel-box h4{font-size:14px;font-weight:700;line-height:1.2;margin-bottom:6px}
+    .intel-box p{font-size:12.5px;line-height:1.5;color:var(--muted);margin-bottom:10px}
+    .intel-actions{display:flex;gap:7px;flex-wrap:wrap}
+    .intel-actions button{padding:7px 11px;border-radius:10px;border:1px solid var(--orange-border);background:#fff;color:var(--orange-dark);font-weight:700;cursor:pointer;font-size:12px;transition:.14s ease}
+    .intel-actions button:hover{background:var(--orange-light)}
+    .feed-item{padding:11px 0;border-bottom:1px solid var(--line)}
+    .feed-item:last-child{border-bottom:none;padding-bottom:0}
+    .feed-item strong{display:block;font-size:13px;line-height:1.3;margin-bottom:4px}
+    .feed-item span{font-size:12px;color:var(--muted);line-height:1.45}
+    .badge-block{display:inline-flex;margin-top:7px;padding:3px 8px;border-radius:999px;background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);font-family:var(--font-mono);font-size:10px}
+    .coach-prompt{display:grid;gap:9px}
+    /* AUDIT FIX: severity differentiation on coach tips */
+    .coach-prompt .tip{padding:11px 12px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2);border-left:3px solid var(--line)}
+    .coach-prompt .tip.tip-urgent{border-left-color:var(--red);background:var(--red-bg)}
+    .coach-prompt .tip.tip-warn{border-left-color:var(--amber);background:var(--amber-bg)}
+    .coach-prompt .tip.tip-info{border-left-color:var(--blue);background:var(--blue-bg)}
+    .coach-prompt .tip strong{display:block;font-size:13px;margin-bottom:5px}
+    .coach-prompt .tip span{font-size:12px;color:var(--muted);line-height:1.45}
+    .floating-ai{position:sticky;bottom:0;background:var(--navy);color:#fff;padding:15px 17px;border-radius:18px;box-shadow:0 16px 36px rgba(30,51,86,.2);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .floating-ai strong{display:block;font-size:18px;line-height:1.1;margin-bottom:4px}
+    .floating-ai span{font-size:12px;color:rgba(255,255,255,.76);line-height:1.45;display:block}
+
+    /* ── AI COACH UPSELL BANNER (bottom only) ── */
+    .coach-banner{background:linear-gradient(115deg,#fff 0%, #fff7f0 52%, #fcebdc 100%);border:1px solid var(--orange-border);border-radius:22px;padding:20px;box-shadow:var(--shadow-soft);display:grid;grid-template-columns:1.35fr .95fr;gap:16px;align-items:center}
+    .coach-copy .eyebrow{font-family:var(--font-mono);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--orange-dark);margin-bottom:8px}
+    .coach-copy h2{font-family:var(--font-serif);font-size:27px;line-height:1.1;margin-bottom:8px;max-width:20ch}
+    .coach-copy p{font-size:13.5px;line-height:1.5;color:var(--muted);max-width:58ch}
+    .coach-bullets{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .coach-bullets span{padding:5px 10px;border-radius:999px;background:#fff;border:1px solid var(--orange-border);font-size:11px;font-weight:700;color:var(--orange-dark)}
+    .coach-card{background:#fff;border:1px solid var(--orange-border);border-radius:18px;padding:16px}
+    .coach-card h3{font-size:15px;font-weight:700;margin-bottom:10px}
+    .coach-price{display:flex;align-items:end;gap:8px;margin:8px 0 12px}
+    .coach-price strong{font-family:var(--font-mono);font-size:28px;line-height:1;color:var(--orange-dark)}
+    .coach-price span{font-size:12px;color:var(--muted)}
+    .coach-list{display:grid;gap:7px;margin-bottom:14px}
+    .coach-list div{display:flex;gap:8px;font-size:12.5px;color:var(--text)}
+    .coach-list i{font-style:normal;color:var(--green);font-weight:700}
+    .coach-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+    /* ── AGENT DRAWER (with contact bar) ── */
+    .agent-drawer{position:fixed;top:0;right:0;width:440px;max-width:100%;height:100%;background:#fff;border-left:1px solid var(--line);box-shadow:-16px 0 44px rgba(20,20,20,.12);transform:translateX(100%);transition:.24s ease;z-index:20;display:flex;flex-direction:column}
+    .agent-drawer.open{transform:translateX(0)}
+    .drawer-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+    .drawer-head-left{display:flex;align-items:center;gap:12px}
+    .drawer-avatar{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--orange-soft),#fff);border:1px solid var(--orange-border);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--orange-dark);flex-shrink:0}
+    .drawer-head h3{font-family:var(--font-serif);font-size:22px;line-height:1.1}
+    .drawer-head p{font-size:12.5px;color:var(--muted);margin-top:4px}
+    /* AUDIT FIX: contact bar in drawer */
+    .drawer-contact{display:flex;gap:7px;flex-wrap:wrap;padding:11px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+    .close-drawer{width:32px;height:32px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;flex-shrink:0;font-size:14px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+    .close-drawer:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .drawer-body{padding:14px 18px 22px;overflow:auto;display:grid;gap:12px}
+    .drawer-block{border:1px solid var(--line);border-radius:18px;padding:13px;background:#fff}
+    .drawer-block h4{font-family:var(--font-mono);font-size:10px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ghost);margin-bottom:10px}
+    .drawer-kpis{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    .drawer-kpi{border:1px solid var(--line);border-radius:12px;padding:11px;background:var(--surface-2)}
+    .drawer-kpi strong{display:block;font-family:var(--font-mono);font-size:21px;margin-bottom:4px}
+    .drawer-kpi span{font-size:11px;color:var(--muted);line-height:1.35}
+    .todo{display:grid;gap:9px}
+    .todo-item{padding:11px;border-radius:13px;background:var(--surface-2);border:1px solid var(--line)}
+    .todo-item strong{display:block;font-size:13.5px;line-height:1.25;margin-bottom:5px}
+    .todo-item span{font-size:12px;color:var(--muted);line-height:1.45}
+
+    /* ── INLINE UPLOAD FLYOUT ── */
+    .upload-flyout{display:none;margin-top:10px;padding:14px;border:2px dashed var(--orange-border);border-radius:14px;background:var(--orange-soft)}
+    .upload-flyout.show{display:block}
+    .upload-flyout p{font-size:13px;color:var(--orange-dark);font-weight:600;margin-bottom:10px}
+    .upload-flyout .upload-actions{display:flex;gap:8px}
+
+    /* ── OVERLAY ── */
+    .overlay{position:fixed;inset:0;background:rgba(18,24,38,.28);opacity:0;pointer-events:none;transition:.2s ease;z-index:10}
+    .overlay.show{opacity:1;pointer-events:auto}
+
+    /* ── WHAT CHANGED BANNER ── */
+    .change-bar{display:flex;align-items:center;gap:10px;padding:9px 14px;background:var(--blue-bg);border:1px solid var(--blue-border);border-radius:14px;font-size:12.5px}
+    .change-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0}
+    .change-bar span{color:var(--blue);font-weight:600}
+    .change-bar .change-time{color:var(--muted);font-family:var(--font-mono);font-size:11px;margin-left:auto}
+    .change-bar a{color:var(--blue);font-weight:700;font-size:12px}
+
+    /* ── RESPONSIVE ── */
+    /* AUDIT FIX: rail collapses at 1100px not 1380px */
+    @media (max-width: 1280px){
+      .stats-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width: 1100px){
+      .content-wrap{grid-template-columns:1fr}
+      .rail{position:static}
+      .grid-two,.split-tools,.pipeline-wrap{grid-template-columns:1fr}
+      .coach-banner{grid-template-columns:1fr}
+    }
+    @media (max-width: 960px){
+      .app{grid-template-columns:1fr}
+      .sidebar{display:none}
+      .agent-row{grid-template-columns:1fr 1fr;align-items:start}
+      .queue-item{grid-template-columns:auto 1fr}
+      .queue-actions{grid-column:1/-1;justify-content:flex-start;padding-top:4px}
+      .topbar{height:auto;flex-direction:column;align-items:flex-start;padding:14px;gap:10px}
+      .top-right{width:100%;flex-wrap:wrap}
+      .search{width:100%}
+    }
+    @media (max-width: 760px){
+      .stats-grid{grid-template-columns:1fr 1fr}
+      .agent-row{grid-template-columns:1fr}
+      .drop-grid{grid-template-columns:1fr}
+      .content-wrap{padding:12px}
+      .coach-copy h2{font-size:22px}
+      .page-title{font-size:20px}
+      .floating-ai{flex-direction:column;align-items:flex-start}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ══════════════════════════════ SIDEBAR ══════════════════════════════ -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">✦</div>
+        <div class="brand-name">
+          <strong>Velvet Elves</strong>
+          <span>Team Command</span>
+        </div>
+      </div>
+
+      <div class="side-block">
+        <div class="side-label">Team snapshot</div>
+        <div class="side-summary">
+          <div class="mini"><div class="num red">4</div><div class="cap">Deals at risk today</div></div>
+          <div class="mini"><div class="num orange">11</div><div class="cap">Closing in 14 days</div></div>
+          <div class="mini"><div class="num green">$218K</div><div class="cap">Pending GCI this year</div></div>
+          <div class="mini"><div class="num blue">6</div><div class="cap">Agents on pace</div></div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="active" href="#">⌂ Team Dashboard <span class="badge">Live</span></a>
+        <a href="#">🗂 Active Transactions <span class="badge">38</span></a>
+        <a href="#">👥 Agents <span class="badge">9</span></a>
+        <a href="#">📄 Blocked Documents <span class="badge alert">7</span></a>
+        <a href="#">🧠 AI Interventions <span class="badge alert">12</span></a>
+        <a href="#">📞 Communication Log</a>
+        <a href="#">📊 Production</a>
+        <!-- AUDIT FIX: renamed from "AI Coach Upsell" — destination for managing coaching, not a sales destination -->
+        <a href="#">🎯 AI Coach</a>
+        <a href="#">⚙ Settings</a>
+      </nav>
+
+      <div class="side-block">
+        <div class="side-label">What the team needs</div>
+        <div class="side-summary">
+          <div class="mini"><div class="num orange">3h</div><div class="cap">AI time saved today</div></div>
+          <div class="mini"><div class="num red">7</div><div class="cap">Stale client convos</div></div>
+        </div>
+      </div>
+
+      <div class="side-footer">
+        <button class="btn-primary" style="width:100%">+ Add New Transaction</button>
+      </div>
+    </aside>
+
+    <!-- ══════════════════════════════ MAIN SHELL ══════════════════════════════ -->
+    <div class="main-shell">
+
+      <!-- TOP BAR — AUDIT FIX: dynamic dateline + "what changed" badge replaces static tagline -->
+      <header class="topbar">
+        <div class="top-left">
+          <div class="top-briefing">
+            <div class="top-dateline" id="topDateline">Wednesday, March 18 · Team Leader</div>
+            <div class="page-title">
+              4 files need your attention today.
+              <!-- AUDIT FIX: "what changed since last visit" inline badge -->
+              <span class="since-badge" title="Since your last visit at 9:47 AM">↑ 2 new since 9:47 AM</span>
+              <span class="since-badge green-badge" title="1 intervention resolved">✓ 1 resolved</span>
+            </div>
+          </div>
+        </div>
+        <div class="top-right">
+          <div class="search">⌕ Search transactions, agents, lenders, docs</div>
+          <div class="pill orange">9 agents · 38 active</div>
+          <button class="btn-outline-orange">+ Add Transaction</button>
+          <div class="user"><div class="avatar">JS</div><strong>Jake Stiles</strong></div>
+        </div>
+      </header>
+
+      <!-- MAIN CONTENT -->
+      <main class="content-wrap">
+        <section class="main-col">
+
+          <!-- ① STATS GRID — moved to top, upsell banner removed from here -->
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-head"><div class="stat-label">Pending GCI · 2026</div><div class="delta up">+12% vs last month</div></div>
+              <div class="stat-big"><strong>$218,430</strong><small>from live pendings</small></div>
+              <div class="stat-sub">Forecasted income across all active team files.</div>
+              <div class="lifetime">
+                <div class="item"><strong>$3.84M</strong><span>lifetime GCI</span></div>
+                <div class="item"><strong>1,426</strong><span>lifetime closings</span></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-head"><div class="stat-label">Pending Volume · 2026</div><div class="delta flat">Stable mix</div></div>
+              <div class="stat-big"><strong>$9.47M</strong><small>under contract</small></div>
+              <div class="stat-sub">Volume shows scale. GCI shows whether scale is paying the bills.</div>
+              <div class="lifetime">
+                <div class="item"><strong>$146M</strong><span>lifetime volume</span></div>
+                <div class="item"><strong>29.7%</strong><span>team win rate</span></div>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-head"><div class="stat-label">Closings in 14 days</div><div class="delta down">4 need intervention</div></div>
+              <div class="stat-big"><strong>11</strong><small>files closing soon</small></div>
+              <div class="stat-sub">4 healthy · 3 doc gaps · 2 lender/title · 2 comms risk.</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-head"><div class="stat-label">Team health score</div><div class="delta up">+3 today</div></div>
+              <div class="stat-big"><strong>74</strong><small>weighted risk score</small></div>
+              <div class="stat-sub">Main drag: stale client comms in buyer-financed files.</div>
+            </div>
+          </div>
+
+          <!-- ② INTERVENTION QUEUE + DRIFT — the operational core, now second not fifth -->
+          <div class="grid-two">
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-titles">
+                  <h3>Start here — 4 deals need action today.</h3>
+                  <p>Ranked by likelihood of breaking. The exact move and close date are on every card.</p>
+                </div>
+                <a class="panel-link" href="#">All interventions →</a>
+              </div>
+              <div class="panel-inner">
+                <div class="queue-list">
+
+                  <!-- AUDIT FIX: close date badge on every intervention card -->
+                  <div class="queue-item">
+                    <div class="queue-dot red"></div>
+                    <div class="queue-main">
+                      <h4>Review inspection amendment before buyer walks</h4>
+                      <div class="queue-meta">
+                        <strong>Amanda Rogers</strong> · 1542 Sugar Maple Ln
+                        <span class="close-date urgent">Closes Mar 24</span><br>
+                        Response deadline 1:00 PM · Seller side quiet for 19 hours.
+                      </div>
+                    </div>
+                    <div class="queue-actions">
+                      <span class="tag red">Critical</span>
+                      <button class="btn-primary">Open file</button>
+                    </div>
+                  </div>
+
+                  <div class="queue-item">
+                    <div class="queue-dot amber"></div>
+                    <div class="queue-main">
+                      <h4>Push lender and title for clear-to-close</h4>
+                      <div class="queue-meta">
+                        <strong>Neil Patel</strong> · 2239 Harbor Pointe Ct
+                        <span class="close-date urgent">Closes Mar 24</span><br>
+                        No lender update in 2 days. Closing in 6 days.
+                      </div>
+                    </div>
+                    <div class="queue-actions">
+                      <span class="tag amber">Attention</span>
+                      <button class="btn-outline-orange">Call now</button>
+                    </div>
+                  </div>
+
+                  <div class="queue-item">
+                    <div class="queue-dot blue"></div>
+                    <div class="queue-main">
+                      <h4>Coach Melissa on price-reduction conversation</h4>
+                      <div class="queue-meta">
+                        <strong>Melissa Hart</strong> · 872 Ridge Hollow Dr
+                        <span class="close-date soon">Closes Apr 10</span><br>
+                        19 DOM without a second showing.
+                      </div>
+                    </div>
+                    <div class="queue-actions">
+                      <span class="tag blue">Coach</span>
+                      <button class="btn-secondary">Draft points</button>
+                    </div>
+                  </div>
+
+                  <!-- AUDIT FIX: inline upload flyout — no navigation required -->
+                  <div class="queue-item" id="uploadQueueItem">
+                    <div class="queue-dot amber"></div>
+                    <div class="queue-main">
+                      <h4>Upload signed seller disclosure — blocking lender package</h4>
+                      <div class="queue-meta">
+                        <strong>Tina Nguyen</strong> · 801 Meadow Walk Dr
+                        <span class="close-date soon">Closes Apr 4</span><br>
+                        AI found the PDF in email. It never reached the transaction record.
+                      </div>
+                      <div class="upload-flyout" id="uploadFlyout">
+                        <p>Upload seller disclosure directly into the Nguyen · 801 Meadow Walk file</p>
+                        <div class="upload-actions">
+                          <button class="btn-primary">Choose file to upload</button>
+                          <button class="btn-secondary">Cancel</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="queue-actions">
+                      <span class="tag amber">Document</span>
+                      <button class="btn-outline-orange" onclick="document.getElementById('uploadFlyout').classList.toggle('show');event.stopPropagation()">Upload</button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-titles">
+                  <h3>Why deals are drifting</h3>
+                  <p>Where process discipline is leaking across the team right now.</p>
+                </div>
+              </div>
+              <div class="panel-inner">
+                <div class="drift-list">
+                  <div class="drift-row"><div class="n red">4</div><div class="desc">closings inside 7 days with unresolved external dependency</div><div class="hint">mostly lender / title silence</div></div>
+                  <div class="drift-row"><div class="n amber">7</div><div class="desc">transactions with no logged client touch in 72+ hours</div><div class="hint">buyers feel ignored before they feel informed</div></div>
+                  <div class="drift-row"><div class="n blue">5</div><div class="desc">files blocked by missing signatures or document upload gaps</div><div class="hint">easy to fix, costly to leave</div></div>
+                  <div class="drift-row"><div class="n purple">3</div><div class="desc">agents who need coaching on next-step communication, not admin rescue</div><div class="hint">management problem, not file problem</div></div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- ③ AGENT BOARD — moved up from its original late position -->
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-titles">
+                <h3>Team performance at a glance</h3>
+                <p>Click any row to drill into that agent's transactions, tasks, and jump actions.</p>
+              </div>
+              <a class="panel-link" href="#">Full team report →</a>
+            </div>
+            <div class="panel-inner">
+              <div class="agent-board" id="agentBoard"></div>
+            </div>
+          </section>
+
+          <!-- ④ FAST FILTERS + TRANSACTION INTAKE -->
+          <div class="split-tools">
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-titles">
+                  <h3>Fast filters</h3>
+                  <p>Jump to Active Transactions with the relevant group already surfaced.</p>
+                </div>
+              </div>
+              <div class="panel-inner filters">
+                <div class="filter-pill">Critical · closing within 7 days <small>4</small></div>
+                <div class="filter-pill">No client contact in 3+ days <small>7</small></div>
+                <div class="filter-pill">Documents blocking next milestone <small>5</small></div>
+                <div class="filter-pill">Agents needing coaching today <small>3</small></div>
+                <div class="filter-pill">Inspection negotiations still open <small>6</small></div>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-head">
+                <div class="panel-titles">
+                  <h3>New transaction intake</h3>
+                  <p>Drop a contract and AI builds the full transaction shell in seconds.</p>
+                </div>
+              </div>
+              <div class="panel-inner">
+                <div class="dropzone" id="dropzone">
+                  <div>
+                    <div class="title">AI intake — drop the signed contract here</div>
+                    <div class="sub" style="margin-top:6px">AI extracts parties, dates, docs, and opens the new transaction view automatically.</div>
+                  </div>
+                  <div class="drop-grid">
+                    <div class="drop-box">
+                      <div class="icon">⇪</div>
+                      <div>
+                        <h4>Drag signed documents</h4>
+                        <p>PDFs, email attachments, agent chaos.</p>
+                      </div>
+                      <button class="btn-primary">Drop documents</button>
+                    </div>
+                    <div class="drop-box">
+                      <div class="icon">⌕</div>
+                      <div>
+                        <h4>Browse for files</h4>
+                        <p>For people who still insist on folders.</p>
+                      </div>
+                      <button class="btn-secondary">Choose files</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- ⑤ PIPELINE HEALTH -->
+          <section class="panel">
+            <div class="panel-head">
+              <div class="panel-titles">
+                <h3>Pipeline health and annual pace</h3>
+                <p>Stage distribution for what is active now, anchored with annual progress.</p>
+              </div>
+            </div>
+            <div class="panel-inner pipeline-wrap">
+              <div class="stage-list">
+                <div class="stage-row"><label>New / intake</label><div class="bar"><span style="width:34%"></span></div><strong class="mono">5</strong></div>
+                <div class="stage-row"><label>Under contract</label><div class="bar blue"><span style="width:88%"></span></div><strong class="mono">13</strong></div>
+                <div class="stage-row"><label>Inspection / response</label><div class="bar amber"><span style="width:54%"></span></div><strong class="mono">8</strong></div>
+                <div class="stage-row"><label>Appraisal / underwriting</label><div class="bar purple"><span style="width:46%"></span></div><strong class="mono">6</strong></div>
+                <div class="stage-row"><label>Clear to close</label><div class="bar green"><span style="width:41%"></span></div><strong class="mono">6</strong></div>
+              </div>
+              <div class="scorecard">
+                <div class="ring"><span>74</span></div>
+                <h4>Team health score</h4>
+                <div class="notes">
+                  <div class="scoreline"><span>Projected closings this month</span><strong>9</strong></div>
+                  <div class="scoreline"><span>Missed client-touch standard</span><strong>7 files</strong></div>
+                  <div class="scoreline"><span>Blocked document events</span><strong>5 files</strong></div>
+                  <div class="scoreline"><span>AI-handled interventions today</span><strong>18</strong></div>
+                  <div class="scoreline"><span>Coach upsell attach rate</span><strong>22%</strong></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ⑥ AI COACH UPSELL — AUDIT FIX: moved to bottom, after value delivery -->
+          <div class="coach-banner">
+            <div class="coach-copy">
+              <div class="eyebrow">optional paid add-on · AI coach / mentor</div>
+              <h2>AI Coach keeps agents accountable without making you play therapist.</h2>
+              <p>Push scripts, accountability prompts, follow-up plans, and transaction-specific coaching tied to what is actually happening inside each file. It is easier to scale systems than moods.</p>
+              <div class="coach-bullets">
+                <span>Agent scorecards</span>
+                <span>Follow-up coaching</span>
+                <span>Objection handling</span>
+                <span>Listing prep</span>
+                <span>Prospecting prompts</span>
+              </div>
+            </div>
+            <div class="coach-card">
+              <h3>Enable on a per-agent basis</h3>
+              <div class="coach-price"><strong>$79</strong><span>per agent / month</span></div>
+              <div class="coach-list">
+                <div><i>✓</i> Triggered from active transactions and production drift</div>
+                <div><i>✓</i> Coaching tied to active deals, not motivational wallpaper</div>
+                <div><i>✓</i> Gives underperformers fewer places to hide</div>
+              </div>
+              <div class="coach-actions">
+                <button class="btn-primary">Turn on for 3 agents</button>
+                <button class="btn-secondary">See ROI model</button>
+              </div>
+            </div>
+          </div>
+
+        </section><!-- end .main-col -->
+
+        <!-- ══════════════════════════════ RIGHT RAIL ══════════════════════════════ -->
+        <!-- AUDIT FIX: Rail breakpoint protected to 1100px, not 1380px -->
+        <aside class="rail">
+
+          <!-- AI PORTFOLIO INTELLIGENCE — highest-value rail card, always first -->
+          <section class="rail-card">
+            <div class="rail-head"><h3>AI portfolio intelligence</h3><a href="#">See all</a></div>
+            <div class="rail-body">
+              <div class="intel-box">
+                <h4>Communication drift is your real team problem</h4>
+                <p>Seven files have gone beyond your 72-hour touch standard. That is an agent behavior issue wearing a transaction hat.</p>
+                <div class="intel-actions"><button>Draft check-in texts</button><button>Queue call list</button></div>
+              </div>
+              <div class="intel-box">
+                <h4>Missing docs concentrated around two agents</h4>
+                <p>Four of five blocking document alerts come from the same two production lanes. Fix it there, not across the board.</p>
+                <div class="intel-actions"><button>Open doc queue</button><button>Coach responsible agents</button></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- COACH PROMPTS — AUDIT FIX: severity-differentiated with left-border color coding -->
+          <section class="rail-card">
+            <div class="rail-head"><h3>Coach prompts for you</h3><a href="#">Open coach</a></div>
+            <div class="rail-body coach-prompt">
+              <div class="tip tip-urgent">
+                <strong>Melissa needs pricing-coach support today</strong>
+                <span>Use AI Coach to draft a market-reset script with comps and a seller-facing explanation. This is today's intervention.</span>
+              </div>
+              <div class="tip tip-warn">
+                <strong>Tina needs process correction, not motivation</strong>
+                <span>Push a document-compliance checklist and require same-day uploads after inbox detection events.</span>
+              </div>
+              <div class="tip tip-info">
+                <strong>Rogers needs faster external escalation</strong>
+                <span>Queue a lender/title escalation playbook automatically for closings inside 7 days.</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- DOCUMENTS BLOCKING MILESTONES -->
+          <section class="rail-card">
+            <div class="rail-head"><h3>Documents blocking milestones</h3><a href="#">View queue</a></div>
+            <div class="rail-body">
+              <div class="feed-item"><strong>Seller disclosure · Nguyen</strong><span>Lender package cannot finalize until upload is complete.</span><div class="badge-block">Blocking</div></div>
+              <div class="feed-item"><strong>Repair addendum · Rogers</strong><span>Inspection response cannot route to signature until language is attached.</span><div class="badge-block">Blocking</div></div>
+              <div class="feed-item"><strong>HOA docs · Hart</strong><span>Buyer review clock starts late if packet remains outside the file.</span><div class="badge-block">Blocking</div></div>
+            </div>
+          </section>
+
+          <!-- RECENT COMMUNICATION -->
+          <section class="rail-card">
+            <div class="rail-head"><h3>Recent communication</h3><a href="#">Open log</a></div>
+            <div class="rail-body">
+              <div class="feed-item"><strong>Rogers: buyer signed inspection amendment</strong><span>8:12 AM · Email received and matched by AI. Seller-side response still pending.</span></div>
+              <div class="feed-item"><strong>Nguyen: seller sent disclosure PDF</strong><span>9:03 AM · Found in inbox but never uploaded into the transaction.</span></div>
+              <div class="feed-item"><strong>Patel: title confirmed closing packet prep</strong><span>Yesterday 4:41 PM · No lender follow-up since — how routine files become meetings.</span></div>
+            </div>
+          </section>
+
+          <!-- ASK VELVET ELVES — sticky escalation point -->
+          <div class="floating-ai">
+            <div>
+              <strong>Ask Velvet Elves</strong>
+              <span>Summarize risk, draft emails, coach an agent, or open the next file that needs intervention.</span>
+            </div>
+            <button class="btn-primary">Open AI</button>
+          </div>
+
+        </aside>
+      </main>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════ OVERLAY + DRAWER ══════════════════════════════ -->
+  <div class="overlay" id="overlay"></div>
+
+  <aside class="agent-drawer" id="agentDrawer">
+    <div class="drawer-head">
+      <div class="drawer-head-left">
+        <div class="drawer-avatar" id="drawerAvatar">AR</div>
+        <div>
+          <h3 id="drawerName">Amanda Rogers</h3>
+          <p id="drawerRole">12 active deals · 2 need intervention today</p>
+        </div>
+      </div>
+      <button class="close-drawer" id="closeDrawer">✕</button>
+    </div>
+    <!-- AUDIT FIX: contact bar always visible in drawer — one-tap access to call/text/email -->
+    <div class="drawer-contact" id="drawerContact">
+      <button class="btn-contact">📞 (615) 555-0182</button>
+      <button class="btn-contact">✉ Email</button>
+      <button class="btn-contact">💬 Text agent</button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+
+  <script>
+    // ── Agents data ──
+    const agents = [
+      {
+        name:'Amanda Rogers', initials:'AR', role:'Buyer specialist',
+        phone:'(615) 555-0182', email:'a.rogers@velvetelves.com',
+        active:12, gci:'$68,420', health:82, risk:'2 critical', riskClass:'red',
+        stale:'1 stale convo', close:'4 closing soon',
+        note:'Strong volume. Needs faster escalation with seller-side silence.',
+        tasks:[
+          'Inspection amendment at 1542 Sugar Maple Ln needs seller-side push before 1:00 PM.',
+          'Repair addendum upload missing from file even though AI found it in email.',
+          'Coach prompt: use lender/title escalation script on Harbor Pointe if update remains stale by noon.'
+        ],
+        kpis:[['$68,420','Pending GCI'],['12','Active deals'],['4','Closing in 14 days'],['82','Health score']]
+      },
+      {
+        name:'Tina Nguyen', initials:'TN', role:'Contract-to-close heavy',
+        phone:'(615) 555-0247', email:'t.nguyen@velvetelves.com',
+        active:7, gci:'$33,180', health:71, risk:'1 doc blocker', riskClass:'amber',
+        stale:'0 stale convos', close:'2 closing soon',
+        note:'Good communication. Process slippage on document uploads is costing clean milestones.',
+        tasks:[
+          'Seller disclosure for 801 Meadow Walk Dr is still outside the transaction record.',
+          'AI Coach should assign same-day upload checklist after inbox detection events.',
+          'Two files are otherwise healthy. Fix docs and stop creating avoidable meetings.'
+        ],
+        kpis:[['$33,180','Pending GCI'],['7','Active deals'],['2','Closing in 14 days'],['71','Health score']]
+      },
+      {
+        name:'Melissa Hart', initials:'MH', role:'Listing focused',
+        phone:'(615) 555-0391', email:'m.hart@velvetelves.com',
+        active:5, gci:'$24,550', health:64, risk:'Needs coaching', riskClass:'amber',
+        stale:'3 stale convos', close:'1 closing soon',
+        note:'This is not an admin rescue case. Seller communication and price strategy need intervention.',
+        tasks:[
+          '872 Ridge Hollow Dr needs a price-reduction conversation and script support today.',
+          'Three seller-side files show no logged human touch in 72+ hours.',
+          'AI Coach should push pricing script, objection handling, and a call-block today.'
+        ],
+        kpis:[['$24,550','Pending GCI'],['5','Active deals'],['1','Closing in 14 days'],['64','Health score']]
+      },
+      {
+        name:'Neil Patel', initials:'NP', role:'Buyer + investor mix',
+        phone:'(615) 555-0458', email:'n.patel@velvetelves.com',
+        active:6, gci:'$29,890', health:77, risk:'1 external drag', riskClass:'amber',
+        stale:'1 stale convo', close:'2 closing soon',
+        note:'Files mostly on pace. Lender/title follow-up cadence needs automation on late-stage deals.',
+        tasks:[
+          '2239 Harbor Pointe Ct needs lender push for clear-to-close milestone.',
+          'One buyer file has not been updated in 48 hours because the outside vendor chain stalled.',
+          'Add automatic escalation sequence for closings inside 7 days.'
+        ],
+        kpis:[['$29,890','Pending GCI'],['6','Active deals'],['2','Closing in 14 days'],['77','Health score']]
+      },
+      {
+        name:'Omar Ellis', initials:'OE', role:'Sphere conversion lane',
+        phone:'(615) 555-0519', email:'o.ellis@velvetelves.com',
+        active:8, gci:'$41,220', health:86, risk:'On pace', riskClass:'green',
+        stale:'2 stale convos', close:'2 closing soon',
+        note:'Healthy book overall. Best candidate for AI Coach upsell because adoption will likely be high.',
+        tasks:[
+          'Two conversations are drifting toward the 72-hour threshold.',
+          'No document blockers right now. Keep the lane clean and use this as your process model.',
+          'Upsell AI Coach with accountability plan and prospecting prompts.'
+        ],
+        kpis:[['$41,220','Pending GCI'],['8','Active deals'],['2','Closing in 14 days'],['86','Health score']]
+      }
+    ];
+
+    // ── Build agent board ──
+    const board = document.getElementById('agentBoard');
+    board.innerHTML = agents.map((agent, index) => `
+      <div class="agent-row" data-index="${index}">
+        <div class="agent-cell">
+          <small>Agent</small>
+          <div class="agent-name">
+            <div class="agent-avatar">${agent.initials}</div>
+            <div>
+              <strong>${agent.name}</strong>
+              <span>${agent.role}</span>
+            </div>
+          </div>
+        </div>
+        <div class="agent-cell">
+          <small>Pending GCI</small>
+          <div class="mono">${agent.gci}</div>
+          <div class="agent-sub">${agent.active} active deals</div>
+        </div>
+        <div class="agent-cell">
+          <small>Health</small>
+          <div class="healthbar"><span style="width:${agent.health}%"></span></div>
+          <div class="agent-sub">Score ${agent.health}</div>
+        </div>
+        <div class="agent-cell cell-stack">
+          <small>Risk</small>
+          <span class="alert-chip ${agent.riskClass}">${agent.risk}</span>
+        </div>
+        <div class="agent-cell cell-stack">
+          <small>Comms / close</small>
+          <div class="agent-sub" style="margin-top:0">${agent.stale}</div>
+          <div class="agent-sub">${agent.close}</div>
+        </div>
+        <div class="agent-cell" style="text-align:right">
+          <button class="btn-secondary" style="font-size:12px;padding:7px 12px" onclick="event.stopPropagation();openAgent(${index})">Drill down</button>
+        </div>
+      </div>
+    `).join('');
+
+    // ── Drawer ──
+    const drawer = document.getElementById('agentDrawer');
+    const overlay = document.getElementById('overlay');
+    const drawerName = document.getElementById('drawerName');
+    const drawerRole = document.getElementById('drawerRole');
+    const drawerAvatar = document.getElementById('drawerAvatar');
+    const drawerContact = document.getElementById('drawerContact');
+    const drawerBody = document.getElementById('drawerBody');
+    const closeDrawerBtn = document.getElementById('closeDrawer');
+
+    function openAgent(index){
+      const agent = agents[index];
+      drawerAvatar.textContent = agent.initials;
+      drawerName.textContent = agent.name;
+      drawerRole.textContent = `${agent.active} active deals · ${agent.risk}`;
+
+      // FIX: wire email to mailto, phone to tel link
+      drawerContact.innerHTML = `
+        <a href="tel:${agent.phone.replace(/\D/g,'')}" class="btn-contact">\uD83D\uDCDE ${agent.phone}</a>
+        <a href="mailto:${agent.email}" class="btn-contact">\u2709 Email</a>
+        <button class="btn-contact">\uD83D\uDCAC Text agent</button>
+      `;
+
+      drawerBody.innerHTML = `
+        <section class="drawer-block">
+          <h4>Agent snapshot</h4>
+          <div class="drawer-kpis">
+            ${agent.kpis.map(([value,label]) => `<div class="drawer-kpi"><strong>${value}</strong><span>${label}</span></div>`).join('')}
+          </div>
+        </section>
+        <section class="drawer-block">
+          <h4>What you should do now</h4>
+          <div class="todo">
+            ${agent.tasks.map(task => `<div class="todo-item"><span>${task}</span></div>`).join('')}
+          </div>
+        </section>
+        <section class="drawer-block">
+          <h4>Jump actions</h4>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-primary">Open ${agent.name.split(' ')[0]}'s transactions</button>
+            <button class="btn-secondary">Launch AI coach</button>
+            <button class="btn-outline-orange">Communication log</button>
+          </div>
+        </section>
+        <section class="drawer-block" style="background:var(--surface-2)">
+          <h4>Agent note</h4>
+          <p style="font-size:13px;line-height:1.55;color:var(--muted)">${agent.note}</p>
+        </section>
+      `;
+      drawer.classList.add('open');
+      overlay.classList.add('show');
+    }
+
+    board.querySelectorAll('.agent-row').forEach(row => {
+      row.addEventListener('click', () => openAgent(+row.dataset.index));
+    });
+
+    function closeDrawer(){
+      drawer.classList.remove('open');
+      overlay.classList.remove('show');
+    }
+
+    closeDrawerBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+
+    // FIX: close drawer on Escape key
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+    });
+
+    // ── Dynamic date in topbar ──
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const now = new Date();
+    document.getElementById('topDateline').textContent =
+      `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()} \u00B7 Team Leader`;
+
+    // ── Intake dropzone: drag-and-drop + file input wiring ──
+    const dz = document.getElementById('dropzone');
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.multiple = true;
+    fileInput.accept = '.pdf,.docx,.doc';
+    fileInput.style.display = 'none';
+    document.body.appendChild(fileInput);
+
+    fileInput.addEventListener('change', function(){
+      if (this.files && this.files.length) {
+        const names = Array.from(this.files).map(f => f.name).join(', ');
+        alert(this.files.length + ' file(s) selected: ' + names + '\n\nIn production, AI would process these and open a new transaction.');
+      }
+    });
+
+    ['dragover','dragenter'].forEach(e => dz.addEventListener(e, ev => {
+      ev.preventDefault();
+      dz.classList.add('drag-over');
+    }));
+
+    // FIX: drop actually handles files instead of silently discarding them
+    dz.addEventListener('drop', function(ev){
+      ev.preventDefault();
+      dz.classList.remove('drag-over');
+      const files = ev.dataTransfer.files;
+      if (files && files.length) {
+        const names = Array.from(files).map(f => f.name).join(', ');
+        alert(files.length + ' file(s) dropped: ' + names + '\n\nIn production, AI would process these and open a new transaction.');
+      }
+    });
+
+    dz.addEventListener('dragleave', ev => { ev.preventDefault(); dz.classList.remove('drag-over'); });
+
+    // FIX: wire "Drop documents" and "Choose files" buttons to file picker
+    dz.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        fileInput.click();
+      });
+    });
+
+    // ── FIX: upload flyout — real file input instead of alert stub ──
+    const flyoutFileInput = document.createElement('input');
+    flyoutFileInput.type = 'file';
+    flyoutFileInput.accept = '.pdf,.docx,.doc';
+    flyoutFileInput.style.display = 'none';
+    document.body.appendChild(flyoutFileInput);
+
+    flyoutFileInput.addEventListener('change', function(){
+      if (this.files && this.files.length) {
+        document.getElementById('uploadFlyout').classList.remove('show');
+        alert('"' + this.files[0].name + '" uploaded to Nguyen \u00B7 801 Meadow Walk Dr.\n\nIn production this attaches to the transaction record.');
+      }
+    });
+
+    const flyoutChooseBtn = document.querySelector('#uploadFlyout .btn-primary');
+    if (flyoutChooseBtn) {
+      flyoutChooseBtn.onclick = function(e){ e.stopPropagation(); flyoutFileInput.click(); };
+    }
+
+    // FIX: flyout Cancel stops propagation
+    const flyoutCancelBtn = document.querySelector('#uploadFlyout .btn-secondary');
+    if (flyoutCancelBtn) {
+      flyoutCancelBtn.onclick = function(e){
+        e.stopPropagation();
+        document.getElementById('uploadFlyout').classList.remove('show');
+      };
+    }
+
+    // FIX: "Open AI" floating button
+    const openAIBtn = document.querySelector('.floating-ai .btn-primary');
+    if (openAIBtn) {
+      openAIBtn.addEventListener('click', function(){
+        alert('Velvet Elves AI — in production, this opens the AI assistant panel.');
+      });
+    }
+
+    // FIX: "+ Add Transaction" / "+ Add New Transaction" buttons
+    document.querySelectorAll('button, .btn-primary, .btn-outline-orange').forEach(btn => {
+      const txt = btn.textContent.trim();
+      if ((txt.includes('Add') && txt.includes('Transaction')) || txt === '+ Add Transaction' || txt === '+ Add New Transaction') {
+        btn.addEventListener('click', function(){
+          alert('New Transaction — in production, this opens the transaction intake flow.');
+        });
+      }
+    });
+  </script>
+</body>
+</html>

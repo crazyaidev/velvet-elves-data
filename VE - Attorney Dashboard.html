@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velvet Elves — Attorney Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    /* ─── TOKENS ─────────────────────────────────────────────── */
+    :root {
+      --orange:        #E26812;
+      --orange-dark:   #B85107;
+      --orange-mid:    #F48C3D;
+      --orange-light:  #FFF3E8;
+      --orange-border: #F0C49A;
+      --orange-soft:   #FFFAF5;
+      --navy:          #1B3058;
+      --navy-2:        #243F6E;
+      --navy-3:        #2E4F85;
+      --bg:            #F4F2EF;
+      --surface:       #FFFFFF;
+      --surface-2:     #FAFAF8;
+      --surface-3:     #F6F5F2;
+      --line:          #E6E3DC;
+      --line-2:        #D6D2C8;
+      --text:          #161616;
+      --text-2:        #3D3D3A;
+      --muted:         #6B6B68;
+      --ghost:         #9A9A96;
+      --green:         #126544;
+      --green-bg:      #EBF7F1;
+      --green-border:  #A9D9BF;
+      --green-text:    #0E5238;
+      --amber:         #9A6005;
+      --amber-bg:      #FEF7E7;
+      --amber-border:  #E8C47E;
+      --amber-text:    #7A4C04;
+      --red:           #B83230;
+      --red-bg:        #FEF1F1;
+      --red-border:    #EAB8B8;
+      --red-text:      #922826;
+      --blue:          #234A7D;
+      --blue-bg:       #EDF3FF;
+      --blue-border:   #BACAE8;
+      --blue-text:     #1C3D6B;
+      --shadow-sm:     0 1px 3px rgba(20,20,20,.06), 0 1px 2px rgba(20,20,20,.04);
+      --shadow:        0 4px 16px rgba(20,20,20,.08), 0 1px 4px rgba(20,20,20,.04);
+      --shadow-lg:     0 12px 40px rgba(20,20,20,.10), 0 2px 8px rgba(20,20,20,.05);
+      --radius-sm:     10px;
+      --radius:        16px;
+      --radius-lg:     20px;
+      --sidebar-w:     256px;
+      --topbar-h:      58px;
+      --command-h:     48px;
+      --rail-w:        340px;
+      --font-sans:     'IBM Plex Sans', sans-serif;
+      --font-serif:    'Lora', serif;
+      --font-mono:     'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; font-size: 14px; line-height: 1.5; }
+    button, input, select { font: inherit; }
+    a { text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+
+    /* ─── LAYOUT ─────────────────────────────────────────────── */
+    .app {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      grid-template-rows: 1fr;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ─── SIDEBAR ─────────────────────────────────────────────── */
+    .sidebar {
+      background: linear-gradient(175deg, var(--navy) 0%, #162644 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      border-right: 1px solid rgba(255,255,255,.07);
+    }
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.018'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 16px 16px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .brand-mark {
+      width: 38px; height: 38px;
+      border-radius: 11px;
+      background: var(--orange);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      box-shadow: 0 2px 8px rgba(226,104,18,.35), inset 0 0 0 1px rgba(255,255,255,.15);
+      flex-shrink: 0;
+    }
+    .brand-copy strong {
+      display: block;
+      font-family: var(--font-serif);
+      font-size: 17px;
+      color: #fff;
+      line-height: 1;
+    }
+    .brand-copy span {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.5);
+      margin-top: 4px;
+    }
+
+    /* ─── SIDEBAR STATS ─────────────────────────────────────── */
+    .sidebar-stats {
+      padding: 12px 14px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .stats-label {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+      margin-bottom: 9px;
+    }
+    .stats-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stat-pill {
+      flex: 1;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 8px;
+      padding: 8px 8px 7px;
+      text-align: center;
+    }
+    .stat-pill .n {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .stat-pill .t {
+      font-size: 9px;
+      color: rgba(255,255,255,.6);
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    .n.red   { color: #FF8E8A; }
+    .n.amber { color: #FFC97A; }
+    .n.blue  { color: #9BBEF8; }
+    .n.green { color: #7ADBA8; }
+
+    /* ─── MATTER LIST ─────────────────────────────────────────── */
+    .matters-section {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 12px 14px 0;
+    }
+    .matters-label {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.45);
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+    .matter-list {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 2px;
+      padding-bottom: 12px;
+    }
+    .matter-list::-webkit-scrollbar { width: 3px; }
+    .matter-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
+
+    .matter-btn {
+      width: 100%;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 13px;
+      padding: 11px 12px;
+      text-align: left;
+      color: #fff;
+      transition: background .15s, border-color .15s;
+      position: relative;
+    }
+    .matter-btn:hover { background: rgba(255,255,255,.08); }
+    .matter-btn.active {
+      background: rgba(226,104,18,.14);
+      border-color: rgba(226,104,18,.28);
+    }
+    .matter-btn.active::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%;
+      transform: translateY(-50%);
+      width: 3px; height: 60%;
+      background: var(--orange);
+      border-radius: 0 3px 3px 0;
+    }
+    .matter-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .matter-name { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
+    .mbadge {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: .3px;
+      padding: 2.5px 7px;
+      border-radius: 999px;
+      border: 1px solid;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    .mbadge.critical { background: rgba(190,50,48,.2); border-color: rgba(234,184,184,.2); color: #FF9A97; }
+    .mbadge.attention { background: rgba(154,96,5,.2); border-color: rgba(232,196,126,.2); color: #FFCA7A; }
+    .mbadge.clean { background: rgba(18,101,68,.2); border-color: rgba(169,217,191,.2); color: #7ADBA8; }
+    .matter-meta { font-size: 11px; color: rgba(255,255,255,.62); line-height: 1.45; }
+
+    /* ─── SIDEBAR FOOTER ─────────────────────────────────────── */
+    .sidebar-footer {
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .sf-btn {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 11px;
+      font-size: 12.5px;
+      font-weight: 600;
+      transition: .15s;
+      border: none;
+    }
+    .sf-btn.primary { background: var(--orange); color: #fff; }
+    .sf-btn.primary:hover { background: var(--orange-dark); }
+    .sf-btn.secondary { background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); border: 1px solid rgba(255,255,255,.1); }
+    .sf-btn.secondary:hover { background: rgba(255,255,255,.13); }
+
+    /* ─── MAIN COLUMN ─────────────────────────────────────────── */
+    .main {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* ─── TOPBAR ─────────────────────────────────────────────── */
+    .topbar {
+      height: var(--topbar-h);
+      background: rgba(244,242,239,.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+      min-width: 0;
+    }
+    .crumb-path {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      color: var(--ghost);
+    }
+    .crumb-sep { color: var(--line-2); margin: 0 6px; }
+    .tb-matter-name {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      line-height: 1;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tb-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .tb-status-badge.critical { background: var(--red-bg); border-color: var(--red-border); color: var(--red-text); }
+    .tb-status-badge.attention { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+    .tb-status-badge.clean { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .tb-btn {
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      transition: .15s;
+      border: none;
+    }
+    .tb-btn.primary { background: var(--orange); color: #fff; }
+    .tb-btn.primary:hover { background: var(--orange-dark); }
+    .tb-btn.ghost { background: transparent; color: var(--text-2); border: 1px solid var(--line-2); }
+    .tb-btn.ghost:hover { background: var(--surface); border-color: var(--orange-border); color: var(--orange-dark); }
+    .tb-icon-btn {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: var(--surface);
+      transition: .15s;
+    }
+    .tb-icon-btn:hover { border-color: var(--orange-border); color: var(--orange); background: var(--orange-light); }
+
+    /* ─── COMMAND STRIP ─────────────────────────────────────── */
+    .command-strip {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      height: var(--command-h);
+      border-bottom: 1px solid var(--line);
+      transition: background .25s, border-color .25s;
+      z-index: 9;
+    }
+    .command-strip.is-critical {
+      background: linear-gradient(90deg, #FEF1F0 0%, var(--surface) 60%);
+      border-bottom-color: var(--red-border);
+    }
+    .command-strip.is-attention {
+      background: linear-gradient(90deg, #FEFAEE 0%, var(--surface) 60%);
+      border-bottom-color: var(--amber-border);
+    }
+    .command-strip.is-clean {
+      background: linear-gradient(90deg, #F0FBF5 0%, var(--surface) 60%);
+      border-bottom-color: var(--green-border);
+    }
+    .command-icon {
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .command-text {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-2);
+      min-width: 0;
+    }
+    .command-text strong { font-weight: 600; }
+    .command-text .ct-muted { color: var(--muted); font-size: 12px; }
+    .command-cta {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      transition: .15s;
+      flex-shrink: 0;
+    }
+    .command-cta.red { background: var(--red-bg); color: var(--red-text); border: 1px solid var(--red-border); }
+    .command-cta.red:hover { background: #FADDDD; }
+    .command-cta.amber { background: var(--amber-bg); color: var(--amber-text); border: 1px solid var(--amber-border); }
+    .command-cta.amber:hover { background: #FEF2D0; }
+    .command-cta.green { background: var(--green-bg); color: var(--green-text); border: 1px solid var(--green-border); }
+    .command-cta.green:hover { background: #DAEEF3; }
+    .command-strip-clean-msg {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--green);
+    }
+
+    /* ─── WORKSPACE ─────────────────────────────────────────── */
+    .workspace {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--rail-w);
+      gap: 16px;
+      padding: 16px 20px 24px;
+      align-items: start;
+    }
+    .workspace::-webkit-scrollbar { width: 6px; }
+    .workspace::-webkit-scrollbar-thumb { background: var(--line-2); border-radius: 6px; }
+
+    .col { display: flex; flex-direction: column; gap: 14px; }
+
+    /* ─── PANEL BASE ─────────────────────────────────────────── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+    }
+    .panel.soft { background: var(--surface-2); box-shadow: none; }
+
+    /* ─── SUMMARY CARDS ─────────────────────────────────────── */
+    .summary-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 16px 18px;
+    }
+    .sum-card {
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      padding: 13px 13px 12px;
+      cursor: pointer;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .sum-card:hover { border-color: var(--orange-border); box-shadow: var(--shadow-sm); }
+    .sum-card .sv {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 600;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .sv.red   { color: var(--red); }
+    .sv.amber { color: var(--amber); }
+    .sv.blue  { color: var(--blue); }
+    .sv.green { color: var(--green); }
+    .sum-card .sl { font-size: 11.5px; font-weight: 600; line-height: 1.3; color: var(--text-2); }
+    .sum-card .sn { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 4px; }
+
+    /* ─── SECTION HEADER ─────────────────────────────────────── */
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px 0;
+    }
+    .sec-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ghost);
+      margin-bottom: 4px;
+    }
+    .sec-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .sec-action {
+      padding: 7px 12px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: transparent;
+      transition: .15s;
+    }
+    .sec-action:hover { border-color: var(--orange-border); color: var(--orange-dark); background: var(--orange-light); }
+
+    /* ─── DOC ROWS ─────────────────────────────────────────────── */
+    .doc-list { display: flex; flex-direction: column; gap: 8px; padding: 12px 18px 16px; }
+
+    .doc-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto auto auto;
+      gap: 14px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 13px 14px;
+      background: var(--surface-2);
+      transition: border-color .15s;
+    }
+    .doc-row.is-critical {
+      border-color: var(--red-border);
+      background: #FFFBFB;
+    }
+    .doc-row.is-attention {
+      border-color: var(--amber-border);
+      background: #FFFDF7;
+    }
+    .doc-row:hover { border-color: var(--line-2); }
+    .doc-row.is-critical:hover { border-color: #D8A0A0; }
+    .doc-row.is-attention:hover { border-color: #D8BA80; }
+
+    .doc-name strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .doc-name span {
+      display: block;
+      font-size: 11.5px;
+      color: var(--muted);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+    .doc-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
+    }
+    .doc-col-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--ghost);
+      margin-bottom: 4px;
+      white-space: nowrap;
+    }
+    .doc-col-val {
+      font-size: 12px;
+      color: var(--text-2);
+      line-height: 1.35;
+    }
+    .doc-col-val.muted { color: var(--muted); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      letter-spacing: .3px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .pill.green { background: var(--green-bg); border-color: var(--green-border); color: var(--green-text); }
+    .pill.amber { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber-text); }
+    .pill.red   { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red-text); }
+    .pill.blue  { background: var(--blue-bg);  border-color: var(--blue-border);  color: var(--blue-text); }
+
+    /* Priority-aware action buttons */
+    .doc-action {
+      padding: 8px 14px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: .15s;
+    }
+    .doc-action.primary-red { background: var(--red); color: #fff; }
+    .doc-action.primary-red:hover { background: #922826; }
+    .doc-action.primary-amber { background: var(--orange); color: #fff; }
+    .doc-action.primary-amber:hover { background: var(--orange-dark); }
+    .doc-action.secondary { background: var(--surface); color: var(--text-2); border: 1px solid var(--line-2); }
+    .doc-action.secondary:hover { border-color: var(--orange-border); color: var(--orange-dark); background: var(--orange-light); }
+
+    /* ─── TIMELINE ───────────────────────────────────────────── */
+    .timeline-list { display: flex; flex-direction: column; padding: 10px 18px 16px; gap: 0; }
+    .tl-item {
+      display: grid;
+      grid-template-columns: 78px 1fr auto;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 11px 0;
+      border-top: 1px solid var(--line);
+      transition: background .1s;
+    }
+    .tl-item:first-child { border-top: none; }
+    .tl-date { font-family: var(--font-mono); font-size: 10.5px; color: var(--ghost); padding-top: 2px; }
+    .tl-body strong { display: block; font-size: 12.5px; font-weight: 600; }
+    .tl-body span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 3px; }
+    .tl-pill { font-size: 9px; padding: 3px 8px; }
+
+    /* ─── CHANGES ─────────────────────────────────────────────── */
+    .changes-list { display: flex; flex-direction: column; gap: 8px; padding: 10px 18px 16px; }
+    .change-item {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface-2);
+    }
+    .change-item strong { display: block; font-size: 12.5px; font-weight: 600; }
+    .change-item span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.45; margin-top: 3px; }
+
+    /* ─── RIGHT RAIL ─────────────────────────────────────────── */
+    .rail-panel { padding: 14px 16px 16px; }
+    .rail-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--ghost);
+      margin-bottom: 11px;
+    }
+
+    /* AI Brief */
+    .brief-card {
+      border: 1px solid var(--orange-border);
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--orange-soft), #fff 70%);
+      overflow: hidden;
+    }
+    .brief-summary {
+      padding: 14px 14px 12px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+    .brief-main-title {
+      font-size: 14px;
+      font-family: var(--font-serif);
+      line-height: 1.3;
+      color: var(--text);
+      flex: 1;
+    }
+    .brief-toggle {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      background: rgba(226,104,18,.12);
+      color: var(--orange);
+      font-size: 11px;
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+    .brief-toggle.open { transform: rotate(180deg); }
+    .brief-body { padding: 0 14px 14px; display: none; border-top: 1px solid rgba(226,104,18,.15); }
+    .brief-body.open { display: block; }
+    .brief-copy { font-size: 12.5px; color: var(--muted); line-height: 1.55; padding-top: 11px; }
+    .brief-items { margin-top: 11px; display: flex; flex-direction: column; gap: 9px; }
+    .brief-item { border-top: 1px solid rgba(226,104,18,.12); padding-top: 9px; }
+    .brief-item strong {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--orange-dark);
+      margin-bottom: 3px;
+    }
+    .brief-item span { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* Review Queue */
+    .queue-list { display: flex; flex-direction: column; gap: 7px; }
+    .queue-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: var(--surface);
+    }
+    .queue-item strong { display: block; font-size: 12.5px; font-weight: 600; }
+    .queue-item span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.4; margin-top: 3px; }
+
+    /* Contacts */
+    .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .contact-card {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      padding: 11px 11px 10px;
+      background: var(--surface);
+      transition: border-color .15s;
+    }
+    .contact-card:hover { border-color: var(--line-2); }
+    .contact-role {
+      font-family: var(--font-mono);
+      font-size: 8.5px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--ghost);
+      margin-bottom: 5px;
+    }
+    .contact-name { font-size: 12.5px; font-weight: 600; margin-bottom: 4px; }
+    .contact-detail { font-size: 11px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+    .contact-actions { display: flex; gap: 5px; }
+    .contact-btn {
+      flex: 1;
+      padding: 5px 6px;
+      border-radius: 7px;
+      font-size: 10.5px;
+      font-weight: 600;
+      text-align: center;
+      border: 1px solid var(--line);
+      background: var(--surface-3);
+      color: var(--text-2);
+      transition: .13s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+    .contact-btn:hover { border-color: var(--orange-border); color: var(--orange-dark); background: var(--orange-light); }
+    .contact-btn svg { width: 10px; height: 10px; }
+
+    /* Clean matter minimal state */
+    .clean-banner {
+      margin: 14px 18px 16px;
+      border: 1px solid var(--green-border);
+      border-radius: 12px;
+      background: var(--green-bg);
+      padding: 13px 14px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+    }
+    .clean-icon { font-size: 20px; flex-shrink: 0; }
+    .clean-text strong { display: block; font-size: 13px; font-weight: 600; color: var(--green-text); }
+    .clean-text span { display: block; font-size: 11.5px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+    .clean-expand-btn {
+      margin-left: auto;
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--surface);
+      color: var(--green-text);
+      border: 1px solid var(--green-border);
+      transition: .13s;
+    }
+    .clean-expand-btn:hover { background: #D5EFE2; }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────────── */
+    @media (max-width: 1300px) {
+      :root { --rail-w: 300px; }
+      .summary-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    /* ─── ANIMATIONS ─────────────────────────────────────────── */
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .matter-panel-content {
+      animation: fadeSlide .2s ease both;
+    }
+
+    /* ─── TOOLTIP ─────────────────────────────────────────────── */
+    [data-tip] { position: relative; }
+    [data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════════════════════════════ SIDEBAR ═══════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">⚖️</div>
+      <div class="brand-copy">
+        <strong>Velvet Elves</strong>
+        <span>Attorney Workspace</span>
+      </div>
+    </div>
+
+    <div class="sidebar-stats">
+      <div class="stats-label">Today at a glance</div>
+      <div class="stats-row">
+        <div class="stat-pill">
+          <div class="n red">3</div>
+          <div class="t">need review today</div>
+        </div>
+        <div class="stat-pill">
+          <div class="n amber">8</div>
+          <div class="t">AI-prepared</div>
+        </div>
+        <div class="stat-pill">
+          <div class="n green">19</div>
+          <div class="t">filed &amp; clean</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="matters-section">
+      <div class="matters-label">Matters — 4 active</div>
+      <div class="matter-list">
+
+        <button class="matter-btn active" data-id="rogers">
+          <div class="matter-top">
+            <div class="matter-name">Rogers · 1542 Sugar Maple Ln</div>
+            <div class="mbadge critical">review today</div>
+          </div>
+          <div class="matter-meta">Inspection amendment pending signature. Title objection response due 4:00 PM.</div>
+        </button>
+
+        <button class="matter-btn" data-id="nguyen">
+          <div class="matter-top">
+            <div class="matter-name">Nguyen · 801 Meadow Walk Dr</div>
+            <div class="mbadge attention">docs missing</div>
+          </div>
+          <div class="matter-meta">Seller disclosure uploaded. Notarized affidavit still missing from file.</div>
+        </button>
+
+        <button class="matter-btn" data-id="patel">
+          <div class="matter-top">
+            <div class="matter-name">Patel · 2239 Harbor Pointe Ct</div>
+            <div class="mbadge attention">deadline soon</div>
+          </div>
+          <div class="matter-meta">Clear-to-close packet ready. Attorney sign-off required by 2:00 PM.</div>
+        </button>
+
+        <button class="matter-btn" data-id="morris">
+          <div class="matter-top">
+            <div class="matter-name">Morris · 624 Winthrop Ave</div>
+            <div class="mbadge clean">clean file</div>
+          </div>
+          <div class="matter-meta">AI finished package index and exception summary. No blockers detected.</div>
+        </button>
+
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="sf-btn primary">Upload documents</button>
+      <button class="sf-btn secondary">+ New matter</button>
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════════════ MAIN ════════════ -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <span class="crumb-path">Matters<span class="crumb-sep">/</span></span>
+        <span class="tb-matter-name" id="tbMatterName">Rogers · 1542 Sugar Maple Ln</span>
+        <div class="tb-status-badge critical" id="tbStatusBadge">
+          <div class="badge-dot"></div>
+          <span id="tbStatusText">Critical</span>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <button class="tb-icon-btn" data-tip="Filing log">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="3" rx="1" fill="currentColor" opacity=".5"/><rect x="2" y="6.5" width="12" height="3" rx="1" fill="currentColor" opacity=".75"/><rect x="2" y="11" width="7" height="3" rx="1" fill="currentColor"/></svg>
+        </button>
+        <button class="tb-icon-btn" data-tip="Matter settings">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="tb-btn ghost">Open filing log</button>
+        <button class="tb-btn primary">Upload documents</button>
+      </div>
+    </header>
+
+    <!-- COMMAND STRIP (persistent next-action bar) -->
+    <div class="command-strip is-critical" id="commandStrip">
+      <span class="command-icon" id="commandIcon">⚠️</span>
+      <div class="command-text" id="commandText">
+        <strong>Title objection response due today at 4:00 PM</strong>
+        <span class="ct-muted"> · Miss this and closing schedule shifts. AI draft is ready for your review.</span>
+      </div>
+      <button class="command-cta red" id="commandCta">Review draft →</button>
+    </div>
+
+    <!-- WORKSPACE -->
+    <div class="workspace">
+
+      <!-- LEFT COLUMN -->
+      <div class="col" id="mainCol">
+        <!-- Injected by JS -->
+      </div>
+
+      <!-- RIGHT RAIL -->
+      <aside class="col" id="railCol">
+        <!-- Injected by JS -->
+      </aside>
+
+    </div>
+  </main>
+</div>
+
+<!-- ══════════════════════════════════════ DATA + JS ══════════════════════ -->
+<script>
+const matters = {
+  rogers: {
+    id: 'rogers',
+    titleFull: 'Rogers · 1542 Sugar Maple Ln',
+    status: 'critical',
+    statusLabel: 'Critical',
+    command: {
+      icon: '⚠️',
+      text: '<strong>Title objection response due today at 4:00 PM</strong><span class="ct-muted"> · Miss this and closing schedule shifts. AI draft is ready for your review.</span>',
+      ctaLabel: 'Review draft →',
+      ctaClass: 'red'
+    },
+    summary: [
+      { val: '2', cls: 'red',   label: 'docs blocking release',   note: 'Inspection amendment + title objection response — both need attorney review today.' },
+      { val: '4:00 PM', cls: 'amber', label: 'next legal deadline', note: 'Miss this and the title issue response may push the closing schedule.' },
+      { val: '3', cls: 'blue',  label: 'AI-prepared items ready', note: 'Drafted language, indexed exhibits, and attached the related communication chain.' },
+      { val: '71%', cls: 'green', label: 'file completeness',     note: 'Enough assembled to work efficiently, but not release-ready yet.' }
+    ],
+    docs: [
+      {
+        priority: 'critical',
+        name: 'Title objection response',
+        desc: 'AI drafted a response shell and linked the title commitment. Final legal position still needs attorney approval.',
+        statusPill: 'red', statusLabel: 'Blocking release',
+        owner: 'Attorney review',
+        due: 'Today · 4:00 PM',
+        ai: 'Drafted response + matched exhibits',
+        btnLabel: 'Review draft', btnClass: 'primary-red'
+      },
+      {
+        priority: 'attention',
+        name: 'Inspection amendment',
+        desc: 'Buyer signed. Seller signature outstanding. Language change needs legal eyes before release.',
+        statusPill: 'amber', statusLabel: 'Waiting on sig.',
+        owner: 'Attorney + seller',
+        due: 'Today · 1:00 PM',
+        ai: 'Parsed request, prepared redline',
+        btnLabel: 'Open draft', btnClass: 'primary-amber'
+      },
+      {
+        priority: '',
+        name: 'Sales disclosure package',
+        desc: 'Assembled and indexed. No legal issue detected. Release with amendment set.',
+        statusPill: 'blue', statusLabel: 'AI prepared',
+        owner: 'Ready after review',
+        due: 'No fixed deadline',
+        ai: 'Merged file + checked signatures',
+        btnLabel: 'Preview', btnClass: 'secondary'
+      },
+      {
+        priority: '',
+        name: 'Closing protection letter',
+        desc: 'Filed and complete. Affects downstream title release confidence.',
+        statusPill: 'green', statusLabel: 'Complete',
+        owner: 'Filed',
+        due: 'Completed',
+        ai: 'Logged and indexed',
+        btnLabel: 'View', btnClass: 'secondary'
+      }
+    ],
+    timeline: [
+      { date: 'Today', title: 'Approve title objection response', copy: 'If this response does not go out today, the title issue will likely push the planned closing schedule.', pill: 'red', pillText: 'hard stop' },
+      { date: 'Today', title: 'Release inspection amendment for seller signature', copy: 'Document is drafted. Remaining work is legal approval and release timing.', pill: 'amber', pillText: 'same-day' },
+      { date: 'Tomorrow', title: 'Confirm receipt from title company', copy: 'Once filed, the system marks the title objection resolved and moves the matter out of red status.', pill: 'blue', pillText: 'follow-up' }
+    ],
+    changes: [
+      { title: 'Buyer signed the inspection amendment at 8:12 AM', copy: 'AI matched the signed PDF to the open amendment request and updated signature status automatically.' },
+      { title: 'Title commitment uploaded from email', copy: 'System indexed the commitment, extracted the objection deadline, and linked the issue list to the response draft.' },
+      { title: 'Seller disclosure packet recompiled', copy: 'No new legal issue found. Rebuild triggered because one exhibit was replaced with a clearer scan.' }
+    ],
+    brief: {
+      title: 'Why the AI is flagging this file',
+      copy: 'The system found a title objection deadline, drafted a response shell, linked the underlying commitment, and marked the matter red because a lawyer still needs to approve the reasoning before anything goes out.',
+      did: 'Drafted proposed language, indexed supporting exhibits, and matched the deadline to the contract and title commitment.',
+      human: 'Because deadline math is not legal judgment. The AI can organize and draft. It cannot decide what legal position you want to take.',
+      next: 'Review the title objection response first. Once approved, release the inspection amendment for signature in the same pass.'
+    },
+    queue: [
+      { title: 'Title objection response', copy: 'AI prepared draft is complete. Waiting for human review before filing.' },
+      { title: 'Inspection amendment release', copy: 'All supporting communication is attached. One approval step remains.' },
+      { title: 'Seller disclosure packet', copy: 'Ready to release after the amendment is approved.' }
+    ],
+    contacts: [
+      { role: 'Seller', name: 'Paul Rogers', email: 'paul@rogersmail.com', phone: '(317) 555-0137' },
+      { role: 'Buyer agent', name: 'Dani Moss', email: 'dani@northlinerealty.com', phone: '(317) 555-0182' },
+      { role: 'Title company', name: 'ClearPath Title', email: 'closings@clearpathtitle.com', phone: '(317) 555-0111' },
+      { role: 'Platform support', name: 'VE Legal Ops', email: 'legalops@velvetelves.ai', phone: null }
+    ]
+  },
+  nguyen: {
+    id: 'nguyen',
+    titleFull: 'Nguyen · 801 Meadow Walk Dr',
+    status: 'attention',
+    statusLabel: 'Docs missing',
+    command: {
+      icon: '📋',
+      text: '<strong>Notarized affidavit still missing</strong><span class="ct-muted"> · Lender packet is blocked until received. AI drafted the request note — send it now.</span>',
+      ctaLabel: 'Request item →',
+      ctaClass: 'amber'
+    },
+    summary: [
+      { val: '1', cls: 'red',   label: 'doc blocking release',    note: 'A notarized affidavit is still missing from the file.' },
+      { val: 'Tomorrow', cls: 'amber', label: 'next legal deadline', note: 'Lender package cannot finalize cleanly until the affidavit is in place.' },
+      { val: '2', cls: 'blue',  label: 'AI-prepared items ready', note: 'Assembled the disclosure set and drafted the request note to the seller.' },
+      { val: '84%', cls: 'green', label: 'file completeness',     note: 'The matter is close, but one missing formal document still matters.' }
+    ],
+    docs: [
+      {
+        priority: 'critical',
+        name: 'Notarized seller affidavit',
+        desc: 'Required before the lender package can be finalized. AI could not verify any uploaded substitute as legally equivalent.',
+        statusPill: 'red', statusLabel: 'Blocking release',
+        owner: 'Seller + attorney',
+        due: 'Tomorrow · 10:00 AM',
+        ai: 'Flagged missing requirement',
+        btnLabel: 'Request item', btnClass: 'primary-red'
+      },
+      {
+        priority: '',
+        name: 'Seller disclosure package',
+        desc: 'Uploaded, indexed, and cross-checked against the property file.',
+        statusPill: 'green', statusLabel: 'Complete',
+        owner: 'Filed',
+        due: 'Completed',
+        ai: 'Checked signatures and dates',
+        btnLabel: 'View', btnClass: 'secondary'
+      },
+      {
+        priority: 'attention',
+        name: 'Lender packet cover letter',
+        desc: 'Drafted and ready. Hold release until the affidavit is received so the package does not need a second pass.',
+        statusPill: 'amber', statusLabel: 'On hold',
+        owner: 'Attorney staff',
+        due: 'After affidavit',
+        ai: 'Prepared transmittal language',
+        btnLabel: 'Preview', btnClass: 'primary-amber'
+      },
+      {
+        priority: '',
+        name: 'Settlement draft memo',
+        desc: 'No legal blocker detected. Ready so matter can move quickly once affidavit lands.',
+        statusPill: 'blue', statusLabel: 'AI prepared',
+        owner: 'Ready after missing doc',
+        due: 'No fixed deadline',
+        ai: 'Generated checklist and memo shell',
+        btnLabel: 'Open', btnClass: 'secondary'
+      }
+    ],
+    timeline: [
+      { date: 'Today', title: 'Request notarized affidavit from seller', copy: 'This is the one item that keeps the file from becoming fully release-ready.', pill: 'red', pillText: 'must do' },
+      { date: 'Tomorrow', title: 'Review affidavit for form compliance', copy: 'AI will not mark this item complete until a human confirms the notarization is usable.', pill: 'amber', pillText: 'review' },
+      { date: 'Tomorrow', title: 'Release lender packet', copy: 'Once the affidavit is accepted, the remaining documents can move out cleanly in one batch.', pill: 'blue', pillText: 'next' }
+    ],
+    changes: [
+      { title: 'Seller disclosure PDF uploaded at 9:03 AM', copy: 'Document pulled from email, indexed, and matched to the correct matter automatically.' },
+      { title: 'AI rebuilt the lender package checklist', copy: 'One line item remains open because the notarized affidavit is still absent.' },
+      { title: 'No new legal issues detected in the latest upload set', copy: 'The problem here is completeness, not drafting risk.' }
+    ],
+    brief: {
+      title: 'Why the AI is flagging this file',
+      copy: 'The system is not worried about legal language here. It is worried about a missing formal document that would force rework later if nobody catches it now.',
+      did: 'Checked uploaded documents against the expected file set, drafted the seller request note, and held the lender packet from release.',
+      human: 'Because the AI can tell you something is missing, but it should not decide whether a replacement document is legally acceptable.',
+      next: 'Request the notarized affidavit now, then review it for usable form once it comes in.'
+    },
+    queue: [
+      { title: 'Missing notarized affidavit', copy: 'Highest priority — blocks the next package release.' },
+      { title: 'Lender packet cover letter', copy: 'Prepared and waiting for the file to become complete.' },
+      { title: 'Settlement memo shell', copy: 'Ready for final matter cleanup after the affidavit is accepted.' }
+    ],
+    contacts: [
+      { role: 'Seller', name: 'Linh Nguyen', email: 'linh@meadowwalkmail.com', phone: '(317) 555-0148' },
+      { role: 'Lender', name: 'ArrowStone Lending', email: 'processing@arrowstonelending.com', phone: '(317) 555-0172' },
+      { role: 'Title company', name: 'ClearPath Title', email: 'orders@clearpathtitle.com', phone: '(317) 555-0111' },
+      { role: 'Platform support', name: 'VE Legal Ops', email: 'legalops@velvetelves.ai', phone: null }
+    ]
+  },
+  patel: {
+    id: 'patel',
+    titleFull: 'Patel · 2239 Harbor Pointe Ct',
+    status: 'attention',
+    statusLabel: 'Deadline soon',
+    command: {
+      icon: '📦',
+      text: '<strong>Clear-to-close packet needs your sign-off by 2:00 PM today</strong><span class="ct-muted"> · AI built the full packet. Title is waiting on you — one review, one release.</span>',
+      ctaLabel: 'Review packet →',
+      ctaClass: 'amber'
+    },
+    summary: [
+      { val: '1', cls: 'amber', label: 'awaiting legal sign-off', note: 'The clear-to-close packet is drafted and ready, but not released.' },
+      { val: '2:00 PM', cls: 'amber', label: 'next legal deadline', note: 'Title wants the signed release packet this afternoon to stay on schedule.' },
+      { val: '4', cls: 'blue',  label: 'AI-prepared items ready', note: 'Packet draft, exhibit ordering, communication summary, and release checklist are complete.' },
+      { val: '93%', cls: 'green', label: 'file completeness',     note: 'Almost clean. The hold-up is attorney release, not missing data.' }
+    ],
+    docs: [
+      {
+        priority: 'attention',
+        name: 'Clear-to-close packet',
+        desc: 'Drafted, indexed, and bundled. Requires attorney release before it can go to title.',
+        statusPill: 'amber', statusLabel: 'Awaiting sign-off',
+        owner: 'Attorney review',
+        due: 'Today · 2:00 PM',
+        ai: 'Built packet + release checklist',
+        btnLabel: 'Review now', btnClass: 'primary-amber'
+      },
+      {
+        priority: '',
+        name: 'Settlement statement review memo',
+        desc: 'AI summarized revisions and linked the comparison set from yesterday.',
+        statusPill: 'blue', statusLabel: 'AI prepared',
+        owner: 'Ready with packet',
+        due: 'No fixed deadline',
+        ai: 'Compared versions, summarized changes',
+        btnLabel: 'Open', btnClass: 'secondary'
+      },
+      {
+        priority: '',
+        name: 'Title contact confirmation',
+        desc: 'Complete and logged. No action needed unless closing time changes again.',
+        statusPill: 'green', statusLabel: 'Complete',
+        owner: 'Filed',
+        due: 'Completed',
+        ai: 'Logged confirmation',
+        btnLabel: 'View', btnClass: 'secondary'
+      },
+      {
+        priority: '',
+        name: 'Buyer communication summary',
+        desc: 'Included so the attorney can see what was promised before release.',
+        statusPill: 'blue', statusLabel: 'AI prepared',
+        owner: 'Context only',
+        due: 'Reference',
+        ai: 'Summarized thread',
+        btnLabel: 'Preview', btnClass: 'secondary'
+      }
+    ],
+    timeline: [
+      { date: 'Today', title: 'Approve and release clear-to-close packet', copy: 'This is the only meaningful legal action still holding the matter from a clean finish.', pill: 'amber', pillText: 'due soon' },
+      { date: 'Today', title: 'Confirm title receipt', copy: 'Once title acknowledges receipt, the matter should move out of the attorney queue.', pill: 'blue', pillText: 'follow-up' },
+      { date: 'Tomorrow', title: 'Final schedule check', copy: 'Only needed if title or lender changes the timing again.', pill: 'green', pillText: 'light touch' }
+    ],
+    changes: [
+      { title: 'AI rebuilt the clear-to-close packet at 7:40 AM', copy: 'Pulled the latest settlement statement and replaced the outdated version automatically.' },
+      { title: 'No lender follow-up in two days', copy: 'System surfaced this because timing is tight, not because the file is incomplete.' },
+      { title: 'Communication summary attached to matter', copy: 'Attorney can review recent promises without digging through inbox history.' }
+    ],
+    brief: {
+      title: 'Why the AI is flagging this file',
+      copy: 'The system is not seeing a legal drafting problem. It is seeing a nearly finished file that still needs a human release decision before title can move.',
+      did: 'Compiled the packet, updated the exhibit order, attached a release checklist, and summarized the recent communication thread.',
+      human: 'Because releasing a clear-to-close package is still a human legal approval step. The AI should never pretend otherwise.',
+      next: 'Review the packet once, sign off, and send it in the same motion so the file leaves the queue cleanly.'
+    },
+    queue: [
+      { title: 'Clear-to-close packet', copy: 'Prepared. Waiting only on attorney sign-off.' },
+      { title: 'Settlement statement memo', copy: 'Ready as review context if anything changed materially.' },
+      { title: 'Communication summary', copy: 'Included for quick verification before release.' }
+    ],
+    contacts: [
+      { role: 'Seller', name: 'Mina Patel', email: 'mina@harborpointemail.com', phone: '(317) 555-0109' },
+      { role: 'Title company', name: 'North Harbor Title', email: 'closings@northharbortitle.com', phone: '(317) 555-0168' },
+      { role: 'Lender', name: 'Pioneer Lending', email: 'closingdesk@pioneerlending.com', phone: '(317) 555-0193' },
+      { role: 'Platform support', name: 'VE Legal Ops', email: 'legalops@velvetelves.ai', phone: null }
+    ]
+  },
+  morris: {
+    id: 'morris',
+    titleFull: 'Morris · 624 Winthrop Ave',
+    status: 'clean',
+    statusLabel: 'Clean file',
+    command: {
+      icon: '✅',
+      text: null,
+      ctaLabel: null,
+      ctaClass: null
+    },
+    summary: [
+      { val: '0', cls: 'green', label: 'docs blocking release',   note: 'Nothing is actively holding the matter up.' },
+      { val: 'Thursday', cls: 'blue', label: 'next legal checkpoint', note: 'A light final schedule review is all that remains.' },
+      { val: '2', cls: 'blue',  label: 'AI-prepared items ready', note: 'Package index and exception summary are prepared for reference.' },
+      { val: '98%', cls: 'green', label: 'file completeness',     note: 'Functionally clean. Only routine final checks remain.' }
+    ],
+    docs: [
+      {
+        priority: '',
+        name: 'Closing package index',
+        desc: 'Complete and ready. Organized so a human can verify the file without wandering through attachments.',
+        statusPill: 'green', statusLabel: 'Complete',
+        owner: 'Filed',
+        due: 'Completed',
+        ai: 'Built and indexed final package',
+        btnLabel: 'View', btnClass: 'secondary'
+      },
+      {
+        priority: '',
+        name: 'Exception summary',
+        desc: 'AI summarized the file and found no active legal blockers needing action.',
+        statusPill: 'blue', statusLabel: 'AI prepared',
+        owner: 'Reference only',
+        due: 'As needed',
+        ai: 'Summarized file posture',
+        btnLabel: 'Open', btnClass: 'secondary'
+      },
+      {
+        priority: '',
+        name: 'Final schedule check',
+        desc: 'No risk today. Keep it visible so the file does not vanish completely before closing.',
+        statusPill: 'green', statusLabel: 'On track',
+        owner: 'Attorney staff',
+        due: 'Thursday · 11:00 AM',
+        ai: 'Tracked calendar event',
+        btnLabel: 'Open calendar', btnClass: 'secondary'
+      },
+      {
+        priority: '',
+        name: 'Communication archive',
+        desc: 'Bundled for clean handoff if anyone asks for proof of sequence later.',
+        statusPill: 'green', statusLabel: 'Complete',
+        owner: 'Filed',
+        due: 'Completed',
+        ai: 'Compiled thread history',
+        btnLabel: 'Preview', btnClass: 'secondary'
+      }
+    ],
+    timeline: [
+      { date: 'Thursday', title: 'Run final schedule check', copy: 'Routine confirmation only. No legal issue is currently surfacing from the file.', pill: 'green', pillText: 'routine' },
+      { date: 'Closing day', title: 'Keep file archive ready', copy: 'No extra work unless a party asks for backup documentation or schedule confirmation.', pill: 'blue', pillText: 'ready' }
+    ],
+    changes: [
+      { title: 'Package index completed', copy: 'AI rebuilt the file index after the final addenda were uploaded.' },
+      { title: 'No new exceptions detected', copy: 'System reviewed the file against the expected checklist and found nothing new to escalate.' },
+      { title: 'Archive bundle prepared', copy: 'Communication history and executed documents are ready for handoff or post-close storage.' }
+    ],
+    brief: {
+      title: 'Why the AI is not panicking about this file',
+      copy: 'Because sometimes the machine is allowed to be boring. The matter looks clean, the package is assembled, and the remaining work is ordinary final confirmation.',
+      did: 'Rebuilt the package index, ran the exception check, and prepared the communication archive.',
+      human: 'Because a lawyer still owns the file, even when the answer is basically "nothing alarming is happening."',
+      next: 'Run the light final schedule check on Thursday and otherwise leave this matter alone.'
+    },
+    queue: [
+      { title: 'Final schedule check', copy: 'Low urgency. Kept visible so the matter is not forgotten.' },
+      { title: 'Exception summary', copy: 'Reference only. No action required right now.' },
+      { title: 'Archive bundle', copy: 'Ready for post-close or partner requests.' }
+    ],
+    contacts: [
+      { role: 'Seller', name: 'Helen Morris', email: 'helen@winthropmail.com', phone: '(317) 555-0121' },
+      { role: 'Buyer agent', name: 'Corey Lane', email: 'corey@lanerealty.com', phone: '(317) 555-0155' },
+      { role: 'Title company', name: 'Oakline Title', email: 'files@oaklinetitle.com', phone: '(317) 555-0118' },
+      { role: 'Platform support', name: 'VE Legal Ops', email: 'legalops@velvetelves.ai', phone: null }
+    ]
+  }
+};
+
+/* ─── RENDER ─────────────────────────────────────── */
+/* ─── HELPERS ─────────────────────────────────────── */
+function copyToClipboard(text) {
+  // FIX: fallback for non-HTTPS / older browsers + visual feedback
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).catch(fallback);
+  } else {
+    fallback();
+  }
+  // Visual feedback: briefly flash the clicked button
+  const btn = event && event.currentTarget;
+  if (btn) {
+    const orig = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    btn.style.background = 'var(--green-bg)';
+    btn.style.borderColor = 'var(--green-border)';
+    btn.style.color = 'var(--green-text)';
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 1500);
+  }
+}
+
+function renderMatter(id) {
+  const m = matters[id];
+
+  /* topbar */
+  document.getElementById('tbMatterName').textContent = m.titleFull;
+  const badge = document.getElementById('tbStatusBadge');
+  badge.className = 'tb-status-badge ' + m.status;
+  document.getElementById('tbStatusText').textContent = m.statusLabel;
+
+  /* command strip */
+  const strip = document.getElementById('commandStrip');
+  strip.className = 'command-strip is-' + m.status;
+  if (m.status === 'clean') {
+    // FIX: derive next checkpoint from matter timeline instead of hardcoding 'Thursday'
+    const nextCheckpoint = m.timeline && m.timeline.length > 0 ? m.timeline[0].date : 'Soon';
+    strip.innerHTML = `
+      <span class="command-icon">✅</span>
+      <span class="command-strip-clean-msg">No attorney action required · Next checkpoint: ${nextCheckpoint}</span>
+    `;
+  } else {
+    strip.innerHTML = `
+      <span class="command-icon">${m.command.icon}</span>
+      <div class="command-text">${m.command.text}</div>
+      <button class="command-cta ${m.command.ctaClass}">${m.command.ctaLabel}</button>
+    `;
+  }
+
+  /* ── MAIN COLUMN ── */
+  const mainCol = document.getElementById('mainCol');
+  mainCol.innerHTML = '';
+
+  /* summary cards */
+  const summaryPanel = document.createElement('div');
+  summaryPanel.className = 'panel matter-panel-content';
+  summaryPanel.innerHTML = `
+    <div class="summary-row">
+      ${m.summary.map(s => `
+        <div class="sum-card" title="${s.note}">
+          <div class="sv ${s.cls}">${s.val}</div>
+          <div class="sl">${s.label}</div>
+          <div class="sn">${s.note}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  mainCol.appendChild(summaryPanel);
+
+  /* clean matter special state */
+  if (m.status === 'clean') {
+    const cleanPanel = document.createElement('div');
+    cleanPanel.className = 'panel matter-panel-content';
+    cleanPanel.innerHTML = `
+      <div class="clean-banner">
+        <div class="clean-icon">🟢</div>
+        <div class="clean-text">
+          <strong>This file is clean — no blocking items</strong>
+          <span>AI has assembled the package and found no active legal blockers. The only remaining task is a routine schedule check on Thursday.</span>
+        </div>
+        <button class="clean-expand-btn" id="cleanExpandBtn">View full file</button>
+      </div>
+    `;
+    mainCol.appendChild(cleanPanel);
+
+    const hiddenContent = document.createElement('div');
+    hiddenContent.id = 'cleanHidden';
+    hiddenContent.style.display = 'none';
+    mainCol.appendChild(hiddenContent);
+
+    // FIX: guard against re-rendering on repeated expand clicks
+    let cleanRendered = false;
+    document.getElementById('cleanExpandBtn').addEventListener('click', function() {
+      const h = document.getElementById('cleanHidden');
+      if (h.style.display === 'none') {
+        if (!cleanRendered) {
+          renderDocSection(h, m);
+          renderTimelineSection(h, m);
+          renderChangesSection(h, m);
+          cleanRendered = true;
+        }
+        h.style.display = '';
+        this.textContent = 'Collapse';
+      } else {
+        h.style.display = 'none';
+        this.textContent = 'View full file';
+      }
+    });
+  } else {
+    renderDocSection(mainCol, m);
+    renderTimelineSection(mainCol, m);
+    renderChangesSection(mainCol, m);
+  }
+
+  /* ── RAIL COLUMN ── */
+  const railCol = document.getElementById('railCol');
+  railCol.innerHTML = '';
+  renderRail(railCol, m);
+}
+
+function renderDocSection(container, m) {
+  const panel = document.createElement('div');
+  panel.className = 'panel matter-panel-content';
+  panel.innerHTML = `
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">Documents</div>
+        <div class="sec-title">File checklist</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <div style="display:flex;gap:6px;">
+          <span class="pill green">Complete</span>
+          <span class="pill amber">On hold</span>
+          <span class="pill red">Blocking</span>
+          <span class="pill blue">AI ready</span>
+        </div>
+        <button class="sec-action">Filter</button>
+      </div>
+    </div>
+    <div class="doc-list">
+      ${m.docs.map(doc => `
+        <div class="doc-row ${doc.priority ? 'is-' + doc.priority : ''}">
+          <div class="doc-name">
+            <strong>${doc.name}</strong>
+            <span>${doc.desc}</span>
+          </div>
+          <div class="doc-col">
+            <div class="doc-col-label">Status</div>
+            <span class="pill ${doc.statusPill}">${doc.statusLabel}</span>
+          </div>
+          <div class="doc-col">
+            <div class="doc-col-label">Due</div>
+            <div class="doc-col-val">${doc.due}</div>
+          </div>
+          <div class="doc-col">
+            <div class="doc-col-label">Next owner</div>
+            <div class="doc-col-val">${doc.owner}</div>
+          </div>
+          <div class="doc-col">
+            <div class="doc-col-label">AI contribution</div>
+            <div class="doc-col-val muted">${doc.ai}</div>
+          </div>
+          <button class="doc-action ${doc.btnClass}">${doc.btnLabel}</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(panel);
+}
+
+function renderTimelineSection(container, m) {
+  const panel = document.createElement('div');
+  panel.className = 'panel soft matter-panel-content';
+  panel.innerHTML = `
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">What's next</div>
+        <div class="sec-title">Upcoming actions</div>
+      </div>
+    </div>
+    <div class="timeline-list">
+      ${m.timeline.map(t => `
+        <div class="tl-item">
+          <div class="tl-date">${t.date}</div>
+          <div class="tl-body"><strong>${t.title}</strong><span>${t.copy}</span></div>
+          <span class="pill tl-pill ${t.pill}">${t.pillText}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(panel);
+}
+
+function renderChangesSection(container, m) {
+  const panel = document.createElement('div');
+  panel.className = 'panel soft matter-panel-content';
+  panel.innerHTML = `
+    <div class="sec-head">
+      <div>
+        <div class="sec-eyebrow">Activity</div>
+        <div class="sec-title">What changed since you last looked</div>
+      </div>
+      <button class="sec-action">Full audit trail</button>
+    </div>
+    <div class="changes-list">
+      ${m.changes.map(c => `
+        <div class="change-item">
+          <strong>${c.title}</strong>
+          <span>${c.copy}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(panel);
+}
+
+function renderRail(container, m) {
+  /* AI Brief — collapsed by default for clean matters, open for active */
+  const briefOpen = m.status !== 'clean';
+  const briefPanel = document.createElement('div');
+  briefPanel.className = 'panel rail-panel matter-panel-content';
+  briefPanel.innerHTML = `
+    <div class="rail-label">AI legal brief</div>
+    <div class="brief-card">
+      <div class="brief-summary" id="briefToggle">
+        <div class="brief-main-title">${m.brief.title}</div>
+        <div class="brief-toggle ${briefOpen ? 'open' : ''}" id="briefArrow">▾</div>
+      </div>
+      <div class="brief-body ${briefOpen ? 'open' : ''}" id="briefBody">
+        <div class="brief-copy">${m.brief.copy}</div>
+        <div class="brief-items">
+          <div class="brief-item">
+            <strong>What the AI already did</strong>
+            <span>${m.brief.did}</span>
+          </div>
+          <div class="brief-item">
+            <strong>Why a human attorney is still needed</strong>
+            <span>${m.brief.human}</span>
+          </div>
+          <div class="brief-item">
+            <strong>Recommended next move</strong>
+            <span>${m.brief.next}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  container.appendChild(briefPanel);
+
+  /* Toggle */
+  briefPanel.querySelector('#briefToggle').addEventListener('click', () => {
+    const body = briefPanel.querySelector('#briefBody');
+    const arrow = briefPanel.querySelector('#briefArrow');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    arrow.classList.toggle('open', !isOpen);
+  });
+
+  /* Review queue */
+  const queuePanel = document.createElement('div');
+  queuePanel.className = 'panel soft rail-panel matter-panel-content';
+  queuePanel.innerHTML = `
+    <div class="rail-label">Attorney review queue</div>
+    <div class="queue-list">
+      ${m.queue.map(q => `
+        <div class="queue-item">
+          <strong>${q.title}</strong>
+          <span>${q.copy}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(queuePanel);
+
+  /* Contacts with actions */
+  const contactsPanel = document.createElement('div');
+  contactsPanel.className = 'panel soft rail-panel matter-panel-content';
+  contactsPanel.innerHTML = `
+    <div class="rail-label">People on this matter</div>
+    <div class="contacts-grid">
+      ${m.contacts.map(c => `
+        <div class="contact-card">
+          <div class="contact-role">${c.role}</div>
+          <div class="contact-name">${c.name}</div>
+          <div class="contact-detail">${c.email}${c.phone ? ' · ' + c.phone : ''}</div>
+          <div class="contact-actions">
+            <a class="contact-btn" href="mailto:${c.email}" title="Email">
+              <svg viewBox="0 0 12 10" fill="none"><rect x="0.5" y="0.5" width="11" height="9" rx="1.5" stroke="currentColor" stroke-width="1"/><path d="M1 1.5L6 6L11 1.5" stroke="currentColor" stroke-width="1"/></svg>
+              Email
+            </a>
+            ${c.phone ? `<button class="contact-btn" onclick="copyToClipboard('${c.phone}')" title="Copy phone">
+              <svg viewBox="0 0 12 12" fill="none"><rect x="0.5" y="0.5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1"/><rect x="2" y="2" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1" fill="var(--surface)"/></svg>
+              Copy
+            </button>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  container.appendChild(contactsPanel);
+}
+
+/* ─── MATTER SWITCHING ───────────────────────────── */
+const matterBtns = document.querySelectorAll('.matter-btn');
+matterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    matterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderMatter(btn.dataset.id);
+    document.querySelector('.workspace').scrollTop = 0;
+  });
+});
+
+/* initial render */
+renderMatter('rogers');
+
+/* ─── BUTTON HANDLERS ─────────────────────────────── */
+
+// FIX: Command strip CTA — uses event delegation since strip is rebuilt on every matter switch
+document.getElementById('commandStrip').addEventListener('click', function(e) {
+  const btn = e.target.closest('.command-cta');
+  if (!btn) return;
+  const activeId = document.querySelector('.matter-btn.active')?.dataset.id;
+  const m = activeId ? matters[activeId] : null;
+  if (m) {
+    alert(`Opening: ${btn.textContent.replace('→','').trim()}\n\nMatter: ${m.titleFull}\n\nIn production this would open the relevant document or workflow.`);
+  }
+});
+
+// FIX: Doc action buttons — event delegation on workspace since docs are rendered dynamically
+document.querySelector('.workspace').addEventListener('click', function(e) {
+  const btn = e.target.closest('.doc-action');
+  if (!btn) return;
+  const docRow = btn.closest('.doc-row');
+  const docName = docRow?.querySelector('.doc-name strong')?.textContent || 'document';
+  alert(`Opening: ${btn.textContent.trim()}\nDocument: ${docName}\n\nIn production this would open the document viewer or action workflow.`);
+});
+
+// FIX: Sidebar "Upload documents" button
+document.querySelector('.sf-btn.primary').addEventListener('click', function() {
+  alert('Upload documents — in production this opens the document intake flow.');
+});
+
+// FIX: Sidebar "+ New matter" button
+document.querySelector('.sf-btn.secondary').addEventListener('click', function() {
+  alert('New matter — in production this opens the matter creation form.');
+});
+
+// FIX: Topbar buttons
+document.querySelector('.tb-btn.ghost').addEventListener('click', function() {
+  alert('Filing log — in production this opens the audit trail for the current matter.');
+});
+document.querySelector('.tb-btn.primary').addEventListener('click', function() {
+  alert('Upload documents — in production this opens the document intake flow.');
+});
+
+// FIX: sec-action buttons (Filter, Full audit trail) — event delegation
+document.querySelector('.workspace').addEventListener('click', function(e) {
+  const btn = e.target.closest('.sec-action');
+  if (!btn) return;
+  const label = btn.textContent.trim();
+  if (label === 'Filter') {
+    alert('Filter documents — in production this opens the doc filter panel.');
+  } else if (label === 'Full audit trail') {
+    alert('Audit trail — in production this opens the complete filing history.');
+  }
+}, true); // capture phase so it doesn't conflict with the doc-action delegation above
+</script>
+</body>
+</html>

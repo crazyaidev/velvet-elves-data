@@ -1,23 +1,132 @@
-Color Palette
+# 🟧 Brand Overview
 
-#E26812
+**Brand Name:**
+**Velvet Elves**
 
-#2C4C7F
+**Visual Theme:**
 
-#F4F44
+* Friendly, playful, professional
+* Combines **real estate/home** + **service/work efficiency** (character carrying paperwork)
 
-Typography Suite
+---
 
-IBM Plex Sans
+# 🏠 Logo System
 
-12,345
+## 1. Primary Logo (Main)
 
-Primary UI Font
+* Cartoon character (young professional boy in suit)
+* Holding a **stack of papers above head**
+* House illustration behind (lit windows, warm glow)
+* Text:
 
-400 500 600 700
+  * **Velvet** → Orange
+  * **Elves** → Dark gray
 
-App Header
+## 2. Secondary / Horizontal Logo
 
-Velvet Elves
+* Character placed on the left
+* Text “Velvet Elves” aligned horizontally on the right
 
-Use across app Ul
+---
+
+# 🧩 Iconography
+
+## App / Brand Icons
+
+1. **House Icon**
+
+   * Orange roof
+   * Dark gray structure
+   * Minimal flat style
+
+2. **Character Face Icon**
+
+   * Simplified version of mascot (head only)
+
+## Usage
+
+* Favicons
+* App icons
+* Small UI placements
+
+---
+
+# 🎨 Color Palette
+
+### Primary Colors
+
+* **Orange:** `#E26812`
+
+  * Used for highlights, brand emphasis, roof, “Velvet”
+
+* **Dark Blue / Slate:** `#2C4C7F`
+
+  * Likely for UI elements, backgrounds, accents
+
+* **Light Gray:** `#F4F4F4`
+
+  * Backgrounds, neutral surfaces
+
+---
+
+# 🔤 Typography
+
+## Primary Font
+
+* **IBM Plex Sans**
+
+## Font Weights
+
+* 400 (Regular)
+* 500 (Medium)
+* 600 (Semi-bold)
+* 700 (Bold)
+
+## Usage
+
+* Main UI font across the application
+
+## Display Example
+
+* Numeric sample: **12,345**
+
+---
+
+# 🧾 Text Styling
+
+## App Header
+
+* “Velvet Elves”
+* Used across app UI
+* Clean, modern sans-serif appearance
+
+---
+
+# 📐 Layout Components
+
+## Horizontal Logo Section
+
+* Left: character
+* Right: brand name
+
+## Favicon & Icon Section
+
+* Square icon versions
+* Minimal + recognizable at small sizes
+
+## Color Palette Section
+
+* Presented as color cards with hex codes
+
+## Typography Suite Section
+
+* Shows font, weights, and usage context
+
+---
+
+# 🧠 Brand Interpretation (Helpful Insight)
+
+* The **“elves” concept** = doing work for you (efficient helpers)
+* The **paper stack** = productivity / task handling
+* The **house** = real estate or home-related services
+* The **color scheme** = warm (trust + energy) + stable (professionalism)
