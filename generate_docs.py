@@ -1,10 +1,23 @@
-"""Generate Word documents from requirements.txt and milestones.txt"""
+"""Generate Word documents from project source files."""
+import argparse
 import re
+from pathlib import Path
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor, Cm
+from docx.shared import Pt, RGBColor, Cm
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml.ns import qn
+
+
+BASE_DIR = Path(__file__).resolve().parent
+BODY_FONT_SIZE = Pt(10)
+TABLE_HEADER_FILL = "D9E2F3"
+INLINE_MARKDOWN_PATTERN = re.compile(r"(\*\*.+?\*\*|`.+?`)")
+HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.+)$")
+BULLET_PATTERN = re.compile(r"^(\s*)-\s+(.+)$")
+ORDERED_LIST_PATTERN = re.compile(r"^(\s*)(\d+)\.\s+(.+)$")
+METADATA_PATTERN = re.compile(r"^\*\*(.+?):\*\*\s*(.+)$")
+TABLE_DIVIDER_PATTERN = re.compile(r"^:?-{3,}:?$")
 
 
 def set_cell_shading(cell, color_hex):
@@ -35,6 +48,235 @@ def add_styled_paragraph(doc, text, style_name, bold=False, color=None, size=Non
     if space_before is not None:
         p.paragraph_format.space_before = space_before
     return p
+
+
+def read_source_lines(filename):
+    """Read a source file from the repo root."""
+    return (BASE_DIR / filename).read_text(encoding="utf-8-sig").splitlines()
+
+
+def save_document(doc, filename):
+    """Save a document into the repo root."""
+    output_path = BASE_DIR / filename
+    doc.save(output_path)
+    print(f"Created {output_path.name}")
+
+
+def add_text_run(paragraph, text, bold=False, code=False, size=BODY_FONT_SIZE):
+    """Add a run with consistent sizing and optional inline-code styling."""
+    if not text:
+        return None
+
+    run = paragraph.add_run(text)
+    run.bold = bold
+    run.font.size = size
+    if code:
+        run.font.name = "Consolas"
+    return run
+
+
+def add_inline_markdown_runs(paragraph, text, size=BODY_FONT_SIZE, force_bold=False):
+    """Render simple markdown inline styles inside a paragraph."""
+    cursor = 0
+
+    for match in INLINE_MARKDOWN_PATTERN.finditer(text):
+        if match.start() > cursor:
+            add_text_run(paragraph, text[cursor:match.start()], bold=force_bold, size=size)
+
+        token = match.group(0)
+        if token.startswith("**") and token.endswith("**"):
+            add_text_run(paragraph, token[2:-2], bold=True, size=size)
+        else:
+            add_text_run(paragraph, token[1:-1], bold=force_bold, code=True, size=size)
+
+        cursor = match.end()
+
+    if cursor < len(text):
+        add_text_run(paragraph, text[cursor:], bold=force_bold, size=size)
+
+
+def strip_inline_markdown(text):
+    """Remove inline markdown markers for headings and titles."""
+    return text.replace("**", "").replace("`", "")
+
+
+def split_markdown_table_row(line):
+    """Split a markdown table row into cells."""
+    return [cell.strip() for cell in line.strip().strip("|").split("|")]
+
+
+def is_markdown_table_divider(cells):
+    """Detect the markdown divider row between table header and body."""
+    return bool(cells) and all(TABLE_DIVIDER_PATTERN.fullmatch(cell.replace(" ", "")) for cell in cells)
+
+
+def set_markdown_cell_text(cell, text, force_bold=False):
+    """Write markdown-aware text into a table cell."""
+    cell.text = ""
+    paragraph = cell.paragraphs[0]
+    add_inline_markdown_runs(paragraph, text, force_bold=force_bold)
+    paragraph.paragraph_format.space_after = Pt(0)
+
+
+def add_markdown_table(doc, table_lines):
+    """Render a basic markdown table into the Word document."""
+    parsed_rows = [split_markdown_table_row(line) for line in table_lines]
+    parsed_rows = [row for row in parsed_rows if any(cell for cell in row)]
+    if not parsed_rows:
+        return
+
+    header = parsed_rows[0]
+    data_rows = parsed_rows[1:]
+    if data_rows and is_markdown_table_divider(data_rows[0]):
+        data_rows = data_rows[1:]
+
+    all_rows = [header] + data_rows
+    column_count = max(len(row) for row in all_rows)
+
+    table = doc.add_table(rows=len(all_rows), cols=column_count)
+    table.style = 'Light Grid Accent 1'
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+    for column_index in range(column_count):
+        header_text = header[column_index] if column_index < len(header) else ""
+        cell = table.rows[0].cells[column_index]
+        set_markdown_cell_text(cell, header_text, force_bold=True)
+        set_cell_shading(cell, TABLE_HEADER_FILL)
+
+    for row_index, row_data in enumerate(data_rows, start=1):
+        for column_index in range(column_count):
+            value = row_data[column_index] if column_index < len(row_data) else ""
+            set_markdown_cell_text(table.rows[row_index].cells[column_index], value)
+
+    doc.add_paragraph()
+
+
+def extract_feedback_header(lines):
+    """Extract the title and metadata block from design-feedback.md."""
+    title = "Design Feedback"
+    metadata = []
+    body_start = len(lines)
+
+    for index, line in enumerate(lines):
+        stripped = line.strip()
+        if not stripped:
+            continue
+
+        heading_match = re.match(r"^#\s+(.+)$", stripped)
+        if heading_match and title == "Design Feedback":
+            title = heading_match.group(1).strip()
+            continue
+
+        metadata_match = METADATA_PATTERN.match(stripped)
+        if metadata_match:
+            metadata.append((metadata_match.group(1).strip(), metadata_match.group(2).strip()))
+            continue
+
+        if stripped == "---":
+            body_start = index + 1
+            break
+
+        body_start = index
+        break
+
+    return title, metadata, lines[body_start:]
+
+
+def split_document_title(title):
+    """Split a markdown title into primary and secondary title lines."""
+    parts = re.split(r"\s+[\u2014-]\s+", title, maxsplit=1)
+    main_title = parts[0].strip().upper() if parts else "DESIGN FEEDBACK"
+    subtitle = parts[1].strip() if len(parts) > 1 else ""
+    return main_title, subtitle
+
+
+def add_marked_list_paragraph(doc, marker, text, level=0, size=BODY_FONT_SIZE):
+    """Add an indented paragraph that uses a visible list marker."""
+    paragraph = doc.add_paragraph()
+    paragraph.paragraph_format.left_indent = Cm(0.63 * (level + 1))
+    paragraph.paragraph_format.first_line_indent = Cm(-0.45)
+    paragraph.paragraph_format.space_after = Pt(2)
+    add_text_run(paragraph, f"{marker} ", size=size)
+    add_inline_markdown_runs(paragraph, text, size=size)
+    return paragraph
+
+
+def render_feedback_body(doc, lines):
+    """Render the main markdown body of design-feedback.md."""
+    index = 0
+
+    while index < len(lines):
+        raw_line = lines[index]
+        stripped = raw_line.strip()
+
+        if not stripped:
+            index += 1
+            continue
+
+        if stripped == "---":
+            spacer = doc.add_paragraph()
+            spacer.paragraph_format.space_after = Pt(6)
+            index += 1
+            continue
+
+        if stripped.startswith("|"):
+            table_lines = []
+            while index < len(lines) and lines[index].strip().startswith("|"):
+                table_lines.append(lines[index].strip())
+                index += 1
+            add_markdown_table(doc, table_lines)
+            continue
+
+        heading_match = HEADING_PATTERN.match(stripped)
+        if heading_match:
+            level = len(heading_match.group(1))
+            heading_text = strip_inline_markdown(heading_match.group(2))
+
+            if level <= 2:
+                add_styled_paragraph(doc, heading_text, 'Heading 1',
+                                     space_before=Pt(18), space_after=Pt(6))
+            elif level == 3:
+                add_styled_paragraph(doc, heading_text, 'Heading 2',
+                                     space_before=Pt(12), space_after=Pt(4))
+            else:
+                add_styled_paragraph(doc, heading_text, 'Heading 3',
+                                     space_before=Pt(8), space_after=Pt(4))
+
+            index += 1
+            continue
+
+        bullet_match = BULLET_PATTERN.match(raw_line)
+        if bullet_match:
+            level = len(bullet_match.group(1).expandtabs(2)) // 2
+            add_marked_list_paragraph(doc, "-", bullet_match.group(2).strip(), level=level)
+            index += 1
+            continue
+
+        ordered_match = ORDERED_LIST_PATTERN.match(raw_line)
+        if ordered_match:
+            level = len(ordered_match.group(1).expandtabs(2)) // 2
+            add_marked_list_paragraph(doc, f"{ordered_match.group(2)}.", ordered_match.group(3).strip(), level=level)
+            index += 1
+            continue
+
+        paragraph_lines = [stripped]
+        index += 1
+
+        while index < len(lines):
+            next_raw = lines[index]
+            next_stripped = next_raw.strip()
+            if not next_stripped:
+                break
+            if next_stripped == "---" or next_stripped.startswith("|") or \
+               HEADING_PATTERN.match(next_stripped) or BULLET_PATTERN.match(next_raw) or \
+               ORDERED_LIST_PATTERN.match(next_raw):
+                break
+            paragraph_lines.append(next_stripped)
+            index += 1
+
+        paragraph = doc.add_paragraph()
+        add_inline_markdown_runs(paragraph, " ".join(paragraph_lines))
+        paragraph.paragraph_format.space_after = Pt(4)
 
 
 def create_requirements_doc():
@@ -109,13 +351,12 @@ def create_requirements_doc():
 
     # --- CONTENT ---
     # Read the requirements file
-    with open("e:/Projects/works/velvet_elves/remote_repos/data/requirements.txt", "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    lines = read_source_lines("requirements.txt")
 
     # Parse and format
     i = 0
     while i < len(lines):
-        line = lines[i].rstrip('\n')
+        line = lines[i]
         stripped = line.strip()
 
         # Skip the header block (already on title page)
@@ -200,8 +441,7 @@ def create_requirements_doc():
 
         i += 1
 
-    doc.save("e:/Projects/works/velvet_elves/remote_repos/data/requirements.docx")
-    print("Created requirements.docx")
+    save_document(doc, "requirements.docx")
 
 
 def create_milestones_doc():
@@ -279,8 +519,7 @@ def create_milestones_doc():
     doc.add_page_break()
 
     # --- DETAILED MILESTONES ---
-    with open("e:/Projects/works/velvet_elves/remote_repos/data/milestones.txt", "r", encoding="utf-8") as f:
-        lines = f.readlines()
+    lines = read_source_lines("milestones.txt")
 
     i = 0
     in_summary_section = False
@@ -288,7 +527,7 @@ def create_milestones_doc():
     in_roadmap_section = False
 
     while i < len(lines):
-        line = lines[i].rstrip('\n')
+        line = lines[i]
         stripped = line.strip()
 
         # Skip header block and separator lines
@@ -350,7 +589,7 @@ def create_milestones_doc():
             m_num = milestone_match.group(1)
             m_title = milestone_match.group(2)
             m_weeks = milestone_match.group(3) or ""
-            heading_text = f"Milestone {m_num} — {m_title}"
+            heading_text = f"Milestone {m_num} - {m_title}"
             if m_weeks:
                 heading_text += f" ({m_weeks})"
             add_styled_paragraph(doc, heading_text, 'Heading 2',
@@ -399,14 +638,14 @@ def create_milestones_doc():
         if stripped.startswith("[ ]"):
             text = stripped[4:]
             p = doc.add_paragraph(style='List Bullet')
-            run = p.add_run("☐ " + text)
+            run = p.add_run("[ ] " + text)
             run.font.size = Pt(10)
             p.paragraph_format.space_after = Pt(2)
             p.paragraph_format.left_indent = Cm(1.27)
             i += 1
             # Check for continuation lines (indented sub-items starting with -)
             while i < len(lines):
-                next_line = lines[i].rstrip('\n')
+                next_line = lines[i]
                 next_stripped = next_line.strip()
                 if next_stripped.startswith("- ") and next_line.startswith("      "):
                     sub_text = next_stripped[2:]
@@ -480,11 +719,117 @@ def create_milestones_doc():
 
         i += 1
 
-    doc.save("e:/Projects/works/velvet_elves/remote_repos/data/milestones.docx")
-    print("Created milestones.docx")
+    save_document(doc, "milestones.docx")
+
+
+def create_design_feedback_doc():
+    """Generate a .docx export of design-feedback.md."""
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("design-feedback.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "design-feedback.docx")
+
+
+TARGET_BUILDERS = {
+    "requirements": create_requirements_doc,
+    "milestones": create_milestones_doc,
+    "design-feedback": create_design_feedback_doc,
+}
+
+TARGET_ALIASES = {
+    "requirements.txt": "requirements",
+    "requirements.docx": "requirements",
+    "milestones.txt": "milestones",
+    "milestones.docx": "milestones",
+    "design-feedback.md": "design-feedback",
+    "design-feedback.docx": "design-feedback",
+    "design_feedback": "design-feedback",
+    "feedback": "design-feedback",
+    "all": "all",
+}
+
+
+def normalize_targets(raw_targets):
+    """Normalize CLI target names into supported document keys."""
+    normalized_targets = []
+
+    for raw_target in raw_targets:
+        target = TARGET_ALIASES.get(raw_target.lower(), raw_target.lower())
+        if target == "all":
+            for name in TARGET_BUILDERS:
+                if name not in normalized_targets:
+                    normalized_targets.append(name)
+            continue
+
+        if target not in TARGET_BUILDERS:
+            valid = ", ".join(list(TARGET_BUILDERS.keys()) + ["all"])
+            raise SystemExit(f"Unknown document target '{raw_target}'. Use one of: {valid}")
+
+        if target not in normalized_targets:
+            normalized_targets.append(target)
+
+    return normalized_targets
+
+
+def main():
+    """Parse CLI args and generate the requested documents."""
+    parser = argparse.ArgumentParser(description="Generate Word documents from project source files.")
+    parser.add_argument(
+        "documents",
+        nargs="*",
+        help="Documents to generate: requirements, milestones, design-feedback, or all.",
+    )
+    args = parser.parse_args()
+
+    targets = normalize_targets(args.documents or ["requirements", "milestones"])
+    for target in targets:
+        TARGET_BUILDERS[target]()
+
+    print(f"Done! Created {len(targets)} document(s) in {BASE_DIR}")
 
 
 if __name__ == "__main__":
-    create_requirements_doc()
-    create_milestones_doc()
-    print("Done! Both .docx files created in data/")
+    main()
