@@ -5,56 +5,36 @@ PROJECT MILESTONES (22-WEEK TIMELINE)
 Date Established: 2026-03-04
 Last Updated: 2026-03-26 (role-specific dashboard alignment; Attorney & FSBO roles)
 Start Date: Week 1 (2026-03-09)
-End Date: Week 22 (2026-08-09)
+End Date: Week 22 (2026-08-02)
 Budget: Under USD $40,000 (Fixed-Price)
 Tech Stack: React | FastAPI | OpenAI GPT | Supabase | AWS EC2
-MVP Scope Note:
-  - Approved MVP landing dashboards: Solo Agent, Team Leader, Attorney, FSBO
-  - Shared Active Transactions remains the internal transaction workspace for MVP
-  - Client access is a limited portal; vendors use invited upload/request flows
-  - Advertising, mobile apps, AI Coach, IMAP/SMTP fallback, and role-specific
-    Active Transactions pages remain future-hook or post-MVP items
 ================================================================================
 
 
 ================================================================================
 PHASE 1: DISCOVERY, ARCHITECTURE & FOUNDATION
-Weeks 1-3 (Mar 9 - Mar 29)
+Weeks 1-3
 ================================================================================
 
-MILESTONE 1.1 - Project Setup, Architecture & Delivery Foundation (Week 1)
+MILESTONE 1.1 - Project Setup & Architecture Design (Week 1)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Review updated requirements, approved dashboard references, and current
-      project scaffolding
-  [ ] Finalize system architecture aligned to the updated MVP:
-      - Multi-tenant brokerage model (`tenants`, `teams`, `users`)
-      - Shared transaction + property-workspace architecture
-      - Shared internal shell + role-aware dashboard routing
-      - Attorney approval guardrails and customer-safe visibility rules
-  [ ] Finalize database architecture for:
-      - tenants, teams, users, contacts
-      - property_workspaces, transactions, transaction_assignments,
-        transaction_parties
-      - task_templates, tasks
-      - documents, communication_logs, milestone_share_links
-      - audit_logs, invitation_tokens, confidence_settings
-  [ ] Define API architecture (REST + webhook hooks) for:
-      - auth, contacts, transactions, property workspaces, task engine
-      - dashboard aggregation endpoints
-      - share-link and external portal access
-  [ ] Finalize route and shell strategy for:
-      - `/dashboard/*`, `/transactions/*`, `/properties/*`, `/share/:token`
-      - shared sidebar navigation: Dashboard / Deals / Workflow / Intelligence
+  [ ] Review legacy ASP.NET MVC codebase and scope documents
+  [ ] Finalize system architecture document (multi-tenant, modular)
+  [ ] Define database schema design (Supabase PostgreSQL)
+      - Users, roles, transactions, tasks, documents, contacts, vendors,
+        communication logs, audit logs, tenants
+  [ ] Design API architecture (RESTful with webhook hooks)
   [ ] Set up development environment:
       - React project scaffolding (Vite + React + TypeScript)
       - FastAPI project scaffolding (Python)
-      - Supabase project creation (DB + Auth + Storage)
-      - AWS EC2 staging environment
-  [ ] Set up CI/CD pipeline and private repository workflow
-  [ ] Define branching strategy and release cadence
-Success Criteria: Architecture document approved, route/data model signed off,
-                  staging operational, and CI/CD deploying to staging.
+      - Supabase project creation (DB + Auth)
+      - AWS EC2 instance provisioning
+  [ ] Set up CI/CD pipeline (GitHub Actions or similar)
+  [ ] Set up private Git repository with branching strategy
+  [ ] Create staging environment on AWS
+Success Criteria: Architecture document approved, dev environments operational,
+                  CI/CD deploying to staging.
 
 MILESTONE 1.2 - Database & Data Model Implementation (Week 2)
 -----------------------------------------------------------------------------
@@ -80,7 +60,7 @@ Deliverables:
 Success Criteria: Database fully operational, task catalogue imported,
                   API documentation available.
 
-MILESTONE 1.3 - Authentication, RBAC & Access Control Backend (Week 3)
+MILESTONE 1.3 - Authentication & User Management Backend (Week 3)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Implement Supabase Auth integration (OAuth2/JWT)
@@ -101,11 +81,11 @@ Success Criteria: All 8 roles can register/login, permissions enforced,
 
 
 ================================================================================
-PHASE 2: CORE WORKFLOW PLATFORM
+PHASE 2: CORE TRANSACTION & TASK ENGINE
 Weeks 4-8 (Mar 30 - May 3)
 ================================================================================
 
-MILESTONE 2.1 - Transaction, Property Workspace & Dashboard Data APIs (Week 4)
+MILESTONE 2.1 - Transaction Management Backend (Week 4)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build transaction CRUD APIs (create, read, update, delete)
@@ -173,7 +153,7 @@ Deliverables:
 Success Criteria: Tasks auto-generated from use case, dependencies enforced,
                   notifications firing, state-based rules operational.
 
-MILESTONE 2.3 - Frontend Foundation & Shared Application Shell (Week 7)
+MILESTONE 2.3 - Frontend Foundation & Auth UI (Week 7)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build React app shell matching approved designs (shared across roles):
@@ -228,7 +208,7 @@ Success Criteria: Users can register, login, navigate by role (all 8 roles);
                   white-label theming working; shared component library covers
                   command grid, health score, portfolio cards, and matter cards.
 
-MILESTONE 2.4 - Shared Active Transactions & Core Workspace UI (Week 8)
+MILESTONE 2.4 - Transaction & Task UI (Week 8)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build Agent/Elf Active Transactions workspace per approved redesign:
@@ -287,20 +267,19 @@ Success Criteria: Agents/elves can operate from the approved Active
 
 
 ================================================================================
-PHASE 3: WIZARD & DOCUMENT INTELLIGENCE
+PHASE 3: AI WIZARD & DOCUMENT MANAGEMENT
 Weeks 9-13 (May 4 - Jun 7)
 ================================================================================
 
 MILESTONE 3.1 - AI Document Parsing Engine (Weeks 9-10)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Integrate OpenAI GPT API for document parsing and classification
-  [ ] Build document upload APIs for transactions and property workspaces
-  [ ] Validate formats:
-      - PDF, JPEG, GIF, DOC, DOCX, and other image types
-      - up to 20 MB per file
+  [ ] Integrate OpenAI GPT API for document parsing
+  [ ] Build document upload API with format validation
+      (PDF, JPEG, GIF, DOC, DOCX; up to 20 MB)
   [ ] Implement auto-compression for files over 10 MB
-  [ ] Implement multi-page splitting with page-range metadata
+  [ ] Implement multi-page document splitting (page range selection,
+      naming, metadata assignment)
   [ ] Build AI extraction pipeline:
       - Property data extraction (address, city, state, zip)
       - Transaction data extraction (representation, price, financing, earnest money)
@@ -310,47 +289,47 @@ Deliverables:
       - Closing mode detection (attorney closing vs title/escrow)
       - Owner-occupied vs. investor/second home detection
   [ ] Implement double-check mechanism:
-      - two-pass extraction with different prompt strategies
-      - agreement checks on key fields
-      - per-field confidence scoring
-      - route to human review on disagreement or low confidence
-  [ ] Build edge-case handling for blurry scans, crooked pages, and missing
-      pages
-  [ ] Build AI audit logging (received, extracted, decided, why, override)
-  [ ] Unit tests with representative sample documents
-Success Criteria: AI reliably extracts/classifies key fields and routes
-                  uncertain cases to human review.
+      - Two-pass extraction with different prompt strategies
+      - Agreement check on key fields
+      - Confidence scoring per field
+      - Route to human review on disagreement
+  [ ] Build edge case handling (blurry docs, crooked scans, missing pages)
+  [ ] Build AI audit logging (document received, extracted, decided, why, human override)
+  [ ] Unit tests with sample documents
+Success Criteria: AI accurately extracts key fields from real estate documents,
+                  double-check mechanism functional, confidence scores generated.
 
-MILESTONE 3.2 - Wizard UI & Intake Flow (Week 11)
+MILESTONE 3.2 - Wizard UI & Flow (Week 11)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Build wizard Step 1 document upload interface with drag/drop multi-file
-      support
-  [ ] Add global dropzone behavior anywhere in the authenticated workspace
-  [ ] Build document preview and split UI
-  [ ] Build wizard parsing progress/results screen
-  [ ] Build address confirmation screen with normalization and mismatch flags
-  [ ] Build purchase information validation:
-      - dates, final price, fees, closing mode
-      - discrepancy alerts with source previews
-      - signature status review
-  [ ] Build party/contact review and manual fallback forms
-  [ ] Build missing-information handling:
-      - prompt user for unknowns
-      - show AI public-source search activity
-      - label results as AI-sourced and require confirmation
-  [ ] Build post-upload classification/rename/transaction-association flow
-  [ ] Build e-sign readiness prompt for unsigned documents
-  [ ] Build one confirmation page with edit/accept actions
-  [ ] Build "Suggest AI Improvement" action
-  [ ] Connect wizard to transaction creation, baseline date lock, initial task
-      generation, and property-workspace conversion when applicable
-  [ ] End-to-end wizard tests
-Success Criteria: Users can go from upload to confirmed transaction/workspace
-                  data with human verification and no forced manual intake
-                  upfront.
+  [ ] Build wizard Step 1: Document upload interface (drag-drop, multi-file)
+  [ ] Add global drag-and-drop upload from anywhere in the authenticated
+      workspace
+  [ ] Build document preview with splitting UI (page ranges)
+  [ ] Build wizard Step 2: AI parsing progress/results display
+  [ ] Build address confirmation screen (normalized, flagged inconsistencies)
+  [ ] Build purchase information validation screen:
+      - All dates, final price, professional fees
+      - Discrepancy flags with inline alerts
+      - Document preview showing flagged sections
+  [ ] Build manual entry fallback forms (title company details, etc.)
+  [ ] Build missing information handling:
+      - Prompt for missing data
+      - AI public source search UI (show search activity)
+      - Results labeled as AI-sourced with confirmation
+  [ ] Build drag/drop intake confirmation flow:
+      - AI identifies what the document is
+      - Suggests a document name
+      - Confirms which transaction it belongs to
+      - Checks if it needs e-signature handling
+  [ ] Build wizard confirmation page (all data, edit/accept actions)
+  [ ] Build "Suggest AI Improvement" button
+  [ ] Connect wizard to transaction + task generation backend
+  [ ] End-to-end wizard flow tests
+Success Criteria: Complete wizard flow from upload to transaction creation,
+                  AI extraction with human verification working.
 
-MILESTONE 3.3 - Document Management, Review & Portal Visibility (Week 12)
+MILESTONE 3.3 - Document Management System (Week 12)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build document center UI (upload, view, download, email, archive)
@@ -383,22 +362,23 @@ Success Criteria: Full document lifecycle operational, versioning working,
 MILESTONE 3.4 - E-Signature Integration (Week 13)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Implement provider-aware e-sign integration with DocuSign as the primary
-      MVP path and HelloSign-compatible abstraction/hooks
-  [ ] Build document-center e-sign workflow:
-      - send for signature
-      - define recipients for executed copy
-      - track signature status
-      - replace original with executed version
-      - auto-distribute to identified parties
-  [ ] Build wizard e-sign integration for unsigned documents
-  [ ] Reuse the same e-sign flow for documents dropped into the workspace after
-      intake
+  [ ] Integrate DocuSign API (primary e-sign provider)
+  [ ] Build e-sign workflow in document center:
+      - Send for signature
+      - Specify recipients for executed copy
+      - Track signature status
+      - Auto-replace original with signed version (old to version history)
+      - Auto-distribute to identified parties
+  [ ] Build wizard e-sign integration:
+      - Detect unsigned documents during parsing
+      - Offer to send for signature on finalization
+      - Reuse same prompt/decision flow for documents dropped into the workspace
   [ ] Implement document naming rules for auto-distribution
-  [ ] Build prompts for users without a connected e-sign provider
-  [ ] Integration tests with provider sandbox
-Success Criteria: Documents can be sent, tracked, returned, versioned, and
-                  distributed through one consistent workflow.
+      (PA, C1, Amend -> all parties; other -> agent notification)
+  [ ] Build prompt for unconnected e-sign users (suggest connecting)
+  [ ] Integration tests with DocuSign sandbox
+Success Criteria: Documents can be sent for e-signature, tracked, returned,
+                  versioned, and distributed automatically.
 
 
 ================================================================================
@@ -406,32 +386,29 @@ PHASE 4: COMMUNICATION ENGINE & AI EMAIL
 Weeks 14-16 (Jun 8 - Jun 28)
 ================================================================================
 
-MILESTONE 4.1 - Unified Communication Log & Email Integration (Week 14)
+MILESTONE 4.1 - Email Integration (Week 14)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Integrate Gmail API, Microsoft Graph (Outlook), and Apple iCloud
-  [ ] Build email connection flow during account creation/profile setup
-  [ ] Build provider-agnostic communication log backend for:
-      - email (inbound/outbound)
-      - system messages
-      - document actions
-      - AI sends/drafts
-      - future SMS/voice/push metadata
-  [ ] Support both transaction and property-workspace communication context
-  [ ] Build immutable communication log UI with search/filter by date, party,
-      and keyword
-  [ ] Implement single-transaction download and admin multi-transaction export
-      request flow
-  [ ] Implement 2-year retention from last user login with quarterly
-      auto-purge checks
-  [ ] Build inbound email processing and trigger hooks
-  [ ] Define provider-agnostic hooks for SMS, click-to-call, voice, and
-      calendar-driven reminders
-  [ ] Unit tests for provider integrations and log behavior
-Success Criteria: Supported email providers connect cleanly and all
-                  communication events land in one searchable immutable log.
+  [ ] Integrate Gmail API (OAuth2 flow, send/receive)
+  [ ] Integrate Microsoft Graph API for Outlook (OAuth2, send/receive)
+  [ ] Integrate Apple iCloud email API
+  [ ] Build email connection flow during account creation
+  [ ] Define provider-agnostic hooks for future SMS and click-to-call / voice
+      integrations
+  [ ] Build unified communication log backend:
+      - Immutable log entries (who, what, when, direction, transaction)
+      - Channel support for email now and SMS/voice-ready metadata fields
+      - Search/filtering by date, party, keyword
+      - Indexing for performance
+  [ ] Implement log download (one transaction at a time per user)
+  [ ] Build admin export request workflow (multi-transaction)
+  [ ] Implement 2-year retention with quarterly auto-purge checks
+  [ ] Build inbound email processing (logging, trigger hooks)
+  [ ] Unit tests for email integration
+Success Criteria: Gmail and Outlook connected, emails sent/received/logged,
+                  communication log searchable with retention policy.
 
-MILESTONE 4.2 - AI Email Automation & Review Safeguards (Week 15)
+MILESTONE 4.2 - AI Email Automation (Week 15)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build AI email response engine (OpenAI GPT integration):
@@ -455,10 +432,10 @@ Deliverables:
       deadlines
   [ ] AI email audit logging (request, response, confidence, human action)
   [ ] Integration tests with email sandbox
-Success Criteria: AI handles routine communication with human review guardrails
-                  and explicit legal boundaries.
+Success Criteria: AI responds to routine emails, drafts flagged for review,
+                  safeguards prevent unsupervised sending of uncertain content.
 
-MILESTONE 4.3 - Vendor Communication & External Collaboration Flows (Week 16)
+MILESTONE 4.3 - Vendor Communication System (Week 16)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build vendor email templates with constrained response format
@@ -488,11 +465,11 @@ Success Criteria: Vendor communication automated with structured responses,
 
 
 ================================================================================
-PHASE 5: DASHBOARDS, PORTALS, PAYMENTS & PROFILES
+PHASE 5: DASHBOARDS, PAYMENTS & PROFILES
 Weeks 17-19 (Jun 29 - Jul 19)
 ================================================================================
 
-MILESTONE 5.1 - Role Dashboards, Portals & Share Timeline UI (Week 17)
+MILESTONE 5.1 - Role-Specific Dashboards (Week 17)
 -----------------------------------------------------------------------------
 Deliverables:
   NOTE: Dashboard landing pages are now approved for Solo Agent, Team Leader,
@@ -601,21 +578,24 @@ Success Criteria: All 8 role dashboards/workspaces functional with real data;
                   health score rings, command grids, and portfolio cards rendering;
                   AI-vs-human guardrails enforced on Attorney dashboard.
 
-MILESTONE 5.2 - Payment Processing & Billing Controls (Week 18)
+MILESTONE 5.2 - Payment Processing (Week 18)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Integrate Stripe for secure credit-card processing
-  [ ] Build invoicing, payment tracking, refunds, and commission tracking /
-      payouts
+  [ ] Integrate Stripe API:
+      - Secure credit-card processing
+      - Transaction fee collection
+      - Commission payouts
+  [ ] Build invoicing system (create, send, track invoices)
+  [ ] Build payment tracking UI (payments, refunds, history)
   [ ] Implement payment-triggered task/status updates
-  [ ] Build admin payment access controls (on/off per role/tenant)
-  [ ] Surface payment summaries in relevant dashboards/portals where permitted
-  [ ] Build billing hooks for future accounting platform integrations
-  [ ] Security testing for payment flows and PCI-sensitive handling
-Success Criteria: Payments can be collected and tracked securely, with access
-                  controls and workflow side effects working correctly.
+  [ ] Build admin payment access controls (on/off per role)
+  [ ] Build payment reporting in dashboards
+  [ ] Implement payment hooks for future accounting integration
+  [ ] Security testing for payment flows (PCI compliance)
+Success Criteria: Agents can collect fees via Stripe, commissions tracked,
+                  payment actions trigger task updates.
 
-MILESTONE 5.3 - Profiles, Checklists, AI Task Assistance & Feedback (Week 19)
+MILESTONE 5.3 - Profiles & Advanced Features (Week 19)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build brokerage profile (all agents/teams in one dashboard)
@@ -644,24 +624,23 @@ Deliverables:
       - AI converts plain language to structured task objects
       - Due date and reminder rule generation
   [ ] Build dynamic task intelligence UI:
-      - reasons / sources / confidence
-      - approve / discard / restore actions
-      - team-lead preview and bulk approval flows
-  [ ] Build post-closing task feedback loop UI and admin/team analytics inputs
-  [ ] Expand profile/intelligence reporting views for completion rates,
-      transaction metrics, and searchable/sortable analytics
-Success Criteria: Profiles drive checklists and reminders, AI task assistance
-                  is usable and reviewable, and reporting inputs are captured.
+      - AI recommendations with reasons/sources
+      - Approve/restore controls
+      - Bulk approval for team leads with preview
+  [ ] Build task feedback loop UI (post-closing: useful/unnecessary/missing)
+Success Criteria: All profile types operational, closing checklists generating,
+                  NLP task creation working, AI task recommendations functional.
+
 
 ================================================================================
-PHASE 6: WHITE-LABEL, INTEGRATION HOOKS & EXTENSIBILITY
+PHASE 6: WHITE-LABEL, INTEGRATIONS & ADVERTISING HOOKS
 Weeks 20-21 (Jul 20 - Aug 2)
 ================================================================================
 
-MILESTONE 6.1 - White-Label, Multi-Tenant & External Integration Hooks (Week 20)
+MILESTONE 6.1 - White-Label & Multi-Tenant (Week 20)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Verify and harden multi-tenant isolation with Supabase RLS
+  [ ] Implement multi-tenant data isolation (Supabase RLS policies)
   [ ] Build white-label configuration UI:
       - Logo upload, brand colors, theme selection
       - Custom domain/subdomain configuration
@@ -682,36 +661,26 @@ Deliverables:
 Success Criteria: Multiple tenants with isolated data and custom branding,
                   integration hooks operational and documented.
 
-MILESTONE 6.2 - MVP Future Hooks & Migration Utilities (Week 21)
+MILESTONE 6.2 - Advertising Hooks & Consumer Site (Week 21)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Implement advertising architecture hooks only:
-      - admin-facing package/placement/creative metadata models
-      - wizard/task ad-slot placeholders behind feature flags
-      - impression/click event contracts
-      - Stripe billing linkage contract
-  [ ] Document placeholder contract for a future consumer-facing advertising
-      site
-  [ ] Document extension points for:
-      - mobile app
-      - expanded AI agents (voice, SMS, calendar)
-      - predictive closing risk scoring
-      - pattern detection across teams
-      - IMAP/SMTP fallback
-      - role-specific Active Transactions pages
-      - AI Coach paid add-on
-      - concierge/upsell flows
-  [ ] Deliver data-migration utilities/documentation:
-      - migrate legacy task templates only
-      - broker guidance/tools for re-entering or importing contacts and
-        transactions
-      - offline archive/export guidance for historical data
-  [ ] Add feature flags/toggles to keep non-MVP capabilities isolated from
-      core delivery
-  [ ] Do NOT build a full ad marketplace, full consumer ad site, mobile app,
-      or AI Coach experience in MVP
-Success Criteria: Non-MVP items are scaffolded as clean extension points
-                  without expanding the MVP build.
+  [ ] Build advertising module architecture hooks:
+      - Modular ad slots in wizard and task screens
+      - Ad format support (banners, text links, sponsored suggestions)
+      - Responsive ad rendering
+  [ ] Build basic ad management API:
+      - Package creation/pricing
+      - Creative asset upload/approval
+      - Scheduling (where/when ads appear)
+      - Impression/click tracking
+  [ ] Build basic consumer-facing advertising site:
+      - Landing page
+      - Stripe integration for ad purchases
+  [ ] Clearly delineate ads from system content
+  [ ] Ad billing connected to Stripe payment module
+  [ ] Document advertising API for future expansion
+Success Criteria: Ad slot architecture in place, basic ad management working,
+                  consumer site live with Stripe.
 
 
 ================================================================================
@@ -722,8 +691,7 @@ Week 22 (Aug 3 - Aug 9)
 MILESTONE 7.1 - Comprehensive Testing & Hardening (Week 22 - First Half)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Complete unit test coverage for all major modules
-      (target: >80% on backend business logic and critical frontend flows)
+  [ ] Complete unit test coverage for all modules (>80%)
   [ ] Run full integration test suite
   [ ] End-to-end testing of critical flows:
       - User registration/login (all 8 roles)
@@ -749,75 +717,65 @@ Deliverables:
   [ ] Performance testing (load testing for concurrent users)
   [ ] WCAG AA accessibility audit
   [ ] Fix all critical and high-severity bugs
-Success Criteria: Critical flows pass under security, performance, and
-                  accessibility checks.
+Success Criteria: All critical flows passing, security audit clean,
+                  performance acceptable, accessibility compliant.
 
 MILESTONE 7.2 - Production Deployment & Handoff (Week 22 - Second Half)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Configure production AWS EC2 environment and production Supabase project
-      with backups
+  [ ] Configure production AWS EC2 environment
+  [ ] Set up production Supabase instance with backups
   [ ] Implement backup strategy and disaster recovery plan
   [ ] Deploy application to production via CI/CD
-  [ ] Configure custom domains, SSL certificates, and tenant brand settings
-  [ ] Verify production integrations:
-      - Gmail
-      - Outlook
-      - Apple iCloud
-      - e-sign provider integration(s)
-      - Stripe
-      - OpenAI
+  [ ] Configure custom domain and SSL certificates
+  [ ] Verify all integrations in production:
+      - Email (Gmail, Outlook)
+      - E-signature (DocuSign)
+      - Payments (Stripe)
+      - OpenAI API
   [ ] Deliver technical documentation:
-      - OpenAPI/Swagger docs
-      - architecture diagrams
-      - database schema docs
-      - deployment runbook
-      - task template import mapping
-      - extension-point/future-hook documentation
-      - broker migration guidance
-  [ ] Deliver user training materials for internal roles and external portal
-      workflows
-  [ ] Transfer final source code into the client's private repository
-  [ ] Establish optional post-launch support agreement
-Success Criteria: Application is live in production, documentation is
-                  delivered, source code is transferred, and the team is ready
-                  for post-launch support.
+      - API documentation (Swagger/OpenAPI)
+      - Architecture diagrams
+      - Deployment runbook
+      - Database schema documentation
+  [ ] Deliver user training materials
+  [ ] Deliver deployment scripts and configuration docs
+  [ ] Final source code transfer to client private repository
+  [ ] Establish post-launch support agreement (optional)
+Success Criteria: Application live in production, all documentation delivered,
+                  source code transferred, support agreement in place.
 
 
 ================================================================================
 MILESTONE SUMMARY
 ================================================================================
 
-Phase | Weeks  | Focus Area                               | Duration
-------|--------|-------------------------------------------|----------
-  1   |  1-3   | Discovery, Architecture & Foundation      | 3 weeks
-  2   |  4-8   | Core Workflow Platform                    | 5 weeks
-  3   |  9-13  | Wizard & Document Intelligence            | 5 weeks
-  4   | 14-16  | Communication Engine & AI Email           | 3 weeks
-  5   | 17-19  | Dashboards, Portals, Payments & Profiles  | 3 weeks
-  6   | 20-21  | White-Label, Hooks & Extensibility        | 2 weeks
-  7   |   22   | Testing, Deployment & Launch              | 1 week
-------|--------|-------------------------------------------|----------
-TOTAL |  1-22  | Full MVP Delivery                         | 22 weeks
+Phase | Weeks  | Focus Area                              | Duration
+------|--------|----------------------------------------|----------
+  1   |  1-3   | Discovery, Architecture & Foundation    | 3 weeks
+  2   |  4-8   | Core Transaction & Task Engine          | 5 weeks
+  3   |  9-13  | AI Wizard & Document Management         | 5 weeks
+  4   | 14-16  | Communication Engine & AI Email          | 3 weeks
+  5   | 17-19  | Dashboards, Payments & Profiles          | 3 weeks
+  6   | 20-21  | White-Label, Integrations & Ad Hooks     | 2 weeks
+  7   |   22   | Testing, Deployment & Launch             | 1 week
+------|--------|----------------------------------------|----------
+TOTAL |  1-22  | Full MVP Delivery                       | 22 weeks
 
 
 ================================================================================
 KEY DEPENDENCIES & RISKS
 ================================================================================
 
-1. Task Template Source Data:
-   REWORKING_TASK_DB.csv (or equivalent final mapping source) must be locked by
-   Week 2 for task-template import and dependency validation.
+1. Task Spreadsheet Delivery: Client must provide REWORKING TASK DB.xlsx
+   by Week 2 for task catalogue import.
 
-2. Approved MVP Design Stability:
-   The approved HTML references for Active Transactions, Solo Agent, Team
-   Leader, Attorney, and FSBO should remain stable by Week 7/Week 17. Late
-   layout changes to the shared shell or dashboard modules may cause rework.
+2. API Credentials: Gmail, Outlook, DocuSign, Stripe, and OpenAI API
+   credentials/accounts must be available by Week 9 (AI), Week 13 (e-sign),
+   Week 14 (email), Week 18 (payments).
 
-3. Third-Party Credentials:
-   OpenAI, Supabase, Gmail, Outlook, Apple iCloud, DocuSign/HelloSign, and
-   Stripe credentials/sandboxes must be available by the milestone weeks where
-   they are first needed.
+3. Legacy Codebase Access: Access to current ASP.NET MVC codebase needed
+   by Week 1 for review.
 
 4. Client Feedback Loops: Wizard flow (Week 11) requires client review and
    approval within 2-3 business days to avoid timeline slippage.
@@ -826,20 +784,13 @@ KEY DEPENDENCIES & RISKS
    Team Leader, Attorney, and FSBO approved by client (2026-03-26) and
    incorporated into Milestone 5.1 deliverables.
 
-5. Integration Access:
-   MLS, CRM, title-company, MLO, and calendar-provider access is required by
-   Week 20 to validate hook implementations and documentation.
+5. Third-Party API Limitations: MLS feed access, e-signature provider
+   sandbox availability, and email provider OAuth approval processes
+   may introduce delays.
 
-6. Scope Control:
-   Advertising, mobile, IMAP/SMTP fallback, predictive analytics,
-   role-specific Active Transactions pages, AI Coach, and concierge upsells are
-   explicitly non-MVP build items. Expanding them risks timeline and budget
-   overrun.
-
-7. Data Migration Responsibility:
-   MVP only migrates task-template data from the legacy platform. Brokers still
-   need guidance/tools for re-entering or importing transactions/contacts and
-   for preserving historical data offline.
+6. Scope Creep: The advertising module, consumer-facing site, and some
+   advanced AI features (NLP task creation, predictive analytics) are
+   scoped minimally for MVP. Expanding these risks timeline overrun.
 
 7. AI Coach Feature: The AI Coach add-on shown in Team Leader design files
    is a future paid feature ($79/agent/month) and NOT part of MVP. MVP may
@@ -856,11 +807,15 @@ KEY DEPENDENCIES & RISKS
 POST-MVP ROADMAP (Beyond 22 Weeks)
 ================================================================================
 
-- Mobile app (native or hybrid)
-- Orphan Accounts marketing/dashboard
+- Native/hybrid mobile app
+- IMAP/SMTP email fallback support
+- Specific CRM integrations (Follow Up Boss, etc.)
+- Advanced predictive analytics (closing delays, at-risk transactions)
 - AI custom video creator for milestones
-- Expanded AI agents (voice, SMS, calendar-driven workflows)
-- Predictive closing risk scoring
+- "Orphan Accounts" marketing dashboard
+- Expanded AI agents (voice, SMS)
+- Full advertising platform build-out
+- Pattern detection across teams
 - Compliance auditing enhancements
 - Role-specific Active Transactions pages (per-role transaction views beyond
   the shared MVP workspace)
