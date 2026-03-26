@@ -3,6 +3,7 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 ESTABLISHED PROJECT REQUIREMENTS
 ================================================================================
 Date Established: 2026-03-04
+Last Updated: 2026-03-26 (role-specific dashboard alignment)
 Timeline: 22 Weeks (MVP delivery)
 Budget: Under USD $40,000 (Fixed-Price)
 Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
@@ -41,19 +42,42 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
          - Assign/upload/delete documents, set payment information
          - Assign Elves to their team
          - All activities logged in overview tab
-      d) Administrator
+      d) Attorney
+         - New RBAC role that uses the same core transaction/document model as
+           other internal users
+         - Upload legal packets (title commitments, settlement statements,
+           affidavits, signed amendments, recording packets)
+         - Review title objections, settlement deltas, release timing, and
+           recording/disbursement checkpoints for attorney-closing matters
+         - Approve or hold attorney-owned sends/releases; every approval writes
+           to communication history and audit logs
+         - Can use AI-prepared packet indexing, comparisons, and request-note
+           drafts
+         - CANNOT delegate legal judgment, legal-equivalence decisions, or
+           final packet release to AI
+      e) Administrator
          - Manage users, set system-wide defaults
          - Configure AI behavior limits (set minimum confidence floor)
          - Access all data, set payment access (on/off)
          - Does NOT control/override team or agent task logic without system prompting
          - Execute communication log exports upon user request
-      e) Client (Buyer/Seller)
+      f) Client (Buyer/Seller in an Agent-Led Transaction)
          - View documents and milestones, ask questions/request info
          - Upload documents (cannot delete, but can flag for deletion)
          - CANNOT edit tasks, delete documents, or see internal notes
          - Can share milestones from their profile
          - Ability to turn on/off notifications
-      f) Vendor
+      g) FSBO Customer (Self-Guided Seller)
+         - Customer-facing, property-centric workspace for self-managed sales
+           and listing prep
+         - Upload/view/download documents, review milestones/messages, and ask
+           for plain-English AI guidance
+         - Can share read-only milestone links, manage notification
+           preferences, and flag documents for deletion review
+         - Can interact with assigned Velvet Elves support/guide contacts
+         - CANNOT see internal workflow logic/notes, edit back-office tasks or
+           approvals, or delete documents directly
+      h) Vendor
          - Upload documents (if invited); can upload new iterations
            (old documents marked as legacy/outdated)
          - Receive documents, request information
@@ -62,7 +86,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 1.3 Contact Management
     - Centralized contact directory linked to transactions and vendors
-    - Store details for co-agents, loan officers, title reps, buyers, sellers
+    - Store details for co-agents, loan officers, title reps, attorneys,
+      buyers, sellers
     - Functions to update names, emails, phone numbers
     - Vendor contact "card" feature: outbound emails include link/button to
       redirect vendors/co-agents to add additional contacts (processor, partner)
@@ -90,10 +115,24 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - After the first transaction upload, prompt the user to complete their
       profile/setup if required fields or checklist templates are missing
 
-1.7 Client Portal
-    - Ability to turn on/off notifications
-    - Share milestones from profile
-    - Agent BIO section: "Learn About Your Agent"
+1.7 Client & FSBO Portals
+    Standard Client Portal:
+      - Ability to turn on/off notifications
+      - Share milestones from profile
+      - Agent BIO section: "Learn About Your Agent"
+
+    FSBO Customer Workspace:
+      - Dashboard sections: Overview, My Properties, Documents,
+        Milestones & Messages, Notifications/Sharing
+      - Property-centric view that supports both listing-prep and
+        under-contract states
+      - Plain-English AI guidance focused on next step, deadlines,
+        document requirements, and glossary-style explanations
+      - Read-only milestone sharing with expirable links and viewer-open
+        notifications
+      - Support/guide contact area with a clear boundary that Velvet Elves
+        coordinates workflow but does not act as the customer's agent or
+        provide legal advice
 
 
 ================================================================================
@@ -103,7 +142,9 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 2.1 Transaction Lifecycle
     - Create, edit, delete transactions
     - Fields: address, representation type (buyer/seller/both), purchase price,
-      financing type (cash/financed), closing date, notes
+      financing type (cash/financed), closing date, closing mode
+      (attorney closing vs title/escrow vs shared approval when applicable),
+      notes
     - Populate vendor lists, state lists, agent lists
     - Intuitive forms with built-in validation
     - Support for 6 transaction types:
@@ -114,6 +155,10 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
       5. Buyer & Seller - Financing (Both)
       6. Buyer & Seller - Cash (Both)
     - Use case must be confirmed before tasks are instantiated
+    - For FSBO customers, support a property-centric pre-contract /
+      listing-prep state before a file becomes an active transaction
+    - FSBO property views should support prep milestones such as disclosures,
+      photo approval, marketing/go-live target, and launch checklist
 
 2.2 Transaction Type Switching
     - If transaction type changes mid-process (e.g., Financing to Cash):
@@ -123,13 +168,17 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Log all updates for audit
 
 2.3 Transaction Assignment
-    - Assign to elf or agent; triggers notifications and additional task creation
+    - Assign to elf, agent, or attorney; triggers notifications and additional
+      task creation
     - Support reassignment and multiple participants per transaction
 
 2.4 Filtering & Reporting
-    - Filtered lists per role (elf, agent, vendor, client) with sorting,
-      searching, pagination
+    - Filtered lists per role (elf, agent, team lead, attorney, vendor,
+      client, FSBO) with sorting, searching, pagination
     - Filter by status, closing date, representative, location, etc.
+    - Grouped sidebar navigation from the Active Transactions design is the
+      canonical information architecture for internal workspaces:
+      Dashboard; Deals; Workflow; Intelligence
     - Left sidebar deal-state filters on the Active Transactions workspace:
       Active Transactions, Pending, Closed, All Transactions
     - Active Transactions page tabs: All, Overdue, Due Today, Closing Soon,
@@ -141,6 +190,10 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Inline transaction search bar (next to sort control): search across
       client names, vendor names, companies, dates, addresses, and all
       transaction fields
+    - Dashboard KPI tiles, fast filters, and role-specific queue cards should
+      deep-link into filtered Active Transactions or review views
+    - Attorney dashboard queue filters: All, Needs Review, Missing Docs,
+      Ready To Release, Clean Files
     - Preserve future hook for "Active Listings" in the deal-state navigation
       for v2
     - Export capabilities: CSV, Excel, PDF
@@ -154,24 +207,130 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Integration with accounting platforms (future hook)
 
 2.6 Role-Specific Workspaces & Dashboards
-    - Tailored for: agents, team leaders, transaction managers, vendors,
-      clients, administrators
+    - Tailored for: agents, team leaders, elves/transaction managers,
+      attorneys, FSBO customers, vendors, clients, administrators
     - Summarize: active transactions, upcoming deadlines, outstanding payments,
       communication status
-    - Customizable widgets, interactive charts/KPIs
+    - Customizable widgets, interactive charts/KPIs where appropriate
     - "What's the most important thing to do today?" prioritized list
       (overdue, missed, closest to closing date)
     - AI assistant can act as a filter/sort/suggestion layer
-    - When the user lands on the Dashboard, AI can offer a "most important
-      things today" briefing covering overdue tasks, due-today tasks, and
-      timeline reminders; if nothing is urgent, it can offer prospecting or
-      low-priority suggestions
+    - When the user lands on a dashboard, AI can offer a "most important
+      things today" briefing covering overdue tasks, due-today tasks, timeline
+      reminders, or plain-English next-step guidance depending on role
     - Search & sort features
-    - Scope note: the currently approved screen is the Active Transactions page;
-      the broader Dashboard page is the next design phase and should reuse the
-      same visual/data patterns
+    - Dashboard landing pages are now approved for MVP for Solo Agent, Team
+      Leader, FSBO, and Attorney
+    - For MVP, all internal dashboard drill-downs should route into the shared
+      Active Transactions workspace; role-specific Active Transactions pages
+      are a later phase
 
-    Agent/Elf Active Transactions Workspace (client-approved redesign):
+    Shared Internal Navigation & Shell:
+      a) Topbar with:
+         - Brand lockup + AI indicator
+         - "Today's AI Briefing" chip
+         - Inline AI briefing counts: Critical, Needs Attention, On Track
+         - Global search, notification bell, user chip, contextual CTA
+      b) Dark left sidebar with:
+         - KPI tiles relevant to the role
+         - Navigation grouped as Dashboard, Deals, Workflow, Intelligence
+         - Deals: Active Transactions, Pending, Closed, All Transactions
+         - Workflow: My Task Queue, All Documents, Closing Calendar
+         - Intelligence: AI Suggestions, Analytics, Settings
+         - Pinned primary CTA and profile card at the bottom
+      c) Shared interaction model:
+         - Dashboard cards, fast filters, and AI prompts should open filtered
+           transaction/review states instead of isolated dead-end pages
+         - Global search and AI command entry should stay available from the
+           dashboard shell
+
+    Solo Agent Dashboard:
+      a) Document-first intake card:
+         - Drag/drop or browse to start a new transaction
+         - AI reads the documents, builds the transaction shell, suggests
+           milestone dates, identifies missing docs, and routes to Active
+           Transactions
+      b) Hero / action queue:
+         - Ranked list of transactions needing intervention today
+         - Portfolio health score
+         - "Why deals are drifting" diagnostics
+         - Fast filters for critical closings, missing responses, stale
+           communication, and document blockers
+      c) Production snapshot:
+         - Pending GCI, pending volume, closings YTD/lifetime, active
+           transaction counts
+      d) Transaction overview and priority cards:
+         - Tiles for closing soon, in inspection, documents needed, etc.
+         - Priority transaction cards with next-step CTA, key tasks, key dates,
+           contacts, and footer actions (documents, print checklist, history)
+      e) Side rail:
+         - AI portfolio intelligence, missing-doc concentration, recent
+           communication highlights
+
+    Team Leader Dashboard:
+      a) Team intervention queue ranked by likelihood of breaking
+      b) Drift / discipline metrics:
+         - Closings inside 7 days with unresolved dependency
+         - No client touch in 72+ hours
+         - Missing signatures or document gaps
+         - Agents needing coaching
+      c) Team performance modules:
+         - Agent board with drill-down into an individual agent's book
+         - Team financials, pipeline health, annual pace, and closings in the
+           next 14 days
+      d) Side rail:
+         - AI portfolio intelligence, coach prompts, documents blocking
+           milestones, recent communication
+      e) AI Coach:
+         - The AI Coach add-on shown in design files is a future paid feature
+           and NOT part of MVP
+         - MVP may preserve architecture hooks or feature-flagged placeholders,
+           but should not scope active implementation into the core delivery
+
+    Attorney Dashboard:
+      a) New RBAC-backed landing page for attorney-closing matters
+      b) Matter / packet intake:
+         - Upload title commitments, settlement statements, affidavits, signed
+           amendments, and recording packets
+         - AI extracts deadlines, compares versions, indexes exhibits, flags
+           missing formal documents, and routes anything needing legal judgment
+           back to the attorney queue
+      c) Review filters and queues:
+         - Filters: All, Needs Review, Missing Docs, Ready To Release, Clean
+           Files
+         - Legal queue, release queue, and clean-file watch
+      d) Matter cards:
+         - Next-step CTA, why-badges, milestone bar, key dates, contacts,
+           audit trail, and packet/document actions
+      e) State-rule surfaces:
+         - State rules modal / watch for closing mode, recording timelines,
+           disbursement timing, and same-day release checks
+         - Recording calendar and legal/audit quick actions
+      f) Guardrails:
+         - Make the line between AI-prepared work and human legal judgment
+           explicit
+         - Final legal position, packet release approval, and same-day
+           disbursement exceptions remain human-owned
+
+    FSBO Dashboard:
+      a) Customer-facing workspace for self-guided sellers using Velvet Elves
+         without a listing agent
+      b) Primary sections:
+         - Overview, My Properties, Documents, Milestones & Messages,
+           Notifications/Sharing, Ask AI
+      c) Property-centric behavior:
+         - Support both listing-prep and under-contract views
+         - Surface the next decision, why it matters, upcoming milestones, and
+           current document blockers in plain English
+      d) Guidance and sharing:
+         - Read-only milestone sharing with expiry and viewer alerts
+         - Support/guide contact area and AI glossary-style explanations
+         - Shared viewers can see milestone progress and key dates but cannot
+           edit tasks, delete documents, or view internal workflow notes
+
+    Shared Active Transactions Workspace (MVP; used by Agent, Elf, Team Lead,
+    Attorney, and dashboard drill-downs until role-specific transaction pages
+    are designed):
       a) Topbar with:
          - Brand lockup + AI indicator
          - "Today's AI Briefing" chip
@@ -226,19 +385,6 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
          - Critical red / warning amber / healthy green / neutral gray
          - AI surfaces use subtle champagne glow accents only
 
-    Team Lead Active Transactions Workspace:
-      - Same page architecture as Agent/Elf view, adapted for team scope
-      - Team-wide KPI tiles and briefing counts
-      - Transaction cards include assignee information
-      - Team member filtering layered on top of deal-state and page tabs
-      - Team activity overview and team task template management shortcuts
-
-    Dashboard (next design phase):
-      - Broader Dashboard page still pending from client and should be planned
-        as a separate screen after Active Transactions
-      - Reuse AI briefing, urgency states, and "most important things today"
-        patterns from the Active Transactions workspace
-
 2.7 Full Transaction View
     - Overview Tab / Transaction Log
     - Ability to resend emails with one click (icon on the far right of note)
@@ -280,12 +426,13 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Extract from all uploaded documents:
       Property Data: street address, city, state, zip code
       Transaction Data: representation type, purchase price, financing type,
-                        earnest money details
+                        earnest money details, closing mode when applicable
       Timeline Data: contract acceptance date, inspection deadlines,
                      financing/appraisal deadlines, closing date,
                      date-based contingencies
       Party Data: buyer(s), seller(s), listing agent, buyer's agent,
-                  loan officer, title company
+                  loan officer, title company, closing attorney/settlement
+                  attorney when present
     - Detect owner-occupied vs. investor/second home purchase (criteria:
       purchase agreement marking, down payment >= 20%)
     - Modify scripts accordingly for investor/second home focus
@@ -326,8 +473,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 3.8 Wizard Confirmation Page
     - Single confirmation page showing: address, purchase price, closing date,
-      all extracted deadlines, parties/contact info, financing status,
-      appraisal status (cash only)
+      closing mode when applicable, all extracted deadlines,
+      parties/contact info, financing status, appraisal status (cash only)
     - Actions: edit any field, accept as-is
     - One-time validation (no rescan on edit)
     - Optional "Suggest AI Improvement" button for corrections to improve AI
@@ -465,7 +612,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 ================================================================================
 
 5.1 Upload & Storage
-    - Agents, elves, clients, vendors can upload documents
+    - Agents, elves, attorneys, clients, FSBO customers, and vendors can
+      upload documents according to role permissions
     - Secure storage linked to transactions (Supabase storage or AWS S3)
     - Version history with diffs (Git-like tracking or text/PDF compares)
     - Soft deletes as default (archiving with restore for authorized roles)
@@ -476,6 +624,11 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Rename, archive (soft delete) documents
     - Versioning: track changes, view previous versions
     - Vendors see only their own uploads (unless agent/elf shares)
+    - Customer-facing FSBO/client document views should surface status states
+      such as Missing, In Progress, Uploaded, Verified, or Complete, with
+      role-appropriate actions like Upload New Version or Flag Issue
+    - Shared milestone viewers see read-only status cues only; no internal
+      workflow details or deletion actions
     - Cross-transaction "All Documents" workspace with AI search by document
       name, buyer, seller, and related transaction
 
@@ -493,13 +646,13 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
       copy -> returned signed doc replaces original (old to version history)
       -> distribute to identified parties
     - Named documents (PA, C1, Amend, etc.) auto-sent to all parties/vendors
-    - Other documents: notify agent of completion
+    - Other documents: notify the responsible internal owner of completion
 
 5.5 AI-Assisted Document Processing
     - AI reads uploaded documents (contracts, PDFs) and auto-extracts key fields
     - Reduce manual data entry, improve accuracy
-    - Client deletion requests: "flag for deletion" button that notifies
-      agent/elf for approval with logging
+    - Client/FSBO deletion requests: "flag for deletion" button that notifies
+      the responsible internal owner for approval with logging
 
 
 ================================================================================
@@ -527,14 +680,16 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - IMAP/SMTP: not in MVP, planned for future
 
 6.3 AI Email Responsibilities
-    - Auto-respond to vendor/client document requests (always CC agent & elf)
-    - Auto-respond to client factual questions (always CC agent & elf):
+    - Auto-respond to vendor/client/FSBO document requests (always CC the
+      responsible internal owner, e.g. agent & elf for agent-led files)
+    - Auto-respond to client/FSBO factual questions (always CC the responsible
+      internal owner):
       Closing date/time, utility info, possession date,
       transaction milestones/status updates
     - Rules:
-      Document exists -> send + CC agent + elf
-      Document missing -> notify agent + elf with draft email
-      Unsure about request -> notify agent + elf with draft email
+      Document exists -> send + CC responsible internal owner(s)
+      Document missing -> notify responsible internal owner(s) with draft email
+      Unsure about request -> notify responsible internal owner(s) with draft email
     - Auto-reply to messages sent back (type out response, ask user to
       modify or send)
     - AI disclaimer at bottom of any AI-sent messages
@@ -542,7 +697,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 6.4 AI Draft Safeguards
     - If AI makes assumptions/inferences/interpretations:
       Email drafted but NOT sent
-      Agent and elf receive draft with "Approve / Edit & Send" button
+      Responsible human owner(s) receive draft with "Approve / Edit & Send"
+      button
       Button links back into system
       All assumptions/inferences/interpretations in bold in draft
     - Side-by-side review UI: left = draft with bolded assumptions,
@@ -553,7 +709,8 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Follow predefined style rules (configurable)
     - Avoid legal advice
     - Avoid certainty when data is inferred
-    - Include vague disclaimer about verifying info with agent (if AI-sent)
+    - Include a disclaimer about verifying information with the responsible
+      human owner/support contact (if AI-sent)
 
 6.6 In-App Notifications
     - Notifications for all external communications sent
@@ -645,6 +802,17 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Log: document received, what AI extracted, what AI decided,
       why it decided (top drivers), whether human approved/overrode
 
+8.6 Attorney-Role AI Guardrails
+    - AI may compare settlement statement versions, extract deadlines, index
+      exhibits, summarize communication history, and draft transmittal or
+      request language
+    - AI must NOT determine legal equivalence, legal position, final packet
+      release approval, or same-day disbursement exceptions
+    - If confidence is below threshold, a formal/notarized document is
+      missing, or legal judgment is required, the task remains human-owned
+    - Every attorney approval or override writes to communication history and
+      audit logs
+
 
 ================================================================================
 9. USER INTERFACE & EXPERIENCE
@@ -652,11 +820,16 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 9.1 Responsive Web Application
     - React frontend, accessible from desktops and mobile browsers
-    - Dark sidebar + slim topbar + page header + scrollable transaction area
-    - IBM Plex Sans typography throughout the product UI
+    - Dark sidebar + slim topbar + page header + scrollable content area for
+      internal workspaces, with a simplified but brand-consistent shell for
+      customer-facing portals
+    - IBM Plex Sans is the primary UI font throughout the product
     - IBM Plex Mono for numbers, dates, countdowns, and other dense operational
       values
-    - No serif typography in the application workspace
+    - Limited Lora serif accents may be used for approved brand/display
+      headings only; body/UI copy remains IBM Plex Sans
+    - Use one shared typography system across all roles and portals; do not
+      introduce role-specific alternates such as DM Sans
     - font-variant-numeric: tabular-nums lining-nums applied anywhere the UI
       shows money, dates, phones, addresses, file IDs, percentages, or deadlines
     - 6px radius for professional components
@@ -667,36 +840,47 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
     - Native or hybrid mobile app (subsequent phase if budget permits)
     - View/update transactions, upload via camera, push notifications
 
-9.3 Active Transactions Workspace & Reporting
-    - The currently approved role-specific page is the Active Transactions
-      workspace (see Section 2.6); the broader Dashboard screen is still pending
-    - Sidebar navigation groups:
+9.3 Role-Specific Dashboards & Active Transactions
+    - Approved MVP landing dashboards: Solo Agent, Team Leader, FSBO,
+      Attorney
+    - Internal dashboards use the grouped sidebar navigation as canonical:
       Dashboard
       Deals: Active Transactions, Pending, Closed, All Transactions
       Workflow: My Task Queue, All Documents, Closing Calendar
       Intelligence: AI Suggestions, Analytics, Settings
-    - Sidebar KPI tiles: Overdue Tasks, Closing This Week, Active Deals,
-      Pipeline Value
-    - Topbar AI briefing row: Today's AI Briefing + Critical / Needs Attention /
-      On Track counts
-    - Page tabs: All, Overdue, Due Today, Closing Soon, In Inspection,
-      On Track, Unhealthy
-    - Transaction stage pills and "why" badges explain current risk, not just
-      status labels
-    - Inline task completion and key-date editing within expanded transaction
-      drawers
-    - One-click call/email buttons and add-contact affordances inside grouped
-      contact panels
-    - Footer actions per transaction: View/Add Documents, Print Checklist,
-      Transaction History
-    - All Documents search should support AI-assisted search across transactions
-    - Reporting dashboard remains available in profile and analytics views
+    - Solo Agent dashboard highlights: new-transaction intake, intervention
+      queue, pipeline snapshot, transaction overview, priority transaction
+      cards, AI intelligence rail
+    - Team Leader dashboard highlights: intervention queue, drift metrics,
+      agent board, team financials, closings-soon view, and team intelligence
+      rails
+    - Attorney dashboard highlights: legal queue, state-rule watch, packet
+      review/release filters, explicit AI-vs-human boundaries, and audit/legal
+      quick actions
+    - FSBO dashboard uses property-centric tabs: Overview, My Properties,
+      Documents, Milestones & Messages, with notification/sharing controls and
+      plain-English AI help
+    - Dashboard tiles, cards, queue rows, and fast filters should deep-link
+      into the shared Active Transactions workspace or the relevant review view
+    - Active Transactions remains a shared MVP workspace across internal roles;
+      role-specific Active Transactions pages are future work
+    - Shared Active Transactions retains sidebar KPI tiles, AI briefing
+      topbar, page tabs (All, Overdue, Due Today, Closing Soon, In Inspection,
+      On Track, Unhealthy), urgency-first sort, risk badges, inline task/date
+      editing, grouped contact actions, and transaction footer actions
+    - Shared milestone viewers get a clean, read-only timeline with key dates
+      and document-status cues only
+    - All Documents search should support AI-assisted search across
+      transactions
+    - Reporting dashboards remain available in profile and analytics views
 
 9.3.1 AI Daily Briefing
     - Persistent topbar chip that surfaces the current AI briefing state
+      across approved internal dashboards and the Active Transactions workspace
     - Summary counters for Critical, Needs Attention, and On Track transactions
     - Should be actionable as a filter/sort shortcut into the current workspace
-    - Serves as the bridge pattern for the future Dashboard landing page
+    - Serves as a shared interaction pattern across dashboard and transaction
+      workspaces
 
 9.4 Accessibility & Internationalization
     - WCAG AA compliance
@@ -775,6 +959,9 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 12.6 Compliance Auditing
 12.7 Pattern Detection Across Teams
 12.8 IMAP/SMTP Email Fallback
+12.9 Role-Specific Active Transactions Pages
+12.10 AI Coach Paid Add-On ($79/agent/month)
+12.11 Concierge / Concierge-Style Upsell
 
 
 ================================================================================

@@ -3,6 +3,7 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 PROJECT MILESTONES (22-WEEK TIMELINE)
 ================================================================================
 Date Established: 2026-03-04
+Last Updated: 2026-03-26 (role-specific dashboard alignment; Attorney & FSBO roles)
 Start Date: Week 1 (2026-03-09)
 End Date: Week 22 (2026-08-02)
 Budget: Under USD $40,000 (Fixed-Price)
@@ -42,7 +43,8 @@ Deliverables:
       - Multi-tenant tables with Row Level Security (RLS)
       - Users, roles, permissions tables
       - Transactions table (address, representation, price, financing,
-        closing date, notes, status, use-case type)
+        closing date, closing mode, notes, status, use-case type,
+        FSBO state fields)
       - Tasks table (name, description, target, dependencies, float,
         automation level, use-case applicability)
       - Documents table (name, type, metadata, version history, soft-delete)
@@ -64,7 +66,8 @@ Deliverables:
   [ ] Implement Supabase Auth integration (OAuth2/JWT)
   [ ] Build registration, login, password reset APIs
   [ ] Implement invite-based onboarding flow (token generation + email)
-  [ ] Build RBAC system: Agent, Elf, Team Lead, Admin, Client, Vendor
+  [ ] Build RBAC system: Agent, Elf, Team Lead, Attorney, Admin, Client,
+      FSBO Customer, Vendor
   [ ] Implement role-specific permission middleware in FastAPI
   [ ] Build contact management API (CRUD for contacts, linking to
       transactions/vendors)
@@ -73,7 +76,7 @@ Deliverables:
       - Admin: set global minimum confidence floor
       - Team Lead: set team thresholds (above admin minimum)
   [ ] Unit tests for auth and RBAC
-Success Criteria: All 6 roles can register/login, permissions enforced,
+Success Criteria: All 8 roles can register/login, permissions enforced,
                   invite flow working end-to-end.
 
 
@@ -87,7 +90,12 @@ MILESTONE 2.1 - Transaction Management Backend (Week 4)
 Deliverables:
   [ ] Build transaction CRUD APIs (create, read, update, delete)
   [ ] Implement 6 transaction types with validation
-  [ ] Build transaction assignment API (assign agent/elf, trigger notifications)
+  [ ] Build transaction assignment API (assign agent/elf/attorney, trigger
+      notifications)
+  [ ] Implement closing_mode field (attorney closing vs title/escrow vs
+      shared approval) with validation
+  [ ] Implement FSBO property state support (is_fsbo flag, fsbo_state for
+      listing-prep vs under-contract)
   [ ] Build filtered transaction lists per role (sorting, searching, pagination)
   [ ] Implement transaction status management (active, incomplete, paused,
       completed, closed)
@@ -136,8 +144,11 @@ Deliverables:
       - By status (previous, today, upcoming)
       - By vendor ("vendor carts")
       - Highlight upcoming deadlines
-  [ ] Implement state-based task rules (attorney vs title/escrow closing,
-      recording timelines, disbursement timing)
+  [ ] Implement state-based task rules keyed off closing_mode:
+      - Attorney closing vs title/escrow closing workflows
+      - Recording timelines, disbursement timing
+      - Required attorney involvement in doc prep/settlement
+      - Recording and funding sequence expectations
   [ ] Unit and integration tests for task engine
 Success Criteria: Tasks auto-generated from use case, dependencies enforced,
                   notifications firing, state-based rules operational.
@@ -145,11 +156,13 @@ Success Criteria: Tasks auto-generated from use case, dependencies enforced,
 MILESTONE 2.3 - Frontend Foundation & Auth UI (Week 7)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Build React app shell matching the approved Active Transactions layout:
-      - Dark sidebar with KPI tiles and grouped navigation
-      - Slim topbar with AI briefing chip, search, notifications, user chip,
-        and New Transaction CTA
-      - Page header + tab bar + scrollable transaction area
+  [ ] Build React app shell matching approved designs (shared across roles):
+      - Dark sidebar with role-specific KPI tiles and grouped navigation
+        (Dashboard, Deals, Workflow, Intelligence; Team section for Team Lead)
+      - Slim topbar with brand lockup, AI briefing chip, search, notifications,
+        user chip, and contextual CTA
+      - Page header + tab bar + scrollable content area
+      - Simplified customer-facing shell variant for FSBO workspace
   [ ] Implement brand-aligned design system as CSS variables:
       - Deep Institutional Navy (#1B2B3C)
       - Refined Amber Orange (#EE7623)
@@ -166,9 +179,14 @@ Deliverables:
       - AI next-step banners and why badges
       - Visual milestone timeline (Contract, EM, Inspection, Appraisal,
         CD Delivered, CTC, Close)
-      - Page tab bar with live counts
+      - Page tab bar with live counts (filter tabs and portal tabs)
       - KPI tiles and AI briefing badges
       - Grouped contact cards with one-click call/email actions
+      - Command grid layout (hero card + metric cards, fractional widths)
+      - Health score ring (conic-gradient progress indicator)
+      - Upload intake card (drag/drop zone with AI classification)
+      - Portfolio cards (property-centric, for FSBO workspace)
+      - Matter cards (legal review queue, for Attorney workspace)
       - Data tables with sorting/filtering/pagination
       - Forms with validation
       - Modals, notifications, alerts
@@ -176,15 +194,19 @@ Deliverables:
   [ ] Apply typography/accessibility rules from the brand kit:
       - IBM Plex Sans across app UI
       - IBM Plex Mono for operational values
+      - Limited Lora serif accents for approved brand/display headings only
       - tabular-nums/lining-nums for dates, money, phones, file IDs, deadlines
       - 6px radius and 48x48 minimum interactive targets
+      - One shared typography system across all roles and portals (no
+        role-specific alternates such as DM Sans)
   [ ] Implement white-label theming engine:
       - Custom logos, colors, themes per tenant
       - Applied across login, dashboards, email templates
   [ ] Connect frontend to Supabase Auth
-Success Criteria: Users can register, login, navigate by role;
-                  Active Transactions layout shell functional; white-label
-                  theming working.
+Success Criteria: Users can register, login, navigate by role (all 8 roles);
+                  shared app shell functional (internal + FSBO variant);
+                  white-label theming working; shared component library covers
+                  command grid, health score, portfolio cards, and matter cards.
 
 MILESTONE 2.4 - Transaction & Task UI (Week 8)
 -----------------------------------------------------------------------------
@@ -221,7 +243,15 @@ Deliverables:
       - Team member filtering
       - Assignee names on cards
       - Team task template access and activity overview
+  [ ] Build Attorney adaptation of the Active Transactions workspace:
+      - Attorney queue filters: All, Needs Review, Missing Docs,
+        Ready To Release, Clean Files
+      - Matter cards with attorney sign-off checkboxes
+      - Legal-specific KPI tiles (hard stops, release-ready packets,
+        active matters, reviewed volume)
+      - Explicit AI-vs-human boundary in card actions
   [ ] Build transaction create/edit forms with validation
+      - Include closing_mode selection (attorney/title-escrow/shared approval)
   [ ] Build transaction detail/overview page (full transaction view)
   [ ] Build task detail/edit UI
   [ ] Build admin task template management UI (edit definitions,
@@ -231,8 +261,9 @@ Deliverables:
   [ ] Integration tests for frontend-backend flows
 Success Criteria: Agents/elves can operate from the approved Active
                   Transactions workspace end-to-end, Team Leads can switch to
-                  team-scoped transaction views, and admins can configure task
-                  templates via UI.
+                  team-scoped transaction views, Attorneys can view and filter
+                  their matter queue, and admins can configure task templates
+                  via UI.
 
 
 ================================================================================
@@ -253,7 +284,9 @@ Deliverables:
       - Property data extraction (address, city, state, zip)
       - Transaction data extraction (representation, price, financing, earnest money)
       - Timeline data extraction (all dates and contingencies)
-      - Party data extraction (buyers, sellers, agents, loan officer, title co.)
+      - Party data extraction (buyers, sellers, agents, loan officer, title co.,
+        closing attorney/settlement attorney when present)
+      - Closing mode detection (attorney closing vs title/escrow)
       - Owner-occupied vs. investor/second home detection
   [ ] Implement double-check mechanism:
       - Two-pass extraction with different prompt strategies
@@ -303,11 +336,21 @@ Deliverables:
   [ ] Build cross-transaction All Documents UI with AI-assisted search
   [ ] Implement version history with diffs
   [ ] Build vendor document visibility rules (own uploads only, sharing)
+  [ ] Build attorney document upload support:
+      - Legal packet types: title commitments, settlement statements,
+        affidavits, signed amendments, recording packets
+      - AI-assisted packet indexing, version comparison, exhibit indexing
+  [ ] Build customer-facing document views (Client and FSBO):
+      - Document status states: Missing, In Progress, Uploaded, Verified,
+        Complete
+      - Role-appropriate actions: Upload New Version, Flag Issue
+      - Shared milestone viewers see read-only status cues only
   [ ] Implement soft delete with restore for authorized roles
   [ ] Build document emailing UI (recipients, subject, body, attachments,
       templated emails)
   [ ] Implement one-click resend from transaction log
-  [ ] Build client "flag for deletion" feature with agent/elf approval workflow
+  [ ] Build client/FSBO "flag for deletion" feature with agent/elf approval
+      workflow and audit logging
   [ ] Implement document metadata management (rename, type assignment)
   [ ] Build transaction documents modal flow used by the Active Transactions
       workspace
@@ -369,9 +412,12 @@ MILESTONE 4.2 - AI Email Automation (Week 15)
 -----------------------------------------------------------------------------
 Deliverables:
   [ ] Build AI email response engine (OpenAI GPT integration):
-      - Auto-respond to document requests (CC agent + elf)
-      - Auto-respond to factual questions (closing date, status, etc.)
-      - Apply rules: document exists -> send; missing -> draft; unsure -> draft
+      - Auto-respond to vendor/client/FSBO document requests (always CC the
+        responsible internal owner, e.g. agent & elf for agent-led files)
+      - Auto-respond to client/FSBO factual questions (closing date, status,
+        milestones; always CC the responsible internal owner)
+      - Apply rules: document exists -> send + CC; missing -> notify owner
+        with draft; unsure -> notify owner with draft
   [ ] Implement AI draft safeguards:
       - Detect assumptions/inferences/interpretations
       - Bold flagged content in draft
@@ -403,8 +449,11 @@ Deliverables:
       - Connected contacts persist for future transactions
       - Primary opt-in selection per transaction
   [ ] Implement saved vendor rep background search (offer updates to info)
-  [ ] Document future-provider wiring for SMS reminders and phone-icon
-      call-bridge actions
+  [ ] Document and wire provider-agnostic hooks for future SMS and
+      click-to-call / voice integrations:
+      - Communication log and data model support SMS/voice metadata fields
+      - Phone icons in contact cards support future call-bridge workflows
+      - Provider choice can be finalized later (e.g., Twilio)
   [ ] Build communication log UI:
       - Unified log view per transaction
       - Search/filter controls
@@ -423,17 +472,94 @@ Weeks 17-19 (Jun 29 - Jul 19)
 MILESTONE 5.1 - Role-Specific Dashboards (Week 17)
 -----------------------------------------------------------------------------
 Deliverables:
-  NOTE: The detailed page approved to date is the Active Transactions workspace
-  (built in Milestone 2.4). This milestone covers the broader Dashboard landing
-  page once that design is delivered, plus remaining roles and polish.
-  [ ] Build Agent/Elf Dashboard landing page:
-      - AI "most important things today" entry experience
-      - Shortcuts into Active Transactions filters and task queues
-      - Summary widgets for payments, deadlines, and communications
-  [ ] Build Team Lead Dashboard landing page:
-      - Team performance KPIs and charts
-      - Team member comparison metrics
-      - Shortcuts into the team-scoped Active Transactions workspace
+  NOTE: Dashboard landing pages are now approved for Solo Agent, Team Leader,
+  FSBO, and Attorney (approved 2026-03-26). The Active Transactions workspace
+  was built in Milestone 2.4. This milestone implements the approved dashboard
+  landing pages plus remaining roles and polish.
+
+  [ ] Build Solo Agent Dashboard landing page (per approved design):
+      - Upload intake card: drag/drop or browse zone for document-first intake;
+        AI reads docs, builds transaction shell, suggests milestones, identifies
+        missing docs, routes to Active Transactions
+      - Command grid layout (3-column responsive: 1.55fr / .95fr / .8fr):
+        hero card + production snapshot + transaction overview
+      - Hero card: health score ring (conic gradient, 0-100), health descriptor,
+        action queue (ranked transactions needing intervention today),
+        drift diagnostics ("why deals are drifting"), fast filter buttons
+        (critical closings, missing responses, stale communication,
+        document blockers)
+      - Production snapshot: pending GCI, pending volume, closings YTD/lifetime,
+        active transaction counts
+      - Priority transaction cards: closing soon, in inspection, documents
+        needed, next-step CTA, key tasks, key dates, contacts, footer actions
+      - Side rail: AI portfolio intelligence, missing-doc concentration,
+        recent communication highlights
+      - All dashboard cards, fast filters, and AI prompts deep-link into the
+        shared Active Transactions workspace (no dead-end pages)
+  [ ] Build Team Leader Dashboard landing page (per approved design):
+      - Upload intake card (same as Solo Agent)
+      - Command grid layout (same 3-column system):
+      - Hero card: team health score ring, intervention queue ranked by
+        likelihood of breaking, drift/discipline metrics (closings in 7 days
+        with unresolved dependency, no client touch in 72+ hrs, missing
+        signatures/doc gaps, agents needing coaching)
+      - Team performance modules: agent board with drill-down into individual
+        agent's book, team financials, pipeline health, annual pace, closings
+        in the next 14 days
+      - Side rail: AI portfolio intelligence, coach prompts, documents blocking
+        milestones, recent communication highlights
+      - Sidebar Team section: Agents and Task Templates navigation links
+      - NOTE: The AI Coach add-on shown in design files is a future paid feature
+        ($79/agent/month) and NOT part of MVP. MVP may preserve architecture
+        hooks or feature-flagged placeholders but should not scope active
+        implementation into the core delivery
+  [ ] Build Attorney Dashboard landing page (per approved design):
+      - Upload intake card for legal packets: title commitments, settlement
+        statements, affidavits, signed amendments, recording packets;
+        AI extracts deadlines, compares versions, indexes exhibits, flags
+        missing formal docs, routes legal judgment to attorney queue;
+        CTAs: "Open intake" and "Open release queue"
+      - Hero card: legal health score (0-100) focused on approval gates,
+        matters needing legal judgment, action list of critical approval gates,
+        drift summary (blocked matters, missing formal docs, release-ready
+        packets), filter buttons (needs attorney judgment, missing notarized
+        docs, ready to release, recording/disbursement timing)
+      - Filter tabs: All, Needs Review, Missing Docs, Ready To Release,
+        Clean Files
+      - Matter card stack: matter name, status pills (Critical, Today,
+        Missing doc), expandable drawer (review queue with sign-off checkboxes,
+        key dates with status colors, AI-prepared next step with context),
+        footer actions (View docs, Audit trail, Send packet, price)
+      - State rules modal: closing mode, recording timelines, disbursement
+        timing, same-day release checks, recording calendar, legal/audit
+        quick actions
+      - Explicit AI-vs-human guardrails: AI may compare versions, extract
+        deadlines, index exhibits, draft transmittal language; AI must NOT
+        determine legal equivalence, final packet release, or same-day
+        disbursement exceptions; these remain human-owned
+  [ ] Build FSBO Customer Workspace (per approved design):
+      - Simplified customer-facing shell (brand-consistent but not the full
+        internal sidebar/topbar)
+      - Sidebar KPI tiles: critical next steps, days to close, share links
+        live, missing documents
+      - Sidebar navigation: Dashboard, My Properties, Documents,
+        Milestones & Messages, Ask Velvet Elves AI, Notifications, Sharing
+      - Portal tabs: Overview, Properties, Documents, Support (with count
+        badges — distinct from filter tabs)
+      - Property portfolio strip: portfolio cards per property with property
+        title, status pill, portfolio chips (closing date, missing docs,
+        new messages), quick actions (Open timeline, Share link)
+      - Support both listing-prep and under-contract property views
+      - Plain-English AI guidance: next decision, why it matters, upcoming
+        milestones, current document blockers in plain English,
+        glossary-style explanations
+      - Milestone sharing: read-only milestone links with expiry and
+        viewer-open notifications; shared viewers see timeline and key dates
+        but cannot edit tasks, delete documents, or view internal workflow
+      - Support/guide contact area with boundary notice (VE coordinates
+        workflow but does not act as the customer's agent or provide legal
+        advice)
+      - "Share milestones" primary CTA in topbar
   [ ] Build Admin dashboard:
       - System-wide user management
       - AI confidence threshold configuration
@@ -446,8 +572,11 @@ Deliverables:
       - Task completion rates
       - Transaction metrics
       - Search & sort features
-Success Criteria: All 6 role dashboards functional with real data,
-                  widgets customizable, KPIs displaying.
+Success Criteria: All 8 role dashboards/workspaces functional with real data;
+                  Solo Agent, Team Leader, Attorney, and FSBO match approved
+                  HTML designs; dashboard cards deep-link into Active Transactions;
+                  health score rings, command grids, and portfolio cards rendering;
+                  AI-vs-human guardrails enforced on Attorney dashboard.
 
 MILESTONE 5.2 - Payment Processing (Week 18)
 -----------------------------------------------------------------------------
@@ -482,6 +611,10 @@ Deliverables:
       - Milestone sharing
       - Agent BIO / "Learn About Your Agent"
       - Notification preferences
+  [ ] Build FSBO customer portal settings:
+      - Notification preferences management
+      - Milestone sharing preferences (link expiry, viewer alerts)
+      - Support/guide contact preferences
   [ ] Build AI closing checklist generator:
       - Agent sheet and client sheet
       - Standard data areas per agent/team
@@ -511,7 +644,8 @@ Deliverables:
   [ ] Build white-label configuration UI:
       - Logo upload, brand colors, theme selection
       - Custom domain/subdomain configuration
-  [ ] Apply branding across: login, dashboards, email templates, documents
+  [ ] Apply branding across: login, all role-specific dashboards (Solo Agent,
+      Team Leader, Attorney, FSBO), email templates, documents
   [ ] Build tenant management admin panel
   [ ] Implement MLS feed integration hooks (property data pre-population)
   [ ] Build CRM integration webhooks (generic RESTful endpoints):
@@ -560,17 +694,25 @@ Deliverables:
   [ ] Complete unit test coverage for all modules (>80%)
   [ ] Run full integration test suite
   [ ] End-to-end testing of critical flows:
-      - User registration/login (all roles)
+      - User registration/login (all 8 roles)
       - Full wizard flow (upload -> parse -> confirm -> transaction)
       - Task generation and dependency enforcement
       - Document upload/version/email/e-sign
       - AI email automation with safeguards
       - Payment processing
       - White-label tenant isolation
+      - Solo Agent dashboard (intake, health score, deep-link to transactions)
+      - Team Leader dashboard (team metrics, intervention queue, agent drill-down)
+      - Attorney dashboard (matter queue, packet upload, release approval,
+        state rules, AI-vs-human guardrails enforced)
+      - FSBO workspace (property portfolio, document submission, milestone
+        sharing with expirable links, plain-English AI guidance)
+      - Dashboard-to-Active-Transactions deep-link flow
   [ ] Security audit:
       - OWASP Top 10 checks
       - PII encryption verification (at rest and in transit)
-      - RBAC permission enforcement testing
+      - RBAC permission enforcement testing (all 8 roles)
+      - Attorney AI guardrail testing (legal judgment not delegated to AI)
       - Payment security (PCI compliance)
   [ ] Performance testing (load testing for concurrent users)
   [ ] WCAG AA accessibility audit
@@ -638,9 +780,9 @@ KEY DEPENDENCIES & RISKS
 4. Client Feedback Loops: Wizard flow (Week 11) requires client review and
    approval within 2-3 business days to avoid timeline slippage.
    NOTE: Active Transactions page design approved by client (2026-03-19) and
-   moved into Week 8 implementation. The broader Dashboard landing page is
-   still pending client design/review and should be approved in time for
-   Milestone 5.1.
+   moved into Week 8 implementation. Dashboard landing pages for Solo Agent,
+   Team Leader, Attorney, and FSBO approved by client (2026-03-26) and
+   incorporated into Milestone 5.1 deliverables.
 
 5. Third-Party API Limitations: MLS feed access, e-signature provider
    sandbox availability, and email provider OAuth approval processes
@@ -649,6 +791,16 @@ KEY DEPENDENCIES & RISKS
 6. Scope Creep: The advertising module, consumer-facing site, and some
    advanced AI features (NLP task creation, predictive analytics) are
    scoped minimally for MVP. Expanding these risks timeline overrun.
+
+7. AI Coach Feature: The AI Coach add-on shown in Team Leader design files
+   is a future paid feature ($79/agent/month) and NOT part of MVP. MVP may
+   preserve architecture hooks or feature-flagged placeholders but should not
+   scope active implementation into the core delivery.
+
+8. Attorney AI Guardrails: Attorney dashboard implementation must enforce
+   explicit boundaries between AI-prepared work and human legal judgment.
+   Final legal position, packet release approval, and same-day disbursement
+   exceptions remain human-owned. Testing must verify these guardrails.
 
 
 ================================================================================
@@ -665,6 +817,12 @@ POST-MVP ROADMAP (Beyond 22 Weeks)
 - Full advertising platform build-out
 - Pattern detection across teams
 - Compliance auditing enhancements
+- Role-specific Active Transactions pages (per-role transaction views beyond
+  the shared MVP workspace)
+- AI Coach paid add-on ($79/agent/month) for Team Leaders
+- Concierge / Concierge-Style upsell
+- "Active Listings" deal-state navigation item (v2 feature hook preserved
+  in MVP sidebar)
 
 
 ================================================================================
