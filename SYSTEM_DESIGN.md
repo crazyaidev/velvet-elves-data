@@ -1,8 +1,9 @@
 # Velvet Elves - System Design Document
 
-**Date:** 2026-03-26
-**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) aligned to the approved MVP role dashboards and updated requirements
-**Reference:** ListedKit.com functionality as design benchmark, adapted for Velvet Elves' approved role-specific dashboard set
+**Date:** 2026-03-05
+**Last Updated:** 2026-03-26 (role-specific dashboard alignment; Attorney & FSBO roles; 5 approved HTML designs)
+**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs now approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions
+**Reference:** ListedKit.com functionality as design benchmark
 
 ---
 
@@ -86,12 +87,7 @@ Utils           │ Encryption, security, logging helpers
 
 ```
 Tenant (Brokerage)
-  └── Users (Agent, Elf, TeamLead, Attorney, Admin, Client, FSBO, Vendor)
-       ├── Property Workspaces
-       │    ├── Tasks
-       │    ├── Documents
-       │    ├── Communication Logs
-       │    └── Milestone Share Links
+  └── Users (Agent, Elf, TeamLead, Attorney, Admin, Client, FSBO_Customer, Vendor)
        └── Transactions
             ├── Tasks
             ├── Documents
@@ -172,7 +168,8 @@ CREATE TABLE IF NOT EXISTS public.users (
   email                  TEXT NOT NULL UNIQUE,        -- Fernet encrypted
   full_name              TEXT,                        -- Fernet encrypted
   phone                  TEXT,                        -- Fernet encrypted
-  role                   TEXT NOT NULL DEFAULT 'Agent',
+  role                   TEXT NOT NULL DEFAULT 'Agent',    -- Agent,Elf,TeamLead,Attorney,Admin,
+                                                         -- Client,FSBO_Customer,Vendor
   is_active              BOOLEAN NOT NULL DEFAULT TRUE,
   onboarding_completed   BOOLEAN NOT NULL DEFAULT FALSE,
   company_name           TEXT,
@@ -229,8 +226,8 @@ CREATE TABLE IF NOT EXISTS public.contacts (
   tenant_id       UUID NOT NULL REFERENCES public.tenants(id),
   created_by      UUID NOT NULL REFERENCES public.users(id),
   contact_type    TEXT NOT NULL,                    -- 'co_agent','loan_officer','title_rep',
-                                                   -- 'buyer','seller','inspector','appraiser',
-                                                   -- 'home_warranty','other'
+                                                   -- 'attorney','buyer','seller','inspector',
+                                                   -- 'appraiser','home_warranty','other'
   full_name       TEXT NOT NULL,                    -- Fernet encrypted
   email           TEXT,                             -- Fernet encrypted
   phone           TEXT,                             -- Fernet encrypted
@@ -344,8 +341,17 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   -- Insurance
   insurance_commitment_days INTEGER,
 
+  -- Closing mode (attorney vs title/escrow)
+  closing_mode            TEXT,                           -- 'attorney','title_escrow','shared_approval'
+                                                         -- NULL if not yet determined
+
   -- Financing specific
   is_owner_occupied       BOOLEAN DEFAULT TRUE,
+
+  -- FSBO / listing-prep state
+  is_fsbo                 BOOLEAN DEFAULT FALSE,          -- true for FSBO customer-owned properties
+  fsbo_state              TEXT,                           -- 'listing_prep','under_contract',NULL
+                                                         -- supports property-centric pre-contract state
 
   -- Status
   status                  TEXT NOT NULL DEFAULT 'Active',
@@ -383,6 +389,8 @@ ALTER TABLE public.property_workspaces
 - Added `attorney_rule_context` for state-based closing and release/disbursement logic
 - `user_id` renamed to `created_by` for clarity
 - Property address split into components (city, state, zip, county)
+- Added `closing_mode` for attorney closing vs title/escrow vs shared approval
+- Added `is_fsbo` and `fsbo_state` for FSBO customer property-centric workflows
 - `metadata_json` for extensibility without schema changes
 
 #### 2.2.7 `transaction_assignments` — Who works on a transaction (NEW)
@@ -403,8 +411,7 @@ CREATE INDEX idx_tx_assign_transaction ON public.transaction_assignments (transa
 CREATE INDEX idx_tx_assign_user ON public.transaction_assignments (user_id);
 ```
 
-**Why:** Requirement 2.3 now explicitly includes attorney assignment in
-addition to agent/elf/team participation.
+**Why:** Requirement 2.3 — transactions can be assigned to elf, agent, or attorney; support reassignment and multiple participants.
 
 #### 2.2.8 `transaction_parties` — External parties on a deal (NEW)
 
@@ -881,10 +888,10 @@ class UserRole(str, enum.Enum):
     AGENT = "Agent"
     ELF = "Elf"
     TEAM_LEAD = "TeamLead"
-    ATTORNEY = "Attorney"
+    ATTORNEY = "Attorney"          # NEW: legal review, packet release, state-rule compliance
     ADMIN = "Admin"
     CLIENT = "Client"
-    FSBO = "FSBO"
+    FSBO_CUSTOMER = "FSBO_Customer" # NEW: self-guided seller workspace
     VENDOR = "Vendor"
 
 class TransactionUseCase(str, enum.Enum):
@@ -965,8 +972,7 @@ class ContactType(str, enum.Enum):
     CO_AGENT = "co_agent"
     LOAN_OFFICER = "loan_officer"
     TITLE_REP = "title_rep"
-    ATTORNEY = "attorney"
-    SUPPORT_GUIDE = "support_guide"
+    ATTORNEY = "attorney"          # NEW: closing attorney / settlement attorney
     BUYER = "buyer"
     SELLER = "seller"
     INSPECTOR = "inspector"
@@ -976,9 +982,9 @@ class ContactType(str, enum.Enum):
 
 class CommunicationChannel(str, enum.Enum):
     EMAIL = "email"
-    SMS = "sms"
-    VOICE_CALL = "voice_call"
-    PUSH = "push"
+    SMS = "sms"                    # NEW: future SMS provider integration
+    VOICE_CALL = "voice_call"      # NEW: future click-to-call / call-bridge
+    PUSH = "push"                  # NEW: push notifications
     SYSTEM = "system"
     AI_DRAFT = "ai_draft"
     NOTE = "note"
@@ -1237,37 +1243,113 @@ GET    /api/v1/audit-logs                  # List audit logs (Admin only)
 GET    /api/v1/audit-logs/{entityType}/{entityId} # Logs for specific entity
 ```
 
-#### Dashboard & Landing Experience (`/api/v1/dashboard`)
-
-**Updated scope:** this section now covers role-specific dashboard landing
-payloads plus the shared Active Transactions datasets used across internal
-roles.
+#### Shared Active Transactions Workspace (`/api/v1/workspace`)
 
 ```
-GET    /api/v1/dashboard/landing            # Role-aware landing contract; returns redirect target
-GET    /api/v1/dashboard/agent-home         # Solo Agent dashboard payload
-GET    /api/v1/dashboard/team-home          # Team Leader dashboard payload
-GET    /api/v1/dashboard/attorney-home      # Attorney dashboard payload
-GET    /api/v1/dashboard/fsbo-home          # FSBO dashboard payload
-
-GET    /api/v1/dashboard/ai-briefing        # Topbar AI briefing for current role context
-GET    /api/v1/dashboard/sidebar-kpis       # Shared shell KPI tiles
-GET    /api/v1/dashboard/deal-state-counts  # Sidebar grouped nav counts
-GET    /api/v1/dashboard/transaction-cards  # Shared Active Transactions card stack
-GET    /api/v1/dashboard/attorney-queue     # Review-ready tasks/documents by urgency/state
-GET    /api/v1/dashboard/fsbo-properties    # FSBO property cards and self-service milestones
+GET    /api/v1/workspace/ai-briefing        # Topbar AI briefing:
+                                            #   critical_count, needs_attention_count,
+                                            #   on_track_count, suggested_focus
+GET    /api/v1/workspace/sidebar-kpis       # Sidebar KPI tiles:
+                                            #   overdue_tasks, closing_this_week,
+                                            #   active_deals, pipeline_value
+GET    /api/v1/workspace/deal-state-counts  # Sidebar Deals counts:
+                                            #   active_transactions, pending, closed, all_transactions
+GET    /api/v1/workspace/transaction-cards  # Active transaction cards:
+                                            #   client, address, status_pill, why_badges,
+                                            #   ai_next_step, milestone_bar, info_badges,
+                                            #   key_dates, grouped_contacts, price,
+                                            #   Supports: ?view=personal|team,
+                                            #   ?state_filter=active|pending|closed|all,
+                                            #   ?tab=all|overdue|today|closing_soon|
+                                            #        in_inspection|on_track|unhealthy,
+                                            #   ?sort=urgency|close_date|client_name|price,
+                                            #   ?search=, ?team_member_id=
 ```
 
 **Notes:**
-- `/dashboard/landing` is the canonical post-login entry point and resolves the
-  correct role dashboard client-side route.
-- `/dashboard/transaction-cards` remains the shared Active Transactions
-  contract used by Agent, Team Lead, Attorney, and temporary FSBO transaction views.
-- `/dashboard/attorney-queue` is optimized for legal review filters,
-  approval status, and state-specific closing logic.
-- `/dashboard/fsbo-home` and `/dashboard/fsbo-properties` focus on property
-  workspaces first, with converted transactions appearing in the shared deal views.
-- Sidebar navigation remains grouped as `Dashboard > Deals > Workflow > Intelligence`.
+- `?view=personal` returns only the user's own deals (Agent View)
+- `?view=team` returns all team deals with assignee info (Team Leader View)
+- `?search=` searches across client names, vendor names, companies, dates, addresses
+- `?sort=urgency` (default) sorts by overdue + soonest closing first
+- `?tab=in_inspection` means the inspection response has not yet been sent
+- `pipeline_value` sums purchase_price of currently active transactions
+- Status pills and "why" badges are computed server-side from transaction
+  state, task state, due dates, message counts, and missing-doc conditions
+- Dashboard landing pages reuse these same aggregation services
+
+#### Role-Specific Dashboard Landing Pages (`/api/v1/dashboard`)
+
+```
+# --- Solo Agent Dashboard ---
+GET    /api/v1/dashboard/agent/hero         # Hero card data:
+                                            #   health_score (0-100), health_descriptor,
+                                            #   action_queue (ranked transactions needing
+                                            #   intervention today), drift_diagnostics
+                                            #   (deals drifting + why), fast_filter_counts
+GET    /api/v1/dashboard/agent/production   # Production snapshot:
+                                            #   pending_gci, pending_volume, closings_ytd,
+                                            #   closings_lifetime, active_transaction_count
+GET    /api/v1/dashboard/agent/priority-cards  # Priority transaction cards:
+                                            #   closing_soon, in_inspection, documents_needed,
+                                            #   next_step_cta, key_tasks, key_dates,
+                                            #   contacts, footer_actions
+GET    /api/v1/dashboard/agent/intelligence # Side rail AI intelligence:
+                                            #   portfolio_insights, missing_doc_concentration,
+                                            #   recent_communication_highlights
+
+# --- Team Leader Dashboard ---
+GET    /api/v1/dashboard/team/intervention  # Team intervention queue:
+                                            #   ranked by likelihood of breaking,
+                                            #   closings_in_7d_with_dependency,
+                                            #   no_client_touch_72h, missing_signatures,
+                                            #   agents_needing_coaching
+GET    /api/v1/dashboard/team/performance   # Team performance modules:
+                                            #   agent_board (drill-down per agent),
+                                            #   team_financials, pipeline_health,
+                                            #   annual_pace, closings_next_14d
+GET    /api/v1/dashboard/team/drift         # Drift / discipline metrics:
+                                            #   unresolved_dependencies, stale_communication,
+                                            #   document_gaps, coaching_opportunities
+GET    /api/v1/dashboard/team/intelligence  # Team side rail:
+                                            #   ai_portfolio_intel, coach_prompts,
+                                            #   docs_blocking_milestones, recent_comms
+
+# --- Attorney Dashboard ---
+GET    /api/v1/dashboard/attorney/queue     # Attorney queue data:
+                                            #   hard_stops_today, release_ready_packets,
+                                            #   active_matters, reviewed_volume
+GET    /api/v1/dashboard/attorney/hero      # Attorney hero card:
+                                            #   legal_health_score, matters_needing_judgment,
+                                            #   action_list (critical approval gates),
+                                            #   drift_summary (blocked, missing_formal_docs,
+                                            #   release_ready)
+GET    /api/v1/dashboard/attorney/matter-cards  # Matter cards:
+                                            #   matter_name, status_pills, review_queue,
+                                            #   key_dates, ai_prepared_next_step,
+                                            #   audit_trail, packet_actions
+                                            #   Supports: ?tab=all|needs_review|missing_docs|
+                                            #        ready_to_release|clean_files
+GET    /api/v1/dashboard/attorney/state-rules   # State rules data:
+                                            #   closing_mode, recording_timelines,
+                                            #   disbursement_timing, same_day_release_checks
+
+# --- FSBO Customer Workspace ---
+GET    /api/v1/dashboard/fsbo/overview      # FSBO overview:
+                                            #   critical_next_steps, days_to_close,
+                                            #   share_links_live, missing_documents
+GET    /api/v1/dashboard/fsbo/properties    # Property portfolio:
+                                            #   property cards with status, closing_date,
+                                            #   missing_docs, new_messages, fsbo_state
+                                            #   (listing_prep | under_contract)
+GET    /api/v1/dashboard/fsbo/documents     # FSBO document view:
+                                            #   documents with status (missing, in_progress,
+                                            #   uploaded, verified, complete),
+                                            #   role-appropriate actions
+GET    /api/v1/dashboard/fsbo/milestones    # Milestones & messages:
+                                            #   milestone_timeline, messages, ai_guidance
+GET    /api/v1/dashboard/fsbo/share-link    # Milestone sharing:
+POST   /api/v1/dashboard/fsbo/share-link    #   create/manage expirable read-only links
+```
 
 #### Health & System
 
@@ -1278,53 +1360,43 @@ GET    /api/v1/health/ready                # Readiness check (DB connectivity)
 
 ### 3.3 Permission Matrix (Phase 1)
 
-**Internal application roles**
-
-| Capability | Admin | TeamLead | Agent | Elf | Attorney |
-|------------|-------|----------|-------|-----|----------|
-| User management | CRUD | Read team | Read self | Read self | Read self |
-| Invite users | Yes | Team only | Own support users / invited collaborators | No | No |
-| Create transaction | Yes | Yes | Yes | No | No |
-| Create property workspace | Yes | Yes | Yes | Yes (assigned only) | No |
-| View transactions | All | Team + personal | Own/assigned | Assigned | Assigned/review queue |
-| View property workspaces | All | Team + personal | Own/assigned | Assigned | Assigned/review queue |
-| Manage tasks | All | Team templates + oversight | Own txn/workspace | Assigned txn/workspace | Review-only unless explicitly assigned |
-| Approve gated tasks/documents | Yes | Team policy overrides | No | No | Yes |
-| Task templates | System-wide | Team-wide | Personal | No | Review only |
-| Upload/view documents | All | Team | Own/assigned | Assigned | Assigned/review queue |
-| Create/revoke share links | Yes | Team | Own/assigned | Assigned on behalf of owner | No |
-| Dashboard landing data | All | Team + personal toggle | Own | Assigned | Attorney queue + assigned matters |
-| Confidence settings | Global floor | Team threshold | No | No | No |
-| Audit logs | Full | Team scope | No | No | Review actions only |
-
-**External and token-based access**
-
-| Capability | Client | FSBO | Vendor | Share Link Viewer |
-|------------|--------|------|--------|-------------------|
-| Full app login | Limited portal only | Yes, FSBO workspace only | No | No |
-| View own milestones | Yes | Yes | No | Yes, read-only |
-| Upload documents | Yes, portal-safe only | Yes, workspace-safe only | Yes, invited uploads only | No |
-| Edit tasks | No | Limited self-service tasks only | No | No |
-| View documents | Own portal-visible docs | Own portal-visible docs | Own uploads / requested docs | Timeline-safe only |
-| View Active Transactions data | Own deal summary only | Converted deal summary only | No | No |
-| Create share links | No | No | No | No |
+| Endpoint | Admin | TeamLead | Agent | Elf | Attorney | Client | FSBO Customer | Vendor |
+|----------|-------|----------|-------|-----|----------|--------|---------------|--------|
+| User management | CRUD | Read team | Read self | Read self | Read self | Read self | Read self | Read self |
+| Invite users | Yes | Team only | Own elves | No | No | No | No | No |
+| Create transaction | Yes | Yes | Yes | No | No | No | No | No |
+| View transactions | All | Team | Own/assigned | Assigned | Assigned (attorney matters) | Own | Own properties | Own |
+| Manage tasks | All | Team templates | Own txn | Assigned txn | Attorney-owned tasks | No | No | No |
+| Task templates | System-wide | Team-wide | Personal | No | No | No | No | No |
+| Upload documents | Yes | Yes | Yes | Yes | Yes (legal packets) | Yes (no delete) | Yes (no delete) | Yes (own) |
+| Delete documents | Yes | Yes | Yes | Yes | Yes (own uploads) | Flag only | Flag only | No |
+| View documents | All | Team | Own txn | Assigned txn | Assigned txn | Own txn | Own property docs | Own uploads |
+| Active Transactions workspace | All | Team + personal toggle | Own | Assigned | Attorney queue | No | No | No |
+| Dashboard landing page | Admin dashboard | Team Leader dashboard | Solo Agent dashboard | Solo Agent dashboard | Attorney dashboard | Client portal | FSBO workspace | Vendor portal |
+| Approve/release packets | No | No | No | No | Yes (attorney-owned) | No | No | No |
+| AI-prepared legal work | No | No | No | No | Review only (no delegation) | No | No | No |
+| Milestone sharing | No | No | No | No | No | Share own | Share own (expirable links) | No |
+| Confidence settings | Global floor | Team threshold | No | No | No | No | No | No |
+| Audit logs | Full | Team | No | No | Own matters | No | No | No |
 
 ---
 
 ## 4. Frontend UI/UX Design
 
-### 4.1 Design System (Approved MVP Dashboard Set)
+### 4.1 Design System (Client-Approved Designs)
 
-**Visual approach:** shared operations shell with dark grouped navigation and light content
-surfaces plus role-tuned content modules. The approved MVP references are:
-- `completed_designs/ve-active_transactions.html`
-- `completed_designs/ve-homepage_dashboard-solo_agent.html`
-- `completed_designs/ve-homepage_dashboard-team_leader.html`
-- `completed_designs/ve-fsbo_dashboard.html`
-- `completed_designs/ve-attorney_dashboard.html`
+**Visual approach:** B2B institutional trust pack — dark sidebar + light content
+surface + high-density transaction cards. Customer-facing portals (FSBO) use a
+simplified but brand-consistent shell.
 
-Files `ve-brandkit.txt` and `ve-style-sheet.txt` are explicitly ignored for
-this design-system update.
+**Approved HTML design references (2026-03-26):**
+- `completed_designs/ve-active_transactions.html` — shared Active Transactions workspace
+- `completed_designs/ve-homepage_dashboard-solo_agent.html` — Solo Agent dashboard landing
+- `completed_designs/ve-homepage_dashboard-team_leader.html` — Team Leader dashboard landing
+- `completed_designs/ve-fsbo_dashboard.html` — FSBO Customer workspace
+- `completed_designs/ve-attorney_dashboard.html` — Attorney dashboard landing
+
+**Additional brand references:** `data/ve-brandkit.txt` and `data/ve-style-sheet.txt`
 
 - **Colors — brand-aligned semantic token system (CSS variables, white-label propagation):**
   ```css
@@ -1343,29 +1415,32 @@ this design-system update.
     --ve-danger: #c8322f;
   }
   ```
-  Status pills, urgency rails, milestone bars, and dashboard metric cards all
-  derive from this token layer so white-label overrides remain centralized.
-- **Typography:** IBM Plex Sans is the single application font across Agent,
-  Team Leader, Attorney, FSBO, and Active Transactions experiences. IBM Plex
-  Mono is reserved for numeric UI like currency, dates, IDs, countdowns, and
-  badge counts.
-- **Navigation language:** grouped sidebar structure is canonical for MVP:
-  `Dashboard > Deals > Workflow > Intelligence`.
-- **Layout:** one reusable shell with dark grouped sidebar, slim topbar, role
-  dashboard hero zone, and high-density workspace cards/tables beneath.
-- **Interaction rules:** 6px corner radius, clear urgency color hierarchy, and
-  a minimum 48x48px interactive target size.
-- **Components:** shadcn/ui primitives plus custom dashboard cards, grouped nav
-  sections, transaction cards, attorney review rows, and FSBO property cards.
-- **Responsive:** desktop-first, but all dashboards and the shared Active
-  Transactions view must collapse cleanly to tablet/mobile without breaking the
-  grouped nav or hiding approval/status cues.
+  Status pills use tint + border + text for readability, while card edge bars,
+  briefing badges, and inline urgency states carry stronger emphasis.
+- **Typography:** IBM Plex Sans across the application workspace; IBM Plex Mono
+  for numbers, dates, countdowns, phone numbers, file IDs, and badge counts.
+  Limited Lora serif accents may be used for approved brand/display headings
+  (hero card titles, dashboard section headers) per the design files; body/UI
+  copy remains IBM Plex Sans. Do not introduce role-specific alternates such as
+  DM Sans.
+- **Numeric handling:** apply `font-variant-numeric: tabular-nums lining-nums`
+  anywhere the UI displays money, dates, percentages, phone numbers,
+  commissions, file IDs, or deadlines.
+- **Layout:** Dark sidebar + slim topbar + page header + scrollable transaction
+  area.
+- **Interaction rules:** 6px corner radius for professional components and a
+  minimum 48x48px target size for interactive elements.
+- **Components:** shadcn/ui + custom workspace components matching the approved
+  Active Transactions patterns.
+- **Responsive:** Desktop-first with mobile breakpoints; preserve scan density
+  without collapsing the workspace into a consumer-style layout.
 
 ### 4.2 Page Structure
 
-**Scope update (2026-03-26):** the approved MVP now includes role-specific
-dashboard landing pages for Solo Agent, Team Leader, Attorney, and FSBO, plus a
-shared Active Transactions experience that all internal roles can flow into.
+**Scope update (2026-03-26):** Dashboard landing pages are now approved for
+Solo Agent, Team Leader, Attorney, and FSBO. The Active Transactions workspace
+remains the shared MVP transaction view for all internal roles. The page tree
+below reflects the full approved scope.
 
 ```text
 App
@@ -1380,45 +1455,62 @@ App
 |-- Onboarding (protected, standalone)
 |   `-- OnboardingWizard
 |
-|-- Main App (protected)
-|   |-- Topbar
+|-- Main App (protected — internal roles)
+|   |-- Topbar (shared shell)
+|   |   |-- Brand lockup + AI indicator
+|   |   |-- Today's AI Briefing chip (Critical / Needs Attention / On Track)
 |   |   |-- Global search
-|   |   |-- Today's AI Briefing
-|   |   |-- Notifications
-|   |   `-- Profile menu
+|   |   |-- Notifications bell
+|   |   |-- User chip
+|   |   `-- Contextual CTA (e.g., + New Transaction)
 |   |
-|   |-- Sidebar
-|   |   |-- Dashboard
-|   |   |   |-- Role Landing
-|   |   |   |-- Personal Metrics
-|   |   |   `-- Team / Queue / FSBO summaries
+|   |-- Sidebar (shared shell — KPIs and nav vary by role)
+|   |   |-- KPI tiles (2x2 grid, role-specific metrics)
+|   |   |-- Dashboard link
 |   |   |-- Deals
 |   |   |   |-- Active Transactions
 |   |   |   |-- Pending
 |   |   |   |-- Closed
 |   |   |   `-- All Transactions
 |   |   |-- Workflow
-|   |   |   |-- Task Queue
-|   |   |   |-- Closing Calendar
-|   |   |   `-- All Documents
+|   |   |   |-- My Task Queue
+|   |   |   |-- All Documents
+|   |   |   `-- Closing Calendar
 |   |   |-- Intelligence
 |   |   |   |-- AI Suggestions
-|   |   |   `-- Analytics
-|   |   |-- Pinned CTA
-|   |   |   |-- New Transaction
-|   |   |   `-- New Property Workspace
-|   |   `-- User profile summary
+|   |   |   |-- Analytics
+|   |   |   `-- Settings
+|   |   |-- Team (Team Lead only)
+|   |   |   |-- Agents
+|   |   |   `-- Task Templates
+|   |   |-- Pinned CTA (+ New Transaction)
+|   |   `-- User profile card
 |   |
-|   |-- Role Dashboards
+|   |-- Dashboard Landing Pages (role-specific, approved designs)
 |   |   |-- Solo Agent Dashboard
+|   |   |   |-- Upload intake card (drag/drop to start transaction)
+|   |   |   |-- Hero card (health score, action queue, drift diagnostics)
+|   |   |   |-- Production snapshot (GCI, volume, closings)
+|   |   |   |-- Priority transaction cards
+|   |   |   `-- Side rail (AI intelligence, missing docs, comms)
 |   |   |-- Team Leader Dashboard
-|   |   |-- Attorney Dashboard
-|   |   `-- FSBO Dashboard
+|   |   |   |-- Upload intake card
+|   |   |   |-- Hero card (team health score, intervention queue)
+|   |   |   |-- Drift / discipline metrics
+|   |   |   |-- Agent board with drill-down
+|   |   |   |-- Team financials and pipeline
+|   |   |   `-- Side rail (AI intel, coach prompts, docs blocking)
+|   |   `-- Attorney Dashboard
+|   |       |-- Upload intake card (legal packets)
+|   |       |-- Hero card (legal health score, approval gates)
+|   |       |-- Filter tabs (All, Needs Review, Missing Docs, Ready To Release, Clean Files)
+|   |       |-- Matter cards (review queue, key dates, AI next step)
+|   |       `-- State rules modal / recording calendar
 |   |
-|   |-- Shared Active Transactions Workspace
-|   |   |-- Agent / Elf personal view
+|   |-- Active Transactions Workspace (shared MVP for Agent, Elf, Team Lead, Attorney)
+|   |   |-- Agent/Elf personal view
 |   |   |-- Team Lead team/personal toggle
-|   |   `-- Attorney assigned-matter view
+|   |   `-- Attorney queue view (filtered by attorney matters)
 |   |
 |   |-- Transaction Detail
 |   |   |-- Overview
@@ -1457,10 +1549,27 @@ App
 |       |-- Tenant/Brokerage Settings
 |       `-- Audit Logs
 |
-`-- External Experiences
-    |-- Client Portal (transaction-focused)
-    |-- FSBO Workspace (property-focused)
-    `-- Share Link Timeline (read-only)
+|-- FSBO Customer Workspace (protected — customer-facing)
+|   |-- Sidebar
+|   |   |-- KPI tiles (critical next steps, days to close, share links, missing docs)
+|   |   |-- Dashboard
+|   |   |-- My Properties
+|   |   |-- Documents
+|   |   |-- Milestones & Messages
+|   |   |-- Ask Velvet Elves AI
+|   |   |-- Notifications
+|   |   `-- Sharing
+|   |-- Portal tabs: Overview | Properties | Documents | Support
+|   |-- Property portfolio cards (listing-prep and under-contract states)
+|   |-- Plain-English AI guidance panel
+|   |-- Milestone sharing (expirable read-only links)
+|   `-- Support/guide contact area
+|
+`-- Client Portal (protected — simplified)
+    |-- My Transactions
+    |-- Documents
+    |-- Milestones
+    `-- Agent Info
 ```
 
 ### 4.3 Key UI Components (Phase 1)
@@ -1490,9 +1599,258 @@ App
 
 #### 4.3.2 Transaction and Property Detail Views
 
-- Transaction detail remains a tabbed operations view for active deals.
-- Property workspace detail mirrors the same pattern but emphasizes prep tasks,
-  timeline guidance, documents, and conversion-to-transaction actions.
+```text
+Team Lead Active Transactions Workspace
+
+- Shared shell:
+  - Same topbar, sidebar, tabs, transaction-card system, and overlays as Agent/Elf view
+  - Toggle allows Team Lead to switch between personal and team scopes
+
+- Team view adjustments:
+  - KPI tiles and AI briefing aggregate across the full team
+  - Transaction cards include assignee name and optional assignee filter
+  - Activity summaries, unhealthy counts, and upcoming closings are team-scoped
+  - Team task-template actions and oversight shortcuts are available
+
+- Personal view adjustments:
+  - Uses the same Active Transactions workspace but scoped to the Team Lead's own deals
+```
+
+**Why toggle:** Most Team Leads also sell real estate and need both a personal
+Active Transactions view (their own deals) and a team oversight view (all team
+deals).
+
+#### 4.3.1c Solo Agent Dashboard Landing Page
+
+**Reference:** `completed_designs/ve-homepage_dashboard-solo_agent.html`
+
+```text
++--------------------------------------------------------------------------+
+| SIDEBAR (same shared shell as Active Transactions)                       |
+| - KPI tiles: Overdue Tasks, Closing This Week, Active Deals, Pipeline   |
+| - Dashboard (active), Deals, Workflow, Intelligence                     |
++--------------------------------------------------------------------------+
+| TOPBAR                                                                   |
+| - Brand lockup + AI indicator                                           |
+| - Today's AI Briefing chip (Critical / Needs Attention / On Track)      |
+| - Search, notifications, user chip, + New Transaction CTA               |
++--------------------------------------------------------------------------+
+| UPLOAD INTAKE CARD                                                       |
+| - Prominent drag/drop or browse zone for document-first intake          |
+| - AI reads docs, builds transaction shell, suggests milestones,         |
+|   identifies missing docs, routes to Active Transactions                |
+| - "Open intake" outline button                                          |
++--------------------------------------------------------------------------+
+| COMMAND GRID (3-column responsive layout)                                |
+| - Hero card (1.55fr):                                                   |
+|   - Serif heading, health score ring (conic gradient, 0-100)            |
+|   - "Why deals are drifting" diagnostics                                |
+|   - Action queue: ranked transactions needing intervention today        |
+|   - Fast filter buttons: critical closings, missing responses,          |
+|     stale communication, document blockers                              |
+| - Production snapshot (.95fr):                                          |
+|   - Pending GCI, pending volume, closings YTD/lifetime,                 |
+|     active transaction counts                                           |
+| - Transaction overview (.8fr):                                          |
+|   - Priority cards: closing soon, in inspection, documents needed       |
+|   - Next-step CTA, key tasks, key dates, contacts, footer actions      |
++--------------------------------------------------------------------------+
+| SIDE RAIL                                                                |
+| - AI portfolio intelligence                                             |
+| - Missing-doc concentration                                             |
+| - Recent communication highlights                                       |
++--------------------------------------------------------------------------+
+```
+
+**Key design patterns (dashboard-specific):**
+- **Upload intake card**: document-first engagement at the top of the dashboard;
+  AI handles classification, transaction creation, and routing.
+- **Command grid**: 3-column responsive layout mixing a hero card with metric
+  and overview cards. Columns use fractional widths (1.55fr / .95fr / .8fr).
+- **Health score ring**: conic-gradient progress indicator (0-100) with
+  descriptive text summarizing portfolio health.
+- **Drift summary rows**: quantified workflow state with color-coded emphasis
+  (e.g., "2 deals need inspection docs").
+- **Action queue**: prioritized list of transactions needing intervention today
+  with status dots and inline quick-action buttons.
+- **Fast filter buttons**: one-click filters that open curated views in the
+  Active Transactions workspace.
+- **Dashboard cards, fast filters, and AI prompts deep-link into the shared
+  Active Transactions workspace** — they do not create isolated dead-end pages.
+
+#### 4.3.1d Team Leader Dashboard Landing Page
+
+**Reference:** `completed_designs/ve-homepage_dashboard-team_leader.html`
+
+```text
++--------------------------------------------------------------------------+
+| SIDEBAR                                                                  |
+| - KPI tiles: Deals At Risk, Closing in 14 Days, Active Deals, Pipeline  |
+| - Dashboard (active), Deals, Workflow, Team (Agents, Task Templates),    |
+|   Intelligence (includes AI Coach link — future paid feature, not MVP)   |
++--------------------------------------------------------------------------+
+| TOPBAR (same shared shell)                                               |
++--------------------------------------------------------------------------+
+| UPLOAD INTAKE CARD (same as Solo Agent)                                  |
++--------------------------------------------------------------------------+
+| COMMAND GRID (3-column, same layout system)                              |
+| - Hero card:                                                            |
+|   - Team health score ring                                              |
+|   - Intervention queue ranked by likelihood of breaking                 |
+|   - Drift metrics: closings in 7d with unresolved dependency,           |
+|     no client touch in 72+ hrs, missing signatures, agent coaching      |
+|   - Filter buttons: needs judgment, stale deals, doc gaps, coaching     |
+| - Team performance modules:                                             |
+|   - Agent board with drill-down per agent                               |
+|   - Team financials, pipeline health, annual pace                       |
+|   - Closings in the next 14 days                                       |
+| - Side rail:                                                            |
+|   - AI portfolio intelligence, coach prompts                            |
+|   - Documents blocking milestones, recent communication                 |
++--------------------------------------------------------------------------+
+```
+
+**Key differences from Solo Agent:**
+- **Sidebar Team section**: additional navigation group with Agents and Task
+  Templates links.
+- **KPIs are team-aggregated**: "Deals at Risk" replaces "Overdue Tasks";
+  larger numbers reflect the full team pool.
+- **AI Coach link**: shown in Intelligence section but is a future paid feature
+  ($79/agent/month). MVP may preserve architecture hooks or feature-flagged
+  placeholders but should not scope active implementation.
+- **Intervention queue**: ranked by breaking likelihood rather than personal
+  urgency; includes coaching opportunities.
+
+#### 4.3.1e Attorney Dashboard Landing Page
+
+**Reference:** `completed_designs/ve-attorney_dashboard.html`
+
+```text
++--------------------------------------------------------------------------+
+| SIDEBAR                                                                  |
+| - KPI tiles: Hard Stops Today, Release-Ready Packets, Active Matters,   |
+|   Reviewed Volume                                                       |
+| - Deals: Attorney Queue, Pending Review, Ready To Release, Clean Files  |
+| - Workflow: Missing Documents, Recording Calendar, Communication Log    |
+| - Intelligence: AI Suggestions, State Rules, Settings                   |
++--------------------------------------------------------------------------+
+| TOPBAR (same shared shell — "Attorney Workspace" subtitle)              |
++--------------------------------------------------------------------------+
+| UPLOAD INTAKE CARD (legal packets)                                       |
+| - Accepts: title commitments, settlement statements, affidavits,        |
+|   signed amendments, recording packets                                  |
+| - AI extracts deadlines, compares versions, indexes exhibits,           |
+|   flags missing formal docs, routes legal judgment to attorney queue    |
+| - CTAs: "Open intake" and "Open release queue"                          |
++--------------------------------------------------------------------------+
+| COMMAND GRID                                                             |
+| - Hero card:                                                            |
+|   - Legal health score (0-100) focused on approval gates                |
+|   - "N matters need legal judgment before closing stays on track"       |
+|   - Action list: critical approval gates                                |
+|   - Drift summary: blocked matters, missing formal docs,               |
+|     release-ready packets                                               |
+|   - Filter buttons: needs attorney judgment, missing notarized docs,    |
+|     ready to release after sign-off, recording/disbursement timing      |
++--------------------------------------------------------------------------+
+| FILTER TABS                                                              |
+| - All | Needs Review | Missing Docs | Ready To Release | Clean Files    |
++--------------------------------------------------------------------------+
+| MATTER CARD STACK                                                        |
+| - Header: matter name, status pills (Critical, Today, Missing doc)      |
+| - Expandable drawer (3-column):                                         |
+|   - Review queue: tasks with attorney sign-off checkboxes               |
+|   - Key dates: deadlines with status color coding                       |
+|   - Next step: AI-prepared action with context                          |
+| - Footer: View docs, Audit trail, Send packet, price                    |
++--------------------------------------------------------------------------+
+| STATE RULES MODAL                                                        |
+| - Closing mode, recording timelines, disbursement timing,               |
+|   same-day release checks                                               |
+| - Recording calendar and legal/audit quick actions                      |
++--------------------------------------------------------------------------+
+```
+
+**Key design patterns (attorney-specific):**
+- **Attorney-specific KPIs**: "Hard Stops Today" and "Release-Ready Packets"
+  replace generic task/deal metrics.
+- **Legal health score**: operational health focused on sign-off gates and
+  release timing, not general portfolio health.
+- **Matter cards**: similar structure to transaction cards but oriented around
+  legal review queue, sign-off gates, and packet release actions.
+- **Explicit AI-vs-human boundary**: the dashboard makes the line between
+  AI-prepared work and human legal judgment explicit. Final legal position,
+  packet release approval, and same-day disbursement exceptions remain
+  human-owned.
+- **Release queue**: separate action path for pre-closing packet staging and
+  attorney-specific approval gates.
+- **State rules surface**: modal/watch for closing mode, recording timelines,
+  disbursement timing, and same-day release checks.
+
+#### 4.3.1f FSBO Customer Workspace
+
+**Reference:** `completed_designs/ve-fsbo_dashboard.html`
+
+```text
++--------------------------------------------------------------------------+
+| SIDEBAR (simplified, customer-facing)                                    |
+| - KPI tiles: Critical Next Steps, Days to Close, Share Links Live,      |
+|   Missing Documents                                                     |
+| - Dashboard, My Properties, Documents, Milestones & Messages            |
+| - Ask Velvet Elves AI, Notifications, Sharing                           |
++--------------------------------------------------------------------------+
+| TOPBAR ("FSBO WORKSPACE" subtitle)                                       |
+| - Brand lockup, AI briefing chip, search, notifications, user chip      |
+| - "Share milestones" primary CTA                                        |
++--------------------------------------------------------------------------+
+| PORTAL TABS                                                              |
+| - Overview | Properties | Documents | Support (with count badges)        |
++--------------------------------------------------------------------------+
+| PROPERTY PORTFOLIO STRIP                                                 |
+| - Portfolio cards per property:                                          |
+|   - Property title (serif heading)                                      |
+|   - Status pill (e.g., "Needs response")                                |
+|   - Portfolio chips: closing date, missing docs, new messages            |
+|   - Quick actions: Open timeline, Share link                            |
+| - Supports both listing-prep and under-contract views                   |
++--------------------------------------------------------------------------+
+| PLAIN-ENGLISH AI GUIDANCE                                                |
+| - Next decision, why it matters, upcoming milestones,                   |
+|   current document blockers in plain English                            |
+| - Glossary-style explanations                                           |
+| - Boundary notice: VE coordinates workflow but does not act as the      |
+|   customer's agent or provide legal advice                              |
++--------------------------------------------------------------------------+
+| MILESTONE SHARING                                                        |
+| - Read-only milestone links with expiry and viewer-open notifications   |
+| - Shared viewers see timeline and key dates only — no internal workflow  |
+|   details, task editing, document deletion, or internal notes           |
++--------------------------------------------------------------------------+
+| SUPPORT / GUIDE CONTACT AREA                                             |
+| - Assigned Velvet Elves support/guide contacts                          |
++--------------------------------------------------------------------------+
+```
+
+**Key design patterns (FSBO-specific):**
+- **Portal tabs** (not filter tabs): navigate between content sections
+  (Overview, Properties, Documents, Support).
+- **Portfolio cards**: property-centric alternative to transaction cards;
+  oriented toward property ownership rather than deal management.
+- **Property-centric KPIs**: "Days to Close", "Missing Documents", and "Share
+  Links Live" replace deal-management metrics.
+- **Plain-English AI guidance**: customer-facing AI that explains next steps,
+  deadlines, and document requirements without internal jargon.
+- **Milestone sharing**: expirable read-only links; shared viewers see progress
+  and key dates but cannot edit tasks, delete documents, or view internal
+  workflow notes.
+- **Minimal workflow exposure**: FSBO customers see document status states
+  (Missing, In Progress, Uploaded, Verified, Complete) and milestone progress
+  but not internal task management, approval workflows, or back-office notes.
+- **Document status states**: customer-facing documents surface states like
+  Missing, In Progress, Uploaded, Verified, or Complete with role-appropriate
+  actions (Upload New Version, Flag Issue).
+
+#### 4.3.2 Transaction Detail — Tabbed View
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -1553,12 +1911,12 @@ export const ROUTES = {
   ONBOARDING: '/onboarding',
   INVITE_ACCEPT: '/invite/:token',          // NEW
 
-  // Main app - role-aware dashboard and grouped sidebar navigation
-  DASHBOARD: '/dashboard',
-  DASHBOARD_AGENT: '/dashboard/agent',
-  DASHBOARD_TEAM_LEAD: '/dashboard/team-lead',
-  DASHBOARD_ATTORNEY: '/dashboard/attorney',
-  DASHBOARD_FSBO: '/dashboard/fsbo',
+  // Main app — role-specific dashboard landing pages (approved 2026-03-26)
+  DASHBOARD: '/dashboard',                          // auto-routes by role
+  DASHBOARD_AGENT: '/dashboard/agent',              // NEW: Solo Agent dashboard
+  DASHBOARD_TEAM_LEADER: '/dashboard/team',         // NEW: Team Leader dashboard
+  DASHBOARD_ATTORNEY: '/dashboard/attorney',        // NEW: Attorney dashboard
+  DASHBOARD_ADMIN: '/dashboard/admin',              // existing admin dashboard
   PROFILE: '/profile',
 
   // Deals section
@@ -1598,6 +1956,21 @@ export const ROUTES = {
   PIPELINE: '/pipeline',
   SHARE_TIMELINE: '/share/:token',
 
+  // Attorney workspace
+  ATTORNEY_QUEUE: '/attorney/queue',                // NEW: attorney matter queue
+  ATTORNEY_RELEASE_QUEUE: '/attorney/releases',     // NEW: release-ready packets
+  ATTORNEY_STATE_RULES: '/attorney/state-rules',    // NEW: state rules modal/view
+  ATTORNEY_RECORDING_CALENDAR: '/attorney/recording-calendar', // NEW
+
+  // FSBO Customer workspace
+  FSBO_DASHBOARD: '/fsbo',                          // NEW: FSBO overview
+  FSBO_PROPERTIES: '/fsbo/properties',              // NEW: property portfolio
+  FSBO_PROPERTY_DETAIL: '/fsbo/properties/:id',     // NEW
+  FSBO_DOCUMENTS: '/fsbo/documents',                // NEW: document submission
+  FSBO_MILESTONES: '/fsbo/milestones',              // NEW: milestones & messages
+  FSBO_SHARE: '/fsbo/share',                        // NEW: milestone sharing
+  FSBO_AI_HELP: '/fsbo/ask-ai',                     // NEW: plain-English AI guidance
+
   // Admin
   ADMIN_USERS: '/admin/users',              // NEW
   ADMIN_USER_DETAIL: '/admin/users/:userId',
@@ -1607,6 +1980,9 @@ export const ROUTES = {
   ADMIN_CONFIDENCE: '/admin/confidence',     // NEW
   ADMIN_AUDIT_LOGS: '/admin/audit-logs',     // NEW
   ADMIN_TENANT: '/admin/tenant',             // NEW
+
+  // Shared milestone viewer (public, read-only)
+  MILESTONE_VIEWER: '/milestones/:shareToken',      // NEW: expirable public link
 } as const;
 ```
 
@@ -1616,17 +1992,14 @@ export const ROUTES = {
 React Query (TanStack Query)
 |-- Server State (cached via React Query)
 |   |-- /auth/me                      -> current user
-|   |-- /dashboard/landing            -> role-aware dashboard target
-|   |-- /dashboard/agent-home         -> solo agent landing data
-|   |-- /dashboard/team-home          -> team leader landing data
-|   |-- /dashboard/attorney-home      -> attorney landing data
-|   |-- /dashboard/fsbo-home          -> FSBO landing data
-|   |-- /dashboard/ai-briefing        -> topbar AI briefing counts
-|   |-- /dashboard/sidebar-kpis       -> grouped-shell KPI tiles
-|   |-- /dashboard/deal-state-counts  -> Active/Pending/Closed/All counts
-|   |-- /dashboard/transaction-cards  -> shared Active Transactions card data
-|   |-- /dashboard/attorney-queue     -> review queue
-|   |-- /dashboard/fsbo-properties    -> property workspace cards
+|   |-- /workspace/ai-briefing        -> topbar AI briefing counts
+|   |-- /workspace/sidebar-kpis       -> sidebar KPI tiles
+|   |-- /workspace/deal-state-counts  -> Active/Pending/Closed/All counts
+|   |-- /workspace/transaction-cards  -> collapsible card data
+|   |-- /dashboard/agent/*            -> Solo Agent dashboard data (hero, production, priority, intel)
+|   |-- /dashboard/team/*             -> Team Leader dashboard data (intervention, performance, drift)
+|   |-- /dashboard/attorney/*         -> Attorney dashboard data (queue, hero, matters, state-rules)
+|   |-- /dashboard/fsbo/*             -> FSBO workspace data (overview, properties, docs, milestones)
 |   |-- /transactions                 -> transaction list
 |   |-- /property-workspaces          -> property workspace list/detail
 |   |-- /tasks                        -> task list
@@ -1638,14 +2011,12 @@ React Query (TanStack Query)
 |   `-- /audit-logs                   -> audit trail
 |
 |-- Client State (React Context)
-|   |-- AuthContext                   -> JWT token, user session
+|   |-- AuthContext                   -> JWT token, user session, current role
 |   |-- ThemeContext                  -> white-label branding
 |   |-- RoleDashboardContext          -> role landing composition + dashboard mode
 |   |-- WorkspaceViewContext          -> Team Lead personal/team toggle
 |   |-- WorkspaceFilterContext        -> deal-state + page-tab filters
-|   |-- FsboWorkspaceContext          -> property workspace progress + guidance state
-|   |-- AttorneyReviewContext         -> review queue filters + approval actions
-|   |-- ShareLinkContext              -> create/revoke link state
+|   |-- DashboardContext              -> role-specific dashboard state, command grid layout
 |   |-- GlobalDropzoneContext         -> workspace-wide document drop handling
 |   `-- NotificationContext           -> toast/alert state
 |
@@ -1654,9 +2025,9 @@ React Query (TanStack Query)
     |-- PropertyWorkspaceForm
     |-- TaskTemplateForm
     |-- ContactForm
-    |-- ShareLinkForm
-    |-- AttorneyReviewForm
-    `-- UserInviteForm
+    |-- UserInviteForm
+    |-- FSBOShareForm                 -> milestone sharing with expiry
+    `-- AttorneyReleaseForm           -> packet release approval
 ```
 
 ---
@@ -1718,9 +2089,16 @@ React Query (TanStack Query)
    - Update existing schemas for expanded fields
 
 **Frontend tasks:**
-1. Update route constants for role dashboards, property workspaces, attorney review, and share timelines
-2. Define dashboard composition strategy for Agent, Team Leader, Attorney, and FSBO views
-3. Plan shared shell components and grouped sidebar navigation
+1. No major frontend changes in Week 1
+2. Update route constants for new pages (including dashboard landing routes,
+   attorney workspace routes, FSBO workspace routes, milestone viewer)
+3. Plan component structure for all 5 approved designs:
+   - Shared app shell (topbar + sidebar + content area)
+   - Solo Agent dashboard (command grid + hero card + upload intake)
+   - Team Leader dashboard (team metrics + intervention queue)
+   - Attorney dashboard (matter cards + release queue + state rules)
+   - FSBO workspace (portal tabs + portfolio cards + milestone sharing)
+   - Shared Active Transactions workspace (existing)
 
 ### 5.2 Milestone 1.2 — Database & Data Model Implementation (Week 2)
 
@@ -1855,9 +2233,10 @@ Detailed mapping from REWORKING_TASK_DB.csv to `task_templates`:
 
 The current schema has:
 - `users`: basic fields → needs new columns (bio, avatar, notification_prefs, team_id)
-- `transactions`: minimal fields → needs full expansion
+- `transactions`: minimal fields → needs full expansion (including closing_mode, is_fsbo, fsbo_state)
 - `tasks`: basic fields → needs template_id, target, AI fields
 - `documents`: basic fields → needs versioning, classification, signature tracking
+- `users.role`: enum expansion to include Attorney and FSBO_Customer
 - `integrations`: adequate for Phase 1
 - Missing: tenants, teams, contacts, task_templates, transaction_assignments, transaction_parties, communication_logs, audit_logs, invitation_tokens, confidence_settings
 - `property_workspaces`: new table needed for FSBO and pre-transaction listing prep
@@ -1889,7 +2268,8 @@ Migration strategy:
 | Multi-state support | State-based task rules | 2 |
 
 Key differentiators from ListedKit:
-- **More granular roles** (8 internal/external roles vs ListedKit's simpler model)
+- **More granular roles** (8 roles including Attorney and FSBO Customer vs ListedKit's simpler model)
+- **Role-specific dashboard landing pages** (Solo Agent, Team Leader, Attorney, FSBO)
 - **AI email automation** with safeguards (ListedKit has basic drafting)
 - **Attorney approval guardrails** for legal-sensitive work
 - **FSBO property workspace** before a transaction formally exists
@@ -1897,3 +2277,6 @@ Key differentiators from ListedKit:
 - **White-label multi-tenancy** (ListedKit is single-brand)
 - **Advertising module** for monetization
 - **Task dependency engine** (more sophisticated than ListedKit's checklists)
+- **Attorney workflow** with legal packet review, release gates, state-rule compliance
+- **FSBO customer workspace** with property-centric views and plain-English AI guidance
+- **Health score dashboards** with command-grid layout and drift diagnostics
