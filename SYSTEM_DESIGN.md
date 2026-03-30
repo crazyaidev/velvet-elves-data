@@ -1,8 +1,8 @@
 # Velvet Elves - System Design Document
 
 **Date:** 2026-03-05
-**Last Updated:** 2026-03-26 (role-specific dashboard alignment; Attorney & FSBO roles; 5 approved HTML designs)
-**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs now approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions
+**Last Updated:** 2026-03-30 (Active Transactions UI alignment — key dates, modals, transaction history, AI chat)
+**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions; Active Transactions UI fully aligned with ve-active_transactions.html
 **Reference:** ListedKit.com functionality as design benchmark
 
 ---
@@ -260,10 +260,19 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   purchase_price        NUMERIC(12,2),
   earnest_money         NUMERIC(12,2),
 
-  -- Key dates
+  -- Core dates
   contract_acceptance_date DATE,
   closing_date             DATE,
+  closing_time             TIME,                          -- time-of-day for closing (NULL = TBD)
   possession_date          DATE,
+  possession_time          TIME,                          -- time-of-day for possession (NULL = TBD)
+
+  -- Key milestone dates (editable from Active Transactions drawer)
+  em_delivered_date        DATE,                          -- Earnest Money delivered
+  inspection_response_date DATE,                         -- Inspection response deadline
+  appraisal_expected_date  DATE,                         -- Appraisal expected
+  cd_delivered_date        DATE,                          -- Closing Disclosure delivered
+  cleared_to_close_date    DATE,                         -- Cleared to Close
 
   -- Inspection
   has_inspection          BOOLEAN DEFAULT TRUE,
@@ -323,6 +332,11 @@ CREATE INDEX idx_transactions_use_case ON public.transactions (use_case);
 - Property address split into components (city, state, zip, county)
 - Added `closing_mode` for attorney closing vs title/escrow vs shared approval
 - Added `is_fsbo` and `fsbo_state` for FSBO customer property-centric workflows
+- Added key milestone date columns (`em_delivered_date`, `inspection_response_date`,
+  `appraisal_expected_date`, `cd_delivered_date`, `cleared_to_close_date`) — these are
+  the editable "Key Dates" shown in the Active Transactions expanded drawer
+- Added `closing_time` and `possession_time` (TIME) for time-of-day tracking
+  (displayed as "Time: TBD" until set)
 - `metadata_json` for extensibility without schema changes
 
 #### 2.2.6 `transaction_assignments` — Who works on a transaction (NEW)
@@ -1021,6 +1035,28 @@ GET    /api/v1/workspace/transaction-cards  # Active transaction cards:
                                             #        in_inspection|on_track|unhealthy,
                                             #   ?sort=urgency|close_date|client_name|price,
                                             #   ?search=, ?team_member_id=
+
+# Key dates management (inline edit from expanded drawer)
+PUT    /api/v1/transactions/{id}/key-dates  # Update one or more key milestone dates:
+                                            #   em_delivered_date, inspection_response_date,
+                                            #   appraisal_expected_date, cd_delivered_date,
+                                            #   cleared_to_close_date, closing_date,
+                                            #   closing_time, possession_date, possession_time
+
+# Transaction history timeline
+GET    /api/v1/transactions/{id}/history    # Searchable event timeline:
+                                            #   events grouped by date (Today, Yesterday, etc.)
+                                            #   Each: timestamp, description, detail, event_type
+                                            #   Merges audit logs, communication logs, task
+                                            #   completions, date changes, AI flags
+                                            #   Supports: ?search= for filtering
+
+# AI chat for workspace context
+POST   /api/v1/workspace/ai-chat           # Contextual AI assistant:
+                                            #   message, optional transaction_id context
+                                            #   Returns: response, suggested_actions[]
+                                            #   Quick-action prompts: "Show overdue tasks",
+                                            #   "Draft inspection response", "Summarize deal"
 ```
 
 **Notes:**
@@ -1033,6 +1069,10 @@ GET    /api/v1/workspace/transaction-cards  # Active transaction cards:
 - Status pills and "why" badges are computed server-side from transaction
   state, task state, due dates, message counts, and missing-doc conditions
 - Dashboard landing pages reuse these same aggregation services
+- Key dates are returned as part of transaction card data and are editable
+  inline via the `PUT /key-dates` endpoint; changes are audit-logged
+- Transaction history merges multiple event sources into a unified timeline;
+  the frontend displays it in the Transaction History panel
 
 #### Role-Specific Dashboard Landing Pages (`/api/v1/dashboard`)
 
@@ -1330,10 +1370,10 @@ App
 
 #### 4.3.1 Agent/Elf Active Transactions Workspace (Client-Approved Redesign)
 
-**Reference:** `data/velvet-elves-active-transactions.html`
+**Reference:** `completed_designs/ve-active_transactions.html`
 **Scope note:** This section supersedes the earlier dashboard-first planning.
-The approved detailed screen is the Active Transactions workspace, while the
-broader Dashboard landing page remains pending.
+The approved detailed screen is the Active Transactions workspace; dashboard
+landing pages are now also approved (see 4.3.1c–4.3.1f).
 
 ```text
 +--------------------------------------------------------------------------+
@@ -1364,9 +1404,14 @@ broader Dashboard landing page remains pending.
 | - Footer actions: Add Task, Upload, View Documents, Print Checklist      |
 +--------------------------------------------------------------------------+
 | SUPPORTING OVERLAYS                                                      |
-| - Add Task modal with AI similar-task suggestions                        |
+| - Add Task modal (name, method, due date, assign to, AI suggestions)     |
+| - New Transaction quick-create modal (AI Import + manual fields)         |
 | - Transaction Documents modal                                            |
 | - All Documents AI Search modal                                          |
+| - Add Contact inline modal (company, name, phone, email)                 |
+| - Transaction History panel (searchable event timeline)                  |
+| - Edit Date popover (inline key-date changes)                            |
+| - Floating AI Chat panel (contextual assistant)                          |
 | - Global drag-and-drop document intake prompt                            |
 +--------------------------------------------------------------------------+
 ```
@@ -1390,10 +1435,31 @@ broader Dashboard landing page remains pending.
   lender touch, and history are surfaced before expansion.
 - **Expanded 3-column drawer**: Tasks, Key Dates, Contacts, followed by an AI
   suggestions strip and footer actions.
+- **Key Dates column**: lists EM Delivered, Inspection Response, Appraisal
+  Expected, CD Delivered, Cleared to Close, Closing Date (with time), and
+  Possession (with time); each date has a pencil-edit icon that opens an
+  inline Save/Cancel popover; overdue dates shown in red.
 - **Grouped contact cards**: buyer, listing agent, lender, title, etc. each
-  support expand/collapse, one-click call/email, and add-secondary-contact flows.
-- **Integrated overlays**: Add Task modal, Transaction Documents modal, and
-  All Documents AI Search modal are all part of the primary workspace.
+  support expand/collapse, one-click call/email, and add-secondary-contact
+  flows; empty slots show "Add [role]" links.
+- **Add Task modal**: task name, completion method (Phone Call, Email,
+  DocuSign/E-Signature, In Person, Upload Document, Online Portal, AI Agent,
+  Other), due date, assign-to (self, AI Agent, team members), and "Get AI
+  Suggestions" button with expandable AI Suggested Approaches.
+- **New Transaction quick-create modal**: AI Import action ("Paste a contract
+  or MLS listing — AI will auto-fill all fields"); manual fields: Client Name,
+  Property Address, City/ZIP, Transaction Type, Purchase Price, Contract Date,
+  Projected Closing Date, Lender/Title Company, Notes; "Create with AI
+  Checklist" action.
+- **Add Contact modal**: Company Name, First Name, Last Name, Phone Number,
+  Email Address.
+- **Transaction History panel**: searchable event timeline organized by date
+  headings (Today, Yesterday, etc.) merging AI flags, emails, task
+  completions, date confirmations, and offer events.
+- **Floating AI Chat panel**: "Velvet Elves AI" contextual assistant with
+  deal-specific quick-action prompts.
+- **Integrated overlays**: Transaction Documents modal, All Documents AI
+  Search modal, and Edit Date popover are all part of the primary workspace.
 - **Checklist print action**: each transaction drawer exposes a print action
   fed from user/team checklist templates.
 

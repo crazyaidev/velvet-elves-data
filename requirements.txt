@@ -3,7 +3,7 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 ESTABLISHED PROJECT REQUIREMENTS
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-03-26 (role-specific dashboard alignment)
+Last Updated: 2026-03-30 (Active Transactions UI alignment — key dates, modals, AI chat)
 Timeline: 22 Weeks (MVP delivery)
 Budget: Under USD $40,000 (Fixed-Price)
 Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
@@ -141,10 +141,18 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 
 2.1 Transaction Lifecycle
     - Create, edit, delete transactions
-    - Fields: address, representation type (buyer/seller/both), purchase price,
-      financing type (cash/financed), closing date, closing mode
+    - Fields: address, city, state, zip, representation type
+      (buyer/seller/both), purchase price, financing type (cash/financed),
+      closing date, closing mode
       (attorney closing vs title/escrow vs shared approval when applicable),
-      notes
+      client name, lender/title company, contract date, notes
+    - Key milestone dates tracked per transaction (editable in place on the
+      Active Transactions expanded drawer):
+      EM Delivered, Inspection Response, Appraisal Expected, CD Delivered,
+      Cleared to Close, Closing Date (with time-of-day), Possession (with
+      time-of-day)
+    - Time-of-day stored separately for closing and possession dates
+      (displayed as "Time: TBD" until set)
     - Populate vendor lists, state lists, agent lists
     - Intuitive forms with built-in validation
     - Support for 6 transaction types:
@@ -365,20 +373,49 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
          - Three-column layout: Tasks, Key Dates, Contacts
          - Tasks grouped as Overdue / Upcoming / Completed with inline
            completion status and Add Task CTA
-         - Key dates editable in place with visual urgency states
+         - Key dates column lists these editable milestone dates with visual
+           urgency states and pencil-edit icons:
+           EM Delivered, Inspection Response, Appraisal Expected, CD Delivered,
+           Cleared to Close, Closing Date (with time-of-day), Possession (with
+           time-of-day)
+         - Inline date edit popover (Save / Cancel) for each key date
          - Contacts grouped by role (Buyer, Listing Agent, Lender, Title, etc.)
-           with expand/collapse, call/email, and add-secondary-contact actions
-         - AI Suggestions panel for the current deal
+           with expand/collapse, one-click call/email, and
+           add-secondary-contact actions
+         - Empty contact slots show an "Add [role]" link (e.g., "Add title
+           company")
+         - AI Suggestions panel for the current deal (e.g., "Draft inspection
+           response", "Summarize lender email thread", "Generate repair credit
+           counter-offer")
          - Footer actions: View/Add Transaction Documents, Print Checklist,
            Transaction History, price
       f) Supporting overlays and modal patterns:
-         - Add Task modal with completion-method options (Phone Call, Email,
+         - Add Task modal:
+           Task Name, completion-method selection (Phone Call, Email,
            DocuSign/E-Signature, In Person, Upload Document, Online Portal,
-           AI Agent, Other)
-         - AI "how to complete this task" suggestions within the Add Task flow
+           AI Agent, Other), Due Date, Assign To (self, AI Agent, team members)
+         - "Get AI Suggestions on How to Complete This Task" button with
+           expandable AI Suggested Approaches section
+         - Similar-task Add / Combine / Disregard workflow before saving
          - All Documents modal with AI search across all transactions by
            document name, buyer, or seller
          - Transaction Documents modal supporting view/add/rename/history
+         - New Transaction quick-create modal (from topbar and sidebar CTAs):
+           "Paste a contract or MLS listing — AI will auto-fill all fields"
+           AI Import action; manual fields: Client Name, Property Address,
+           City/ZIP, Transaction Type (Buyer/Seller/Dual Agency), Purchase
+           Price, Contract Date, Projected Closing Date, Lender/Title Company,
+           Notes; "Create with AI Checklist" action
+         - Add Contact inline modal: Company Name, First Name, Last Name,
+           Phone Number, Email Address
+         - Transaction History panel: searchable timeline of events with
+           timestamps, organized by date headings (Today, Yesterday, etc.),
+           showing AI flags, emails received, task completions, date
+           confirmations, and offer events
+         - Floating AI Chat panel ("Velvet Elves AI"): contextual assistant
+           with deal-specific quick-action prompts (e.g., "Show overdue
+           tasks", "Draft inspection response", "Summarize Young deal")
+         - Edit Date popover for inline key-date changes (Save / Cancel)
       g) Semantic color system aligned to the current brand system:
          - Primary navy for trust surfaces/navigation
          - Amber/orange for CTAs and high-importance actions
