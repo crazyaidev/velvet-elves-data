@@ -3,11 +3,11 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 PROJECT MILESTONES (22-WEEK TIMELINE)
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-03-30 (Active Transactions UI alignment — key dates, modals, transaction history, AI chat)
+Last Updated: 2026-03-31 (Multi-provider AI — switchable OpenAI / Claude support)
 Start Date: Week 1 (2026-03-09)
 End Date: Week 22 (2026-08-02)
 Budget: Under USD $40,000 (Fixed-Price)
-Tech Stack: React | FastAPI | OpenAI GPT | Supabase | AWS EC2
+Tech Stack: React | FastAPI | OpenAI GPT + Claude | Supabase | AWS EC2
 ================================================================================
 
 
@@ -329,7 +329,10 @@ Weeks 9-13 (May 4 - Jun 7)
 MILESTONE 3.1 - AI Document Parsing Engine (Weeks 9-10)
 -----------------------------------------------------------------------------
 Deliverables:
+  [ ] Build provider-agnostic AI abstraction layer (OpenAI GPT + Claude)
+      with admin-configurable switching via system settings
   [ ] Integrate OpenAI GPT API for document parsing
+  [ ] Integrate Anthropic Claude API for document parsing
   [ ] Build document upload API with format validation
       (PDF, JPEG, GIF, DOC, DOCX; up to 20 MB)
   [ ] Implement auto-compression for files over 10 MB
@@ -466,7 +469,7 @@ Success Criteria: Gmail and Outlook connected, emails sent/received/logged,
 MILESTONE 4.2 - AI Email Automation (Week 15)
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Build AI email response engine (OpenAI GPT integration):
+  [ ] Build AI email response engine (OpenAI GPT + Claude via abstraction layer):
       - Auto-respond to vendor/client/FSBO document requests (always CC the
         responsible internal owner, e.g. agent & elf for agent-led files)
       - Auto-respond to client/FSBO factual questions (closing date, status,
@@ -787,7 +790,7 @@ Deliverables:
       - Email (Gmail, Outlook)
       - E-signature (DocuSign)
       - Payments (Stripe)
-      - OpenAI API
+      - AI APIs (OpenAI + Claude)
   [ ] Deliver technical documentation:
       - API documentation (Swagger/OpenAPI)
       - Architecture diagrams
@@ -825,9 +828,9 @@ KEY DEPENDENCIES & RISKS
 1. Task Spreadsheet Delivery: Client must provide REWORKING TASK DB.xlsx
    by Week 2 for task catalogue import.
 
-2. API Credentials: Gmail, Outlook, DocuSign, Stripe, and OpenAI API
-   credentials/accounts must be available by Week 9 (AI), Week 13 (e-sign),
-   Week 14 (email), Week 18 (payments).
+2. API Credentials: Gmail, Outlook, DocuSign, Stripe, OpenAI, and
+   Anthropic (Claude) API credentials/accounts must be available by
+   Week 9 (AI), Week 13 (e-sign), Week 14 (email), Week 18 (payments).
 
 3. Legacy Codebase Access: Access to current ASP.NET MVC codebase needed
    by Week 1 for review.

@@ -1,7 +1,7 @@
 # Velvet Elves - System Design Document
 
 **Date:** 2026-03-05
-**Last Updated:** 2026-03-30 (Active Transactions UI alignment — key dates, modals, transaction history, AI chat)
+**Last Updated:** 2026-03-31 (Multi-provider AI — switchable OpenAI / Claude support)
 **Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions; Active Transactions UI fully aligned with ve-active_transactions.html
 **Reference:** ListedKit.com functionality as design benchmark
 
@@ -38,7 +38,7 @@
 │  │  └──────────┘  └───────────┘  └────────────┘  └──────────┘ │  │
 │  │  ┌──────────┐  ┌───────────┐  ┌────────────┐               │  │
 │  │  │   Auth   │  │ AI Engine │  │ Task Engine │               │  │
-│  │  │Middleware│  │ (OpenAI)  │  │(Dependency) │               │  │
+│  │  │Middleware│  │(Multi-AI) │  │(Dependency) │               │  │
 │  │  └──────────┘  └───────────┘  └────────────┘               │  │
 │  └─────────────────────────────────────────────────────────────┘  │
 └──────────────┬───────────────────────────────────────────────────┘
@@ -75,7 +75,7 @@ Utils           │ Encryption, security, logging helpers
 | Auth | Supabase Auth (GoTrue) + JWT | OAuth2/JWT; no password storage in app |
 | Multi-tenancy | tenant_id + RLS policies | Row-level isolation per brokerage |
 | PII | Fernet encryption at rest | email, full_name, phone, address encrypted |
-| AI | OpenAI GPT API | Document parsing, email automation, task suggestions |
+| AI | OpenAI GPT + Claude (switchable) | Document parsing, email automation, task suggestions; provider-agnostic abstraction layer with admin-configurable switching |
 | File Storage | Supabase Storage | Integrated with auth; signed URLs for access |
 | Frontend State | React Query (TanStack) | Server state caching, mutations, optimistic updates |
 | UI Components | shadcn/ui + Tailwind | Consistent design system, accessible components |
@@ -148,6 +148,18 @@ CREATE TABLE IF NOT EXISTS public.tenants (
 ```
 
 **Why:** Multi-tenant isolation requires a first-class tenant entity. Previously `tenant_id` was just a UUID string with no backing table. This table stores brokerage branding for white-label (Milestone 6.1) and acts as the anchor for RLS policies.
+
+**AI Provider Config:** `settings_json` stores the active AI provider preference. Example structure:
+```json
+{
+  "ai_provider": "openai",       // "openai" | "claude"
+  "ai_provider_config": {
+    "openai_model": "gpt-4o",
+    "claude_model": "claude-sonnet-4-20250514"
+  }
+}
+```
+Admin users can switch the active provider (`ai_provider`) at any time via system settings. All AI features (document parsing, email automation, task suggestions, wizard logic) route through a provider-agnostic abstraction layer that reads this setting. Audit logs record which provider was used for each AI action.
 
 #### 2.2.2 `users` — Application profiles (UPDATED)
 
@@ -1005,6 +1017,13 @@ GET    /api/v1/transactions/{id}/documents # List documents for a transaction
 ```
 GET    /api/v1/settings/confidence         # Get current settings
 PUT    /api/v1/settings/confidence         # Update settings (Admin/TeamLead)
+```
+
+#### AI Provider Settings (`/api/v1/settings/ai-provider`)
+
+```
+GET    /api/v1/settings/ai-provider        # Get active AI provider & config
+PUT    /api/v1/settings/ai-provider        # Switch provider: { "ai_provider": "openai" | "claude" } (Admin only)
 ```
 
 #### Audit Logs (`/api/v1/audit-logs`)

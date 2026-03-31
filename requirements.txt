@@ -3,10 +3,10 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 ESTABLISHED PROJECT REQUIREMENTS
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-03-30 (Active Transactions UI alignment — key dates, modals, AI chat)
+Last Updated: 2026-03-31 (Multi-provider AI — switchable OpenAI / Claude support)
 Timeline: 22 Weeks (MVP delivery)
 Budget: Under USD $40,000 (Fixed-Price)
-Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
+Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
             Supabase (Database & Auth) | AWS EC2 (Hosting)
 ================================================================================
 
@@ -459,7 +459,7 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
       sent for signature
 
 3.3 AI Document Parsing
-    - Using OpenAI GPT models
+    - Using switchable AI provider (OpenAI GPT or Claude — see 8.1a)
     - Extract from all uploaded documents:
       Property Data: street address, city, state, zip code
       Transaction Data: representation type, purchase price, financing type,
@@ -814,8 +814,23 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT (AI) |
 8. AI & AUTOMATION
 ================================================================================
 
-8.1 AI-Assisted Development
-    - Use AI coding agents (Copilot, ChatGPT) to accelerate implementation
+8.1a Multi-Provider AI Architecture
+    - Support both OpenAI GPT and Anthropic Claude as AI providers
+    - Provider-agnostic abstraction layer: all AI features (document parsing,
+      email automation, task suggestions, wizard logic) must work through a
+      unified interface that can route to either provider
+    - Admin-configurable provider switching: allow the client to switch the
+      active AI provider (OpenAI ↔ Claude) at any time without code changes
+    - Provider configuration stored in system settings (not hard-coded)
+    - Both providers must support the same input/output contracts so features
+      behave consistently regardless of which provider is active
+    - Audit logs must record which AI provider was used for each action
+    - Rationale: client wants the ability to compare both providers over time
+      and switch as the competitive landscape evolves
+
+8.1b AI-Assisted Development
+    - Use AI coding agents (Copilot, ChatGPT, Claude) to accelerate
+      implementation
     - Guidelines on code quality, documentation, human oversight
 
 8.2 Natural-Language Task Creation
