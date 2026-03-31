@@ -3,7 +3,7 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 PROJECT MILESTONES (22-WEEK TIMELINE)
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-03-26 (role-specific dashboard alignment; Attorney & FSBO roles)
+Last Updated: 2026-03-30 (Active Transactions UI alignment — key dates, modals, transaction history, AI chat)
 Start Date: Week 1 (2026-03-09)
 End Date: Week 22 (2026-08-02)
 Budget: Under USD $40,000 (Fixed-Price)
@@ -110,13 +110,33 @@ Deliverables:
       - Collapsible transaction card data (status pill, why badges, AI next-step banner, milestone bar, info badges, grouped contacts,
         editable key dates)
       - Support personal and team views, deal-state filters, page tabs, urgency sorting, search, and team member filtering
+  [ ] Build key dates management API (inline edit from expanded drawer):
+      - PUT endpoint for milestone dates: EM Delivered, Inspection Response,
+        Appraisal Expected, CD Delivered, Cleared to Close, Closing Date
+        (with time-of-day), Possession (with time-of-day)
+      - Inline Save/Cancel popover data contract; changes audit-logged
+  [ ] Build transaction history timeline API:
+      - Searchable event timeline merging audit logs, communication logs,
+        task completions, date changes, and AI flags
+      - Events grouped by date headings (Today, Yesterday, etc.)
+      - Supports search filtering by keyword
+  [ ] Build workspace AI chat API:
+      - Contextual AI assistant accepting a message and optional
+        transaction_id context
+      - Returns response and suggested_actions array
+      - Quick-action prompts: "Show overdue tasks", "Draft inspection
+        response", "Summarize [client] deal"
   [ ] Implement stage pill computation logic:
       - "Critical", "Needs Attention", "On Track", and "Unhealthy"
       - "In Inspection" computed when inspection response has not yet been sent
       - Computed from transaction state, task status, dates, message counts, and missing-document conditions
   [ ] Implement pipeline value calculation (sum of active purchase_price)
   [ ] Unit and integration tests for transaction APIs
-Success Criteria: Full transaction lifecycle operational via API, type switching with targeted updates working, Active Transactions workspace APIs returning correct data.
+Success Criteria: Full transaction lifecycle operational via API, type switching
+                  with targeted updates working, Active Transactions workspace
+                  APIs returning correct data, key dates editable via API with
+                  audit logging, transaction history timeline and AI chat
+                  endpoints operational.
 
 MILESTONE 2.2 - Task Engine Backend (Weeks 5-6)
 -----------------------------------------------------------------------------
@@ -169,6 +189,14 @@ Deliverables:
       - Soft Cool Grey (#F5F7FA)
       - Subtle Champagne Glow (#FFEEC2)
       - Max-Contrast Slate Grey (#333333)
+  [ ] Implement semantic/functional color tokens as CSS variables:
+      - Status states: critical red (#c8322f), warning amber (#c07a0a),
+        healthy green (#1a7a52), info blue (#2c4c7f), neutral gray (#7a7a7a)
+      - Tinted background variants for status pills and badges
+      - Surface tokens: card white, sidebar navy, border grays
+      - AI surfaces use subtle champagne glow accents only
+      - Status pills use tint + border + text for readability; card edge bars,
+        briefing badges, and urgency states carry stronger emphasis
   [ ] Implement login/register/password-reset pages
   [ ] Build invite acceptance flow UI
   [ ] Implement role-based navigation and access control in React
@@ -238,6 +266,32 @@ Deliverables:
   [ ] Build document overlays:
       - Transaction Documents modal (view/add/rename/history)
       - All Documents AI Search modal across transactions
+  [ ] Build New Transaction quick-create modal (from topbar and sidebar CTAs):
+      - AI Import action ("Paste a contract or MLS listing — AI will
+        auto-fill all fields")
+      - Manual fields: Client Name, Property Address, City/ZIP, Transaction
+        Type (Buyer/Seller/Dual Agency), Purchase Price, Contract Date,
+        Projected Closing Date, Lender/Title Company, Notes
+      - "Create with AI Checklist" action
+  [ ] Build Add Contact inline modal:
+      - Fields: Company Name, First Name, Last Name, Phone Number,
+        Email Address
+  [ ] Build Transaction History panel:
+      - Searchable event timeline organized by date headings (Today,
+        Yesterday, etc.)
+      - Shows AI flags, emails received, task completions, date
+        confirmations, and offer events
+      - Merges audit logs, communication logs, task completions, and
+        date changes into a unified view
+  [ ] Build floating AI Chat panel ("Velvet Elves AI"):
+      - Contextual assistant with deal-specific quick-action prompts
+      - Example prompts: "Show overdue tasks", "Draft inspection response",
+        "Summarize Young deal"
+      - Supports optional transaction context for scoped assistance
+  [ ] Build Edit Date popover for inline key-date changes:
+      - Pencil-edit icon on each key date in expanded drawer
+      - Save / Cancel actions with visual urgency states
+      - Overdue dates shown in red
   [ ] Build Team Lead adaptation of the Active Transactions workspace:
       - Team-wide KPI tiles and AI briefing counts
       - Team member filtering
@@ -260,10 +314,11 @@ Deliverables:
   [ ] Export buttons for transaction lists (CSV, Excel, PDF)
   [ ] Integration tests for frontend-backend flows
 Success Criteria: Agents/elves can operate from the approved Active
-                  Transactions workspace end-to-end, Team Leads can switch to
-                  team-scoped transaction views, Attorneys can view and filter
-                  their matter queue, and admins can configure task templates
-                  via UI.
+                  Transactions workspace end-to-end including quick-create
+                  transactions, inline key-date editing, transaction history,
+                  and AI chat; Team Leads can switch to team-scoped transaction
+                  views; Attorneys can view and filter their matter queue; admins
+                  can configure task templates via UI.
 
 
 ================================================================================
@@ -782,7 +837,9 @@ KEY DEPENDENCIES & RISKS
    NOTE: Active Transactions page design approved by client (2026-03-19) and
    moved into Week 8 implementation. Dashboard landing pages for Solo Agent,
    Team Leader, Attorney, and FSBO approved by client (2026-03-26) and
-   incorporated into Milestone 5.1 deliverables.
+   incorporated into Milestone 5.1 deliverables. Active Transactions UI
+   alignment (key dates, modals, transaction history, AI chat) finalized
+   2026-03-30 and incorporated into Milestones 2.1 and 2.4.
 
 5. Third-Party API Limitations: MLS feed access, e-signature provider
    sandbox availability, and email provider OAuth approval processes
