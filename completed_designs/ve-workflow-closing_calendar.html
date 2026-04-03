@@ -249,7 +249,8 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    CALENDAR SCROLL CONTAINER
 ============================================================ */
-.cal-scroll { flex: 1; overflow-y: auto; padding: 16px 24px 24px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.cal-scroll { flex: 1; overflow-y: auto; padding: 16px 24px 24px; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.cal-scroll > * + * { margin-top: 14px; }
 .cal-scroll::-webkit-scrollbar { width: 5px; }
 .cal-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
@@ -301,11 +302,11 @@ a { color: inherit; text-decoration: none; }
 /* ============================================================
    CALENDAR GRID
 ============================================================ */
-.cal-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.cal-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
 .cal-dow-header { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1.5px solid var(--border); }
 .cal-dow { padding: 8px 0; text-align: center; font-size: 9.5px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-ghost); font-weight: 600; }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); flex: 1; min-height: 0; }
-.cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 5px 6px; display: flex; flex-direction: column; gap: 2px; cursor: default; transition: background .1s; position: relative; overflow: hidden; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal-day { border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 5px 6px; display: flex; flex-direction: column; gap: 2px; cursor: default; transition: background .1s; position: relative; overflow: hidden; height: 100px; }
 .cal-day:nth-child(7n) { border-right: none; }
 .cal-day.other-month { background: var(--surface-2); }
 .cal-day.other-month .day-num { color: var(--text-ghost); }
