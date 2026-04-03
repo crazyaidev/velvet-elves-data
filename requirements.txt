@@ -780,13 +780,10 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
     - Calendar APIs: Google Calendar, Outlook (schedule appointments,
       send reminders, manage events)
 
-7.2 MLS Feeds
-    - Pull property and listing data to pre-populate transaction details
-
-7.3 E-Signature Providers
+7.2 E-Signature Providers
     - DocuSign, HelloSign integration for contracts and disclosures
 
-7.4 CRM Systems
+7.3 CRM Systems
     - Basic open RESTful endpoints/webhooks in MVP (no specific CRM required)
     - Generic sync for contacts/tasks
     - Two-way data flow architecture
