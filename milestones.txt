@@ -705,7 +705,6 @@ Deliverables:
   [ ] Apply branding across: login, all role-specific dashboards (Solo Agent,
       Team Leader, Attorney, FSBO), email templates, documents
   [ ] Build tenant management admin panel
-  [ ] Implement MLS feed integration hooks (property data pre-population)
   [ ] Build CRM integration webhooks (generic RESTful endpoints):
       - Contact sync
       - Task sync
@@ -844,9 +843,11 @@ KEY DEPENDENCIES & RISKS
    alignment (key dates, modals, transaction history, AI chat) finalized
    2026-03-30 and incorporated into Milestones 2.1 and 2.4.
 
-5. Third-Party API Limitations: MLS feed access, e-signature provider
-   sandbox availability, and email provider OAuth approval processes
-   may introduce delays.
+5. Third-Party API Limitations: E-signature provider sandbox
+   availability and email provider OAuth approval processes may
+   introduce delays. MLS feed integration has been deferred from
+   the MVP (transaction details are populated from user-uploaded
+   documents instead).
 
 6. Scope Creep: The advertising module, consumer-facing site, and some
    advanced AI features (NLP task creation, predictive analytics) are
