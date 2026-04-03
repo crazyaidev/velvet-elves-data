@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velvet Elves — AI Suggestions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --orange:#E26812;--orange-dark:#B85107;--orange-light:#FFF2E7;--orange-soft:#FFF9F4;--orange-border:#F1C79E;
+      --navy:#1E3356;--bg:#F2F1EE;--surface:#FFFFFF;--surface-2:#FAFAF8;
+      --line:#E3E2DE;--line-strong:#CEC9C0;--text:#181818;--muted:#686868;--ghost:#929292;
+      --green:#14704B;--green-bg:#EEF8F3;--green-border:#B9DEC9;
+      --amber:#A56A08;--amber-bg:#FFF8EC;--amber-border:#EACB93;
+      --red:#BE3431;--red-bg:#FFF2F2;--red-border:#F0C7C7;
+      --blue:#2C4C7F;--blue-bg:#EEF4FF;--blue-border:#C0D1EF;
+      --purple:#6545B6;--purple-bg:#F5F0FF;--purple-border:#D7C8FF;
+      --teal:#0E6E70;--teal-bg:#EDFAFA;--teal-border:#A8D8DA;
+      --shadow:0 4px 16px rgba(20,20,20,.06);--shadow-md:0 8px 28px rgba(20,20,20,.09);
+      --radius:18px;--font-body:'IBM Plex Sans',sans-serif;--font-serif:'Lora',serif;--font-mono:'IBM Plex Mono',monospace;
+      --sidebar:228px;--top:60px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    /* ── SIDEBAR ── */
+    .sidebar{background:linear-gradient(180deg,#1a2d4e,#152340);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.07)}
+    .brand{display:flex;align-items:center;gap:12px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name strong{font-family:var(--font-serif);font-size:17px;color:#fff;font-weight:700;display:block;line-height:1}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;display:block}
+    .side-block{padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:9px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .mini{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:10px}
+    .mini .num{font-family:var(--font-mono);font-size:21px;font-weight:600;line-height:1;margin-bottom:5px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.72);line-height:1.3}
+    .num.red{color:#ff9090}.num.green{color:#7ed8a8}.num.orange{color:#ffbc7a}.num.blue{color:#94bfff}
+    .nav{padding:8px 7px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:rgba(255,255,255,.85);padding:9px 11px;border-radius:9px;font-size:13px;font-weight:500;position:relative;transition:.14s}
+    .nav a:hover{background:rgba(255,255,255,.055)}
+    .nav a.active{background:rgba(226,104,18,.18);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .nav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.38);padding:14px 11px 5px}
+    .side-footer{padding:11px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px}
+    .upgrade-nudge{background:rgba(226,104,18,.12);border:1px solid rgba(226,104,18,.22);border-radius:11px;padding:10px 11px;cursor:pointer;transition:.14s}
+    .upgrade-nudge:hover{background:rgba(226,104,18,.18)}
+    .upgrade-nudge strong{display:block;font-size:12px;color:#ffcf9e;margin-bottom:3px}
+    .upgrade-nudge span{display:block;font-size:11px;color:rgba(255,255,255,.6);line-height:1.35}
+    .user-row{display:flex;align-items:center;gap:9px}
+    .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .user-info strong{display:block;font-size:12px;color:rgba(255,255,255,.9)}
+    .user-info span{display:block;font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font-mono)}
+
+    /* ── SHARED BUTTONS ── */
+    .btn-primary,.btn-secondary,.btn-ghost{border:none;border-radius:11px;cursor:pointer;transition:.15s ease;font-weight:600;font-family:var(--font-body)}
+    .btn-primary{background:var(--orange);color:#fff;padding:10px 14px;font-weight:700;font-size:13px}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:13px}
+    .btn-secondary:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 11px;font-size:12px}
+    .btn-ghost:hover{background:#fff}
+
+    /* ── PILLS ── */
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:600;white-space:nowrap}
+    .pill.red{background:var(--red-bg);border:1px solid var(--red-border);color:#8a201d}
+    .pill.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+    .pill.green{background:var(--green-bg);border:1px solid var(--green-border);color:#0d5537}
+    .pill.blue{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .pill.purple{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+    .pill.orange{background:var(--orange-light);border:1px solid var(--orange-border);color:#8b470c}
+
+    /* ── TOPBAR ── */
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:var(--top);display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-shrink:0}
+    .top-title{font-family:var(--font-serif);font-size:20px;font-weight:700;flex:1}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .top-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .notif-btn{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.14s}
+    .notif-btn:hover{background:var(--surface-2)}
+    .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;border:1.5px solid #fff}
+    .content{overflow:auto;padding:18px 22px 60px;display:flex;flex-direction:column;gap:20px}
+
+    /* ── AI BRIEFING ── */
+    .ai-briefing{background:linear-gradient(135deg,#1a2d4e,#233d6a);color:#fff;border-radius:var(--radius);padding:16px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;box-shadow:var(--shadow-md)}
+    .ai-briefing-icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+    .ai-briefing-copy .eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.9px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px}
+    .ai-briefing-copy strong{display:block;font-family:var(--font-serif);font-size:18px;line-height:1.1;margin-bottom:5px}
+    .ai-briefing-copy p{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.5;max-width:680px}
+    .ai-briefing-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .ai-briefing-actions .btn-primary{font-size:12px;padding:8px 13px;white-space:nowrap}
+    .ai-meta{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.5);text-align:right}
+
+    /* ── FILTER BAR ── */
+    .filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .filter-tab{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:.13s;display:flex;align-items:center;gap:6px;border:none}
+    .filter-tab:hover{background:var(--surface-2);color:var(--text)}
+    .filter-tab.active{background:var(--orange-light);border:1px solid var(--orange-border);color:#8b470c}
+    .filter-tab .tab-count{font-family:var(--font-mono);font-size:10px;background:rgba(0,0,0,.07);border-radius:999px;padding:1px 6px}
+    .filter-tab.active .tab-count{background:rgba(139,71,12,.15)}
+    .filter-bar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .dismissed-toggle{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s}
+    .dismissed-toggle:hover{background:var(--surface-2)}
+    .dismissed-toggle.on{color:var(--muted);border-color:var(--line-strong)}
+
+    /* ── SECTION GROUP ── */
+    .sg-wrap{display:flex;flex-direction:column;gap:8px}
+    .sg-header{display:flex;align-items:center;gap:10px;padding:0 0 4px}
+    .sg-label{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.7px;text-transform:uppercase;font-weight:600}
+    .sg-count{font-family:var(--font-mono);font-size:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)}
+    .sg-line{flex:1;height:1px;background:var(--line)}
+
+    /* ── SUGGESTION CARD ── */
+    .sug-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;transition:box-shadow .15s,border-color .15s}
+    .sug-card:hover{box-shadow:var(--shadow-md)}
+    .sug-card.is-open{border-color:var(--line-strong);box-shadow:var(--shadow-md)}
+    .sug-card.dismissed{opacity:.45;pointer-events:none}
+    .sug-card.snoozed{opacity:.6}
+
+    /* priority left border */
+    .sug-card.pri-critical{border-left:4px solid var(--red)}
+    .sug-card.pri-high{border-left:4px solid var(--amber)}
+    .sug-card.pri-medium{border-left:4px solid var(--blue)}
+    .sug-card.pri-low{border-left:4px solid var(--green)}
+    .sug-card.pri-pro{border-left:4px solid var(--purple)}
+
+    /* Pro lock overlay */
+    .sug-card.pro-locked{position:relative}
+
+    /* collapsed row */
+    .sug-collapsed{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;padding:13px 15px 13px 14px;cursor:pointer;user-select:none;transition:background .12s}
+    .sug-collapsed:hover{background:var(--surface-2)}
+    .sug-card.is-open .sug-collapsed{background:var(--surface-2)}
+
+    /* category icon badge */
+    .sug-cat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+    /* collapsed text */
+    .sug-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+    .sug-title{font-size:13.5px;font-weight:700;line-height:1.3}
+    .sug-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .sug-tx{font-size:12px;color:var(--muted);font-weight:600}
+    .sug-age{font-family:var(--font-mono);font-size:11px;color:var(--ghost)}
+
+    /* confidence bar */
+    .confidence-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0}
+    .confidence-label{font-family:var(--font-mono);font-size:10px;color:var(--ghost);white-space:nowrap}
+    .confidence-bar{width:52px;height:5px;background:var(--line);border-radius:999px;overflow:hidden}
+    .confidence-fill{height:100%;border-radius:999px;transition:width .4s}
+
+    /* chevron */
+    .sug-chevron{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:14px;color:var(--ghost);flex-shrink:0;transition:transform .2s,background .13s;line-height:1;margin-left:8px}
+    .sug-card.is-open .sug-chevron{transform:rotate(90deg);background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+
+    /* ── EXPAND PANEL ── */
+    .sug-expand{display:none;border-top:1px solid var(--line);background:var(--surface-2)}
+    .sug-expand.open{display:block}
+
+    /* Zone 1 — AI reasoning + editable content */
+    .exp-zone-reason{padding:16px 18px;border-bottom:1px solid var(--line);background:#fff}
+    .exp-two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .exp-col-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost);margin-bottom:7px;font-weight:600}
+    .exp-reason-box{font-size:12.5px;color:var(--text);line-height:1.55;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+    .exp-ai-box{background:linear-gradient(135deg,var(--purple-bg),#fdfcff);border:1px solid var(--purple-border);border-radius:10px;padding:11px 13px}
+    .exp-ai-box .ai-title{display:block;font-size:12px;color:var(--purple);font-weight:700;margin-bottom:5px}
+    .exp-ai-box p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:0}
+
+    /* editable draft area */
+    .exp-draft-wrap{margin-top:12px}
+    .exp-draft-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost);margin-bottom:7px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+    .exp-draft-edit-btn{font-family:var(--font-body);font-size:11px;font-weight:700;color:var(--orange);cursor:pointer;letter-spacing:0;text-transform:none}
+    .exp-draft-edit-btn:hover{text-decoration:underline}
+    .exp-draft-textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:12.5px;background:#fff;resize:vertical;outline:none;transition:.14s;min-height:80px;color:var(--text);line-height:1.55}
+    .exp-draft-textarea:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+    .exp-draft-readonly{font-size:12.5px;color:var(--text);line-height:1.55;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 13px}
+
+    /* Zone 2 — task checklist suggestions */
+    .exp-zone-tasks{padding:14px 18px;border-bottom:1px solid var(--line)}
+    .task-suggest-list{display:flex;flex-direction:column;gap:6px}
+    .task-suggest-row{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:9px;padding:9px 12px}
+    .task-suggest-check{width:18px;height:18px;border-radius:5px;border:2px solid var(--line-strong);background:#fff;cursor:pointer;flex-shrink:0;display:grid;place-items:center;transition:.13s}
+    .task-suggest-check:hover{border-color:var(--green);background:var(--green-bg)}
+    .task-suggest-check.checked{border-color:var(--green);background:var(--green-bg)}
+    .task-suggest-check.checked::after{content:'✓';font-size:10px;font-weight:700;color:var(--green)}
+    .task-suggest-text{flex:1;font-size:12.5px;font-weight:600}
+    .task-suggest-meta{font-size:11px;color:var(--ghost);font-family:var(--font-mono)}
+    .add-to-template-btn{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--teal);cursor:pointer;padding:0 8px;flex-shrink:0;border:none;background:transparent}
+    .add-to-template-btn:hover{text-decoration:underline}
+
+    /* Zone 3 — action row */
+    .exp-zone-actions{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff}
+    .action-btns{display:flex;align-items:center;gap:8px}
+    .exp-meta-right{font-size:11.5px;color:var(--ghost)}
+
+    /* accept / dismiss / snooze */
+    .btn-accept{background:var(--green);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:.14s;display:flex;align-items:center;gap:6px;font-family:var(--font-body)}
+    .btn-accept:hover{background:#0f5c3c}
+    .btn-accept.needs-confirm{background:var(--orange)}
+    .btn-accept.needs-confirm:hover{background:var(--orange-dark)}
+    .btn-snooze{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 13px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.14s;display:flex;align-items:center;gap:6px;font-family:var(--font-body)}
+    .btn-snooze:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-dismiss{background:transparent;border:1px solid var(--line);border-radius:10px;padding:8px 13px;font-size:12px;font-weight:600;color:var(--ghost);cursor:pointer;transition:.14s;font-family:var(--font-body)}
+    .btn-dismiss:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+
+    /* snooze picker */
+    .snooze-picker{display:none;align-items:center;gap:6px;flex-wrap:wrap}
+    .snooze-picker.open{display:flex}
+    .snooze-chip{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s}
+    .snooze-chip:hover{background:#fff;border-color:var(--line-strong);color:var(--text)}
+
+    /* pro lock gate */
+    .pro-gate{background:linear-gradient(135deg,var(--purple-bg),#fdfcff);border:1px solid var(--purple-border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin:14px 18px}
+    .pro-gate-icon{font-size:22px;flex-shrink:0}
+    .pro-gate-text strong{display:block;font-size:13px;color:var(--purple);margin-bottom:3px}
+    .pro-gate-text span{font-size:12px;color:var(--muted);line-height:1.4}
+    .btn-upgrade{background:var(--purple);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:.14s;font-family:var(--font-body);white-space:nowrap;margin-left:auto}
+    .btn-upgrade:hover{background:#4f35a0}
+
+    /* ── CONFIDENCE COLORS ── */
+    .cf-high{background:linear-gradient(90deg,var(--green),#1d9e6a)}
+    .cf-med{background:linear-gradient(90deg,var(--amber),#c8891a)}
+    .cf-low{background:linear-gradient(90deg,var(--red),#d44040)}
+
+    /* ── MODAL ── */
+    .modal-wrap{position:fixed;inset:0;background:rgba(20,20,20,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);padding:16px}
+    .modal-wrap.open{display:flex}
+    .modal{background:#fff;border-radius:20px;width:100%;max-width:500px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+    .modal-head h3{font-family:var(--font-serif);font-size:20px;margin-bottom:4px}
+    .modal-head p{font-size:12.5px;color:var(--muted);line-height:1.4}
+    .close-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:.13s}
+    .close-btn:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+    .modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 18px;border-top:1px solid var(--line);background:var(--surface-2)}
+    .field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--muted)}
+    .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;background:var(--surface-2);transition:.14s;outline:none;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+
+    /* ── Q&A FLOW (gift / custom suggestions) ── */
+    .qa-flow{display:flex;flex-direction:column;gap:10px}
+    .qa-step{display:none}
+    .qa-step.active{display:block}
+    .qa-q{font-size:13px;font-weight:700;margin-bottom:8px}
+    .qa-options{display:flex;flex-wrap:wrap;gap:7px}
+    .qa-opt{padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s}
+    .qa-opt:hover{border-color:var(--line-strong);color:var(--text)}
+    .qa-opt.selected{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+
+
+    /* ── AI COACH UPSELL BANNER ── */
+    .coach-upsell{background:var(--orange-soft);border:1px solid var(--orange-border);border-radius:var(--radius);padding:22px 26px;display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
+    .coach-upsell-left{}
+    .coach-upsell-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--orange);font-weight:600;margin-bottom:8px}
+    .coach-upsell-headline{font-family:var(--font-serif);font-size:24px;font-weight:700;line-height:1.2;color:var(--text);margin-bottom:8px;max-width:520px}
+    .coach-upsell-sub{font-size:13px;color:var(--muted);line-height:1.55;max-width:500px;margin-bottom:14px}
+    .coach-upsell-chips{display:flex;flex-wrap:wrap;gap:7px}
+    .coach-upsell-chip{background:transparent;border:1px solid var(--orange-border);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--orange-dark);cursor:default}
+    .coach-upsell-right{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;min-width:260px;flex-shrink:0;box-shadow:var(--shadow)}
+    .coach-upsell-price{display:flex;align-items:baseline;gap:4px;margin-bottom:4px}
+    .coach-upsell-price .amount{font-family:var(--font-serif);font-size:36px;font-weight:700;color:var(--orange);line-height:1}
+    .coach-upsell-price .per{font-size:13px;color:var(--muted);margin-left:2px}
+    .coach-upsell-price-sub{font-size:12px;color:var(--ghost);margin-bottom:14px;font-family:var(--font-mono)}
+    .coach-upsell-checklist{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+    .coach-upsell-check{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--text);line-height:1.4}
+    .coach-upsell-check-icon{color:var(--orange);font-weight:700;flex-shrink:0;margin-top:1px;font-size:13px}
+    .coach-upsell-actions{display:flex;align-items:center;gap:9px}
+    .btn-upsell-primary{background:var(--orange);color:#fff;border:none;border-radius:11px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:.15s;font-family:var(--font-body);white-space:nowrap}
+    .btn-upsell-primary:hover{background:var(--orange-dark)}
+    .btn-upsell-ghost{background:transparent;border:1px solid var(--line);border-radius:11px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s;font-family:var(--font-body);white-space:nowrap}
+    .btn-upsell-ghost:hover{background:var(--surface-2);border-color:var(--line-strong)}
+
+    /* ── FLOATING AI ── */
+    .floating-ai{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--navy),#233d6a);color:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 8px 30px rgba(30,51,86,.35);transition:.2s;z-index:100;max-width:280px;border:1px solid rgba(255,255,255,.1)}
+    .floating-ai:hover{transform:translateY(-2px)}
+    .floating-ai strong{display:block;font-size:13px;margin-bottom:2px}
+    .floating-ai span{display:block;font-size:11px;color:rgba(255,255,255,.7);line-height:1.35}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:90px;right:24px;background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;z-index:300;transform:translateY(12px);opacity:0;transition:.25s ease;pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+    .toast strong{display:block;font-size:13px;margin-bottom:1px}
+    .toast span{font-size:11.5px;color:var(--muted)}
+    .toast-close{margin-left:auto;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0}
+
+    /* empty state */
+    .empty-state{background:#fff;border:1px solid var(--line);border-radius:14px;padding:40px 24px;text-align:center}
+    .empty-state h3{font-family:var(--font-serif);font-size:20px;margin-bottom:7px}
+    .empty-state p{font-size:13px;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto}
+
+    /* tiny-btn */
+    .tiny-btn{display:flex;align-items:center;gap:5px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);padding:0 9px;transition:.13s;white-space:nowrap}
+    .tiny-btn:hover{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <div class="brand-name"><strong>Velvet Elves</strong><span>Transaction OS</span></div>
+    </div>
+    <div class="side-block">
+      <div class="side-label">AI activity today</div>
+      <div class="side-summary">
+        <div class="mini"><div class="num orange">12</div><div class="cap">New suggestions</div></div>
+        <div class="mini"><div class="num red">3</div><div class="cap">Critical alerts</div></div>
+        <div class="mini"><div class="num green">7</div><div class="cap">Acted on</div></div>
+        <div class="mini"><div class="num blue">4</div><div class="cap">Snoozed</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Deals</div>
+      <a href="#"><span>⊞</span> Dashboard</a>
+      <a href="#"><span>◈</span> Active Transactions <span class="badge">3</span></a>
+      <a href="#"><span>◔</span> Pending <span class="badge">1</span></a>
+      <a href="#"><span>◉</span> Closed</a>
+      <a href="#"><span>◻</span> All Transactions</a>
+      <div class="nav-section">Workflow</div>
+      <a href="#"><span>✓</span> My Task Queue <span class="badge">14</span></a>
+      <a href="#"><span>◻</span> All Documents <span class="badge">3</span></a>
+      <a href="#"><span>◷</span> Closing Calendar</a>
+      <div class="nav-section">Intelligence</div>
+      <a href="#" class="active"><span>✦</span> AI Suggestions <span class="badge">12</span></a>
+      <a href="#"><span>◈</span> Analytics</a>
+      <a href="#"><span>◻</span> Settings</a>
+    </div>
+    <div class="side-footer">
+      <div class="upgrade-nudge">
+        <strong>✦ Add AI Coach</strong>
+        <span>Grow your business between transactions. Lead gen, scripts & coaching.</span>
+      </div>
+      <div class="user-row">
+        <div class="s-avatar">JM</div>
+        <div class="user-info"><strong>Jordan Mills</strong><span>Solo Agent</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+    <div class="topbar">
+      <div class="top-title">AI Suggestions</div>
+      <div class="top-actions">
+        <button class="tiny-btn" onclick="acceptAll()">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          Act on all high-confidence
+        </button>
+        <div class="notif-btn"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><div class="notif-dot"></div></div>
+        <div class="top-avatar">JM</div>
+      </div>
+    </div>
+
+    <div class="content" id="main-content">
+
+      <!-- AI BRIEFING -->
+      <div class="ai-briefing">
+        <div class="ai-briefing-icon">✦</div>
+        <div class="ai-briefing-copy">
+          <div class="eyebrow">Intelligence summary — today</div>
+          <strong>3 critical items need your attention before end of day.</strong>
+          <p>Financing contingency on 628 Prince Dr expires in 3 days with no lender confirmation on file. Sarah Chen hasn't responded to your last message in 9 days. Your Sunridge listing description is under 150 words — MLS data shows longer descriptions average 23% more saves.</p>
+        </div>
+        <div class="ai-briefing-actions">
+          <button class="btn-primary" onclick="showToast('Running AI…','Drafting your action plan.')">Draft action plan</button>
+          <div class="ai-meta">Refreshed 2 min ago</div>
+        </div>
+      </div>
+
+
+      <!-- AI COACH UPSELL BANNER -->
+      <div class="coach-upsell" id="coach-upsell-banner">
+        <div class="coach-upsell-left">
+          <div class="coach-upsell-eyebrow">Optional paid add-on &nbsp;·&nbsp; AI Coach</div>
+          <div class="coach-upsell-headline">AI Coach keeps you growing between transactions — not just closing them.</div>
+          <div class="coach-upsell-sub">Personalized scripts, accountability nudges, negotiation coaching, and business growth plans tied to what's actually happening inside your files right now.</div>
+          <div class="coach-upsell-chips">
+            <div class="coach-upsell-chip">Negotiation coaching</div>
+            <div class="coach-upsell-chip">Objection handling</div>
+            <div class="coach-upsell-chip">Listing prep</div>
+            <div class="coach-upsell-chip">Prospecting scripts</div>
+            <div class="coach-upsell-chip">Conversion coaching</div>
+            <div class="coach-upsell-chip">Business benchmarking</div>
+          </div>
+        </div>
+        <div class="coach-upsell-right">
+          <div class="coach-upsell-price">
+            <span class="amount">$49</span>
+            <span class="per">per agent / month</span>
+          </div>
+          <div class="coach-upsell-price-sub">Billed monthly · Cancel anytime</div>
+          <div class="coach-upsell-checklist">
+            <div class="coach-upsell-check"><span class="coach-upsell-check-icon">✓</span>Coaching tied to your active deals, not generic advice</div>
+            <div class="coach-upsell-check"><span class="coach-upsell-check-icon">✓</span>AI detects patterns in your pipeline and fills gaps</div>
+            <div class="coach-upsell-check"><span class="coach-upsell-check-icon">✓</span>Weekly performance benchmarks vs. top agents in your market</div>
+          </div>
+          <div class="coach-upsell-actions">
+            <button class="btn-upsell-primary" onclick="showToast('Starting your trial…','AI Coach Pro — first 14 days free.')">Turn on AI Coach</button>
+            <button class="btn-upsell-ghost" onclick="showToast('ROI model loading…','Based on your last 12 months.')">See ROI model</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILTER BAR -->
+      <div class="filter-bar">
+        <button class="filter-tab active" onclick="setFilter(this,'all')">All <span class="tab-count" id="fc-all">12</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'risk')">🔴 Risk Alerts <span class="tab-count">3</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'task')">✅ Task Intelligence <span class="tab-count">3</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'comms')">💬 Communications <span class="tab-count">2</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'market')">📊 Market & Pricing <span class="tab-count">1</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'marketing')">📣 Listing & Marketing <span class="tab-count">1</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'relationship')">🤝 Relationship <span class="tab-count">2</span></button>
+        <button class="filter-tab" onclick="setFilter(this,'coaching')">✦ Coaching <span class="tab-count">2</span></button>
+        <div class="filter-bar-right">
+          <button class="dismissed-toggle" id="dismissed-toggle" onclick="toggleDismissed()">Show dismissed</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: COACHING (PRO)
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-coaching" data-cat="coaching">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--purple)">✦ Coaching <span style="font-family:var(--font-mono);font-size:9px;background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:6px;padding:2px 6px;color:var(--purple);margin-left:4px;letter-spacing:.5px">PRO</span></span>
+          <span class="sg-count">2</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD CO1 — Negotiation coaching (PRO gated) -->
+        <div class="sug-card pri-pro pro-locked" id="sug-co1" data-cat="coaching" data-cf="90">
+          <div class="sug-collapsed" onclick="toggleCard('co1')">
+            <div class="sug-cat-icon" style="background:var(--purple-bg)">🧠</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Negotiation coaching: buyer's agent on Sunridge has a pattern of low-ball escalation tactics</span>
+                <span class="pill purple">✦ Pro</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">4412 Sunridge Blvd · Offer strategy</span>
+                <span class="sug-age">Agent pattern detected</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">90%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:90%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-co1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-co1">
+            <div class="pro-gate">
+              <div class="pro-gate-icon">✦</div>
+              <div class="pro-gate-text">
+                <strong>AI Coach Pro feature</strong>
+                <span>Negotiation coaching, agent pattern analysis, and counter-offer strategy are available with AI Coach Pro. Upgrade to unlock this suggestion and 40+ more coaching tools.</span>
+              </div>
+              <button class="btn-upgrade" onclick="showToast('Opening upgrade…','AI Coach Pro — $49/mo')">Upgrade to Pro</button>
+            </div>
+            <div style="filter:blur(3px);pointer-events:none;padding:0 18px 14px">
+              <div class="exp-zone-reason" style="border-bottom:none">
+                <div class="exp-two-col">
+                  <div>
+                    <div class="exp-col-label">Agent pattern analysis</div>
+                    <div class="exp-reason-box">Agent Marcus Webb (Webb Realty) has been on the opposing side in 3 of your transactions. In 2 of 3 cases, initial offers came in 12–15% below ask with escalation clauses designed to anchor the negotiation low. Counter-strategy has 90% predicted effectiveness.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">✦ Counter-offer coaching</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">Recommended response framework</span>
+                      <p>Do not counter below $382K. Use inspection contingency as a concession trade. Webb's pattern shows he backs off at 96% of ask when seller holds firm past 2 counters.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD CO2 — Business growth coaching (PRO gated) -->
+        <div class="sug-card pri-pro pro-locked" id="sug-co2" data-cat="coaching" data-cf="85">
+          <div class="sug-collapsed" onclick="toggleCard('co2')">
+            <div class="sug-cat-icon" style="background:var(--purple-bg)">📈</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">You close 70% of buyer consultations — here's how top agents in your market close 90%</span>
+                <span class="pill purple">✦ Pro</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">Business growth · Your pipeline</span>
+                <span class="sug-age">Weekly performance analysis</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">85%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:85%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-co2">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-co2">
+            <div class="pro-gate">
+              <div class="pro-gate-icon">✦</div>
+              <div class="pro-gate-text">
+                <strong>AI Coach Pro feature</strong>
+                <span>Business performance benchmarking, conversion rate coaching, and personalized growth plans are available with AI Coach Pro.</span>
+              </div>
+              <button class="btn-upgrade" onclick="showToast('Opening upgrade…','AI Coach Pro — $49/mo')">Upgrade to Pro</button>
+            </div>
+            <div style="filter:blur(3px);pointer-events:none;padding:0 18px 14px">
+              <div class="exp-zone-reason" style="border-bottom:none">
+                <div class="exp-two-col">
+                  <div>
+                    <div class="exp-col-label">Your stats vs. market</div>
+                    <div class="exp-reason-box">Your buyer consultation close rate is 70% (7 of last 10). Top performers in the 46220–46240 zip cluster close at 88–93%. The gap is primarily in the first 10 minutes — specifically, how quickly you establish timeline and motivation.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">✦ Coaching script</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">3-question opener that closes 22% faster</span>
+                      <p>Start with: "What would make this the perfect home for your family?" Then: "What's your timeline?" Then: "What's your biggest concern about the process?" This sequence builds trust and surfaces objections before they become blockers.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: RISK ALERTS
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-risk" data-cat="risk">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--red)">🔴 Risk Alerts</span>
+          <span class="sg-count">3</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD R1 — Financing contingency expiring -->
+        <div class="sug-card pri-critical" id="sug-r1" data-cat="risk" data-cf="72">
+          <div class="sug-collapsed" onclick="toggleCard('r1')">
+            <div class="sug-cat-icon" style="background:var(--red-bg)">⚠️</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Financing contingency expires in 3 days — no lender confirmation on file</span>
+                <span class="pill red">Critical</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">628 Prince Dr, Greenwood</span>
+                <span class="sug-age">Flagged 2h ago</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">72%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-med" style="width:72%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-r1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-r1">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why AI flagged this</div>
+                  <div class="exp-reason-box">Financing contingency deadline is April 8 (3 days). No lender commitment letter or pre-approval update has been uploaded. Last buyer contact was 9 days ago. Risk of deal falling through if deadline passes without extension or satisfaction.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Call the buyer's lender directly today</span>
+                    <p>Request a verbal status update on the commitment letter. If not ready, prepare a contingency extension addendum and send to the listing agent before COB tomorrow. I've drafted a follow-up email to Sarah Chen below.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">
+                  DRAFTED FOLLOW-UP EMAIL — SARAH CHEN
+                  <span class="exp-draft-edit-btn" onclick="toggleEdit('r1-draft')">Edit</span>
+                </div>
+                <div class="exp-draft-readonly" id="r1-draft-display">Hi Sarah — just checking in on the financing status for 628 Prince Dr. Our contingency deadline is April 8 and I want to make sure your lender is on track. Can you ask them for a quick status update today? Happy to call them directly if that helps. Let me know!</div>
+                <textarea class="exp-draft-textarea" id="r1-draft-edit" style="display:none">Hi Sarah — just checking in on the financing status for 628 Prince Dr. Our contingency deadline is April 8 and I want to make sure your lender is on track. Can you ask them for a quick status update today? Happy to call them directly if that helps. Let me know!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" id="accept-r1" onclick="handleAccept('r1','Send follow-up email to Sarah Chen')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Send Email
+                </button>
+                <div class="snooze-picker" id="snooze-r1">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('r1','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('r1','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('r1')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('r1')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 72% · Not yet actioned</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD R2 — Stale client communication -->
+        <div class="sug-card pri-high" id="sug-r2" data-cat="risk" data-cf="91">
+          <div class="sug-collapsed" onclick="toggleCard('r2')">
+            <div class="sug-cat-icon" style="background:var(--amber-bg)">📵</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">No contact with Lisa Harmon in 11 days — closing in 63 days</span>
+                <span class="pill amber">High</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">214 Maple Creek Ln, Franklin</span>
+                <span class="sug-age">Flagged 5h ago</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">91%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:91%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-r2">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-r2">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why AI flagged this</div>
+                  <div class="exp-reason-box">Last logged communication with Lisa Harmon was March 19. Average agent-client touchpoint frequency for active buyers is every 5–7 days. At 11 days with a 63-day close window, there is elevated risk of client anxiety or disengagement.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Send a warm check-in text — confidence is 91%</span>
+                    <p>A brief, personal text outperforms email at this stage. Reference the specific next milestone (inspection window) so the message feels relevant, not generic.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED TEXT MESSAGE — LISA HARMON<span class="exp-draft-edit-btn" onclick="toggleEdit('r2-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="r2-draft-display">Hey Lisa! Just wanted to check in and see how you're feeling about everything on Maple Creek. We're in great shape — inspection window is coming up April 22. Any questions on your end? I'm here!</div>
+                <textarea class="exp-draft-textarea" id="r2-draft-edit" style="display:none">Hey Lisa! Just wanted to check in and see how you're feeling about everything on Maple Creek. We're in great shape — inspection window is coming up April 22. Any questions on your end? I'm here!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('r2','Text sent to Lisa Harmon')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Send Text
+                </button>
+                <div class="snooze-picker" id="snooze-r2">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('r2','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('r2','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('r2')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('r2')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 91% · Not yet actioned</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD R3 — Missing docs blocking close -->
+        <div class="sug-card pri-high" id="sug-r3" data-cat="risk" data-cf="98">
+          <div class="sug-collapsed" onclick="toggleCard('r3')">
+            <div class="sug-cat-icon" style="background:var(--red-bg)">📂</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">2 required documents missing on Sunridge — close in 45 days</span>
+                <span class="pill amber">High</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">4412 Sunridge Blvd, Indianapolis</span>
+                <span class="sug-age">Flagged today</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">98%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:98%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-r3">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-r3">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why AI flagged this</div>
+                  <div class="exp-reason-box">Counter Offer Addendum and Wire Instructions are both required by your listing-side template and neither has been uploaded. At 45 days to close, these need to be collected in the next 7–10 days to avoid timeline pressure.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Add a task and send request to buyer's agent</span>
+                    <p>I can add both missing docs to your task queue and draft a request email to the buyer's agent. This is 98% confidence — no edits needed unless you want to customize the message.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED EMAIL — BUYER'S AGENT<span class="exp-draft-edit-btn" onclick="toggleEdit('r3-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="r3-draft-display">Hi — following up on 4412 Sunridge Blvd. I still need the Counter Offer Addendum and Wire Instructions from your side to keep our timeline on track for May 15. Can you get those over by end of this week? Thanks!</div>
+                <textarea class="exp-draft-textarea" id="r3-draft-edit" style="display:none">Hi — following up on 4412 Sunridge Blvd. I still need the Counter Offer Addendum and Wire Instructions from your side to keep our timeline on track for May 15. Can you get those over by end of this week? Thanks!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('r3','Tasks added + email sent to buyer\'s agent')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Add Tasks + Send Email
+                </button>
+                <div class="snooze-picker" id="snooze-r3">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('r3','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('r3','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('r3')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('r3')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 98% · Not yet actioned</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: TASK INTELLIGENCE
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-task" data-cat="task">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--green)">✅ Task Intelligence</span>
+          <span class="sg-count">3</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD T1 — Pattern-based task template suggestion -->
+        <div class="sug-card pri-medium" id="sug-t1" data-cat="task" data-cf="94">
+          <div class="sug-collapsed" onclick="toggleCard('t1')">
+            <div class="sug-cat-icon" style="background:var(--green-bg)">🔁</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">You've added "Order title search" manually on 4 of your last 5 buyer files — add it to your buyer task template?</span>
+                <span class="pill green">Smart Template</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">Buyer transaction template</span>
+                <span class="sug-age">Pattern detected</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">94%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:94%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-t1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-t1">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Pattern detected</div>
+                  <div class="exp-reason-box">You manually added "Order title search" to buyer files in March (628 Prince Dr), February (Elmwood Ave), January (Ridgeview Ct), and December (Sunset Blvd). This task is absent from your buyer template. Adding it saves you 2–3 minutes per transaction.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Permanently add to buyer template</span>
+                    <p>I'll add "Order title search" as a default task on all future buyer files, triggered at contract execution. You can set the default due date offset (e.g. 3 days after contract).</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="exp-zone-tasks">
+              <div class="exp-col-label" style="margin-bottom:9px">Task to be added to buyer template</div>
+              <div class="task-suggest-list">
+                <div class="task-suggest-row">
+                  <div class="task-suggest-check checked" onclick="this.classList.toggle('checked')"></div>
+                  <div style="flex:1">
+                    <div class="task-suggest-text">Order title search</div>
+                    <div class="task-suggest-meta">Due: 3 days after contract execution · Buyer side</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('t1','Task added to buyer template permanently')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Add to Template
+                </button>
+                <div class="snooze-picker" id="snooze-t1">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('t1','tomorrow')">Tomorrow</div>
+                  <div class="snooze-chip" onclick="doSnooze('t1','1week')">1 week</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('t1')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('t1')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 94% · Template update</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD T2 — Closing gift suggestion with Q&A flow -->
+        <div class="sug-card pri-low" id="sug-t2" data-cat="task" data-cf="87">
+          <div class="sug-collapsed" onclick="toggleCard('t2')">
+            <div class="sug-cat-icon" style="background:var(--teal-bg)">🎁</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">628 Prince Dr closes in 28 days — time to arrange a closing gift for the Chens</span>
+                <span class="pill blue">Relationship</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">Sarah &amp; Mark Chen · Buyer side</span>
+                <span class="sug-age">28 days to close</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">87%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:87%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-t2">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-t2">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why now</div>
+                  <div class="exp-reason-box">Closing is April 28 — 28 days out is the ideal window to arrange a personalized gift with enough lead time for custom orders. Agents who send closing gifts within 3 days of close see a 34% higher referral rate within 12 months.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI gift advisor</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Answer 3 quick questions for personalized suggestions</span>
+                    <p>Tell me a bit about the Chens and I'll suggest 3 gift options with estimated cost and where to order.</p>
+                  </div>
+                </div>
+              </div>
+              <!-- Q&A FLOW -->
+              <div class="qa-flow" id="qa-t2" style="margin-top:12px">
+                <div class="qa-step active" id="qa-t2-1">
+                  <div class="qa-q">Do the Chens have children?</div>
+                  <div class="qa-options">
+                    <div class="qa-opt" onclick="qaNext('t2',1,this)">Yes, young kids</div>
+                    <div class="qa-opt" onclick="qaNext('t2',1,this)">Yes, older kids / teens</div>
+                    <div class="qa-opt" onclick="qaNext('t2',1,this)">No kids</div>
+                    <div class="qa-opt" onclick="qaNext('t2',1,this)">Not sure</div>
+                  </div>
+                </div>
+                <div class="qa-step" id="qa-t2-2">
+                  <div class="qa-q">What's your gift budget?</div>
+                  <div class="qa-options">
+                    <div class="qa-opt" onclick="qaNext('t2',2,this)">Under $50</div>
+                    <div class="qa-opt" onclick="qaNext('t2',2,this)">$50–$150</div>
+                    <div class="qa-opt" onclick="qaNext('t2',2,this)">$150–$300</div>
+                    <div class="qa-opt" onclick="qaNext('t2',2,this)">$300+</div>
+                  </div>
+                </div>
+                <div class="qa-step" id="qa-t2-3">
+                  <div class="qa-q">Any known interests or preferences?</div>
+                  <div class="qa-options">
+                    <div class="qa-opt" onclick="qaFinish('t2',this)">Outdoor / garden</div>
+                    <div class="qa-opt" onclick="qaFinish('t2',this)">Food &amp; entertaining</div>
+                    <div class="qa-opt" onclick="qaFinish('t2',this)">Home décor</div>
+                    <div class="qa-opt" onclick="qaFinish('t2',this)">Tech / smart home</div>
+                    <div class="qa-opt" onclick="qaFinish('t2',this)">No idea — surprise me</div>
+                  </div>
+                </div>
+                <div class="qa-step" id="qa-t2-result">
+                  <div class="exp-ai-box">
+                    <span class="ai-title">✦ 3 gift suggestions for the Chens</span>
+                    <p style="margin-top:4px">① <strong>Custom address sign</strong> — laser-engraved slate, $85, ships in 5 days (Etsy / Personalization Mall)<br>② <strong>Local restaurant gift card bundle</strong> — 3 Greenwood spots, $120 total, easy pickup<br>③ <strong>Smart doorbell (Ring)</strong> — $179, Amazon Prime delivery, universally useful for new homeowners</p>
+                  </div>
+                  <div style="margin-top:10px;display:flex;gap:7px">
+                    <button class="btn-accept" onclick="handleAccept('t2','Closing gift task added to queue')">
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                      Add gift task to queue
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <div class="snooze-picker" id="snooze-t2">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('t2','1week')">1 week</div>
+                  <div class="snooze-chip" onclick="doSnooze('t2','2weeks')">2 weeks</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('t2')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('t2')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 87% · Relationship builder</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD T3 — Predicted missed task -->
+        <div class="sug-card pri-high" id="sug-t3" data-cat="task" data-cf="83">
+          <div class="sug-collapsed" onclick="toggleCard('t3')">
+            <div class="sug-cat-icon" style="background:var(--amber-bg)">⏰</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Final walkthrough task due April 25 — no confirmation it's been scheduled yet</span>
+                <span class="pill amber">At Risk</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">628 Prince Dr, Greenwood</span>
+                <span class="sug-age">Flagged 1h ago</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">83%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:83%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-t3">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-t3">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why AI flagged this</div>
+                  <div class="exp-reason-box">The "Final Walkthrough Scheduled" task is due April 25 — 22 days out. No calendar event, no communication log, and no confirmation note exists for this task. Based on typical scheduling lead times, you need to coordinate this within the next 5 days.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Text the Chens now to lock a date</span>
+                    <p>Draft below. I'll also add a calendar event placeholder for April 25 and mark the task as in-progress.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED TEXT — SARAH CHEN<span class="exp-draft-edit-btn" onclick="toggleEdit('t3-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="t3-draft-display">Hey Sarah! We need to schedule your final walkthrough before closing on the 28th. Are you available anytime April 23–25? I'll coordinate with the listing agent once you let me know!</div>
+                <textarea class="exp-draft-textarea" id="t3-draft-edit" style="display:none">Hey Sarah! We need to schedule your final walkthrough before closing on the 28th. Are you available anytime April 23–25? I'll coordinate with the listing agent once you let me know!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('t3','Text sent + calendar event added')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Send Text + Add to Calendar
+                </button>
+                <div class="snooze-picker" id="snooze-t3">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('t3','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('t3','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('t3')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('t3')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 83% · Task at risk</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: COMMUNICATIONS
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-comms" data-cat="comms">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--teal)">💬 Communications</span>
+          <span class="sg-count">2</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD C1 — Referral request -->
+        <div class="sug-card pri-low" id="sug-c1" data-cat="comms" data-cf="89">
+          <div class="sug-collapsed" onclick="toggleCard('c1')">
+            <div class="sug-cat-icon" style="background:var(--green-bg)">🤝</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Past client Kevin Torres closed 6 months ago — ideal time to request a referral</span>
+                <span class="pill green">Referral</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">Closed Oct 2025 · Torres file</span>
+                <span class="sug-age">Optimal window now</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">89%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:89%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-c1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-c1">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why now</div>
+                  <div class="exp-reason-box">Research shows the 6-month post-close window has the highest referral conversion rate — clients have settled in, finished the initial chaos, and are actively telling their story to friends and family. Kevin left a 5-star review, which means the relationship is warm.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Send a personal check-in with a soft referral ask</span>
+                    <p>Never lead with the ask. This message checks in genuinely first, then closes softly. 89% confidence this is the right moment.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED EMAIL — KEVIN TORRES<span class="exp-draft-edit-btn" onclick="toggleEdit('c1-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="c1-draft-display">Hey Kevin! Hard to believe it's already been 6 months since closing on your place — hope you're loving it! I'd love to hear how everything's going. And if you know anyone thinking about buying or selling, I'd be honored to help. You were a pleasure to work with!</div>
+                <textarea class="exp-draft-textarea" id="c1-draft-edit" style="display:none">Hey Kevin! Hard to believe it's already been 6 months since closing on your place — hope you're loving it! I'd love to hear how everything's going. And if you know anyone thinking about buying or selling, I'd be honored to help. You were a pleasure to work with!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('c1','Referral email sent to Kevin Torres')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Send Email
+                </button>
+                <div class="snooze-picker" id="snooze-c1">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('c1','1week')">1 week</div>
+                  <div class="snooze-chip" onclick="doSnooze('c1','2weeks')">2 weeks</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('c1')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('c1')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 89% · Relationship builder</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD C2 — Anniversary check-in -->
+        <div class="sug-card pri-low" id="sug-c2" data-cat="comms" data-cf="95">
+          <div class="sug-collapsed" onclick="toggleCard('c2')">
+            <div class="sug-cat-icon" style="background:var(--blue-bg)">🏡</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">1-year homeowner anniversary for the Nguyens is April 12 — send a note</span>
+                <span class="pill blue">Anniversary</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">Closed Apr 12, 2025 · Nguyen file</span>
+                <span class="sug-age">In 12 days</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">95%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:95%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-c2">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-c2">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why now</div>
+                  <div class="exp-reason-box">The Nguyen transaction closed April 12, 2025 — their 1-year homeowner anniversary is 12 days away. This is a high-value touchpoint: personal, non-intrusive, and reinforces your brand without any sales ask.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">A short personal text — no ask, pure goodwill</span>
+                    <p>Agents who send anniversary notes consistently rank higher in "agent I'd refer" surveys. Schedule this 2 days out so it doesn't slip.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED TEXT — NGUYEN FAMILY<span class="exp-draft-edit-btn" onclick="toggleEdit('c2-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="c2-draft-display">Happy 1-year anniversary in your home! 🏡 It's been such a pleasure watching you settle in. Hope this year has been everything you dreamed of. Here's to many more!</div>
+                <textarea class="exp-draft-textarea" id="c2-draft-edit" style="display:none">Happy 1-year anniversary in your home! 🏡 It's been such a pleasure watching you settle in. Hope this year has been everything you dreamed of. Here's to many more!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('c2','Scheduled text to Nguyen family Apr 12')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Schedule Text for Apr 12
+                </button>
+                <div class="snooze-picker" id="snooze-c2">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('c2','1week')">1 week</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('c2')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('c2')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 95% · Goodwill touchpoint</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: MARKET & PRICING
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-market" data-cat="market">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--blue)">📊 Market &amp; Pricing</span>
+          <span class="sg-count">1</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD M1 — Price reduction nudge -->
+        <div class="sug-card pri-high" id="sug-m1" data-cat="market" data-cf="77">
+          <div class="sug-collapsed" onclick="toggleCard('m1')">
+            <div class="sug-cat-icon" style="background:var(--blue-bg)">📉</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Sunridge has been on market 31 days with 0 offers — 3 comps reduced this week</span>
+                <span class="pill amber">Pricing Alert</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">4412 Sunridge Blvd, Indianapolis</span>
+                <span class="sug-age">Market data updated today</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">77%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-med" style="width:77%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-m1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-m1">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Market data</div>
+                  <div class="exp-reason-box">Sunridge listed at $389,000 on March 1. 31 DOM, 0 offers, 14 showings. Three comparable properties (Meridian Ave, Brookwood Dr, Vista Ct) have each reduced by 3–5% in the past 7 days. Average DOM at reduction for this zip is 28 days. Your listing is above that threshold.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Have a price conversation with your seller this week</span>
+                    <p>A 3% reduction to $377,330 would put Sunridge below the $380k psychological threshold and align with recent comp reductions. I've drafted a seller conversation framework below.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">SELLER CONVERSATION FRAMEWORK<span class="exp-draft-edit-btn" onclick="toggleEdit('m1-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="m1-draft-display">"Tom, I want to share some market intel with you. Three homes similar to yours have reduced their price this week — the market is sending a signal. We've had 14 showings but no offers, which tells me buyers see value but price is the objection. A move to $377K puts us below the key threshold and re-energizes the listing. I'd rather get you to the table with a strong offer than sit another 30 days."</div>
+                <textarea class="exp-draft-textarea" id="m1-draft-edit" style="display:none">"Tom, I want to share some market intel with you. Three homes similar to yours have reduced their price this week — the market is sending a signal. We've had 14 showings but no offers, which tells me buyers see value but price is the objection. A move to $377K puts us below the key threshold and re-energizes the listing. I'd rather get you to the table with a strong offer than sit another 30 days."</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('m1','Price review task added + call scheduled')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Add Seller Call Task
+                </button>
+                <div class="snooze-picker" id="snooze-m1">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('m1','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('m1','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('m1')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('m1')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 77% · Market-driven</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: LISTING & MARKETING
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-marketing" data-cat="marketing">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--orange)">📣 Listing &amp; Marketing</span>
+          <span class="sg-count">1</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD MK1 — MLS description optimization -->
+        <div class="sug-card pri-medium" id="sug-mk1" data-cat="marketing" data-cf="88">
+          <div class="sug-collapsed" onclick="toggleCard('mk1')">
+            <div class="sug-cat-icon" style="background:var(--orange-light)">✏️</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Sunridge MLS description is 118 words — top-performing listings average 240+ words</span>
+                <span class="pill orange">MLS Optimization</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">4412 Sunridge Blvd, Indianapolis</span>
+                <span class="sug-age">Analyzed today</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">88%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:88%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-mk1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-mk1">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Data insight</div>
+                  <div class="exp-reason-box">Your current description is 118 words. MLS data for Indianapolis zip 46220 shows listings with 200–280 words average 23% more saves and 18% more showings. Missing: neighborhood context, lifestyle language, specific feature callouts (kitchen, primary suite, yard).</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Rewrite accepted — 247-word version below</span>
+                    <p>I've expanded the description with lifestyle language and specific feature callouts. Review, edit as needed, then copy to MLS.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">EXPANDED MLS DESCRIPTION — 247 WORDS<span class="exp-draft-edit-btn" onclick="toggleEdit('mk1-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="mk1-draft-display">Welcome to 4412 Sunridge Blvd — a beautifully updated 4-bedroom, 2.5-bath home nestled in one of Indianapolis's most sought-after neighborhoods. From the moment you arrive, the freshly landscaped front yard and new exterior paint signal the care that's gone into every detail of this home.
+
+Inside, the open-concept main level flows seamlessly from a sun-drenched living room into a chef-inspired kitchen featuring granite countertops, stainless appliances, and an oversized island perfect for entertaining. The adjacent dining area opens to a private deck overlooking a fully fenced backyard — ideal for summer barbecues or quiet morning coffee.
+
+Upstairs, the spacious primary suite offers a true retreat with a walk-in closet and spa-style bath. Three additional bedrooms provide flexibility for guests, a home office, or growing families. The finished basement adds bonus living space and ample storage.
+
+Located minutes from Broad Ripple's restaurants and shops, top-rated Warren Township schools, and easy I-465 access. Move-in ready — schedule your showing today.</div>
+                <textarea class="exp-draft-textarea" id="mk1-draft-edit" style="display:none">Welcome to 4412 Sunridge Blvd — a beautifully updated 4-bedroom, 2.5-bath home nestled in one of Indianapolis's most sought-after neighborhoods...</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('mk1','MLS description copied to clipboard')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                  Copy to Clipboard
+                </button>
+                <div class="snooze-picker" id="snooze-mk1">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('mk1','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('mk1')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('mk1')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 88% · MLS optimization</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════
+           SECTION: RELATIONSHIP
+      ══════════════════════════ -->
+      <div class="sg-wrap" id="sg-relationship" data-cat="relationship">
+        <div class="sg-header">
+          <span class="sg-label" style="color:var(--green)">🤝 Relationship</span>
+          <span class="sg-count">2</span>
+          <div class="sg-line"></div>
+        </div>
+
+        <!-- CARD REL1 — Review request -->
+        <div class="sug-card pri-low" id="sug-rel1" data-cat="relationship" data-cf="92">
+          <div class="sug-collapsed" onclick="toggleCard('rel1')">
+            <div class="sug-cat-icon" style="background:var(--amber-bg)">⭐</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Ask Tom Weaver for a Google review — 10 days since listing went live, sentiment is positive</span>
+                <span class="pill green">Review Request</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">4412 Sunridge Blvd · Seller</span>
+                <span class="sug-age">Optimal timing</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">92%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:92%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-rel1">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-rel1">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why now</div>
+                  <div class="exp-reason-box">Tom's last 3 text responses used positive language ("looks great," "appreciate the update," "sounds good"). The listing went live 10 days ago — clients are most responsive to review requests during the active, engaged phase of the transaction, not post-close when motivation drops.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Send a casual, low-friction text review ask</span>
+                    <p>Link directly to your Google profile. Keep it 2 sentences — make it feel like a favor, not an obligation.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED TEXT — TOM WEAVER<span class="exp-draft-edit-btn" onclick="toggleEdit('rel1-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="rel1-draft-display">Hey Tom! Really enjoying working with you on Sunridge. If you have 60 seconds, a quick Google review would mean the world to me — here's the link: [your Google review link]. Thanks so much!</div>
+                <textarea class="exp-draft-textarea" id="rel1-draft-edit" style="display:none">Hey Tom! Really enjoying working with you on Sunridge. If you have 60 seconds, a quick Google review would mean the world to me — here's the link: [your Google review link]. Thanks so much!</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('rel1','Review request sent to Tom Weaver')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  Send Text
+                </button>
+                <div class="snooze-picker" id="snooze-rel1">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('rel1','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('rel1','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('rel1')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('rel1')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 92% · Reputation builder</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CARD REL2 — Social post suggestion -->
+        <div class="sug-card pri-low" id="sug-rel2" data-cat="relationship" data-cf="81">
+          <div class="sug-collapsed" onclick="toggleCard('rel2')">
+            <div class="sug-cat-icon" style="background:var(--purple-bg)">📲</div>
+            <div class="sug-summary">
+              <div class="sug-title-row">
+                <span class="sug-title">Share a "just listed" post for Sunridge — it's been live 10 days with no social activity</span>
+                <span class="pill purple">Social</span>
+              </div>
+              <div class="sug-meta">
+                <span class="sug-tx">4412 Sunridge Blvd, Indianapolis</span>
+                <span class="sug-age">10 days since listing</span>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div class="confidence-wrap">
+                <span class="confidence-label">81%</span>
+                <div class="confidence-bar"><div class="confidence-fill cf-high" style="width:81%"></div></div>
+              </div>
+              <div class="sug-chevron" id="chev-rel2">›</div>
+            </div>
+          </div>
+          <div class="sug-expand" id="exp-rel2">
+            <div class="exp-zone-reason">
+              <div class="exp-two-col">
+                <div>
+                  <div class="exp-col-label">Why this matters</div>
+                  <div class="exp-reason-box">Listings with social posts in the first 14 days generate 2x the organic reach vs. posts made after 14 days. No Instagram or Facebook activity detected for this listing. 0 additional showings have been booked in the last 5 days.</div>
+                </div>
+                <div>
+                  <div class="exp-col-label">✦ AI recommendation</div>
+                  <div class="exp-ai-box">
+                    <span class="ai-title">Post now — caption drafted below</span>
+                    <p>Use 2–3 of your listing photos. Tag the neighborhood. Hashtags included for reach.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-draft-wrap">
+                <div class="exp-draft-label">DRAFTED SOCIAL CAPTION<span class="exp-draft-edit-btn" onclick="toggleEdit('rel2-draft')">Edit</span></div>
+                <div class="exp-draft-readonly" id="rel2-draft-display">✨ Just Listed in Indianapolis! 4 beds · 2.5 baths · fully updated kitchen · private backyard deck. This one checks every box — and it's move-in ready. 📍 4412 Sunridge Blvd · DM me for a private showing!
+
+#JustListed #IndianapolisRealEstate #IndyHomes #MoveinReady #SunridgeIndy #HomesForSale #RealEstateIndy</div>
+                <textarea class="exp-draft-textarea" id="rel2-draft-edit" style="display:none">✨ Just Listed in Indianapolis! 4 beds · 2.5 baths · fully updated kitchen · private backyard deck. This one checks every box — and it's move-in ready. 📍 4412 Sunridge Blvd · DM me for a private showing!
+
+#JustListed #IndianapolisRealEstate #IndyHomes #MoveinReady #SunridgeIndy #HomesForSale #RealEstateIndy</textarea>
+              </div>
+            </div>
+            <div class="exp-zone-actions">
+              <div class="action-btns">
+                <button class="btn-accept" onclick="handleAccept('rel2','Caption copied — open your social app to post')">
+                  <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                  Copy Caption
+                </button>
+                <div class="snooze-picker" id="snooze-rel2">
+                  <span style="font-size:12px;font-weight:600;color:var(--muted)">Remind me in:</span>
+                  <div class="snooze-chip" onclick="doSnooze('rel2','2h')">2 hours</div>
+                  <div class="snooze-chip" onclick="doSnooze('rel2','tomorrow')">Tomorrow</div>
+                </div>
+                <button class="btn-snooze" onclick="toggleSnooze('rel2')">⏱ Snooze</button>
+                <button class="btn-dismiss" onclick="dismiss('rel2')">Dismiss</button>
+              </div>
+              <span class="exp-meta-right">Confidence 81% · Marketing</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div>
+  </main>
+</div>
+
+<!-- ═══ FLOATING AI ═══ -->
+<div class="floating-ai" onclick="showToast('AI Coach opening…','Your full coaching dashboard is ready.')">
+  <div style="font-size:20px">✦</div>
+  <div><strong>AI Coach</strong><span>12 suggestions waiting</span></div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <div style="font-size:18px">✓</div>
+  <div><strong id="toast-title">Done</strong><span id="toast-sub"></span></div>
+  <div class="toast-close" onclick="hideToast()">✕</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
+let currentFilter = 'all';
+let showDismissed = false;
+let toastTimer;
+
+/* ════════════════════════════════════════
+   CARD TOGGLE (expand/collapse)
+════════════════════════════════════════ */
+function toggleCard(id) {
+  const card = document.getElementById('sug-' + id);
+  const exp  = document.getElementById('exp-' + id);
+  const chev = document.getElementById('chev-' + id);
+  if (!card || !exp) return;
+  const isOpen = card.classList.contains('is-open');
+  card.classList.toggle('is-open', !isOpen);
+  exp.classList.toggle('open', !isOpen);
+}
+
+/* ════════════════════════════════════════
+   FILTER TABS
+════════════════════════════════════════ */
+function setFilter(btn, filter) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = filter;
+  document.querySelectorAll('.sg-wrap').forEach(sg => {
+    const cat = sg.dataset.cat;
+    sg.style.display = (filter === 'all' || cat === filter) ? '' : 'none';
+  });
+}
+
+/* ════════════════════════════════════════
+   TOGGLE EDIT / READONLY
+════════════════════════════════════════ */
+function toggleEdit(draftId) {
+  const display  = document.getElementById(draftId + '-display');
+  const editArea = document.getElementById(draftId + '-edit');
+  if (!display || !editArea) return;
+  const editing = editArea.style.display !== 'none';
+  if (editing) {
+    display.textContent = editArea.value;
+    display.style.display = '';
+    editArea.style.display = 'none';
+  } else {
+    editArea.value = display.textContent;
+    display.style.display = 'none';
+    editArea.style.display = '';
+    editArea.focus();
+  }
+}
+
+/* ════════════════════════════════════════
+   ACCEPT ACTION
+════════════════════════════════════════ */
+function handleAccept(id, actionLabel) {
+  const card = document.getElementById('sug-' + id);
+  const cf   = parseInt(card?.dataset.cf || '0');
+
+  // below 90%: show confirmation state first
+  const acceptBtn = document.getElementById('accept-' + id);
+  if (cf < 90 && acceptBtn && !acceptBtn.dataset.confirmed) {
+    acceptBtn.classList.add('needs-confirm');
+    acceptBtn.innerHTML = '<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Confirm: ' + acceptBtn.textContent.trim().replace(/^Confirm: /,'');
+    acceptBtn.dataset.confirmed = '1';
+    showToast('Review before acting', 'Confidence is below 90% — click again to confirm.');
+    return;
+  }
+
+  // accept: visually mark done
+  if (card) {
+    card.style.transition = 'opacity .35s, transform .35s';
+    card.style.opacity = '0';
+    card.style.transform = 'translateX(12px)';
+    setTimeout(() => { card.style.display = 'none'; updateSectionCounts(); }, 360);
+  }
+  showToast('Done — ' + actionLabel, 'Action triggered successfully.');
+}
+
+/* ════════════════════════════════════════
+   SNOOZE
+════════════════════════════════════════ */
+function toggleSnooze(id) {
+  const picker = document.getElementById('snooze-' + id);
+  if (!picker) return;
+  picker.classList.toggle('open');
+}
+
+function doSnooze(id, duration) {
+  const card = document.getElementById('sug-' + id);
+  const labels = {'2h':'2 hours','tomorrow':'tomorrow','1week':'1 week','2weeks':'2 weeks'};
+  if (card) {
+    card.classList.add('snoozed');
+    card.style.transition = 'opacity .35s';
+    card.style.opacity = '0.4';
+    setTimeout(() => { card.style.display = 'none'; updateSectionCounts(); }, 200);
+  }
+  showToast('Snoozed — will remind you in ' + (labels[duration] || duration), '');
+}
+
+/* ════════════════════════════════════════
+   DISMISS
+════════════════════════════════════════ */
+function dismiss(id) {
+  const card = document.getElementById('sug-' + id);
+  if (!card) return;
+  card.dataset.dismissed = '1';
+  card.style.transition = 'opacity .35s, transform .35s';
+  card.style.opacity = '0';
+  card.style.transform = 'translateX(-10px)';
+  setTimeout(() => {
+    card.classList.add('dismissed');
+    card.style.opacity = ''; card.style.transform = '';
+    if (!showDismissed) card.style.display = 'none';
+    updateSectionCounts();
+  }, 360);
+  showToast('Suggestion dismissed', 'You can restore it by showing dismissed items.');
+}
+
+/* ════════════════════════════════════════
+   SHOW / HIDE DISMISSED
+════════════════════════════════════════ */
+function toggleDismissed() {
+  showDismissed = !showDismissed;
+  const btn = document.getElementById('dismissed-toggle');
+  btn.textContent = showDismissed ? 'Hide dismissed' : 'Show dismissed';
+  btn.classList.toggle('on', showDismissed);
+  document.querySelectorAll('.sug-card.dismissed').forEach(c => {
+    c.style.display = showDismissed ? '' : 'none';
+  });
+}
+
+/* ════════════════════════════════════════
+   UPDATE SECTION COUNTS
+════════════════════════════════════════ */
+function updateSectionCounts() {
+  document.querySelectorAll('.sg-wrap').forEach(sg => {
+    const visible = Array.from(sg.querySelectorAll('.sug-card')).filter(c => c.style.display !== 'none').length;
+    const countEl = sg.querySelector('.sg-count');
+    if (countEl) countEl.textContent = visible;
+    sg.style.display = visible === 0 ? 'none' : '';
+  });
+}
+
+/* ════════════════════════════════════════
+   Q&A FLOW (closing gift)
+════════════════════════════════════════ */
+function qaNext(flowId, step, el) {
+  el.classList.add('selected');
+  const current = document.getElementById('qa-' + flowId + '-' + step);
+  const next    = document.getElementById('qa-' + flowId + '-' + (step + 1));
+  setTimeout(() => {
+    if (current) current.classList.remove('active');
+    if (next)    next.classList.add('active');
+  }, 200);
+}
+
+function qaFinish(flowId, el) {
+  el.classList.add('selected');
+  const step3  = document.getElementById('qa-' + flowId + '-3');
+  const result = document.getElementById('qa-' + flowId + '-result');
+  setTimeout(() => {
+    if (step3)  step3.classList.remove('active');
+    if (result) result.classList.add('active');
+  }, 200);
+}
+
+/* ════════════════════════════════════════
+   ACCEPT ALL HIGH-CONFIDENCE
+════════════════════════════════════════ */
+function acceptAll() {
+  const high = Array.from(document.querySelectorAll('.sug-card')).filter(c => {
+    const cf = parseInt(c.dataset.cf || '0');
+    return cf >= 90 && !c.dataset.dismissed && c.style.display !== 'none';
+  });
+  if (high.length === 0) { showToast('Nothing to act on', 'No 90%+ confidence suggestions pending.'); return; }
+  high.forEach((card, i) => {
+    setTimeout(() => {
+      const id = card.id.replace('sug-','');
+      handleAccept(id, 'Auto-actioned');
+    }, i * 180);
+  });
+  showToast(high.length + ' suggestions actioned', 'All 90%+ confidence items processed.');
+}
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+function showToast(title, sub) {
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent   = sub || '';
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 3800);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+/* ════════════════════════════════════════
+   KEYBOARD
+════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') hideToast();
+});
+</script>
+</body>
+</html>

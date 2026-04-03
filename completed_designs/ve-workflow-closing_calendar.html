@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velvet Elves — Closing Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --orange:#E26812;--orange-dark:#B85107;--orange-light:#FFF2E7;--orange-soft:#FFF9F4;--orange-border:#F1C79E;
+      --navy:#1E3356;--bg:#F2F1EE;--surface:#FFFFFF;--surface-2:#FAFAF8;
+      --line:#E3E2DE;--line-strong:#CEC9C0;--text:#181818;--muted:#686868;--ghost:#929292;
+      --green:#14704B;--green-bg:#EEF8F3;--green-border:#B9DEC9;
+      --amber:#A56A08;--amber-bg:#FFF8EC;--amber-border:#EACB93;
+      --red:#BE3431;--red-bg:#FFF2F2;--red-border:#F0C7C7;
+      --blue:#2C4C7F;--blue-bg:#EEF4FF;--blue-border:#C0D1EF;
+      --purple:#6545B6;--purple-bg:#F5F0FF;--purple-border:#D7C8FF;
+      --teal:#0E6E70;--teal-bg:#EDFAFA;--teal-border:#A8D8DA;
+      --shadow:0 4px 16px rgba(20,20,20,.06);--shadow-md:0 8px 28px rgba(20,20,20,.09);
+      --radius:18px;--font-body:'IBM Plex Sans',sans-serif;--font-serif:'Lora',serif;--font-mono:'IBM Plex Mono',monospace;
+      --sidebar:228px;--top:60px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    /* ── SIDEBAR ── */
+    .sidebar{background:linear-gradient(180deg,#1a2d4e,#152340);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.07)}
+    .brand{display:flex;align-items:center;gap:12px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name strong{font-family:var(--font-serif);font-size:17px;color:#fff;font-weight:700;display:block;line-height:1}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;display:block}
+    .side-block{padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:9px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .mini{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:10px}
+    .mini .num{font-family:var(--font-mono);font-size:21px;font-weight:600;line-height:1;margin-bottom:5px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.72);line-height:1.3}
+    .num.red{color:#ff9090}.num.green{color:#7ed8a8}.num.orange{color:#ffbc7a}.num.blue{color:#94bfff}
+    .nav{padding:8px 7px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:rgba(255,255,255,.85);padding:9px 11px;border-radius:9px;font-size:13px;font-weight:500;position:relative;transition:.14s}
+    .nav a:hover{background:rgba(255,255,255,.055)}
+    .nav a.active{background:rgba(226,104,18,.18);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .nav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.38);padding:14px 11px 5px}
+    .side-footer{padding:11px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px}
+    .upgrade-nudge{background:rgba(226,104,18,.12);border:1px solid rgba(226,104,18,.22);border-radius:11px;padding:10px 11px;cursor:pointer;transition:.14s}
+    .upgrade-nudge:hover{background:rgba(226,104,18,.18)}
+    .upgrade-nudge strong{display:block;font-size:12px;color:#ffcf9e;margin-bottom:3px}
+    .upgrade-nudge span{display:block;font-size:11px;color:rgba(255,255,255,.6);line-height:1.35}
+    .user-row{display:flex;align-items:center;gap:9px}
+    .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .user-info strong{display:block;font-size:12px;color:rgba(255,255,255,.9)}
+    .user-info span{display:block;font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font-mono)}
+
+    /* ── SHARED BUTTONS ── */
+    .btn-primary,.btn-secondary,.btn-ghost{border:none;border-radius:11px;cursor:pointer;transition:.15s ease;font-weight:600;font-family:var(--font-body)}
+    .btn-primary{background:var(--orange);color:#fff;padding:10px 14px;font-weight:700;font-size:13px}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:13px}
+    .btn-secondary:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 11px;font-size:12px}
+    .btn-ghost:hover{background:#fff}
+
+    /* ── PILLS ── */
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:600;white-space:nowrap}
+    .pill.red{background:var(--red-bg);border:1px solid var(--red-border);color:#8a201d}
+    .pill.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+    .pill.green{background:var(--green-bg);border:1px solid var(--green-border);color:#0d5537}
+    .pill.blue{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .pill.purple{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+    .pill.orange{background:var(--orange-light);border:1px solid var(--orange-border);color:#8b470c}
+
+    /* ── TOPBAR ── */
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:var(--top);display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-shrink:0}
+    .top-title{font-family:var(--font-serif);font-size:20px;font-weight:700;flex:1}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .top-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .notif-btn{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.14s}
+    .notif-btn:hover{background:var(--surface-2)}
+    .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;border:1.5px solid #fff}
+    .content{overflow:auto;padding:18px 22px 36px;display:flex;flex-direction:column;gap:14px;flex:1}
+
+    /* ── CALENDAR CONTROLS BAR ── */
+    .cal-controls{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow)}
+    .cal-nav{display:flex;align-items:center;gap:8px}
+    .cal-nav-btn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:.13s}
+    .cal-nav-btn:hover{background:var(--surface-2);border-color:var(--line-strong);color:var(--text)}
+    .cal-month-label{font-family:var(--font-serif);font-size:18px;font-weight:700;min-width:180px;text-align:center}
+    .cal-today-btn{padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s}
+    .cal-today-btn:hover{background:var(--surface-2);border-color:var(--line-strong);color:var(--text)}
+    .cal-divider{width:1px;height:24px;background:var(--line);flex-shrink:0}
+    .cal-controls-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+
+    /* ── EVENT TYPE TOGGLES ── */
+    .type-toggle{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.13s;user-select:none}
+    .type-toggle:hover{border-color:var(--line-strong)}
+    .type-toggle.off{opacity:.45;background:var(--surface-2)}
+    .type-toggle .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .dot-close{background:#BE3431}
+    .dot-contingency{background:#A56A08}
+    .dot-task{background:#2C4C7F}
+    .dot-custom{background:#6545B6}
+
+    /* ── CALENDAR GRID ── */
+    .cal-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0}
+    .cal-dow-header{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--line)}
+    .cal-dow{padding:8px 0;text-align:center;font-family:var(--font-mono);font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ghost);font-weight:600}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);flex:1;min-height:0}
+    .cal-day{border-right:1px solid var(--line);border-bottom:1px solid var(--line);padding:6px 7px;display:flex;flex-direction:column;gap:3px;cursor:default;transition:background .1s;position:relative;overflow:hidden}
+    .cal-day:nth-child(7n){border-right:none}
+    .cal-day.other-month{background:var(--surface-2)}
+    .cal-day.other-month .day-num{color:var(--ghost)}
+    .cal-day.today{background:#fffbf5}
+    .cal-day.today .day-num{background:var(--orange);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .cal-day:hover{background:#fafaf7}
+    .day-num{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px;width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+    .day-events{display:flex;flex-direction:column;gap:2px;flex:1}
+
+    /* ── CALENDAR EVENT CHIPS ── */
+    .cal-event{border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600;cursor:pointer;transition:filter .12s, transform .1s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid transparent;line-height:1.5}
+    .cal-event:hover{filter:brightness(.93);transform:translateX(1px)}
+    .cal-event.type-close{background:#FFF2F2;border-left-color:#BE3431;color:#7a1f1d}
+    .cal-event.type-contingency{background:#FFF8EC;border-left-color:#A56A08;color:#6b430a}
+    .cal-event.type-task{background:#EEF4FF;border-left-color:#2C4C7F;color:#1e3460}
+    .cal-event.type-custom{background:#F5F0FF;border-left-color:#6545B6;color:#42298f}
+    .cal-event.hidden{display:none}
+    .more-events{font-family:var(--font-mono);font-size:10px;color:var(--ghost);cursor:pointer;padding:1px 4px;border-radius:4px;transition:.12s}
+    .more-events:hover{background:var(--surface-2);color:var(--muted)}
+
+    /* ── EVENT DETAIL MODAL ── */
+    .modal-wrap{position:fixed;inset:0;background:rgba(20,20,20,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);padding:16px}
+    .modal-wrap.open{display:flex}
+    .modal{background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+    .modal-head-left{}
+    .modal-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:var(--ghost);margin-bottom:5px}
+    .modal-head h3{font-family:var(--font-serif);font-size:20px;margin-bottom:4px}
+    .modal-head p{font-size:12.5px;color:var(--muted);line-height:1.4}
+    .close-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:.13s}
+    .close-btn:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .modal-body{padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+    .modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 18px;border-top:1px solid var(--line);background:var(--surface-2)}
+
+    /* Event detail rows */
+    .detail-row{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+    .detail-row:last-child{border-bottom:none}
+    .detail-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+    .detail-label{font-size:11px;font-weight:700;color:var(--ghost);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;font-family:var(--font-mono)}
+    .detail-value{font-size:13px;font-weight:600;color:var(--text)}
+    .detail-sub{font-size:11.5px;color:var(--muted);margin-top:1px}
+
+    /* Quick action buttons inside modal */
+    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .qa-btn{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:11px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--text);transition:.13s;text-align:left}
+    .qa-btn:hover{border-color:var(--line-strong);background:var(--surface-2)}
+    .qa-btn.primary-action{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .qa-btn.primary-action:hover{background:#2a4472}
+    .qa-btn .qa-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+    .qa-btn.primary-action .qa-icon{background:rgba(255,255,255,.12)}
+    .qa-btn:not(.primary-action) .qa-icon{background:var(--surface-2)}
+
+    /* Note textarea */
+    .field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--muted)}
+    .field textarea,.field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;background:var(--surface-2);transition:.14s;outline:none;resize:vertical}
+    .field textarea:focus,.field input:focus,.field select:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+    /* ── ADD EVENT MODAL ── */
+    .add-modal{background:#fff;border-radius:20px;width:100%;max-width:480px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .event-type-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .event-type-chip{padding:9px 12px;border-radius:9px;border:1px solid var(--line);background:var(--surface-2);font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s;text-align:left;display:flex;align-items:center;gap:7px}
+    .event-type-chip:hover{background:#fff;border-color:var(--line-strong);color:var(--text)}
+    .event-type-chip.selected{border-color:var(--orange-border);background:var(--orange-light);color:#8b470c}
+
+    /* ── INLINE EXPAND (day popover) ── */
+    .day-popover{position:fixed;background:#fff;border:1px solid var(--line-strong);border-radius:14px;box-shadow:var(--shadow-md);width:280px;z-index:150;padding:0;overflow:hidden;display:none}
+    .day-popover.open{display:block}
+    .popover-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+    .popover-date{font-family:var(--font-serif);font-size:15px;font-weight:700}
+    .popover-close{width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;color:var(--muted)}
+    .popover-events{padding:8px 0;max-height:320px;overflow:auto}
+    .popover-event{padding:10px 14px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .12s}
+    .popover-event:last-child{border-bottom:none}
+    .popover-event:hover{background:var(--surface-2)}
+    .pe-type{font-family:var(--font-mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;font-weight:600;margin-bottom:3px}
+    .pe-title{font-size:13px;font-weight:700;margin-bottom:2px}
+    .pe-tx{font-size:11.5px;color:var(--muted)}
+    .popover-add{padding:10px 14px;border-top:1px solid var(--line)}
+
+    /* ── CALENDAR / LIST VIEW TOGGLE ── */
+    .view-toggle-wrap{display:flex;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .view-mode-btn{display:flex;align-items:center;gap:6px;padding:7px 13px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:.13s;white-space:nowrap}
+    .view-mode-btn:hover{background:var(--surface-2)}
+    .view-mode-btn.active{background:var(--orange-light);color:#8b470c}
+    .view-mode-btn + .view-mode-btn{border-left:1px solid var(--line)}
+
+    /* ── UPCOMING STRIP (mini agenda below calendar) ── */
+    .upcoming-strip{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow)}
+    .upcoming-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .upcoming-title{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.7px;text-transform:uppercase;font-weight:600;color:var(--muted)}
+    .upcoming-list{display:flex;flex-direction:column;gap:0}
+    .upcoming-item{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)}
+    .upcoming-item:last-child{border-bottom:none}
+    .upcoming-date{text-align:center}
+    .upcoming-date .ud-day{font-family:var(--font-mono);font-size:18px;font-weight:700;line-height:1;color:var(--text)}
+    .upcoming-date .ud-mon{font-family:var(--font-mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ghost)}
+    .upcoming-info{}
+    .upcoming-name{font-size:13px;font-weight:700;margin-bottom:2px}
+    .upcoming-tx{font-size:11.5px;color:var(--muted)}
+    .upcoming-days{font-family:var(--font-mono);font-size:11px;font-weight:600;white-space:nowrap}
+    .days-urgent{color:var(--red)}
+    .days-soon{color:var(--amber)}
+    .days-ok{color:var(--green)}
+
+    /* ── AI BRIEFING (compact) ── */
+    .ai-briefing{background:linear-gradient(135deg,#1a2d4e,#233d6a);color:#fff;border-radius:var(--radius);padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;box-shadow:var(--shadow-md)}
+    .ai-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:16px;flex-shrink:0}
+    .ai-copy .eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.9px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
+    .ai-copy strong{display:block;font-family:var(--font-serif);font-size:16px;line-height:1.2;margin-bottom:3px}
+    .ai-copy p{font-size:12px;color:rgba(255,255,255,.8);line-height:1.5}
+    .ai-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0}
+    .ai-actions .btn-primary{font-size:12px;padding:7px 12px;white-space:nowrap}
+    .ai-meta{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.5);text-align:right}
+
+    /* ── FLOATING AI ── */
+    .floating-ai{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--navy),#233d6a);color:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 8px 30px rgba(30,51,86,.35);transition:.2s;z-index:100;max-width:280px;border:1px solid rgba(255,255,255,.1)}
+    .floating-ai:hover{transform:translateY(-2px)}
+    .floating-ai strong{display:block;font-size:13px;margin-bottom:2px}
+    .floating-ai span{display:block;font-size:11px;color:rgba(255,255,255,.7);line-height:1.35}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:90px;right:24px;background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;z-index:300;transform:translateY(12px);opacity:0;transition:.25s ease;pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+    .toast strong{display:block;font-size:13px;margin-bottom:1px}
+    .toast span{font-size:11.5px;color:var(--muted)}
+    .toast-close{margin-left:auto;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0}
+
+    /* ── TINY HELPER ── */
+    .tiny-btn{display:flex;align-items:center;gap:5px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);padding:0 9px;transition:.13s;white-space:nowrap}
+    .tiny-btn:hover{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <div class="brand-name"><strong>Velvet Elves</strong><span>Transaction OS</span></div>
+    </div>
+    <div class="side-block">
+      <div class="side-label">This month</div>
+      <div class="side-summary">
+        <div class="mini"><div class="num orange">3</div><div class="cap">Active files</div></div>
+        <div class="mini"><div class="num red">2</div><div class="cap">Closing soon</div></div>
+        <div class="mini"><div class="num amber">5</div><div class="cap">Deadlines</div></div>
+        <div class="mini"><div class="num blue">9</div><div class="cap">Tasks due</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Deals</div>
+      <a href="#"><span>⊞</span> Dashboard</a>
+      <a href="#"><span>◈</span> Active Transactions <span class="badge">3</span></a>
+      <a href="#"><span>◔</span> Pending <span class="badge">1</span></a>
+      <a href="#"><span>◉</span> Closed</a>
+      <a href="#"><span>◻</span> All Transactions</a>
+      <div class="nav-section">Workflow</div>
+      <a href="#"><span>✓</span> My Task Queue <span class="badge">14</span></a>
+      <a href="#"><span>◻</span> All Documents <span class="badge">3</span></a>
+      <a href="#" class="active"><span>◷</span> Closing Calendar</a>
+      <div class="nav-section">Intelligence</div>
+      <a href="#"><span>✦</span> AI Suggestions <span class="badge">4</span></a>
+      <a href="#"><span>◈</span> Analytics</a>
+      <a href="#"><span>◻</span> Settings</a>
+    </div>
+    <div class="side-footer">
+      <div class="upgrade-nudge">
+        <strong>✦ Add AI Coach</strong>
+        <span>Grow your business between transactions. Lead gen, scripts & coaching.</span>
+      </div>
+      <div class="user-row">
+        <div class="s-avatar">JM</div>
+        <div class="user-info"><strong>Jordan Mills</strong><span>Solo Agent</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+    <div class="topbar">
+      <div class="top-title">Closing Calendar</div>
+      <div class="top-actions">
+        <button class="btn-secondary" style="font-size:12px;padding:8px 13px;display:flex;align-items:center;gap:6px" onclick="openAddModal()">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+          Add Event
+        </button>
+        <div class="notif-btn"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><div class="notif-dot"></div></div>
+        <div class="top-avatar">JM</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- AI BRIEFING -->
+      <div class="ai-briefing">
+        <div class="ai-icon">✦</div>
+        <div class="ai-copy">
+          <div class="eyebrow">Calendar intelligence</div>
+          <strong>628 Prince Dr closes in 28 days — financing contingency expires April 8.</strong>
+          <p>Two closings and 5 contingency deadlines this month. Sunridge financing deadline is the highest-risk item — no lender confirmation received yet.</p>
+        </div>
+        <div class="ai-actions">
+          <button class="btn-primary" onclick="showToast('Task added.','Lender follow-up added to queue.')">Add follow-up task</button>
+          <div class="ai-meta">Updated 6 min ago</div>
+        </div>
+      </div>
+
+      <!-- CALENDAR CONTROLS -->
+      <div class="cal-controls">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+          <div class="cal-month-label" id="cal-month-label">April 2026</div>
+          <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        <button class="cal-today-btn" onclick="goToday()">Today</button>
+        <div class="cal-divider"></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+          <span style="font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ghost);font-weight:600;margin-right:2px">Show:</span>
+          <div class="type-toggle" id="toggle-close" onclick="toggleType('close')">
+            <div class="dot dot-close"></div>Close Dates
+          </div>
+          <div class="type-toggle" id="toggle-contingency" onclick="toggleType('contingency')">
+            <div class="dot dot-contingency"></div>Contingencies
+          </div>
+          <div class="type-toggle" id="toggle-task" onclick="toggleType('task')">
+            <div class="dot dot-task"></div>Task Due Dates
+          </div>
+          <div class="type-toggle" id="toggle-custom" onclick="toggleType('custom')">
+            <div class="dot dot-custom"></div>Custom Events
+          </div>
+        </div>
+        <div class="cal-controls-right">
+          <div class="view-toggle-wrap">
+            <button class="view-mode-btn active" id="btn-cal-view" onclick="setCalView('calendar')">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path stroke-linecap="round" d="M16 2v4M8 2v4M3 10h18"/></svg>
+              Calendar
+            </button>
+            <button class="view-mode-btn" id="btn-list-view" onclick="setCalView('list')">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              List View
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDAR GRID -->
+      <div class="cal-wrap">
+        <div class="cal-dow-header">
+          <div class="cal-dow">Sun</div>
+          <div class="cal-dow">Mon</div>
+          <div class="cal-dow">Tue</div>
+          <div class="cal-dow">Wed</div>
+          <div class="cal-dow">Thu</div>
+          <div class="cal-dow">Fri</div>
+          <div class="cal-dow">Sat</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+
+      <!-- LIST VIEW PANEL (hidden by default, shown when List View toggled) -->
+      <div id="list-view-panel" style="display:none">
+        <div class="upcoming-strip">
+          <div class="upcoming-head">
+            <span class="upcoming-title" id="list-view-title">All events — April 2026</span>
+            <button class="tiny-btn" onclick="showToast('Exporting calendar…','ICS file downloading.')">
+              <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              Export .ICS
+            </button>
+          </div>
+          <div class="upcoming-list" id="list-view-events"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ═══ DAY POPOVER ═══ -->
+<div class="day-popover" id="day-popover">
+  <div class="popover-head">
+    <span class="popover-date" id="popover-date">April 8</span>
+    <button class="popover-close" onclick="closePopover()">✕</button>
+  </div>
+  <div class="popover-events" id="popover-events"></div>
+  <div class="popover-add">
+    <button class="btn-ghost" style="width:100%;justify-content:center;display:flex;align-items:center;gap:6px;font-size:12px" onclick="closePopover();openAddModal()">
+      <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      Add event on this day
+    </button>
+  </div>
+</div>
+
+<!-- ═══ EVENT DETAIL MODAL ═══ -->
+<div class="modal-wrap" id="eventModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-left">
+        <div class="modal-eyebrow" id="ev-eyebrow">Close Date</div>
+        <h3 id="ev-title">628 Prince Dr — Closing</h3>
+        <p id="ev-subtitle">April 28, 2026</p>
+      </div>
+      <button class="close-btn" onclick="closeEventModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:0">
+        <div class="detail-row">
+          <div class="detail-icon" style="background:var(--surface-2)">📍</div>
+          <div>
+            <div class="detail-label">Transaction</div>
+            <div class="detail-value" id="ev-tx">628 Prince Dr, Greenwood, IN</div>
+            <div class="detail-sub" id="ev-tx-sub">Buyer Side · Close Apr 28, 2026</div>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon" style="background:var(--surface-2)">📅</div>
+          <div>
+            <div class="detail-label">Date</div>
+            <div class="detail-value" id="ev-date-display">April 28, 2026</div>
+            <div class="detail-sub" id="ev-days-out">28 days from today</div>
+          </div>
+        </div>
+        <div class="detail-row" id="ev-note-row">
+          <div class="detail-icon" style="background:var(--surface-2)">📝</div>
+          <div style="flex:1">
+            <div class="detail-label">Note</div>
+            <div class="detail-value" id="ev-note-display" style="font-weight:400;color:var(--muted);font-style:italic">No note added</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTE INPUT (shown when Add Note clicked) -->
+      <div id="note-input-wrap" style="display:none">
+        <div class="field">
+          <label>ADD NOTE</label>
+          <textarea id="note-textarea" rows="3" placeholder="Add a note about this event…"></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+          <button class="btn-ghost" style="font-size:12px;padding:6px 12px" onclick="cancelNote()">Cancel</button>
+          <button class="btn-primary" style="font-size:12px;padding:6px 12px" onclick="saveNote()">Save Note</button>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div>
+        <div style="font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost);margin-bottom:9px;font-weight:600">Quick Actions</div>
+        <div class="quick-actions">
+          <button class="qa-btn primary-action" onclick="showToast('Opening transaction…','');closeEventModal()">
+            <div class="qa-icon">→</div>
+            <div><div style="font-size:12.5px;font-weight:700">Open Transaction</div><div style="font-size:11px;opacity:.7;margin-top:1px">Full transaction view</div></div>
+          </button>
+          <button class="qa-btn" onclick="openReschedule()">
+            <div class="qa-icon">📅</div>
+            <div><div style="font-size:12.5px;font-weight:700">Reschedule</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Edit date</div></div>
+          </button>
+          <button class="qa-btn" onclick="showNoteInput()">
+            <div class="qa-icon">📝</div>
+            <div><div style="font-size:12.5px;font-weight:700">Add Note</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Attach a comment</div></div>
+          </button>
+          <button class="qa-btn" onclick="showToast('Reminder sent.','Client notified via email.');closeEventModal()">
+            <div class="qa-icon">🔔</div>
+            <div><div style="font-size:12.5px;font-weight:700">Send Reminder</div><div style="font-size:11px;color:var(--muted);margin-top:1px">Notify client</div></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- RESCHEDULE PANEL (hidden by default) -->
+      <div id="reschedule-wrap" style="display:none">
+        <div class="field">
+          <label>NEW DATE</label>
+          <input type="date" id="reschedule-input"/>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:6px">
+          <button class="btn-ghost" style="font-size:12px;padding:6px 12px" onclick="cancelReschedule()">Cancel</button>
+          <button class="btn-primary" style="font-size:12px;padding:6px 12px" onclick="saveReschedule()">Update Date</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ADD EVENT MODAL ═══ -->
+<div class="modal-wrap" id="addModal">
+  <div class="add-modal">
+    <div class="modal-head">
+      <div>
+        <h3>Add Event</h3>
+        <p>Add a custom event, appointment, or note to the calendar.</p>
+      </div>
+      <button class="close-btn" onclick="closeAddModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>EVENT TYPE</label>
+        <div class="event-type-grid">
+          <div class="event-type-chip selected" onclick="selectEventType(this,'custom')" id="etype-custom">
+            <div class="dot dot-custom"></div>Custom Event
+          </div>
+          <div class="event-type-chip" onclick="selectEventType(this,'task')" id="etype-task">
+            <div class="dot dot-task"></div>Task Due Date
+          </div>
+          <div class="event-type-chip" onclick="selectEventType(this,'contingency')" id="etype-contingency">
+            <div class="dot dot-contingency"></div>Contingency
+          </div>
+          <div class="event-type-chip" onclick="selectEventType(this,'close')" id="etype-close">
+            <div class="dot dot-close"></div>Close Date
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label>TITLE</label>
+        <input type="text" id="new-event-title" placeholder="e.g. Client walkthrough, Inspection window…"/>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>DATE</label>
+          <input type="date" id="new-event-date"/>
+        </div>
+        <div class="field">
+          <label>TRANSACTION (OPTIONAL)</label>
+          <select id="new-event-tx">
+            <option value="">— None —</option>
+            <option>628 Prince Dr, Greenwood</option>
+            <option>4412 Sunridge Blvd, Indianapolis</option>
+            <option>214 Maple Creek Ln, Franklin</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>NOTE (OPTIONAL)</label>
+        <textarea rows="2" id="new-event-note" placeholder="Any additional details…"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeAddModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitNewEvent()">Add to Calendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FLOATING AI ═══ -->
+<div class="floating-ai" onclick="showToast('AI Coach opening…','Calendar analysis ready.')">
+  <div style="font-size:20px">✦</div>
+  <div><strong>AI Coach</strong><span>2 deadlines need attention</span></div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <div style="font-size:18px">✓</div>
+  <div><strong id="toast-title">Done</strong><span id="toast-sub"></span></div>
+  <div class="toast-close" onclick="hideToast()">✕</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   EVENT DATA
+════════════════════════════════════════ */
+const EVENTS = [
+  // Close dates
+  {id:1, type:'close',        title:'628 Prince Dr — Closing',          tx:'628 Prince Dr, Greenwood',    date:'2026-04-28', note:''},
+  {id:2, type:'close',        title:'4412 Sunridge Blvd — Closing',     tx:'4412 Sunridge Blvd, Indianapolis', date:'2026-05-15', note:''},
+  // Contingency deadlines
+  {id:3, type:'contingency',  title:'Inspection Contingency Expires',   tx:'628 Prince Dr, Greenwood',    date:'2026-04-05', note:'Must submit repair addendum or release by EOD'},
+  {id:4, type:'contingency',  title:'Financing Contingency Expires',    tx:'628 Prince Dr, Greenwood',    date:'2026-04-08', note:'Awaiting lender commitment letter'},
+  {id:5, type:'contingency',  title:'Appraisal Contingency Expires',    tx:'628 Prince Dr, Greenwood',    date:'2026-04-14', note:''},
+  {id:6, type:'contingency',  title:'Financing Contingency Expires',    tx:'4412 Sunridge Blvd, Indianapolis', date:'2026-04-18', note:'No lender confirmation received'},
+  {id:7, type:'contingency',  title:'Inspection Contingency Expires',   tx:'214 Maple Creek Ln, Franklin',date:'2026-04-22', note:''},
+  // Task due dates
+  {id:8, type:'task',         title:'Submit Repair Addendum',           tx:'628 Prince Dr, Greenwood',    date:'2026-04-06', note:''},
+  {id:9, type:'task',         title:'Order Title Search',               tx:'4412 Sunridge Blvd, Indianapolis', date:'2026-04-10', note:''},
+  {id:10,type:'task',         title:'Deliver Earnest Money',            tx:'214 Maple Creek Ln, Franklin',date:'2026-04-12', note:''},
+  {id:11,type:'task',         title:'Final Walkthrough Scheduled',      tx:'628 Prince Dr, Greenwood',    date:'2026-04-25', note:''},
+  {id:12,type:'task',         title:'Confirm Wire Instructions',        tx:'4412 Sunridge Blvd, Indianapolis', date:'2026-04-30', note:''},
+  // Custom events
+  {id:13,type:'custom',       title:'Client meeting — Harmon',          tx:'214 Maple Creek Ln, Franklin',date:'2026-04-03', note:'Coffee at Starbucks 9am'},
+  {id:14,type:'custom',       title:'Team sync — Coldwell Banker',      tx:'',                            date:'2026-04-09', note:'Monthly office meeting'},
+  {id:15,type:'custom',       title:'Open House — Sunridge',            tx:'4412 Sunridge Blvd, Indianapolis', date:'2026-04-19', note:'1pm–4pm'},
+];
+
+/* active type toggles */
+const activeTypes = {close:true, contingency:true, task:true, custom:true};
+
+/* current month state */
+let curYear = 2026, curMonth = 3; // April = month index 3 (0-based)
+
+/* ════════════════════════════════════════
+   CALENDAR RENDER
+════════════════════════════════════════ */
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderCalendar() {
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  const label = document.getElementById('cal-month-label');
+  label.textContent = MONTH_NAMES[curMonth] + ' ' + curYear;
+
+  const firstDay = new Date(curYear, curMonth, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+  const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
+  const today = new Date();
+
+  // Build 6-row grid (42 cells)
+  const totalCells = 42;
+  for (let i = 0; i < totalCells; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day';
+
+    let dayNum, monthOffset = 0;
+    if (i < firstDay) {
+      dayNum = daysInPrev - firstDay + i + 1;
+      monthOffset = -1;
+      cell.classList.add('other-month');
+    } else if (i >= firstDay + daysInMonth) {
+      dayNum = i - firstDay - daysInMonth + 1;
+      monthOffset = 1;
+      cell.classList.add('other-month');
+    } else {
+      dayNum = i - firstDay + 1;
+    }
+
+    const cellMonth = curMonth + monthOffset;
+    const cellYear  = cellMonth < 0 ? curYear - 1 : cellMonth > 11 ? curYear + 1 : curYear;
+    const normMonth = ((cellMonth % 12) + 12) % 12;
+    const dateStr   = cellYear + '-' + String(normMonth + 1).padStart(2,'0') + '-' + String(dayNum).padStart(2,'0');
+
+    if (monthOffset === 0 &&
+        dayNum === today.getDate() &&
+        curMonth === today.getMonth() &&
+        curYear === today.getFullYear()) {
+      cell.classList.add('today');
+    }
+
+    // Day number
+    const numEl = document.createElement('div');
+    numEl.className = 'day-num';
+    numEl.textContent = dayNum;
+    cell.appendChild(numEl);
+
+    // Events for this day
+    const dayEvents = document.createElement('div');
+    dayEvents.className = 'day-events';
+
+    const eventsForDay = EVENTS.filter(e => e.date === dateStr);
+    const visibleEvents = eventsForDay.filter(e => activeTypes[e.type]);
+    let shown = 0;
+    visibleEvents.forEach((ev, idx) => {
+      if (idx < 3) {
+        const chip = document.createElement('div');
+        chip.className = 'cal-event type-' + ev.type;
+        chip.textContent = ev.title;
+        chip.addEventListener('click', e => { e.stopPropagation(); openEventModal(ev.id); });
+        dayEvents.appendChild(chip);
+        shown++;
+      }
+    });
+    if (visibleEvents.length > 3) {
+      const more = document.createElement('div');
+      more.className = 'more-events';
+      more.textContent = '+' + (visibleEvents.length - 3) + ' more';
+      more.addEventListener('click', e => { e.stopPropagation(); openDayPopover(dateStr, e.currentTarget); });
+      dayEvents.appendChild(more);
+    }
+
+    cell.appendChild(dayEvents);
+
+    // Click empty area of day cell to open popover
+    if (eventsForDay.length > 0) {
+      cell.addEventListener('click', (e) => {
+        if (e.target === cell || e.target === numEl || e.target === dayEvents) {
+          openDayPopover(dateStr, cell);
+        }
+      });
+    }
+
+    grid.appendChild(cell);
+  }
+
+}
+
+
+/* ════════════════════════════════════════
+   LIST VIEW RENDER
+   — shows ALL events in current month/view
+     filtered by active type toggles only
+════════════════════════════════════════ */
+let currentCalView = 'calendar'; // 'calendar' | 'list'
+
+function renderListView() {
+  const list  = document.getElementById('list-view-events');
+  const title = document.getElementById('list-view-title');
+  list.innerHTML = '';
+  title.textContent = 'All events — ' + MONTH_NAMES[curMonth] + ' ' + curYear;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Build month date range
+  const monthStart = new Date(curYear, curMonth, 1);
+  const monthEnd   = new Date(curYear, curMonth + 1, 0);
+  const msStart    = monthStart.getTime();
+  const msEnd      = monthEnd.getTime() + 86399999;
+
+  const filtered = EVENTS
+    .filter(e => {
+      if (!activeTypes[e.type]) return false;
+      const d = new Date(e.date + 'T00:00:00').getTime();
+      return d >= msStart && d <= msEnd;
+    })
+    .sort((a,b) => a.date.localeCompare(b.date));
+
+  const typeLabels = {close:'Close Date', contingency:'Contingency', task:'Task Due', custom:'Event'};
+  const typeColors = {close:'var(--red)', contingency:'var(--amber)', task:'var(--blue)', custom:'var(--purple)'};
+
+  filtered.forEach(ev => {
+    const evDate   = new Date(ev.date + 'T00:00:00');
+    const diffMs   = evDate - today;
+    const diffDays = Math.round(diffMs / 86400000);
+    const mon      = MONTH_NAMES[evDate.getMonth()].slice(0,3).toUpperCase();
+    const dayN     = evDate.getDate();
+
+    let daysLabel, daysClass;
+    if (diffDays === 0)       { daysLabel = 'Today';                    daysClass = 'days-urgent'; }
+    else if (diffDays === 1)  { daysLabel = 'Tomorrow';                 daysClass = 'days-urgent'; }
+    else if (diffDays < 0)    { daysLabel = Math.abs(diffDays) + 'd ago'; daysClass = 'days-ok'; }
+    else if (diffDays <= 7)   { daysLabel = 'In ' + diffDays + ' days'; daysClass = 'days-urgent'; }
+    else if (diffDays <= 14)  { daysLabel = 'In ' + diffDays + ' days'; daysClass = 'days-soon'; }
+    else                      { daysLabel = 'In ' + diffDays + ' days'; daysClass = 'days-ok'; }
+
+    const row = document.createElement('div');
+    row.className = 'upcoming-item';
+    row.style.cursor = 'pointer';
+    row.innerHTML = `
+      <div class="upcoming-date">
+        <div class="ud-day">${dayN}</div>
+        <div class="ud-mon">${mon}</div>
+      </div>
+      <div class="upcoming-info">
+        <div class="upcoming-name">${ev.title}</div>
+        <div class="upcoming-tx" style="display:flex;align-items:center;gap:6px">
+          <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${typeColors[ev.type]};flex-shrink:0"></span>
+          ${typeLabels[ev.type]}${ev.tx ? ' · ' + ev.tx : ''}
+        </div>
+      </div>
+      <div class="upcoming-days ${daysClass}">${daysLabel}</div>`;
+    row.addEventListener('click', () => openEventModal(ev.id));
+    list.appendChild(row);
+  });
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="padding:20px 0;text-align:center;font-size:13px;color:var(--ghost)">No events match the active filters for this month.</div>';
+  }
+}
+
+/* ════════════════════════════════════════
+   CALENDAR / LIST VIEW SWITCHER
+════════════════════════════════════════ */
+function setCalView(view) {
+  currentCalView = view;
+  const calWrap  = document.querySelector('.cal-wrap');
+  const listPanel = document.getElementById('list-view-panel');
+  const btnCal   = document.getElementById('btn-cal-view');
+  const btnList  = document.getElementById('btn-list-view');
+
+  if (view === 'calendar') {
+    calWrap.style.display   = '';
+    listPanel.style.display = 'none';
+    btnCal.classList.add('active');
+    btnList.classList.remove('active');
+  } else {
+    calWrap.style.display   = 'none';
+    listPanel.style.display = '';
+    btnCal.classList.remove('active');
+    btnList.classList.add('active');
+    renderListView();
+  }
+}
+
+/* ════════════════════════════════════════
+   MONTH NAVIGATION
+════════════════════════════════════════ */
+function changeMonth(dir) {
+  curMonth += dir;
+  if (curMonth > 11) { curMonth = 0; curYear++; }
+  if (curMonth < 0)  { curMonth = 11; curYear--; }
+  if (currentCalView === 'calendar') renderCalendar();
+  else { renderCalendar(); renderListView(); }
+}
+
+function goToday() {
+  const t = new Date();
+  curYear = t.getFullYear();
+  curMonth = t.getMonth();
+  if (currentCalView === 'calendar') renderCalendar();
+  else { renderCalendar(); renderListView(); }
+}
+
+/* ════════════════════════════════════════
+   TYPE TOGGLES
+════════════════════════════════════════ */
+function toggleType(type) {
+  activeTypes[type] = !activeTypes[type];
+  document.getElementById('toggle-' + type).classList.toggle('off', !activeTypes[type]);
+  if (currentCalView === 'calendar') {
+    renderCalendar();
+  } else {
+    renderListView();
+  }
+}
+
+/* ════════════════════════════════════════
+   DAY POPOVER
+════════════════════════════════════════ */
+function openDayPopover(dateStr, targetEl) {
+  const pop = document.getElementById('day-popover');
+  const eventsForDay = EVENTS.filter(e => e.date === dateStr && activeTypes[e.type]);
+
+  const d = new Date(dateStr + 'T00:00:00');
+  document.getElementById('popover-date').textContent =
+    MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+
+  const container = document.getElementById('popover-events');
+  container.innerHTML = '';
+  const typeLabels = {close:'Close Date', contingency:'Contingency Deadline', task:'Task Due Date', custom:'Custom Event'};
+  const typeColors  = {close:'var(--red)', contingency:'var(--amber)', task:'var(--blue)', custom:'var(--purple)'};
+
+  eventsForDay.forEach(ev => {
+    const row = document.createElement('div');
+    row.className = 'popover-event';
+    row.innerHTML = `
+      <div class="pe-type" style="color:${typeColors[ev.type]}">${typeLabels[ev.type]}</div>
+      <div class="pe-title">${ev.title}</div>
+      ${ev.tx ? '<div class="pe-tx">' + ev.tx + '</div>' : ''}`;
+    row.addEventListener('click', () => { closePopover(); openEventModal(ev.id); });
+    container.appendChild(row);
+  });
+
+  // Position near the cell
+  const rect = targetEl.getBoundingClientRect();
+  pop.style.top  = Math.min(rect.bottom + 6, window.innerHeight - 360) + 'px';
+  pop.style.left = Math.min(rect.left, window.innerWidth - 296) + 'px';
+  pop.classList.add('open');
+}
+
+function closePopover() {
+  document.getElementById('day-popover').classList.remove('open');
+}
+
+/* ════════════════════════════════════════
+   EVENT DETAIL MODAL
+════════════════════════════════════════ */
+let currentEventId = null;
+
+function openEventModal(id) {
+  closePopover();
+  const ev = EVENTS.find(e => e.id === id);
+  if (!ev) return;
+  currentEventId = id;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const evDate  = new Date(ev.date + 'T00:00:00');
+  const diffDays = Math.round((evDate - today) / 86400000);
+
+  const typeLabels = {close:'Close Date', contingency:'Contingency Deadline', task:'Task Due Date', custom:'Custom Event'};
+  const typeColors  = {close:null, contingency:null, task:null, custom:null};
+
+  document.getElementById('ev-eyebrow').textContent     = typeLabels[ev.type] || ev.type;
+  document.getElementById('ev-title').textContent       = ev.title;
+  document.getElementById('ev-subtitle').textContent    = formatDate(ev.date);
+  document.getElementById('ev-tx').textContent          = ev.tx || '—';
+  document.getElementById('ev-tx-sub').textContent      = ev.tx ? ev.tx : '';
+  document.getElementById('ev-date-display').textContent = formatDate(ev.date);
+  document.getElementById('ev-days-out').textContent    =
+    diffDays === 0 ? 'Today' :
+    diffDays === 1 ? 'Tomorrow' :
+    diffDays < 0   ? Math.abs(diffDays) + ' days ago' :
+                     'In ' + diffDays + ' days';
+  document.getElementById('ev-note-display').textContent = ev.note || 'No note added';
+  document.getElementById('ev-note-display').style.fontStyle = ev.note ? 'normal' : 'italic';
+  document.getElementById('ev-note-display').style.color     = ev.note ? 'var(--text)' : 'var(--muted)';
+  document.getElementById('note-input-wrap').style.display   = 'none';
+  document.getElementById('reschedule-wrap').style.display   = 'none';
+
+  document.getElementById('eventModal').classList.add('open');
+}
+
+function closeEventModal() {
+  document.getElementById('eventModal').classList.remove('open');
+  currentEventId = null;
+}
+
+function formatDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return MONTH_NAMES[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+
+/* ── Note actions ── */
+function showNoteInput() {
+  document.getElementById('note-input-wrap').style.display = '';
+  document.getElementById('note-textarea').focus();
+  document.getElementById('reschedule-wrap').style.display = 'none';
+}
+
+function cancelNote() { document.getElementById('note-input-wrap').style.display = 'none'; }
+
+function saveNote() {
+  const val = document.getElementById('note-textarea').value.trim();
+  const ev  = EVENTS.find(e => e.id === currentEventId);
+  if (ev && val) {
+    ev.note = val;
+    document.getElementById('ev-note-display').textContent = val;
+    document.getElementById('ev-note-display').style.fontStyle = 'normal';
+    document.getElementById('ev-note-display').style.color = 'var(--text)';
+  }
+  document.getElementById('note-input-wrap').style.display = 'none';
+  document.getElementById('note-textarea').value = '';
+  showToast('Note saved.', '');
+}
+
+/* ── Reschedule actions ── */
+function openReschedule() {
+  const ev = EVENTS.find(e => e.id === currentEventId);
+  if (ev) document.getElementById('reschedule-input').value = ev.date;
+  document.getElementById('reschedule-wrap').style.display = '';
+  document.getElementById('note-input-wrap').style.display = 'none';
+}
+
+function cancelReschedule() { document.getElementById('reschedule-wrap').style.display = 'none'; }
+
+function saveReschedule() {
+  const newDate = document.getElementById('reschedule-input').value;
+  const ev = EVENTS.find(e => e.id === currentEventId);
+  if (ev && newDate) {
+    ev.date = newDate;
+    document.getElementById('ev-date-display').textContent = formatDate(newDate);
+    document.getElementById('ev-subtitle').textContent     = formatDate(newDate);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const evDate = new Date(newDate + 'T00:00:00');
+    const diff   = Math.round((evDate - today) / 86400000);
+    document.getElementById('ev-days-out').textContent = diff >= 0 ? 'In ' + diff + ' days' : Math.abs(diff) + ' days ago';
+  }
+  document.getElementById('reschedule-wrap').style.display = 'none';
+  renderCalendar();
+  if (currentCalView === 'list') renderListView();
+  showToast('Date updated.', ev ? ev.title : '');
+}
+
+/* ════════════════════════════════════════
+   ADD EVENT MODAL
+════════════════════════════════════════ */
+let selectedEventType = 'custom';
+
+function selectEventType(el, type) {
+  document.querySelectorAll('.event-type-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEventType = type;
+}
+
+function openAddModal() {
+  const today = new Date();
+  const iso = today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0') + '-' + String(today.getDate()).padStart(2,'0');
+  document.getElementById('new-event-date').value = iso;
+  document.getElementById('new-event-title').value = '';
+  document.getElementById('new-event-note').value  = '';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function closeAddModal() { document.getElementById('addModal').classList.remove('open'); }
+
+function submitNewEvent() {
+  const title = document.getElementById('new-event-title').value.trim();
+  if (!title) { document.getElementById('new-event-title').focus(); return; }
+  const date  = document.getElementById('new-event-date').value;
+  const tx    = document.getElementById('new-event-tx').value;
+  const note  = document.getElementById('new-event-note').value.trim();
+  const newId = Math.max(...EVENTS.map(e => e.id)) + 1;
+  EVENTS.push({ id:newId, type:selectedEventType, title, tx, date, note });
+  closeAddModal();
+  renderCalendar();
+  if (currentCalView === 'list') renderListView();
+  showToast('Event added.', title);
+}
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+let toastTimer;
+function showToast(title, sub) {
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent   = sub || '';
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 3400);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+/* ════════════════════════════════════════
+   BACKDROP CLOSE + KEYBOARD
+════════════════════════════════════════ */
+['eventModal','addModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+});
+
+document.addEventListener('click', e => {
+  const pop = document.getElementById('day-popover');
+  if (pop.classList.contains('open') && !pop.contains(e.target)) closePopover();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeEventModal();
+    closeAddModal();
+    closePopover();
+  }
+});
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+renderCalendar();
+</script>
+</body>
+</html>
