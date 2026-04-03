@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Velvet Elves — Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --orange:#E26812;--orange-dark:#B85107;--orange-light:#FFF2E7;--orange-soft:#FFF9F4;--orange-border:#F1C79E;
+      --navy:#1E3356;--bg:#F2F1EE;--surface:#FFFFFF;--surface-2:#FAFAF8;
+      --line:#E3E2DE;--line-strong:#CEC9C0;--text:#181818;--muted:#686868;--ghost:#929292;
+      --green:#14704B;--green-bg:#EEF8F3;--green-border:#B9DEC9;
+      --amber:#A56A08;--amber-bg:#FFF8EC;--amber-border:#EACB93;
+      --red:#BE3431;--red-bg:#FFF2F2;--red-border:#F0C7C7;
+      --blue:#2C4C7F;--blue-bg:#EEF4FF;--blue-border:#C0D1EF;
+      --purple:#6545B6;--purple-bg:#F5F0FF;--purple-border:#D7C8FF;
+      --teal:#0E6E70;--teal-bg:#EDFAFA;--teal-border:#A8D8DA;
+      --shadow:0 4px 16px rgba(20,20,20,.06);--shadow-md:0 8px 28px rgba(20,20,20,.09);
+      --radius:18px;--font-body:'IBM Plex Sans',sans-serif;--font-serif:'Lora',serif;--font-mono:'IBM Plex Mono',monospace;
+      --sidebar:228px;--top:60px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    /* ── SIDEBAR ── */
+    .sidebar{background:linear-gradient(180deg,#1a2d4e,#152340);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.07)}
+    .brand{display:flex;align-items:center;gap:12px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name strong{font-family:var(--font-serif);font-size:17px;color:#fff;font-weight:700;display:block;line-height:1}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;display:block}
+    .side-block{padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:9px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .mini{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:10px}
+    .mini .num{font-family:var(--font-mono);font-size:21px;font-weight:600;line-height:1;margin-bottom:5px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.72);line-height:1.3}
+    .num.red{color:#ff9090}.num.green{color:#7ed8a8}.num.orange{color:#ffbc7a}.num.blue{color:#94bfff}
+    .nav{padding:8px 7px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:rgba(255,255,255,.85);padding:9px 11px;border-radius:9px;font-size:13px;font-weight:500;position:relative;transition:.14s}
+    .nav a:hover{background:rgba(255,255,255,.055)}
+    .nav a.active{background:rgba(226,104,18,.18);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .nav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.38);padding:14px 11px 5px}
+    .side-footer{padding:11px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px}
+    .upgrade-nudge{background:rgba(226,104,18,.12);border:1px solid rgba(226,104,18,.22);border-radius:11px;padding:10px 11px;cursor:pointer;transition:.14s}
+    .upgrade-nudge:hover{background:rgba(226,104,18,.18)}
+    .upgrade-nudge strong{display:block;font-size:12px;color:#ffcf9e;margin-bottom:3px}
+    .upgrade-nudge span{display:block;font-size:11px;color:rgba(255,255,255,.6);line-height:1.35}
+    .user-row{display:flex;align-items:center;gap:9px}
+    .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .user-info strong{display:block;font-size:12px;color:rgba(255,255,255,.9)}
+    .user-info span{display:block;font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font-mono)}
+
+    /* ── SHARED ── */
+    .btn-primary,.btn-secondary,.btn-ghost{border:none;border-radius:11px;cursor:pointer;transition:.15s ease;font-weight:600;font-family:var(--font-body)}
+    .btn-primary{background:var(--orange);color:#fff;padding:10px 14px;font-weight:700;font-size:13px}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:13px}
+    .btn-secondary:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 11px;font-size:12px}
+    .btn-ghost:hover{background:#fff}
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:600;white-space:nowrap}
+    .pill.green{background:var(--green-bg);border:1px solid var(--green-border);color:#0d5537}
+    .pill.red{background:var(--red-bg);border:1px solid var(--red-border);color:#8a201d}
+    .pill.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+    .pill.blue{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .pill.purple{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+
+    /* ── TOPBAR ── */
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:var(--top);display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-shrink:0}
+    .top-title{font-family:var(--font-serif);font-size:20px;font-weight:700;flex:1}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .top-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .notif-btn{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.14s}
+    .notif-btn:hover{background:var(--surface-2)}
+    .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;border:1.5px solid #fff}
+    .content{overflow:auto;padding:18px 22px 60px;display:flex;flex-direction:column;gap:16px}
+
+    /* ── PERIOD SELECTOR BAR ── */
+    .period-bar{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow)}
+    .period-tabs{display:flex;gap:6px}
+    .period-tab{padding:6px 14px;border-radius:999px;border:1px solid transparent;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:.13s;background:transparent}
+    .period-tab:hover{background:var(--surface-2);color:var(--text)}
+    .period-tab.active{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+    .period-divider{width:1px;height:22px;background:var(--line)}
+    .period-year-select{border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:12px;font-weight:600;background:#fff;cursor:pointer;outline:none;color:var(--text)}
+    .period-year-select:hover{border-color:var(--line-strong)}
+    .period-bar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .compare-toggle{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer}
+    .compare-toggle input[type=checkbox]{width:14px;height:14px;accent-color:var(--orange);cursor:pointer}
+    .tiny-btn{display:flex;align-items:center;gap:5px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);padding:0 9px;transition:.13s;white-space:nowrap}
+    .tiny-btn:hover{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+
+    /* ── GOAL PROGRESS BANNER ── */
+    .goal-banner{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px}
+    .goal-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost);margin-bottom:5px;font-weight:600}
+    .goal-stat{font-family:var(--font-mono);font-size:22px;font-weight:700;line-height:1;margin-bottom:2px}
+    .goal-sub{font-size:11.5px;color:var(--muted)}
+    .goal-divider{width:1px;height:44px;background:var(--line);flex-shrink:0}
+    .goal-track-wrap{flex:1;min-width:200px}
+    .goal-track-labels{display:flex;justify-content:space-between;margin-bottom:5px}
+    .goal-track-labels span{font-size:11.5px;color:var(--muted)}
+    .goal-track-labels strong{font-family:var(--font-mono);font-size:11.5px;color:var(--orange)}
+    .goal-track{height:10px;background:var(--line);border-radius:999px;overflow:hidden}
+    .goal-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--orange),var(--orange-dark));transition:width .5s}
+    .goal-milestones{display:flex;gap:12px;margin-top:6px}
+    .gm{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted)}
+    .gm-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .edit-goal-btn{font-size:12px;font-weight:700;color:var(--orange);cursor:pointer;border:none;background:transparent;padding:0;white-space:nowrap}
+    .edit-goal-btn:hover{text-decoration:underline}
+
+    /* ── KPI STAT CARDS ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .kpi-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+    .kpi-eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:var(--ghost);margin-bottom:8px;font-weight:600}
+    .kpi-value{font-family:var(--font-mono);font-size:28px;font-weight:700;line-height:1;margin-bottom:4px}
+    .kpi-sub{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .kpi-delta{display:inline-flex;align-items:center;gap:4px;font-family:var(--font-mono);font-size:11px;font-weight:600;padding:2px 7px;border-radius:999px}
+    .kpi-delta.up{background:var(--green-bg);color:#0d5537}
+    .kpi-delta.down{background:var(--red-bg);color:#8a201d}
+    .kpi-delta.flat{background:var(--surface-2);color:var(--muted)}
+    .kpi-sparkline{margin-top:10px}
+
+    /* ── SECTION HEADERS ── */
+    .section-head{display:flex;align-items:center;gap:10px}
+    .section-title{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.7px;text-transform:uppercase;font-weight:600}
+    .section-line{flex:1;height:1px;background:var(--line)}
+    .section-right{margin-left:auto;font-size:12px;color:var(--ghost);font-family:var(--font-mono)}
+
+    /* ── CHART CARDS ── */
+    .chart-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
+    .chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px}
+    .chart-title{font-size:14px;font-weight:700}
+    .chart-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+    .chart-area{position:relative}
+    .chart-legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted)}
+    .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+    .legend-line{width:16px;height:3px;border-radius:2px;flex-shrink:0}
+
+    /* ── TWO-COL CHART ROW ── */
+    .chart-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .chart-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+    /* ── BAR CHART (CSS) ── */
+    .bar-chart{display:flex;align-items:flex-end;gap:6px;height:120px;padding-bottom:24px;position:relative;border-bottom:1px solid var(--line)}
+    .bar-group{display:flex;align-items:flex-end;gap:3px;flex:1;position:relative}
+    .bar{border-radius:4px 4px 0 0;transition:opacity .14s;cursor:pointer;position:relative;min-width:8px}
+    .bar:hover{opacity:.82}
+    .bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;color:var(--ghost);white-space:nowrap}
+    .bar-val{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:var(--font-mono);font-size:9px;font-weight:600;color:var(--text);white-space:nowrap;opacity:0;transition:.12s}
+    .bar:hover .bar-val{opacity:1}
+    .bar-yaxis{position:absolute;left:0;top:0;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+    .bar-yaxis span{font-family:var(--font-mono);font-size:9px;color:var(--ghost)}
+
+    /* ── LINE CHART (SVG) ── */
+    .line-chart-wrap{overflow:visible}
+
+    /* ── DONUT CHART (SVG) ── */
+    .donut-wrap{display:flex;align-items:center;gap:20px}
+    .donut-labels{display:flex;flex-direction:column;gap:8px;flex:1}
+    .donut-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .donut-label-left{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text)}
+    .donut-label-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .donut-label-pct{font-family:var(--font-mono);font-size:12px;font-weight:600;color:var(--text)}
+
+    /* ── PIPELINE TABLE ── */
+    .pipeline-table{width:100%;border-collapse:collapse;font-size:12.5px}
+    .pipeline-table th{font-family:var(--font-mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--ghost);padding:0 10px 8px;text-align:left;font-weight:600;border-bottom:1px solid var(--line)}
+    .pipeline-table td{padding:10px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+    .pipeline-table tr:last-child td{border-bottom:none}
+    .pipeline-table tr:hover td{background:var(--surface-2)}
+    .tx-addr{font-weight:700;margin-bottom:1px}
+    .tx-party{font-size:11px;color:var(--muted)}
+    .close-date{font-family:var(--font-mono);font-size:11.5px;font-weight:600}
+    .close-date.on-time{color:var(--green)}
+    .close-date.at-risk{color:var(--amber)}
+    .close-date.overdue{color:var(--red)}
+    .progress-cell{display:flex;align-items:center;gap:8px}
+    .mini-prog{flex:1;height:5px;background:var(--line);border-radius:999px;overflow:hidden;min-width:60px}
+    .mini-prog-fill{height:100%;border-radius:999px}
+    .mini-prog-pct{font-family:var(--font-mono);font-size:10px;color:var(--muted);white-space:nowrap}
+
+    /* ── COMMS HEATMAP ── */
+    .heatmap-wrap{display:flex;flex-direction:column;gap:6px}
+    .heatmap-row{display:flex;align-items:center;gap:6px}
+    .heatmap-label{font-size:11px;color:var(--muted);width:52px;flex-shrink:0;font-weight:600}
+    .heatmap-cells{display:flex;gap:3px;flex:1}
+    .hm-cell{width:18px;height:18px;border-radius:3px;cursor:pointer;transition:transform .1s}
+    .hm-cell:hover{transform:scale(1.2)}
+    .hm-0{background:var(--line)}
+    .hm-1{background:#c8e6d7}
+    .hm-2{background:#7bc8a0}
+    .hm-3{background:#2e9d6a}
+    .hm-4{background:#14704B}
+    .heatmap-x-labels{display:flex;gap:3px;margin-left:58px}
+    .heatmap-x-labels span{width:18px;font-family:var(--font-mono);font-size:8px;color:var(--ghost);text-align:center}
+
+    /* ── GOAL EDIT MODAL ── */
+    .modal-wrap{position:fixed;inset:0;background:rgba(20,20,20,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);padding:16px}
+    .modal-wrap.open{display:flex}
+    .modal{background:#fff;border-radius:20px;width:100%;max-width:480px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+    .modal-head h3{font-family:var(--font-serif);font-size:20px;margin-bottom:3px}
+    .modal-head p{font-size:12.5px;color:var(--muted)}
+    .close-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:.13s}
+    .close-btn:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+    .field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--muted)}
+    .field input,.field select{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;background:var(--surface-2);transition:.14s;outline:none}
+    .field input:focus,.field select:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 18px;border-top:1px solid var(--line);background:var(--surface-2)}
+
+    /* ── PRO GATE ── */
+    .pro-gate-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+    .pro-gate-blur{filter:blur(4px);pointer-events:none;user-select:none;padding:18px 20px}
+    .pro-gate-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center}
+    .pro-gate-badge{background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:999px;padding:4px 12px;font-family:var(--font-mono);font-size:10px;font-weight:700;color:var(--purple)}
+    .pro-gate-overlay h4{font-family:var(--font-serif);font-size:17px;color:var(--text);margin-bottom:2px}
+    .pro-gate-overlay p{font-size:12px;color:var(--muted);line-height:1.5;max-width:280px}
+    .btn-upgrade{background:var(--purple);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;transition:.14s;font-family:var(--font-body)}
+    .btn-upgrade:hover{background:#4f35a0}
+
+
+    /* ── DRAG & DROP LAYOUT ── */
+    /* Flat 4-column grid — blocks have data-span 1 or 2 */
+    #blocks-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      align-items:start;
+    }
+    .dnd-block{position:relative;min-width:0}
+    .dnd-block[data-span="2"]{grid-column:span 2}
+    .dnd-block[data-span="1"]{grid-column:span 1}
+
+    /* Drag handle — sits top-right of each block */
+    .drag-handle{
+      position:absolute;top:10px;right:10px;
+      width:22px;height:22px;border-radius:5px;
+      background:var(--surface-2);border:1px solid var(--line);
+      display:flex;align-items:center;justify-content:center;
+      cursor:grab;opacity:0;transition:opacity .15s;
+      z-index:10;flex-direction:column;gap:2px;
+    }
+    .drag-handle:active{cursor:grabbing}
+    .drag-handle span{display:block;width:10px;height:1.5px;background:var(--ghost);border-radius:1px}
+    .dnd-block:hover .drag-handle{opacity:1}
+
+    /* Drag state classes applied by JS */
+    .dnd-block.is-dragging{opacity:.3;transform:scale(.97);transition:opacity .15s,transform .15s;pointer-events:none}
+    .dnd-block.drop-target{outline:2px dashed var(--orange);outline-offset:3px;border-radius:14px}
+
+    /* Edit mode: show all handles, highlight cards */
+    .edit-mode-btn{display:flex;align-items:center;gap:6px}
+    .edit-mode-btn.active{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+    body.editing-layout .drag-handle{opacity:1!important}
+    body.editing-layout .dnd-block{cursor:grab}
+    body.editing-layout .dnd-block:active{cursor:grabbing}
+    body.editing-layout .dnd-block .kpi-card,
+    body.editing-layout .dnd-block .chart-card{box-shadow:0 0 0 2px var(--orange-border)}
+
+    /* Pinned pro section above grid */
+    #pro-section-locked{margin-bottom:0}
+    .locked-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--purple);background:var(--purple-bg);border:1px solid var(--purple-border);border-radius:6px;padding:3px 8px;font-weight:600}
+
+    /* Reset + edit buttons */
+    .reset-layout-btn{font-size:12px;font-weight:600;color:var(--ghost);cursor:pointer;border:none;background:transparent;padding:0}
+    .reset-layout-btn:hover{color:var(--red);text-decoration:underline}
+
+    /* ── FLOATING AI / TOAST ── */
+    .floating-ai{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--navy),#233d6a);color:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 8px 30px rgba(30,51,86,.35);transition:.2s;z-index:100;max-width:280px;border:1px solid rgba(255,255,255,.1)}
+    .floating-ai:hover{transform:translateY(-2px)}
+    .floating-ai strong{display:block;font-size:13px;margin-bottom:2px}
+    .floating-ai span{display:block;font-size:11px;color:rgba(255,255,255,.7);line-height:1.35}
+    .toast{position:fixed;bottom:90px;right:24px;background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;z-index:300;transform:translateY(12px);opacity:0;transition:.25s ease;pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+    .toast strong{display:block;font-size:13px;margin-bottom:1px}
+    .toast span{font-size:11.5px;color:var(--muted)}
+    .toast-close{margin-left:auto;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0}
+
+    /* ── AI INSIGHT STRIP ── */
+    .ai-insight{background:linear-gradient(135deg,#1a2d4e,#233d6a);color:#fff;border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center;box-shadow:var(--shadow-md)}
+    .ai-insight-icon{width:36px;height:36px;border-radius:10px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:15px;flex-shrink:0}
+    .ai-insight .eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.9px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:4px}
+    .ai-insight strong{display:block;font-family:var(--font-serif);font-size:15px;line-height:1.2;margin-bottom:3px}
+    .ai-insight p{font-size:12px;color:rgba(255,255,255,.75);line-height:1.5}
+    .ai-insight-btn{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:9px;color:#fff;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--font-body);flex-shrink:0}
+    .ai-insight-btn:hover{background:rgba(255,255,255,.2)}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <div class="brand-name"><strong>Velvet Elves</strong><span>Transaction OS</span></div>
+    </div>
+    <div class="side-block">
+      <div class="side-label">Q1 2026 at a glance</div>
+      <div class="side-summary">
+        <div class="mini"><div class="num orange">$81K</div><div class="cap">GCI this quarter</div></div>
+        <div class="mini"><div class="num green">7</div><div class="cap">Closed deals</div></div>
+        <div class="mini"><div class="num amber">3</div><div class="cap">Active pipeline</div></div>
+        <div class="mini"><div class="num blue">86%</div><div class="cap">On-time close rate</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Deals</div>
+      <a href="#"><span>⊞</span> Dashboard</a>
+      <a href="#"><span>◈</span> Active Transactions <span class="badge">3</span></a>
+      <a href="#"><span>◔</span> Pending <span class="badge">1</span></a>
+      <a href="#"><span>◉</span> Closed</a>
+      <a href="#"><span>◻</span> All Transactions</a>
+      <div class="nav-section">Workflow</div>
+      <a href="#"><span>✓</span> My Task Queue <span class="badge">14</span></a>
+      <a href="#"><span>◻</span> All Documents <span class="badge">3</span></a>
+      <a href="#"><span>◷</span> Closing Calendar</a>
+      <div class="nav-section">Intelligence</div>
+      <a href="#"><span>✦</span> AI Suggestions <span class="badge">12</span></a>
+      <a href="#" class="active"><span>◈</span> Analytics</a>
+      <a href="#"><span>◻</span> Settings</a>
+    </div>
+    <div class="side-footer">
+      <div class="upgrade-nudge">
+        <strong>✦ Add AI Coach</strong>
+        <span>Predictive forecasting, market benchmarks &amp; conversion coaching.</span>
+      </div>
+      <div class="user-row">
+        <div class="s-avatar">JM</div>
+        <div class="user-info"><strong>Jordan Mills</strong><span>Solo Agent</span></div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+    <div class="topbar">
+      <div class="top-title">Analytics</div>
+      <div class="top-actions">
+        <button class="tiny-btn" onclick="showToast('Exporting report…','PDF downloading.')">
+          <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Export PDF
+        </button>
+        <div class="notif-btn"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><div class="notif-dot"></div></div>
+        <div class="top-avatar">JM</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- PERIOD SELECTOR -->
+      <div class="period-bar">
+        <div class="period-tabs">
+          <button class="period-tab" onclick="setPeriod(this,'q1')">Q1 2026</button>
+          <button class="period-tab active" onclick="setPeriod(this,'q2')">Q2 2026 <span style="font-family:var(--font-mono);font-size:9px;background:var(--orange-light);border:1px solid var(--orange-border);border-radius:4px;padding:1px 5px;color:#8b470c;margin-left:3px">YTD</span></button>
+          <button class="period-tab" onclick="setPeriod(this,'q3')">Q3 2026</button>
+          <button class="period-tab" onclick="setPeriod(this,'q4')">Q4 2026</button>
+        </div>
+        <div class="period-divider"></div>
+        <select class="period-year-select" onchange="setYear(this.value)">
+          <option value="2026" selected>2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+        </select>
+        <div class="period-divider"></div>
+        <button class="period-tab" onclick="setPeriod(this,'ytd')" style="margin:0">Full Year YTD</button>
+        <div class="period-bar-right">
+          <label class="compare-toggle">
+            <input type="checkbox" id="compare-toggle" onchange="toggleCompare(this.checked)"/>
+            Compare to prior period
+          </label>
+          <button class="tiny-btn" onclick="openGoalModal()">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path stroke-linecap="round" d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>
+            Set Goals
+          </button>
+        </div>
+      </div>
+
+      <!-- GOAL PROGRESS BANNER -->
+      <div class="goal-banner">
+        <div>
+          <div class="goal-label">Q2 Goal Progress</div>
+          <div class="goal-stat" style="color:var(--orange)" id="gci-display">$81,250</div>
+          <div class="goal-sub">GCI earned · Q2 2026</div>
+        </div>
+        <div class="goal-divider"></div>
+        <div class="goal-track-wrap">
+          <div class="goal-track-labels">
+            <span id="goal-progress-label">54% of quarterly GCI goal</span>
+            <strong id="goal-target-label">Goal: $150,000</strong>
+          </div>
+          <div class="goal-track"><div class="goal-fill" id="goal-fill" style="width:54%"></div></div>
+          <div class="goal-milestones">
+            <div class="gm"><div class="gm-dot" style="background:var(--orange)"></div>Q2 target: $150K</div>
+            <div class="gm"><div class="gm-dot" style="background:var(--green)"></div>Annual target: $300K</div>
+            <div class="gm"><div class="gm-dot" style="background:var(--blue)"></div>YTD actual: $81K</div>
+          </div>
+        </div>
+        <div class="goal-divider"></div>
+        <div>
+          <div class="goal-label">Transactions</div>
+          <div class="goal-stat" style="color:var(--green)">7 / 12</div>
+          <div class="goal-sub">Closed · Annual goal</div>
+        </div>
+        <div class="goal-divider"></div>
+        <div>
+          <div class="goal-label">On-Time Close</div>
+          <div class="goal-stat" style="color:var(--blue)">86%</div>
+          <div class="goal-sub">6 of 7 on/before date</div>
+        </div>
+        <button class="edit-goal-btn" onclick="openGoalModal()">Edit goals →</button>
+      </div>
+
+      <!-- AI INSIGHT STRIP -->
+      <div class="ai-insight">
+        <div class="ai-insight-icon">✦</div>
+        <div>
+          <div class="eyebrow">AI performance insight · Q2 2026</div>
+          <strong>You're on pace for $162K GCI — 8% above your annual goal if Q3 & Q4 hold.</strong>
+          <p>Your avg days to close dropped from 38 to 31 this quarter. Biggest drag: Sunridge at 31+ DOM. If it closes this month at list price, Q2 GCI hits $108K — your strongest quarter since Q3 2024.</p>
+        </div>
+        <button class="ai-insight-btn" onclick="showToast('AI Coach opening…','Full forecast in your coaching panel.')">View full forecast</button>
+      </div>
+
+      <!-- DASHBOARD GRID — drag to reorder -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+        <div style="font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ghost);font-weight:600">Dashboard layout</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="reset-layout-btn" onclick="resetLayout()" id="reset-btn" style="display:none">Reset to default</button>
+          <button class="tiny-btn edit-mode-btn" id="edit-mode-btn" onclick="toggleEditMode()">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+            Customize layout
+          </button>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin:-4px 0 -6px">
+        <span class="section-title" style="color:var(--text);font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.7px;text-transform:uppercase;font-weight:600">Key metrics</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--ghost)" id="period-label">Q2 2026</span>
+      </div>
+
+      <!-- LOCKED: Pro section always sits above the draggable grid -->
+      <div id="pro-section-locked">
+        <div class="section-head" style="margin-bottom:10px">
+          <span class="section-title" style="color:var(--purple)">✦ AI Coach Pro — Advanced Analytics</span>
+          <span class="locked-badge">📌 Pinned</span>
+          <div class="section-line"></div>
+        </div>
+        <div class="chart-row-2">
+          <div class="pro-gate-card">
+            <div class="pro-gate-blur"><div class="chart-title" style="margin-bottom:4px">Predictive GCI Forecast</div><div class="chart-sub">AI-modeled projection · next 3 quarters</div><svg width="100%" height="120" viewBox="0 0 300 120"><polyline points="0,90 60,70 120,55 180,40 240,30 300,18" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-dasharray="6 4"/><polyline points="0,90 60,70 120,55" fill="none" stroke="var(--orange)" stroke-width="2.5"/><circle cx="0" cy="90" r="4" fill="var(--orange)"/><circle cx="60" cy="70" r="4" fill="var(--orange)"/><circle cx="120" cy="55" r="4" fill="var(--orange)"/><circle cx="180" cy="40" r="4" fill="none" stroke="var(--orange)" stroke-width="2" stroke-dasharray="3 2"/><circle cx="240" cy="30" r="4" fill="none" stroke="var(--orange)" stroke-width="2" stroke-dasharray="3 2"/><circle cx="300" cy="18" r="4" fill="none" stroke="var(--orange)" stroke-width="2" stroke-dasharray="3 2"/></svg></div>
+            <div class="pro-gate-overlay"><div class="pro-gate-badge">✦ AI Coach Pro</div><h4>GCI Forecast &amp; Trajectory</h4><p>AI models your next 3 quarters based on pipeline, close rate, and market conditions in your zip code.</p><button class="btn-upgrade" onclick="showToast('Opening upgrade…','AI Coach Pro — $49/mo')">Unlock Forecasting</button></div>
+          </div>
+          <div class="pro-gate-card">
+            <div class="pro-gate-blur"><div class="chart-title" style="margin-bottom:4px">Conversion Funnel</div><div class="chart-sub">Leads → consults → contracts → close</div><div style="display:flex;flex-direction:column;gap:6px;margin-top:10px"><div style="background:var(--orange-light);height:28px;border-radius:4px;width:100%"></div><div style="background:var(--blue-bg);height:28px;border-radius:4px;width:75%"></div><div style="background:var(--green-bg);height:28px;border-radius:4px;width:52%"></div><div style="background:var(--teal-bg);height:28px;border-radius:4px;width:36%"></div></div></div>
+            <div class="pro-gate-overlay"><div class="pro-gate-badge">✦ AI Coach Pro</div><h4>Lead Conversion Funnel</h4><p>See exactly where you're losing deals — benchmarked against top agents in your market.</p><button class="btn-upgrade" onclick="showToast('Opening upgrade…','AI Coach Pro — $49/mo')">Unlock Funnel Analytics</button></div>
+          </div>
+        </div>
+        <div class="pro-gate-card" style="margin-top:12px">
+          <div class="pro-gate-blur" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px"><div><div style="font-family:var(--font-mono);font-size:9px;color:var(--ghost);margin-bottom:6px;letter-spacing:1.5px;text-transform:uppercase">You vs. Top Agents</div><div style="font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--orange)">Top 22%</div><div style="font-size:12px;color:var(--muted)">GCI rank in your market</div></div><div><div style="font-family:var(--font-mono);font-size:9px;color:var(--ghost);margin-bottom:6px;letter-spacing:1.5px;text-transform:uppercase">Avg Days to Close — Market</div><div style="font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--blue)">34 days</div><div style="font-size:12px;color:var(--muted)">You: 31 days · 3 days faster</div></div><div><div style="font-family:var(--font-mono);font-size:9px;color:var(--ghost);margin-bottom:6px;letter-spacing:1.5px;text-transform:uppercase">On-Time Close — Market Avg</div><div style="font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--green)">79%</div><div style="font-size:12px;color:var(--muted)">You: 86% · 7pts above avg</div></div></div>
+          <div class="pro-gate-overlay"><div class="pro-gate-badge">✦ AI Coach Pro</div><h4>Market Benchmarking</h4><p>See how your GCI, close rate, and days-to-close compare to top agents in your zip codes — updated monthly.</p><button class="btn-upgrade" onclick="showToast('Opening upgrade…','AI Coach Pro — $49/mo')">Unlock Benchmarking</button></div>
+        </div>
+      </div>
+
+      <!-- DRAGGABLE BLOCKS GRID — each card is individually draggable -->
+      <div id="blocks-grid">
+
+        <div class="dnd-block" data-block="gci" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Gross Commission Income</div>
+            <div class="kpi-value" style="color:var(--orange)">$81,250</div>
+            <div class="kpi-sub">7 closed transactions</div>
+            <span class="kpi-delta up">▲ 14% vs Q1</span>
+            <div class="kpi-sparkline"><svg width="100%" height="32" viewBox="0 0 200 32" preserveAspectRatio="none"><polyline points="0,28 40,22 80,18 120,14 160,10 200,6" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,28 40,22 80,18 120,14 160,10 200,6 200,32 0,32" fill="var(--orange-light)" stroke="none" opacity=".5"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="pipeline" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Pipeline Value</div>
+            <div class="kpi-value" style="color:var(--blue)">$1.16M</div>
+            <div class="kpi-sub">3 active transactions</div>
+            <span class="kpi-delta up">▲ 6% vs Q1</span>
+            <div class="kpi-sparkline"><svg width="100%" height="32" viewBox="0 0 200 32" preserveAspectRatio="none"><polyline points="0,24 40,20 80,16 120,18 160,12 200,8" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,24 40,20 80,16 120,18 160,12 200,8 200,32 0,32" fill="var(--blue-bg)" stroke="none" opacity=".5"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="dtc" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Avg Days to Close</div>
+            <div class="kpi-value" style="color:var(--green)">31</div>
+            <div class="kpi-sub">Down from 38 last quarter</div>
+            <span class="kpi-delta up">▼ 18% vs Q1 (better)</span>
+            <div class="kpi-sparkline"><svg width="100%" height="32" viewBox="0 0 200 32" preserveAspectRatio="none"><polyline points="0,6 40,10 80,14 120,18 160,22 200,26" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,6 40,10 80,14 120,18 160,22 200,26 200,32 0,32" fill="var(--green-bg)" stroke="none" opacity=".5"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="otc" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">On-Time Close Rate</div>
+            <div class="kpi-value" style="color:var(--teal)">86%</div>
+            <div class="kpi-sub">6 of 7 on / before scheduled date</div>
+            <span class="kpi-delta flat">→ Same as Q1</span>
+            <div class="kpi-sparkline"><svg width="100%" height="32" viewBox="0 0 200 32" preserveAspectRatio="none"><polyline points="0,18 40,16 80,14 120,14 160,14 200,12" fill="none" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="0,18 40,16 80,14 120,14 160,14 200,12 200,32 0,32" fill="var(--teal-bg)" stroke="none" opacity=".5"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="taskrate" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Task Completion Rate</div>
+            <div class="kpi-value" style="color:var(--green)">78%</div>
+            <div class="kpi-sub">47 of 60 tasks completed on time</div>
+            <span class="kpi-delta down">▼ 5% vs Q1</span>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="overdue" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Overdue Tasks</div>
+            <div class="kpi-value" style="color:var(--red)">4</div>
+            <div class="kpi-sub">Across 2 active transactions</div>
+            <span class="kpi-delta down">▲ 2 more than Q1</span>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="response" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Avg Client Response Time</div>
+            <div class="kpi-value" style="color:var(--amber)">9.2h</div>
+            <div class="kpi-sub">Hours from client msg to your reply</div>
+            <span class="kpi-delta down">▲ 2.1h slower vs Q1</span>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="avgGci" data-span="1">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="kpi-card">
+            <div class="kpi-eyebrow">Avg GCI per Transaction</div>
+            <div class="kpi-value" style="color:var(--purple)">$11,607</div>
+            <div class="kpi-sub">Across 7 closed deals</div>
+            <span class="kpi-delta up">▲ 9% vs Q1</span>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="gciChart" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">GCI by Month</div><div class="chart-sub">Gross commission income · Q2 2026</div></div></div>
+            <div class="chart-area"><div class="bar-chart" id="gci-bar-chart"></div></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>GCI (current)</div>
+              <div class="legend-item" id="compare-legend" style="display:none"><div class="legend-dot" style="background:var(--line-strong)"></div>Prior period</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="volChart" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">Transaction Volume</div><div class="chart-sub">Closed deals by month · Q2 2026</div></div></div>
+            <div class="chart-area"><div class="bar-chart" id="vol-bar-chart"></div></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Buyer side</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Listing side</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="pipelineTable" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">Active Pipeline</div><div class="chart-sub">Projected closes &amp; completion status</div></div></div>
+            <table class="pipeline-table">
+              <thead><tr><th>Transaction</th><th>Close Date</th><th>Value</th><th>Doc Progress</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><div class="tx-addr">628 Prince Dr</div><div class="tx-party">S. &amp; M. Chen · Buyer</div></td><td><span class="close-date at-risk">Apr 28</span></td><td><span style="font-family:var(--font-mono);font-size:12px;font-weight:600">$310K</span></td><td><div class="progress-cell"><div class="mini-prog"><div class="mini-prog-fill" style="background:var(--amber);width:70%"></div></div><span class="mini-prog-pct">70%</span></div></td><td><span class="pill amber">At Risk</span></td></tr>
+                <tr><td><div class="tx-addr">4412 Sunridge Blvd</div><div class="tx-party">T. Weaver · Listing</div></td><td><span class="close-date on-time">May 15</span></td><td><span style="font-family:var(--font-mono);font-size:12px;font-weight:600">$389K</span></td><td><div class="progress-cell"><div class="mini-prog"><div class="mini-prog-fill" style="background:var(--red);width:50%"></div></div><span class="mini-prog-pct">50%</span></div></td><td><span class="pill red">Docs Missing</span></td></tr>
+                <tr><td><div class="tx-addr">214 Maple Creek Ln</div><div class="tx-party">L. Harmon · Buyer</div></td><td><span class="close-date on-time">Jun 2</span></td><td><span style="font-family:var(--font-mono);font-size:12px;font-weight:600">$462K</span></td><td><div class="progress-cell"><div class="mini-prog"><div class="mini-prog-fill" style="background:var(--green);width:33%"></div></div><span class="mini-prog-pct">33%</span></div></td><td><span class="pill green">On Track</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="otcChart" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">On-Time Close Rate</div><div class="chart-sub">Quarterly trend · closed transactions</div></div></div>
+            <div class="chart-area">
+              <svg width="100%" height="140" viewBox="0 0 340 140" preserveAspectRatio="xMidYMid meet" style="overflow:visible">
+                <line x1="0" y1="20" x2="340" y2="20" stroke="var(--line)" stroke-width="1"/><line x1="0" y1="50" x2="340" y2="50" stroke="var(--line)" stroke-width="1"/><line x1="0" y1="80" x2="340" y2="80" stroke="var(--line)" stroke-width="1"/><line x1="0" y1="110" x2="340" y2="110" stroke="var(--line)" stroke-width="1"/>
+                <text x="-4" y="23" font-size="9" fill="var(--ghost)" text-anchor="end" font-family="IBM Plex Mono">100%</text><text x="-4" y="53" font-size="9" fill="var(--ghost)" text-anchor="end" font-family="IBM Plex Mono">75%</text><text x="-4" y="83" font-size="9" fill="var(--ghost)" text-anchor="end" font-family="IBM Plex Mono">50%</text><text x="-4" y="113" font-size="9" fill="var(--ghost)" text-anchor="end" font-family="IBM Plex Mono">25%</text>
+                <polygon points="20,47 90,56 160,38 230,47 300,38" fill="var(--teal-bg)" stroke="none"/>
+                <polyline points="20,47 90,56 160,38 230,47 300,38" fill="none" stroke="var(--teal)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="20" cy="47" r="4" fill="var(--teal)" stroke="#fff" stroke-width="2"/><circle cx="90" cy="56" r="4" fill="var(--teal)" stroke="#fff" stroke-width="2"/><circle cx="160" cy="38" r="4" fill="var(--teal)" stroke="#fff" stroke-width="2"/><circle cx="230" cy="47" r="4" fill="var(--teal)" stroke="#fff" stroke-width="2"/><circle cx="300" cy="38" r="5" fill="var(--orange)" stroke="#fff" stroke-width="2"/>
+                <text x="20" y="130" font-size="9" fill="var(--ghost)" text-anchor="middle" font-family="IBM Plex Mono">Q2'25</text><text x="90" y="130" font-size="9" fill="var(--ghost)" text-anchor="middle" font-family="IBM Plex Mono">Q3'25</text><text x="160" y="130" font-size="9" fill="var(--ghost)" text-anchor="middle" font-family="IBM Plex Mono">Q4'25</text><text x="230" y="130" font-size="9" fill="var(--ghost)" text-anchor="middle" font-family="IBM Plex Mono">Q1'26</text><text x="300" y="130" font-size="9" fill="var(--orange)" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600">Q2'26</text>
+                <text x="20" y="42" font-size="9" fill="var(--teal)" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600">83%</text><text x="90" y="51" font-size="9" fill="var(--teal)" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600">79%</text><text x="160" y="33" font-size="9" fill="var(--teal)" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600">88%</text><text x="230" y="42" font-size="9" fill="var(--teal)" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600">86%</text><text x="300" y="33" font-size="9" fill="var(--orange)" text-anchor="middle" font-family="IBM Plex Mono" font-weight="600">86%</text>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="referral" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">Referral Sources</div><div class="chart-sub">Where your leads came from · YTD 2026</div></div></div>
+            <div class="donut-wrap">
+              <svg width="110" height="110" viewBox="0 0 110 110"><circle cx="55" cy="55" r="40" fill="none" stroke="var(--line)" stroke-width="18"/><circle cx="55" cy="55" r="40" fill="none" stroke="var(--orange)" stroke-width="18" stroke-dasharray="95.5 155.8" stroke-dashoffset="62.8" transform="rotate(-90 55 55)"/><circle cx="55" cy="55" r="40" fill="none" stroke="var(--blue)" stroke-width="18" stroke-dasharray="67.8 183.5" stroke-dashoffset="-32.7" transform="rotate(-90 55 55)"/><circle cx="55" cy="55" r="40" fill="none" stroke="var(--teal)" stroke-width="18" stroke-dasharray="45.2 206.1" stroke-dashoffset="-100.5" transform="rotate(-90 55 55)"/><circle cx="55" cy="55" r="40" fill="none" stroke="var(--green)" stroke-width="18" stroke-dasharray="27.6 223.7" stroke-dashoffset="-145.7" transform="rotate(-90 55 55)"/><circle cx="55" cy="55" r="40" fill="none" stroke="var(--line-strong)" stroke-width="18" stroke-dasharray="15.1 236.2" stroke-dashoffset="-173.3" transform="rotate(-90 55 55)"/><text x="55" y="51" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="700" fill="var(--text)">11</text><text x="55" y="64" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="var(--ghost)">leads</text></svg>
+              <div class="donut-labels">
+                <div class="donut-label-row"><div class="donut-label-left"><div class="donut-label-dot" style="background:var(--orange)"></div>Past clients</div><span class="donut-label-pct">38% · 4 leads</span></div>
+                <div class="donut-label-row"><div class="donut-label-left"><div class="donut-label-dot" style="background:var(--blue)"></div>Sphere of influence</div><span class="donut-label-pct">27% · 3 leads</span></div>
+                <div class="donut-label-row"><div class="donut-label-left"><div class="donut-label-dot" style="background:var(--teal)"></div>Zillow / Online</div><span class="donut-label-pct">18% · 2 leads</span></div>
+                <div class="donut-label-row"><div class="donut-label-left"><div class="donut-label-dot" style="background:var(--green)"></div>Open house</div><span class="donut-label-pct">11% · 1 lead</span></div>
+                <div class="donut-label-row"><div class="donut-label-left"><div class="donut-label-dot" style="background:var(--line-strong)"></div>Other</div><span class="donut-label-pct">6% · 1 lead</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="heatmap" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">Client Communication Activity</div><div class="chart-sub">Touchpoints per client per week · Q2 2026</div></div></div>
+            <div id="heatmap-container"></div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="dtcChart" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">Days to Close — Per Transaction</div><div class="chart-sub">Actual close time vs. scheduled · closed deals</div></div></div>
+            <div class="chart-area"><div class="bar-chart" id="dtc-bar-chart"></div></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>On or before scheduled</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Late</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dnd-block" data-block="taskChart" data-span="2">
+          <div class="drag-handle" title="Drag to reorder"><span></span><span></span><span></span></div>
+          <div class="chart-card">
+            <div class="chart-head"><div><div class="chart-title">Task Completion Rate</div><div class="chart-sub">On-time vs. overdue vs. missed · Q2 2026</div></div></div>
+            <div class="chart-area"><div class="bar-chart" id="task-bar-chart"></div></div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Completed on time</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Late but done</div>
+              <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Missed / overdue</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drop placeholder (injected by JS during drag) -->
+        <div id="drop-placeholder" style="display:none;border:2px dashed var(--orange);border-radius:14px;background:var(--orange-soft);opacity:.6"></div>
+
+      </div><!-- /#blocks-grid -->
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- ═══ GOAL EDIT MODAL ═══ -->
+<div class="modal-wrap" id="goalModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Set Your Goals</h3>
+        <p>Goals are used to calculate progress across all analytics views.</p>
+      </div>
+      <button class="close-btn" onclick="closeGoalModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label>ANNUAL GCI TARGET</label>
+          <input type="text" id="goal-gci" value="$300,000" placeholder="e.g. $300,000"/>
+        </div>
+        <div class="field">
+          <label>QUARTERLY GCI TARGET</label>
+          <input type="text" id="goal-gci-q" value="$150,000" placeholder="e.g. $75,000"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>ANNUAL TRANSACTION GOAL</label>
+          <input type="text" id="goal-txn" value="12" placeholder="e.g. 12"/>
+        </div>
+        <div class="field">
+          <label>ON-TIME CLOSE RATE TARGET</label>
+          <input type="text" id="goal-otc" value="90%" placeholder="e.g. 90%"/>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>TASK COMPLETION RATE TARGET</label>
+          <input type="text" id="goal-task" value="90%" placeholder="e.g. 90%"/>
+        </div>
+        <div class="field">
+          <label>AVG RESPONSE TIME TARGET</label>
+          <input type="text" id="goal-resp" value="4 hours" placeholder="e.g. 4 hours"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeGoalModal()">Cancel</button>
+      <button class="btn-primary" onclick="saveGoals()">Save Goals</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FLOATING AI ═══ -->
+<div class="floating-ai" onclick="showToast('AI Coach opening…','Your forecast is ready.')">
+  <div style="font-size:20px">✦</div>
+  <div><strong>AI Coach</strong><span>Your Q2 forecast is ready</span></div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <div style="font-size:18px">✓</div>
+  <div><strong id="toast-title">Done</strong><span id="toast-sub"></span></div>
+  <div class="toast-close" onclick="hideToast()">✕</div>
+</div>
+
+<script>
+/* ════════════════════════════════════════
+   DATA
+════════════════════════════════════════ */
+const DATA = {
+  gci:  { q2:  [18500, 28750, 34000], q2p: [14000, 22000, 35500], labels:['Apr','May','Jun'] },
+  vol:  { buy: [1,2,1], list:[0,1,2] },
+  dtc:  { txns:['Hargrove','Patel','Lee','Torres','Nguyen','Chen','Elliott'], days:[28,31,26,35,30,34,42], sched:[30,30,30,32,30,30,35] },
+  task: { months:['Apr','May','Jun'], ontime:[18,15,14], late:[3,4,3], missed:[1,2,1] }
+};
+
+let compareOn = false;
+
+/* ════════════════════════════════════════
+   PERIOD / YEAR
+════════════════════════════════════════ */
+function setPeriod(btn, period) {
+  document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const labels = {q1:'Q1 2026',q2:'Q2 2026',q3:'Q3 2026',q4:'Q4 2026',ytd:'Full Year YTD'};
+  document.getElementById('period-label').textContent = labels[period] || period;
+  showToast('Period updated', labels[period] || period);
+}
+
+function setYear(y) { showToast('Year set to ' + y, 'Analytics refreshed.'); }
+
+function toggleCompare(on) {
+  compareOn = on;
+  document.getElementById('compare-legend').style.display = on ? '' : 'none';
+  renderGCIChart();
+}
+
+/* ════════════════════════════════════════
+   RENDER GCI BAR CHART
+════════════════════════════════════════ */
+function renderGCIChart() {
+  const el = document.getElementById('gci-bar-chart');
+  el.innerHTML = '';
+  const max = 40000;
+  DATA.gci.q2.forEach((v, i) => {
+    const grp = document.createElement('div');
+    grp.className = 'bar-group';
+    grp.style.flexDirection = 'column';
+    grp.style.alignItems = 'center';
+    grp.style.position = 'relative';
+
+    if (compareOn) {
+      const bp = document.createElement('div');
+      bp.className = 'bar';
+      const ph = Math.round((DATA.gci.q2p[i] / max) * 96);
+      bp.style.cssText = `height:${ph}px;background:var(--line-strong);flex:1;min-width:14px`;
+      const bpv = document.createElement('div');
+      bpv.className = 'bar-val';
+      bpv.textContent = '$' + (DATA.gci.q2p[i]/1000).toFixed(1) + 'K';
+      bp.appendChild(bpv);
+      grp.appendChild(bp);
+    }
+
+    const b = document.createElement('div');
+    b.className = 'bar';
+    const h = Math.round((v / max) * 96);
+    b.style.cssText = `height:${h}px;background:var(--orange);flex:1;min-width:14px`;
+    const bv = document.createElement('div');
+    bv.className = 'bar-val';
+    bv.textContent = '$' + (v/1000).toFixed(1) + 'K';
+    b.appendChild(bv);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'bar-label';
+    lbl.textContent = DATA.gci.q2.labels ? DATA.gci.labels[i] : '';
+    lbl.style.cssText = 'position:static;transform:none;font-family:var(--font-mono);font-size:9px;color:var(--ghost);margin-top:4px;text-align:center';
+
+    grp.appendChild(b);
+    grp.appendChild(lbl);
+    el.appendChild(grp);
+  });
+  // Add month labels
+  const months = ['Apr','May','Jun'];
+  months.forEach((m,i) => {
+    el.children[i].querySelector('div:last-child').textContent = m;
+  });
+}
+
+/* ════════════════════════════════════════
+   RENDER VOLUME BAR CHART
+════════════════════════════════════════ */
+function renderVolChart() {
+  const el = document.getElementById('vol-bar-chart');
+  el.innerHTML = '';
+  const months = ['Apr','May','Jun'];
+  DATA.vol.buy.forEach((buy, i) => {
+    const list = DATA.vol.list[i];
+    const grp = document.createElement('div');
+    grp.className = 'bar-group';
+    grp.style.alignItems = 'flex-end';
+    grp.style.gap = '3px';
+
+    if (buy > 0) {
+      const bb = document.createElement('div');
+      bb.className = 'bar';
+      bb.style.cssText = `height:${buy*36}px;background:var(--blue);flex:1;min-width:14px`;
+      const bv = document.createElement('div'); bv.className='bar-val'; bv.textContent=buy; bb.appendChild(bv);
+      grp.appendChild(bb);
+    }
+    if (list > 0) {
+      const bl = document.createElement('div');
+      bl.className = 'bar';
+      bl.style.cssText = `height:${list*36}px;background:var(--teal);flex:1;min-width:14px`;
+      const lv = document.createElement('div'); lv.className='bar-val'; lv.textContent=list; bl.appendChild(lv);
+      grp.appendChild(bl);
+    }
+
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-family:var(--font-mono);font-size:9px;color:var(--ghost);margin-top:4px;text-align:center;width:100%';
+    lbl.textContent = months[i];
+    grp.appendChild(lbl);
+    el.appendChild(grp);
+  });
+}
+
+/* ════════════════════════════════════════
+   RENDER DAYS-TO-CLOSE BAR CHART
+════════════════════════════════════════ */
+function renderDTCChart() {
+  const el = document.getElementById('dtc-bar-chart');
+  el.innerHTML = '';
+  const max = 50;
+  DATA.dtc.txns.forEach((name, i) => {
+    const days = DATA.dtc.days[i];
+    const sched = DATA.dtc.sched[i];
+    const ontime = days <= sched;
+    const grp = document.createElement('div');
+    grp.className = 'bar-group';
+    grp.style.flexDirection = 'column';
+    grp.style.alignItems = 'center';
+
+    const b = document.createElement('div');
+    b.className = 'bar';
+    const h = Math.round((days / max) * 96);
+    b.style.cssText = `height:${h}px;background:${ontime ? 'var(--green)' : 'var(--red)'};flex:1;min-width:10px`;
+    const bv = document.createElement('div');
+    bv.className = 'bar-val';
+    bv.textContent = days + 'd';
+    b.appendChild(bv);
+
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-family:var(--font-mono);font-size:8px;color:var(--ghost);margin-top:4px;text-align:center;width:100%';
+    lbl.textContent = name.slice(0,6);
+
+    grp.appendChild(b);
+    grp.appendChild(lbl);
+    el.appendChild(grp);
+  });
+}
+
+/* ════════════════════════════════════════
+   RENDER TASK BAR CHART
+════════════════════════════════════════ */
+function renderTaskChart() {
+  const el = document.getElementById('task-bar-chart');
+  el.innerHTML = '';
+  const max = 22;
+  DATA.task.months.forEach((m, i) => {
+    const ot = DATA.task.ontime[i];
+    const lt = DATA.task.late[i];
+    const ms = DATA.task.missed[i];
+    const grp = document.createElement('div');
+    grp.className = 'bar-group';
+    grp.style.alignItems = 'flex-end';
+    grp.style.gap = '2px';
+
+    [[ot,'var(--green)'],[lt,'var(--amber)'],[ms,'var(--red)']].forEach(([v,c]) => {
+      const b = document.createElement('div');
+      b.className = 'bar';
+      b.style.cssText = `height:${Math.round((v/max)*96)}px;background:${c};flex:1;min-width:10px`;
+      const bv = document.createElement('div'); bv.className='bar-val'; bv.textContent=v; b.appendChild(bv);
+      grp.appendChild(b);
+    });
+
+    const lbl = document.createElement('div');
+    lbl.style.cssText = 'font-family:var(--font-mono);font-size:9px;color:var(--ghost);margin-top:4px;text-align:center;width:100%';
+    lbl.textContent = m;
+    grp.appendChild(lbl);
+    el.appendChild(grp);
+  });
+}
+
+/* ════════════════════════════════════════
+   RENDER COMM HEATMAP
+════════════════════════════════════════ */
+function renderHeatmap() {
+  const container = document.getElementById('heatmap-container');
+  const clients = ['S. Chen','L. Harmon','T. Weaver','K. Torres','Nguyen'];
+  const weeks = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','W12'];
+  const mockData = [
+    [3,2,1,0,3,2,4,1,2,3,0,1],
+    [1,0,2,3,2,1,0,2,3,2,1,0],
+    [2,3,2,1,0,2,3,4,2,1,0,2],
+    [0,1,0,0,1,2,0,0,1,0,0,0],
+    [1,2,1,0,2,1,0,1,2,1,0,1],
+  ];
+
+  const wrap = document.createElement('div');
+  wrap.className = 'heatmap-wrap';
+
+  // X labels
+  const xRow = document.createElement('div');
+  xRow.className = 'heatmap-x-labels';
+  weeks.forEach(w => {
+    const s = document.createElement('span');
+    s.textContent = w;
+    xRow.appendChild(s);
+  });
+  wrap.appendChild(xRow);
+
+  clients.forEach((client, ci) => {
+    const row = document.createElement('div');
+    row.className = 'heatmap-row';
+    const label = document.createElement('div');
+    label.className = 'heatmap-label';
+    label.textContent = client;
+    row.appendChild(label);
+    const cells = document.createElement('div');
+    cells.className = 'heatmap-cells';
+    mockData[ci].forEach(v => {
+      const cell = document.createElement('div');
+      cell.className = 'hm-cell hm-' + Math.min(v, 4);
+      cell.title = v + ' touchpoint' + (v !== 1 ? 's' : '') + ' this week';
+      cells.appendChild(cell);
+    });
+    row.appendChild(cells);
+    wrap.appendChild(row);
+  });
+
+  // Legend
+  const leg = document.createElement('div');
+  leg.style.cssText = 'display:flex;align-items:center;gap:6px;margin-top:8px;margin-left:58px';
+  leg.innerHTML = '<span style="font-size:10px;color:var(--ghost)">Less</span>';
+  [0,1,2,3,4].forEach(v => {
+    const c = document.createElement('div');
+    c.className = 'hm-cell hm-' + v;
+    c.style.cssText = 'cursor:default';
+    leg.appendChild(c);
+  });
+  leg.innerHTML += '<span style="font-size:10px;color:var(--ghost)">More</span>';
+  wrap.appendChild(leg);
+
+  container.appendChild(wrap);
+}
+
+/* ════════════════════════════════════════
+   GOAL MODAL
+════════════════════════════════════════ */
+function openGoalModal()  { document.getElementById('goalModal').classList.add('open'); }
+function closeGoalModal() { document.getElementById('goalModal').classList.remove('open'); }
+
+function saveGoals() {
+  const gci = document.getElementById('goal-gci-q').value;
+  document.getElementById('goal-target-label').textContent = 'Goal: ' + gci;
+  closeGoalModal();
+  showToast('Goals saved.', 'Analytics updated with your new targets.');
+}
+
+document.getElementById('goalModal').addEventListener('click', function(e) {
+  if (e.target === this) closeGoalModal();
+});
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+let toastTimer;
+function showToast(title, sub) {
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-sub').textContent   = sub || '';
+  document.getElementById('toast').classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 3400);
+}
+function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeGoalModal();
+});
+
+/* ════════════════════════════════════════
+   DRAG & DROP ENGINE — block-level
+   Each .dnd-block is the draggable unit.
+   Grid reflows naturally via CSS grid span.
+════════════════════════════════════════ */
+const STORAGE_KEY = 'analytics-blocks-v2';
+const DEFAULT_BLOCKS = ['gci','pipeline','dtc','otc','taskrate','overdue','response','avgGci','gciChart','volChart','pipelineTable','otcChart','referral','heatmap','dtcChart','taskChart'];
+
+let dragSrc   = null;
+let editMode  = false;
+
+/* ── Storage: window.storage (Claude) → localStorage fallback ── */
+const Store = {
+  async get(k)      { try { if(window.storage){const r=await window.storage.get(k);return r;} } catch(e){} try{const v=localStorage.getItem(k);return v?{value:v}:null;}catch(e){return null;} },
+  async set(k,v)    { try { if(window.storage){await window.storage.set(k,v);return;} } catch(e){} try{localStorage.setItem(k,v);}catch(e){} },
+  async del(k)      { try { if(window.storage){await window.storage.delete(k);return;} } catch(e){} try{localStorage.removeItem(k);}catch(e){} }
+};
+
+function getGrid()   { return document.getElementById('blocks-grid'); }
+function getBlocks() { return Array.from(getGrid().querySelectorAll('.dnd-block[data-block]')); }
+
+/* ── Load saved order ── */
+async function loadLayout() {
+  try {
+    const r = await Store.get(STORAGE_KEY);
+    if (r && r.value) {
+      const saved = JSON.parse(r.value);
+      if (Array.isArray(saved) && saved.length) {
+        applyOrder(saved);
+        document.getElementById('reset-btn').style.display = '';
+      }
+    }
+  } catch(e) {}
+}
+
+/* ── Save current order ── */
+async function saveLayout() {
+  const order = getBlocks().map(b => b.dataset.block);
+  try {
+    await Store.set(STORAGE_KEY, JSON.stringify(order));
+    document.getElementById('reset-btn').style.display = '';
+  } catch(e) {}
+}
+
+/* ── Reset ── */
+async function resetLayout() {
+  await Store.del(STORAGE_KEY);
+  applyOrder(DEFAULT_BLOCKS);
+  document.getElementById('reset-btn').style.display = 'none';
+  showToast('Layout reset', 'Restored to default order.');
+}
+
+/* ── Apply a saved block order ── */
+function applyOrder(order) {
+  const grid = getGrid();
+  const placeholder = document.getElementById('drop-placeholder');
+  order.forEach(blockId => {
+    const block = grid.querySelector('.dnd-block[data-block="' + blockId + '"]');
+    if (block) grid.insertBefore(block, placeholder || null);
+  });
+  setTimeout(rerenderCharts, 40);
+}
+
+/* ── Wire up drag on every block ── */
+function initDragAndDrop() {
+  getBlocks().forEach(block => attachBlockDrag(block));
+}
+
+function attachBlockDrag(block) {
+  block.setAttribute('draggable', 'true');
+
+  /* dragstart — only active in edit mode */
+  block.addEventListener('dragstart', e => {
+    if (!editMode) { e.preventDefault(); return; }
+    dragSrc = block;
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', block.dataset.block);
+    /* delay adding class so the drag image renders before the block fades */
+    requestAnimationFrame(() => block.classList.add('is-dragging'));
+  });
+
+  block.addEventListener('dragend', () => {
+    block.classList.remove('is-dragging');
+    getBlocks().forEach(b => b.classList.remove('drop-target'));
+    dragSrc = null;
+  });
+
+  /* dragover — show target highlight, allow drop */
+  block.addEventListener('dragover', e => {
+    if (!editMode || !dragSrc || dragSrc === block) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    getBlocks().forEach(b => b.classList.remove('drop-target'));
+    block.classList.add('drop-target');
+  });
+
+  block.addEventListener('dragleave', e => {
+    /* only clear when the cursor actually leaves this block (not a child) */
+    if (!block.contains(e.relatedTarget)) block.classList.remove('drop-target');
+  });
+
+  /* drop — swap positions */
+  block.addEventListener('drop', e => {
+    if (!editMode || !dragSrc || dragSrc === block) return;
+    e.preventDefault();
+    block.classList.remove('drop-target');
+
+    const grid   = getGrid();
+    const blocks = getBlocks();
+    const srcIdx = blocks.indexOf(dragSrc);
+    const tgtIdx = blocks.indexOf(block);
+
+    /* Insert dragged block before or after target depending on direction */
+    if (srcIdx < tgtIdx) {
+      grid.insertBefore(dragSrc, block.nextSibling);
+    } else {
+      grid.insertBefore(dragSrc, block);
+    }
+
+    saveLayout();
+    setTimeout(rerenderCharts, 40);
+    showToast('Layout saved', 'Dashboard order updated and remembered.');
+  });
+}
+
+/* ── Edit mode toggle ── */
+function toggleEditMode() {
+  editMode = !editMode;
+  document.body.classList.toggle('editing-layout', editMode);
+  const btn = document.getElementById('edit-mode-btn');
+  btn.classList.toggle('active', editMode);
+  btn.innerHTML = editMode
+    ? '<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Done customizing'
+    : '<svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg> Customize layout';
+  if (editMode) showToast('Edit mode on', 'Drag any card to reorder. Coaching section is pinned.');
+}
+
+/* ── Re-render JS-driven charts after reorder ── */
+function rerenderCharts() {
+  renderGCIChart();
+  renderVolChart();
+  renderDTCChart();
+  renderTaskChart();
+}
+
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
+renderGCIChart();
+renderVolChart();
+renderDTCChart();
+renderTaskChart();
+renderHeatmap();
+initDragAndDrop();
+loadLayout();
+</script>
+</body>
+</html>
