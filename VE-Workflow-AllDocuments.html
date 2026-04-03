@@ -1,0 +1,1300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velvet Elves — All Documents</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════
+       DESIGN TOKENS — identical to Task Queue
+    ═══════════════════════════════════════════════ */
+    :root{
+      --orange:#E26812;
+      --orange-dark:#B85107;
+      --orange-light:#FFF2E7;
+      --orange-soft:#FFF9F4;
+      --orange-border:#F1C79E;
+      --navy:#1E3356;
+      --bg:#F2F1EE;
+      --surface:#FFFFFF;
+      --surface-2:#FAFAF8;
+      --line:#E3E2DE;
+      --line-strong:#CEC9C0;
+      --text:#181818;
+      --muted:#686868;
+      --ghost:#929292;
+      --green:#14704B;
+      --green-bg:#EEF8F3;
+      --green-border:#B9DEC9;
+      --amber:#A56A08;
+      --amber-bg:#FFF8EC;
+      --amber-border:#EACB93;
+      --red:#BE3431;
+      --red-bg:#FFF2F2;
+      --red-border:#F0C7C7;
+      --blue:#2C4C7F;
+      --blue-bg:#EEF4FF;
+      --blue-border:#C0D1EF;
+      --purple:#6545B6;
+      --purple-bg:#F5F0FF;
+      --purple-border:#D7C8FF;
+      --teal:#0E6E70;
+      --teal-bg:#EDFAFA;
+      --teal-border:#A8D8DA;
+      --shadow:0 4px 16px rgba(20,20,20,.06);
+      --shadow-md:0 8px 28px rgba(20,20,20,.09);
+      --radius:18px;
+      --font-body:'IBM Plex Sans',sans-serif;
+      --font-serif:'Lora',serif;
+      --font-mono:'IBM Plex Mono',monospace;
+      --sidebar:228px;
+      --top:60px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    /* ═══════════════════════════════════════════════
+       SIDEBAR — identical to Task Queue
+    ═══════════════════════════════════════════════ */
+    .sidebar{background:linear-gradient(180deg,#1a2d4e,#152340);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.07)}
+    .brand{display:flex;align-items:center;gap:12px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name strong{font-family:var(--font-serif);font-size:17px;color:#fff;font-weight:700;display:block;line-height:1}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;display:block}
+    .side-block{padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:9px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .mini{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:10px}
+    .mini .num{font-family:var(--font-mono);font-size:21px;font-weight:600;line-height:1;margin-bottom:5px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.72);line-height:1.3}
+    .num.red{color:#ff9090}.num.green{color:#7ed8a8}.num.orange{color:#ffbc7a}.num.blue{color:#94bfff}
+    .nav{padding:8px 7px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:rgba(255,255,255,.85);padding:9px 11px;border-radius:9px;font-size:13px;font-weight:500;position:relative;transition:.14s}
+    .nav a:hover{background:rgba(255,255,255,.055)}
+    .nav a.active{background:rgba(226,104,18,.18);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .nav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.38);padding:14px 11px 5px}
+    .side-footer{padding:11px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px}
+    .upgrade-nudge{background:rgba(226,104,18,.12);border:1px solid rgba(226,104,18,.22);border-radius:11px;padding:10px 11px;cursor:pointer;transition:.14s}
+    .upgrade-nudge:hover{background:rgba(226,104,18,.18)}
+    .upgrade-nudge strong{display:block;font-size:12px;color:#ffcf9e;margin-bottom:3px}
+    .upgrade-nudge span{display:block;font-size:11px;color:rgba(255,255,255,.6);line-height:1.35}
+    .user-row{display:flex;align-items:center;gap:9px}
+    .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .user-info strong{display:block;font-size:12px;color:rgba(255,255,255,.9)}
+    .user-info span{display:block;font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font-mono)}
+
+    /* ═══════════════════════════════════════════════
+       SHARED BUTTONS — identical
+    ═══════════════════════════════════════════════ */
+    .btn-primary,.btn-secondary,.btn-ghost,.btn-chip{border:none;border-radius:11px;cursor:pointer;transition:.15s ease;font-weight:600;font-family:var(--font-body)}
+    .btn-primary{background:var(--orange);color:#fff;padding:10px 14px;font-weight:700;font-size:13px}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:13px}
+    .btn-secondary:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 11px;font-size:12px}
+    .btn-ghost:hover{background:#fff}
+    .btn-chip{background:var(--orange-light);border:1px solid var(--orange-border);color:#8f480b;padding:6px 10px;font-size:12px;font-weight:700;border-radius:9px}
+    .btn-chip:hover{background:#fce8d4}
+
+    /* ═══════════════════════════════════════════════
+       PILLS — identical
+    ═══════════════════════════════════════════════ */
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:600;white-space:nowrap}
+    .pill.red{background:var(--red-bg);border:1px solid var(--red-border);color:#8a201d}
+    .pill.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+    .pill.green{background:var(--green-bg);border:1px solid var(--green-border);color:#0d5537}
+    .pill.blue{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .pill.purple{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+
+    /* ═══════════════════════════════════════════════
+       TOPBAR — identical
+    ═══════════════════════════════════════════════ */
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:var(--top);display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-shrink:0}
+    .top-title{font-family:var(--font-serif);font-size:20px;font-weight:700;flex:1}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .top-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .notif-btn{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.14s}
+    .notif-btn:hover{background:var(--surface-2)}
+    .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;border:1.5px solid #fff}
+    .content{overflow:auto;padding:18px 22px 36px;display:flex;flex-direction:column;gap:14px}
+
+    /* ═══════════════════════════════════════════════
+       AI BRIEFING STRIP — identical structure
+    ═══════════════════════════════════════════════ */
+    .ai-briefing{background:linear-gradient(135deg,#1a2d4e,#233d6a);color:#fff;border-radius:var(--radius);padding:16px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;box-shadow:var(--shadow-md)}
+    .ai-briefing-icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+    .ai-briefing-copy .eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.9px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px}
+    .ai-briefing-copy strong{display:block;font-family:var(--font-serif);font-size:18px;line-height:1.1;margin-bottom:5px}
+    .ai-briefing-copy p{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.5;max-width:680px}
+    .ai-briefing-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .ai-briefing-actions .btn-primary{font-size:12px;padding:8px 13px;box-shadow:none;white-space:nowrap}
+    .ai-briefing-actions .ai-meta{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.55);text-align:right}
+
+    /* ═══════════════════════════════════════════════
+       DOC STAT BAR — mirrors progress-bar-wrap
+    ═══════════════════════════════════════════════ */
+    .doc-stat-bar{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px}
+    .ps-btn{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;border-radius:10px;padding:6px 10px;border:1px solid transparent;transition:background .13s,border-color .13s;background:transparent;font-family:var(--font-body)}
+    .ps-btn:hover{background:var(--surface-2);border-color:var(--line)}
+    .ps-btn.active-filter{border-color:var(--line-strong);background:var(--surface-2)}
+    .ps-btn.active-filter.red-filter{background:var(--red-bg);border-color:var(--red-border)}
+    .ps-btn.active-filter.amber-filter{background:var(--amber-bg);border-color:var(--amber-border)}
+    .ps-btn.active-filter.blue-filter{background:var(--blue-bg);border-color:var(--blue-border)}
+    .ps-btn.active-filter.green-filter{background:var(--green-bg);border-color:var(--green-border)}
+    .ps-btn .n{font-family:var(--font-mono);font-size:22px;font-weight:700;line-height:1}
+    .ps-btn .l{font-size:10.5px;color:var(--muted)}
+    .n.red{color:var(--red)}.n.amber{color:var(--amber)}.n.green{color:var(--green)}.n.blue{color:var(--blue)}
+    .ps-divider{width:1px;height:36px;background:var(--line);flex-shrink:0}
+    .doc-stat-right{flex:1;display:flex;flex-direction:column;gap:6px}
+    .doc-stat-label-row{display:flex;justify-content:space-between}
+    .doc-stat-label-row span{font-size:11.5px;color:var(--muted)}
+    .doc-stat-label-row strong{font-size:11.5px;font-family:var(--font-mono);color:var(--green)}
+    .doc-stat-track{height:8px;background:var(--line);border-radius:999px;overflow:hidden}
+    .doc-stat-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),#1d9e6a);transition:width .5s ease}
+    .doc-seg-labels{display:flex;gap:12px;margin-top:3px}
+    .dsl{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted)}
+    .dsl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .dsl-dot.green{background:var(--green)}.dsl-dot.amber{background:var(--amber)}.dsl-dot.red{background:var(--red)}.dsl-dot.blue{background:var(--blue)}
+
+    /* ═══════════════════════════════════════════════
+       CONTROLS BAR — mirrors queue-controls
+    ═══════════════════════════════════════════════ */
+    .doc-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 14px;box-shadow:var(--shadow)}
+    .doc-controls-search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:7px 11px;min-width:220px;flex:1;color:var(--ghost)}
+    .doc-controls-search svg{flex-shrink:0;opacity:.5}
+    .doc-controls-search input{border:none;background:transparent;outline:none;width:100%;font-size:12.5px;font-family:var(--font-body)}
+    .filter-tabs{display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+    .filter-tab{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:.13s;display:flex;align-items:center;gap:6px}
+    .filter-tab:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .filter-tab.active{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+    .filter-tab .tab-count{font-family:var(--font-mono);font-size:10px;background:rgba(0,0,0,.07);border-radius:999px;padding:1px 6px}
+    .filter-tab.active .tab-count{background:rgba(139,71,12,.15)}
+    .doc-controls-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .view-toggle{display:flex;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+    .view-btn{padding:7px 12px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:transparent;cursor:pointer;transition:.13s;display:flex;align-items:center;gap:5px}
+    .view-btn:hover{background:var(--surface-2)}
+    .view-btn.active{background:var(--orange-light);color:#8b470c}
+    .view-btn + .view-btn{border-left:1px solid var(--line)}
+
+    /* ═══════════════════════════════════════════════
+       TRANSACTION GROUP HEADERS — mirrors task-group
+    ═══════════════════════════════════════════════ */
+    .tx-group{display:flex;flex-direction:column;gap:0}
+    .group-header{display:flex;align-items:center;gap:10px;padding:0 0 8px}
+    .group-label{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.7px;text-transform:uppercase;font-weight:600}
+    .group-count{font-family:var(--font-mono);font-size:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)}
+    .group-line{flex:1;height:1px;background:var(--line)}
+
+    /* ═══════════════════════════════════════════════
+       TRANSACTION CARD — mirrors task-card
+    ═══════════════════════════════════════════════ */
+    .tx-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:8px;transition:box-shadow .15s,border-color .15s}
+    .tx-card:last-child{margin-bottom:0}
+    .tx-card.is-open{border-color:var(--line-strong);box-shadow:var(--shadow-md)}
+    .tx-card.has-missing{border-left:4px solid var(--red)}
+    .tx-card.all-clear{border-left:4px solid var(--green)}
+    .tx-card.needs-attention{border-left:4px solid var(--amber)}
+
+    /* Collapsed header row — mirrors task-collapsed */
+    .tx-collapsed{display:grid;grid-template-columns:26px 1fr auto auto;gap:13px;align-items:center;padding:13px 15px 13px 14px;cursor:pointer;user-select:none;transition:background .12s}
+    .tx-collapsed:hover{background:var(--surface-2)}
+    .tx-card.is-open .tx-collapsed{background:var(--surface-2)}
+    .tx-chevron{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:14px;color:var(--ghost);flex-shrink:0;transition:transform .2s,background .13s,border-color .13s;line-height:1}
+    .tx-card.is-open .tx-chevron{transform:rotate(90deg);background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+
+    .tx-summary{}
+    .tx-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+    .tx-address{font-size:13.5px;font-weight:700;line-height:1.3}
+    .tx-meta-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .tx-meta-item{font-size:12px;color:var(--muted);font-weight:600}
+    .tx-side-badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:2px 7px;font-family:var(--font-mono);font-size:9.5px;font-weight:600}
+    .side-buy{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .side-list{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+
+    .tx-doc-progress{display:flex;align-items:center;gap:8px;flex-shrink:0}
+    .mini-track{width:80px;height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+    .mini-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),#1d9e6a)}
+    .mini-fill.warn{background:linear-gradient(90deg,var(--amber),#c8891a)}
+    .mini-fill.danger{background:linear-gradient(90deg,var(--red),#d44040)}
+    .mini-prog-label{font-family:var(--font-mono);font-size:11px;color:var(--muted);white-space:nowrap}
+
+    /* ═══════════════════════════════════════════════
+       DOCUMENT EXPAND PANEL — mirrors task-expand zones
+    ═══════════════════════════════════════════════ */
+    .tx-expand{display:none;border-top:1px solid var(--line);background:var(--surface-2)}
+    .tx-expand.open{display:block}
+    .exp-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;text-transform:uppercase;color:var(--ghost);margin-bottom:8px;font-weight:600}
+
+    /* Doc section header inside expand */
+    .doc-section{padding:14px 18px 0}
+    .doc-section-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+    .doc-section-title{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.6px;text-transform:uppercase;font-weight:600}
+    .doc-section-count{font-family:var(--font-mono);font-size:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:2px 7px;color:var(--muted)}
+    .doc-section-line{flex:1;height:1px;background:var(--line)}
+
+    /* Document row inside expand */
+    .doc-rows{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+    .doc-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+    .doc-row.missing{background:var(--red-bg);border-color:var(--red-border);border-style:dashed}
+
+    .doc-file-icon{width:36px;height:40px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+    .doc-file-icon.pdf{background:var(--red-bg);border:1px solid var(--red-border)}
+    .doc-file-icon.missing-icon{background:var(--surface-2);border:1px dashed var(--line-strong)}
+    .doc-file-icon .ext{font-family:var(--font-mono);font-size:8px;font-weight:700;color:var(--red);letter-spacing:.5px}
+    .doc-file-icon .missing-dash{font-family:var(--font-mono);font-size:16px;color:var(--ghost)}
+
+    .doc-info{}
+    .doc-name{font-size:13px;font-weight:700;margin-bottom:2px}
+    .doc-row.missing .doc-name{color:var(--muted);font-style:italic}
+    .doc-sub{font-size:11px;color:var(--ghost);font-family:var(--font-mono)}
+
+    /* Doc status pill */
+    .doc-status{flex-shrink:0}
+
+    /* Doc actions — mirrors tiny-btn */
+    .doc-actions{display:flex;gap:5px;flex-shrink:0}
+    .tiny-btn{display:flex;align-items:center;gap:5px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);padding:0 9px;transition:.13s;white-space:nowrap}
+    .tiny-btn:hover{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+    .tiny-btn.preview{color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg)}
+    .tiny-btn.preview:hover{background:#dae8fd}
+    .tiny-btn.download{color:var(--teal);border-color:var(--teal-border);background:var(--teal-bg)}
+    .tiny-btn.download:hover{background:#d4f2f2}
+    .tiny-btn.sign{color:var(--purple);border-color:var(--purple-border);background:var(--purple-bg)}
+    .tiny-btn.sign:hover{background:#ece5ff}
+    .tiny-btn.danger{color:var(--red);border-color:var(--red-border);background:var(--red-bg)}
+    .tiny-btn.danger:hover{background:#fce2e2}
+    .tiny-btn.upload-btn{color:var(--orange-dark);border-color:var(--orange-border);background:var(--orange-light)}
+    .tiny-btn.upload-btn:hover{background:#fce8d4}
+    .icon-only{width:30px;height:30px;padding:0;justify-content:center;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;transition:.13s;display:flex;align-items:center;color:var(--muted)}
+    .icon-only:hover{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+    .icon-only.preview:hover{background:#dae8fd;border-color:var(--blue-border);color:var(--blue)}
+    .icon-only.download:hover{background:#d4f2f2;border-color:var(--teal-border);color:var(--teal)}
+    .icon-only.sign:hover{background:#ece5ff;border-color:var(--purple-border);color:var(--purple)}
+    .icon-only.del:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+
+    /* Upload strip at bottom of expanded tx */
+    .doc-upload-strip{padding:0 18px 16px;border-top:1px dashed var(--line-strong);margin-top:2px;padding-top:12px}
+    .upload-strip-inner{display:flex;align-items:center;gap:10px}
+
+    /* Expand footer — open transaction link */
+    .exp-zone-footer{padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-top:1px solid var(--line)}
+    .exp-meta{font-size:11.5px;color:var(--ghost)}
+    .exp-open-txn{display:flex;align-items:center;gap:8px;background:var(--navy);color:#fff;border-radius:11px;padding:9px 15px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:.15s;white-space:nowrap}
+    .exp-open-txn:hover{background:#2a4472;transform:translateY(-1px)}
+
+    /* ═══════════════════════════════════════════════
+       CATEGORY VIEW — grouped by doc type
+    ═══════════════════════════════════════════════ */
+    .cat-card{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:8px}
+    .cat-header{display:flex;align-items:center;gap:10px;padding:13px 15px;cursor:pointer;user-select:none;transition:background .12s}
+    .cat-header:hover{background:var(--surface-2)}
+    .cat-card.is-open .cat-header{background:var(--surface-2)}
+    .cat-icon{width:28px;height:28px;border-radius:7px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+    .cat-name{font-size:13.5px;font-weight:700;flex:1}
+    .cat-sub{font-size:12px;color:var(--muted)}
+    .cat-chevron{width:26px;height:26px;border-radius:7px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;font-size:14px;color:var(--ghost);flex-shrink:0;transition:transform .2s,background .13s;line-height:1}
+    .cat-card.is-open .cat-chevron{transform:rotate(90deg);background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+    .cat-body{display:none;border-top:1px solid var(--line);background:var(--surface-2)}
+    .cat-card.is-open .cat-body{display:block}
+    .cat-doc-row{display:grid;grid-template-columns:36px 1fr auto auto;gap:12px;align-items:center;background:#fff;border-bottom:1px solid var(--line);padding:10px 15px}
+    .cat-doc-row:last-child{border-bottom:none}
+    .cat-tx-label{font-size:11px;color:var(--ghost);font-family:var(--font-mono);margin-top:1px}
+
+    /* ═══════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════ */
+    .empty-state{background:#fff;border:1px solid var(--line);border-radius:14px;padding:40px 24px;text-align:center;display:none}
+    .empty-state.visible{display:block}
+    .empty-icon{font-size:32px;margin-bottom:12px}
+    .empty-state h3{font-family:var(--font-serif);font-size:20px;margin-bottom:7px}
+    .empty-state p{font-size:13px;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto 16px}
+
+    /* ═══════════════════════════════════════════════
+       UPLOAD MODAL — mirrors add-task modal
+    ═══════════════════════════════════════════════ */
+    .modal-wrap{position:fixed;inset:0;background:rgba(20,20,20,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);padding:16px}
+    .modal-wrap.open{display:flex}
+    .modal{background:#fff;border-radius:20px;width:100%;max-width:520px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+    .modal-head h3{font-family:var(--font-serif);font-size:20px;margin-bottom:4px}
+    .modal-head p{font-size:12.5px;color:var(--muted);line-height:1.4}
+    .close-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:.13s}
+    .close-btn:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+    .field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--muted)}
+    .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;background:var(--surface-2);transition:.14s;outline:none;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 18px;border-top:1px solid var(--line);background:var(--surface-2)}
+
+    /* Doc type chip grid inside modal */
+    .doc-type-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+    .doc-type-chip{background:var(--surface-2);border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s;text-align:left}
+    .doc-type-chip:hover{background:#fff;border-color:var(--line-strong);color:var(--text)}
+    .doc-type-chip.selected{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+
+    /* Dropzone */
+    .dropzone{border:2px dashed var(--line-strong);border-radius:12px;padding:28px 20px;text-align:center;cursor:pointer;transition:.15s;background:var(--surface-2)}
+    .dropzone:hover{border-color:var(--orange);background:var(--orange-soft)}
+    .dropzone-icon{font-size:28px;margin-bottom:8px}
+    .dropzone-text{font-size:13px;color:var(--muted);line-height:1.5}
+    .dropzone-text strong{color:var(--orange-dark)}
+    .dropzone-hint{font-size:11px;color:var(--ghost);margin-top:4px}
+
+    /* ═══════════════════════════════════════════════
+       SIGNATURE MODAL
+    ═══════════════════════════════════════════════ */
+    .sig-modal{background:#fff;border-radius:20px;width:100%;max-width:480px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .signer-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:5px}
+    .signer-chip{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s}
+    .signer-chip:hover{border-color:var(--line-strong);background:var(--surface-2)}
+    .signer-chip.selected{background:var(--purple-bg);border-color:var(--purple-border);color:var(--purple)}
+    .chip-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);flex-shrink:0}
+    .sig-integration-note{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 14px}
+    .sig-integration-note strong{display:block;font-size:12px;color:var(--text);margin-bottom:3px}
+    .sig-integration-note span{font-size:11.5px;color:var(--muted)}
+
+    /* ═══════════════════════════════════════════════
+       PREVIEW MODAL
+    ═══════════════════════════════════════════════ */
+    .preview-modal{background:#fff;border-radius:20px;width:100%;max-width:600px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .preview-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+    .preview-filename{font-size:14px;font-weight:700}
+    .preview-body{min-height:340px;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:24px}
+    .preview-pdf-stub{width:100%;max-width:320px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:32px;text-align:center;color:var(--ghost)}
+    .preview-foot{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-top:1px solid var(--line)}
+
+    /* ═══════════════════════════════════════════════
+       FLOATING AI — identical
+    ═══════════════════════════════════════════════ */
+    .floating-ai{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--navy),#233d6a);color:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 8px 30px rgba(30,51,86,.35);transition:.2s;z-index:100;max-width:280px;border:1px solid rgba(255,255,255,.1)}
+    .floating-ai:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(30,51,86,.45)}
+    .floating-ai strong{display:block;font-size:13px;margin-bottom:2px}
+    .floating-ai span{display:block;font-size:11px;color:rgba(255,255,255,.7);line-height:1.35}
+
+    /* ═══════════════════════════════════════════════
+       TOAST — identical
+    ═══════════════════════════════════════════════ */
+    .toast{position:fixed;bottom:90px;right:24px;background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;z-index:300;transform:translateY(12px);opacity:0;transition:.25s ease;pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+    .toast strong{display:block;font-size:13px;margin-bottom:1px}
+    .toast span{font-size:11.5px;color:var(--muted)}
+    .toast-close{margin-left:auto;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0}
+
+    /* SVG icon helper */
+    .ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════════════════════════ SIDEBAR -->
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <div class="brand-name">
+        <strong>Velvet Elves</strong>
+        <span>Transaction OS</span>
+      </div>
+    </div>
+    <div class="side-block">
+      <div class="side-label">Portfolio today</div>
+      <div class="side-summary">
+        <div class="mini"><div class="num orange">3</div><div class="cap">Active files</div></div>
+        <div class="mini"><div class="num red">3</div><div class="cap">Missing docs</div></div>
+        <div class="mini"><div class="num amber">3</div><div class="cap">Pending sig.</div></div>
+        <div class="mini"><div class="num blue">18</div><div class="cap">Total docs</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Deals</div>
+      <a href="#"><span>⊞</span> Dashboard</a>
+      <a href="#"><span>◈</span> Active Transactions <span class="badge">3</span></a>
+      <a href="#"><span>◔</span> Pending <span class="badge">1</span></a>
+      <a href="#"><span>◉</span> Closed</a>
+      <a href="#"><span>◻</span> All Transactions</a>
+      <div class="nav-section">Workflow</div>
+      <a href="#"><span>✓</span> My Task Queue <span class="badge">14</span></a>
+      <a href="#" class="active"><span>◻</span> All Documents <span class="badge">3</span></a>
+      <a href="#"><span>◷</span> Closing Calendar</a>
+      <div class="nav-section">Intelligence</div>
+      <a href="#"><span>✦</span> AI Suggestions <span class="badge">4</span></a>
+      <a href="#"><span>◈</span> Analytics</a>
+      <a href="#"><span>◻</span> Settings</a>
+    </div>
+    <div class="side-footer">
+      <div class="upgrade-nudge">
+        <strong>✦ Add AI Coach</strong>
+        <span>Grow your business between transactions. Lead gen, scripts & coaching.</span>
+      </div>
+      <div class="user-row">
+        <div class="s-avatar">JM</div>
+        <div class="user-info">
+          <strong>Jordan Mills</strong>
+          <span>Solo Agent</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════ MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="top-title">All Documents</div>
+      <div class="top-actions">
+        <div class="notif-btn"><svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg><div class="notif-dot"></div></div>
+        <div class="top-avatar">JM</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- AI BRIEFING -->
+      <div class="ai-briefing">
+        <div class="ai-briefing-icon">✦</div>
+        <div class="ai-briefing-copy">
+          <div class="eyebrow">Document intelligence briefing</div>
+          <strong>3 missing docs are blocking two closings — address Sunridge first.</strong>
+          <p>18 documents across 3 active transactions. 4412 Sunridge Blvd is missing Wire Instructions and a Counter Offer Addendum — both required before close on May 15. 628 Prince Dr still needs the Appraisal Report. Everything else is signed or in motion.</p>
+        </div>
+        <div class="ai-briefing-actions">
+          <button class="btn-primary" onclick="showToast('Missing doc tasks added.','Check My Task Queue.')">Add to task queue</button>
+          <div class="ai-meta">Updated 4 min ago</div>
+        </div>
+      </div>
+
+      <!-- DOC STAT BAR -->
+      <div class="doc-stat-bar">
+        <button class="ps-btn green-filter" id="psb-signed" onclick="filterByStat('signed','psb-signed','green-filter')" title="Filter: Signed">
+          <div class="n green" id="stat-signed">8</div><div class="l">Signed</div>
+        </button>
+        <div class="ps-divider"></div>
+        <button class="ps-btn blue-filter" id="psb-pending" onclick="filterByStat('pending-review','psb-pending','blue-filter')" title="Filter: Pending Review">
+          <div class="n blue" id="stat-pending">4</div><div class="l">Pending Review</div>
+        </button>
+        <div class="ps-divider"></div>
+        <button class="ps-btn amber-filter" id="psb-sent" onclick="filterByStat('sent-sig','psb-sent','amber-filter')" title="Filter: Sent for Sig.">
+          <div class="n amber" id="stat-sent">3</div><div class="l">Sent for Sig.</div>
+        </button>
+        <div class="ps-divider"></div>
+        <button class="ps-btn red-filter" id="psb-missing" onclick="filterByStat('missing','psb-missing','red-filter')" title="Filter: Missing">
+          <div class="n red" id="stat-missing">3</div><div class="l">Missing</div>
+        </button>
+        <div class="ps-divider"></div>
+        <div class="doc-stat-right">
+          <div class="doc-stat-label-row">
+            <span>Document completion across active transactions</span>
+            <strong id="completion-pct">72%</strong>
+          </div>
+          <div class="doc-stat-track"><div class="doc-stat-fill" id="completion-bar" style="width:72%"></div></div>
+          <div class="doc-seg-labels">
+            <div class="dsl"><div class="dsl-dot green"></div>8 signed</div>
+            <div class="dsl"><div class="dsl-dot blue"></div>4 pending</div>
+            <div class="dsl"><div class="dsl-dot amber"></div>3 sent</div>
+            <div class="dsl"><div class="dsl-dot red"></div>3 missing</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="doc-controls">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setTypeFilter(this,'all')">All <span class="tab-count" id="tab-all-count">3</span></button>
+          <button class="filter-tab" onclick="setTypeFilter(this,'buyer')">Buyer Side <span class="tab-count">2</span></button>
+          <button class="filter-tab" onclick="setTypeFilter(this,'listing')">Listing Side <span class="tab-count">1</span></button>
+        </div>
+        <div class="doc-controls-search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input id="doc-search" placeholder="Search documents, addresses, types…" oninput="applySearch()" />
+        </div>
+        <div class="doc-controls-actions">
+          <button class="btn-secondary" style="font-size:12px;padding:8px 13px;display:flex;align-items:center;gap:6px;white-space:nowrap" onclick="openSigModalStandalone()">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            Send for Signature
+          </button>
+          <button class="btn-primary" style="font-size:12px;padding:8px 13px;display:flex;align-items:center;gap:6px;white-space:nowrap" onclick="openUploadModal()">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            Upload Doc
+          </button>
+          <div class="view-toggle">
+            <button class="view-btn active" id="btn-view-tx" onclick="setView('tx')">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+              By Transaction
+            </button>
+            <button class="view-btn" id="btn-view-type" onclick="setView('type')">
+              <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 12h.01M7 17h.01M11 7h6M11 12h6M11 17h6"/></svg>
+              By Type
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ TRANSACTION VIEW ═══ -->
+      <div id="tx-view">
+
+        <!-- TX 1: 628 Prince Dr — has-missing -->
+        <div class="tx-card has-missing" id="txc-1" data-side="buyer">
+          <div class="tx-collapsed" onclick="toggleTx(1)">
+            <div class="tx-chevron" id="txchev-1">›</div>
+            <div class="tx-summary">
+              <div class="tx-title-row">
+                <span class="tx-address">628 Prince Dr, Greenwood, IN</span>
+                <span class="tx-side-badge side-buy">BUYER SIDE</span>
+                <span class="pill amber">Under Contract</span>
+              </div>
+              <div class="tx-meta-row">
+                <span class="tx-meta-item">Close: Apr 28, 2026</span>
+                <span class="tx-meta-item">Sarah &amp; Mark Chen</span>
+                <span class="pill red"><svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"/></svg> 1 missing doc</span>
+              </div>
+            </div>
+            <div class="tx-doc-progress">
+              <div class="mini-track"><div class="mini-fill warn" style="width:70%"></div></div>
+              <span class="mini-prog-label">7/10 docs</span>
+            </div>
+          </div>
+          <div class="tx-expand" id="txexp-1">
+
+            <!-- Completed -->
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--green)">Signed / Executed</span>
+                <span class="doc-section-count">2</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row" data-status="signed" data-name="purchase agreement">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info">
+                    <div class="doc-name">Purchase Agreement</div>
+                    <div class="doc-sub">Uploaded Mar 14 · 2.4 MB</div>
+                  </div>
+                  <span class="pill green">✓ Signed</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" title="Preview" onclick="openPreview('Purchase Agreement','628 Prince Dr')">
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    </button>
+                    <button class="icon-only download" title="Download" onclick="showToast('Download started.','Purchase Agreement')">
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    </button>
+                    <button class="icon-only sign" title="Send for Signature" onclick="openSigModal('Purchase Agreement','628 Prince Dr')">
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                    </button>
+                    <button class="icon-only del" title="Delete / Replace" onclick="showToast('Are you sure?','Double-click to confirm delete.')">
+                      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <div class="doc-row" data-status="signed" data-name="pre-approval letter">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info">
+                    <div class="doc-name">Pre-Approval Letter</div>
+                    <div class="doc-sub">Uploaded Mar 10 · 0.8 MB</div>
+                  </div>
+                  <span class="pill green">✓ Signed</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" title="Preview" onclick="openPreview('Pre-Approval Letter','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" title="Download" onclick="showToast('Download started.','Pre-Approval Letter')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" title="Send for Signature" onclick="openSigModal('Pre-Approval Letter','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" title="Delete / Replace" onclick="showToast('Are you sure?','Double-click to confirm delete.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Needs Attention -->
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--amber)">Needs Attention</span>
+                <span class="doc-section-count">2</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row" data-status="pending-review" data-name="inspection report">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info">
+                    <div class="doc-name">Inspection Report</div>
+                    <div class="doc-sub">Uploaded Mar 22 · 4.1 MB</div>
+                  </div>
+                  <span class="pill blue">● Pending Review</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" title="Preview" onclick="openPreview('Inspection Report','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" title="Download" onclick="showToast('Download started.','Inspection Report')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" title="Send for Signature" onclick="openSigModal('Inspection Report','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" title="Delete / Replace" onclick="showToast('Are you sure?','Double-click to confirm delete.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+                <div class="doc-row" data-status="sent-sig" data-name="sellers disclosure">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info">
+                    <div class="doc-name">Seller's Disclosure</div>
+                    <div class="doc-sub">Sent Mar 24 · Awaiting signatures</div>
+                  </div>
+                  <span class="pill amber">◷ Sent for Sig.</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" title="Preview" onclick="openPreview('Seller\'s Disclosure','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" title="Download" onclick="showToast('Download started.','Seller\'s Disclosure')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" title="Resend for Signature" onclick="openSigModal('Seller\'s Disclosure','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" title="Delete / Replace" onclick="showToast('Are you sure?','Double-click to confirm delete.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Missing -->
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--red)">Missing / Required</span>
+                <span class="doc-section-count">1</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row missing" data-status="missing" data-name="appraisal report">
+                  <div class="doc-file-icon missing-icon"><div class="missing-dash">—</div></div>
+                  <div class="doc-info">
+                    <div class="doc-name">Appraisal Report</div>
+                    <div class="doc-sub">Required by buyer-side template</div>
+                  </div>
+                  <span class="pill red">! Missing</span>
+                  <div class="doc-actions">
+                    <button class="tiny-btn upload-btn" onclick="openUploadModalFor('Appraisal Report','628 Prince Dr, Greenwood, IN')">
+                      <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                      Upload Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="doc-upload-strip">
+              <div class="upload-strip-inner">
+                <button class="btn-ghost" style="display:flex;align-items:center;gap:6px;font-size:12px" onclick="openUploadModalFor('','628 Prince Dr, Greenwood, IN')">
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Add another document to this transaction
+                </button>
+              </div>
+            </div>
+
+            <div class="exp-zone-footer">
+              <span class="exp-meta">Close Apr 28 · 628 Prince Dr · Buyer side</span>
+              <button class="exp-open-txn" onclick="showToast('Opening transaction…','628 Prince Dr')">
+                Open Transaction <span style="font-size:14px;margin-left:2px">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TX 2: 4412 Sunridge — has-missing (2 missing) -->
+        <div class="tx-card has-missing" id="txc-2" data-side="listing">
+          <div class="tx-collapsed" onclick="toggleTx(2)">
+            <div class="tx-chevron" id="txchev-2">›</div>
+            <div class="tx-summary">
+              <div class="tx-title-row">
+                <span class="tx-address">4412 Sunridge Blvd, Indianapolis, IN</span>
+                <span class="tx-side-badge side-list">LISTING SIDE</span>
+                <span class="pill red"><svg width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01"/></svg> 2 missing docs</span>
+              </div>
+              <div class="tx-meta-row">
+                <span class="tx-meta-item">Close: May 15, 2026</span>
+                <span class="tx-meta-item">Tom Weaver</span>
+              </div>
+            </div>
+            <div class="tx-doc-progress">
+              <div class="mini-track"><div class="mini-fill danger" style="width:50%"></div></div>
+              <span class="mini-prog-label">4/8 docs</span>
+            </div>
+          </div>
+          <div class="tx-expand" id="txexp-2">
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--green)">Signed / Executed</span>
+                <span class="doc-section-count">2</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row" data-status="signed" data-name="listing agreement">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info"><div class="doc-name">Listing Agreement</div><div class="doc-sub">Uploaded Feb 28 · 1.9 MB</div></div>
+                  <span class="pill green">✓ Signed</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" title="Preview" onclick="openPreview('Listing Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" onclick="showToast('Download started.','Listing Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" onclick="openSigModal('Listing Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" onclick="showToast('Are you sure?','Double-click to confirm.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+                <div class="doc-row" data-status="sent-sig" data-name="purchase agreement seller">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info"><div class="doc-name">Purchase Agreement (Seller)</div><div class="doc-sub">Sent Mar 20 · Awaiting signatures</div></div>
+                  <span class="pill amber">◷ Sent for Sig.</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" onclick="openPreview('Purchase Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" onclick="showToast('Download started.','Purchase Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" onclick="openSigModal('Purchase Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" onclick="showToast('Are you sure?','Double-click to confirm.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--red)">Missing / Required</span>
+                <span class="doc-section-count">2</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row missing" data-status="missing" data-name="counter offer addendum">
+                  <div class="doc-file-icon missing-icon"><div class="missing-dash">—</div></div>
+                  <div class="doc-info"><div class="doc-name">Counter Offer Addendum</div><div class="doc-sub">Required by listing-side template</div></div>
+                  <span class="pill red">! Missing</span>
+                  <div class="doc-actions"><button class="tiny-btn upload-btn" onclick="openUploadModalFor('Counter Offer Addendum','4412 Sunridge Blvd, Indianapolis, IN')"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Upload Now</button></div>
+                </div>
+                <div class="doc-row missing" data-status="missing" data-name="wire instructions">
+                  <div class="doc-file-icon missing-icon"><div class="missing-dash">—</div></div>
+                  <div class="doc-info"><div class="doc-name">Wire Instructions</div><div class="doc-sub">Required by listing-side template</div></div>
+                  <span class="pill red">! Missing</span>
+                  <div class="doc-actions"><button class="tiny-btn upload-btn" onclick="openUploadModalFor('Wire Instructions','4412 Sunridge Blvd, Indianapolis, IN')"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Upload Now</button></div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-upload-strip">
+              <div class="upload-strip-inner">
+                <button class="btn-ghost" style="display:flex;align-items:center;gap:6px;font-size:12px" onclick="openUploadModalFor('','4412 Sunridge Blvd, Indianapolis, IN')">
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Add another document to this transaction
+                </button>
+              </div>
+            </div>
+            <div class="exp-zone-footer">
+              <span class="exp-meta">Close May 15 · 4412 Sunridge Blvd · Listing side</span>
+              <button class="exp-open-txn" onclick="showToast('Opening transaction…','4412 Sunridge Blvd')">Open Transaction <span style="font-size:14px;margin-left:2px">→</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TX 3: 214 Maple Creek — needs-attention -->
+        <div class="tx-card needs-attention" id="txc-3" data-side="buyer">
+          <div class="tx-collapsed" onclick="toggleTx(3)">
+            <div class="tx-chevron" id="txchev-3">›</div>
+            <div class="tx-summary">
+              <div class="tx-title-row">
+                <span class="tx-address">214 Maple Creek Ln, Franklin, IN</span>
+                <span class="tx-side-badge side-buy">BUYER SIDE</span>
+                <span class="pill amber">◷ Sig. Pending</span>
+              </div>
+              <div class="tx-meta-row">
+                <span class="tx-meta-item">Close: Jun 2, 2026</span>
+                <span class="tx-meta-item">Lisa Harmon</span>
+              </div>
+            </div>
+            <div class="tx-doc-progress">
+              <div class="mini-track"><div class="mini-fill warn" style="width:33%"></div></div>
+              <span class="mini-prog-label">2/6 docs</span>
+            </div>
+          </div>
+          <div class="tx-expand" id="txexp-3">
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--amber)">Needs Attention</span>
+                <span class="doc-section-count">1</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row" data-status="sent-sig" data-name="buyers agency agreement">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info"><div class="doc-name">Buyer's Agency Agreement</div><div class="doc-sub">Sent Mar 28 · Awaiting Lisa Harmon</div></div>
+                  <span class="pill amber">◷ Sent for Sig.</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" onclick="openPreview('Buyer\'s Agency Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" onclick="showToast('Download started.','Buyer\'s Agency Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" onclick="openSigModal('Buyer\'s Agency Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" onclick="showToast('Are you sure?','Double-click to confirm.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-section">
+              <div class="doc-section-head">
+                <span class="doc-section-title" style="color:var(--green)">Signed / Executed</span>
+                <span class="doc-section-count">1</span>
+                <div class="doc-section-line"></div>
+              </div>
+              <div class="doc-rows">
+                <div class="doc-row" data-status="signed" data-name="showing agreement">
+                  <div class="doc-file-icon pdf"><div class="ext">PDF</div></div>
+                  <div class="doc-info"><div class="doc-name">Showing Agreement</div><div class="doc-sub">Uploaded Mar 18 · 0.6 MB</div></div>
+                  <span class="pill green">✓ Signed</span>
+                  <div class="doc-actions">
+                    <button class="icon-only preview" onclick="openPreview('Showing Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button>
+                    <button class="icon-only download" onclick="showToast('Download started.','Showing Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button>
+                    <button class="icon-only sign" onclick="openSigModal('Showing Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                    <button class="icon-only del" onclick="showToast('Are you sure?','Double-click to confirm.')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="doc-upload-strip">
+              <div class="upload-strip-inner">
+                <button class="btn-ghost" style="display:flex;align-items:center;gap:6px;font-size:12px" onclick="openUploadModalFor('','214 Maple Creek Ln, Franklin, IN')">
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Add another document to this transaction
+                </button>
+              </div>
+            </div>
+            <div class="exp-zone-footer">
+              <span class="exp-meta">Close Jun 2 · 214 Maple Creek Ln · Buyer side</span>
+              <button class="exp-open-txn" onclick="showToast('Opening transaction…','214 Maple Creek Ln')">Open Transaction <span style="font-size:14px;margin-left:2px">→</span></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">📂</div>
+          <h3>No documents match this filter</h3>
+          <p>Try a different filter or search term, or check that documents have been assigned to an active transaction.</p>
+          <button class="btn-secondary" onclick="resetFilters()">Clear filters</button>
+        </div>
+
+      </div><!-- /tx-view -->
+
+      <!-- ═══ CATEGORY / TYPE VIEW ═══ -->
+      <div id="type-view" style="display:none">
+
+        <div class="cat-card" id="cat-signed">
+          <div class="cat-header" onclick="toggleCat('signed')">
+            <div class="cat-icon" style="background:var(--green-bg);color:var(--green)">✓</div>
+            <div class="cat-name">Signed / Executed</div>
+            <div class="cat-sub">8 documents across 3 transactions</div>
+            <div class="cat-chevron" id="catchev-signed">›</div>
+          </div>
+          <div class="cat-body" id="catbody-signed">
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Purchase Agreement</div><div class="cat-tx-label">628 Prince Dr · Mar 14</div></div><span class="pill green">✓ Signed</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Purchase Agreement','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only download" onclick="showToast('Download started.','Purchase Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button></div></div>
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Pre-Approval Letter</div><div class="cat-tx-label">628 Prince Dr · Mar 10</div></div><span class="pill green">✓ Signed</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Pre-Approval Letter','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only download" onclick="showToast('Download started.','Pre-Approval Letter')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button></div></div>
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Listing Agreement</div><div class="cat-tx-label">4412 Sunridge Blvd · Feb 28</div></div><span class="pill green">✓ Signed</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Listing Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only download" onclick="showToast('Download started.','Listing Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button></div></div>
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Showing Agreement</div><div class="cat-tx-label">214 Maple Creek Ln · Mar 18</div></div><span class="pill green">✓ Signed</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Showing Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only download" onclick="showToast('Download started.','Showing Agreement')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg></button></div></div>
+          </div>
+        </div>
+
+        <div class="cat-card" id="cat-sent">
+          <div class="cat-header" onclick="toggleCat('sent')">
+            <div class="cat-icon" style="background:var(--amber-bg);color:var(--amber)">◷</div>
+            <div class="cat-name">Sent for Signature</div>
+            <div class="cat-sub">3 documents awaiting signers</div>
+            <div class="cat-chevron" id="catchev-sent">›</div>
+          </div>
+          <div class="cat-body" id="catbody-sent">
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Seller's Disclosure</div><div class="cat-tx-label">628 Prince Dr · Sent Mar 24</div></div><span class="pill amber">◷ Sent for Sig.</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Seller\'s Disclosure','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only sign" onclick="openSigModal('Seller\'s Disclosure','628 Prince Dr')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button></div></div>
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Purchase Agreement (Seller)</div><div class="cat-tx-label">4412 Sunridge Blvd · Sent Mar 20</div></div><span class="pill amber">◷ Sent for Sig.</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Purchase Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only sign" onclick="openSigModal('Purchase Agreement','4412 Sunridge Blvd')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button></div></div>
+            <div class="cat-doc-row"><div class="doc-file-icon pdf"><div class="ext">PDF</div></div><div class="doc-info"><div class="doc-name">Buyer's Agency Agreement</div><div class="cat-tx-label">214 Maple Creek Ln · Sent Mar 28</div></div><span class="pill amber">◷ Sent for Sig.</span><div class="doc-actions"><button class="icon-only preview" onclick="openPreview('Buyer\'s Agency Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></button><button class="icon-only sign" onclick="openSigModal('Buyer\'s Agency Agreement','214 Maple Creek Ln')"><svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button></div></div>
+          </div>
+        </div>
+
+        <div class="cat-card" id="cat-missing">
+          <div class="cat-header" onclick="toggleCat('missing')">
+            <div class="cat-icon" style="background:var(--red-bg);color:var(--red)">!</div>
+            <div class="cat-name">Missing / Required</div>
+            <div class="cat-sub">3 documents needed across 2 transactions</div>
+            <div class="cat-chevron" id="catchev-missing">›</div>
+          </div>
+          <div class="cat-body" id="catbody-missing">
+            <div class="cat-doc-row" style="background:var(--red-bg)"><div class="doc-file-icon missing-icon"><div class="missing-dash">—</div></div><div class="doc-info"><div class="doc-name" style="color:var(--muted);font-style:italic">Appraisal Report</div><div class="cat-tx-label">628 Prince Dr · Required</div></div><span class="pill red">! Missing</span><div class="doc-actions"><button class="tiny-btn upload-btn" onclick="openUploadModalFor('Appraisal Report','628 Prince Dr, Greenwood, IN')"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Upload</button></div></div>
+            <div class="cat-doc-row" style="background:var(--red-bg)"><div class="doc-file-icon missing-icon"><div class="missing-dash">—</div></div><div class="doc-info"><div class="doc-name" style="color:var(--muted);font-style:italic">Counter Offer Addendum</div><div class="cat-tx-label">4412 Sunridge Blvd · Required</div></div><span class="pill red">! Missing</span><div class="doc-actions"><button class="tiny-btn upload-btn" onclick="openUploadModalFor('Counter Offer Addendum','4412 Sunridge Blvd, Indianapolis, IN')"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Upload</button></div></div>
+            <div class="cat-doc-row" style="background:var(--red-bg)"><div class="doc-file-icon missing-icon"><div class="missing-dash">—</div></div><div class="doc-info"><div class="doc-name" style="color:var(--muted);font-style:italic">Wire Instructions</div><div class="cat-tx-label">4412 Sunridge Blvd · Required</div></div><span class="pill red">! Missing</span><div class="doc-actions"><button class="tiny-btn upload-btn" onclick="openUploadModalFor('Wire Instructions','4412 Sunridge Blvd, Indianapolis, IN')"><svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>Upload</button></div></div>
+          </div>
+        </div>
+
+      </div><!-- /type-view -->
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /app -->
+
+<!-- ═══ UPLOAD MODAL ═══ -->
+<div class="modal-wrap" id="uploadModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Upload Document</h3>
+        <p>Assign to a transaction and select the document type.</p>
+      </div>
+      <button class="close-btn" onclick="closeUploadModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>ASSIGN TO TRANSACTION</label>
+        <select id="upload-tx-select">
+          <option value="">— Select a transaction —</option>
+          <option value="628">628 Prince Dr, Greenwood, IN</option>
+          <option value="4412">4412 Sunridge Blvd, Indianapolis, IN</option>
+          <option value="214">214 Maple Creek Ln, Franklin, IN</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>DOCUMENT TYPE</label>
+        <div class="doc-type-grid" id="doc-type-grid">
+          <button class="doc-type-chip" onclick="selectDocType(this)">Purchase Agreement</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Inspection Report</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Appraisal Report</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Seller's Disclosure</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Wire Instructions</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Counter Offer Addendum</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Listing Agreement</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Pre-Approval Letter</button>
+          <button class="doc-type-chip" onclick="selectDocType(this)">Other / Custom</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>FILE</label>
+        <div class="dropzone" onclick="showToast('File picker would open here.','PDF, DOC, DOCX up to 50 MB')">
+          <div class="dropzone-icon">📄</div>
+          <div class="dropzone-text"><strong>Click to browse</strong> or drag and drop</div>
+          <div class="dropzone-hint">PDF, DOC, DOCX · Max 50 MB</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn-primary" onclick="handleUpload()">Upload Document</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SIGNATURE MODAL ═══ -->
+<div class="modal-wrap" id="sigModal">
+  <div class="sig-modal">
+    <div class="modal-head">
+      <div>
+        <h3>Send for Signature</h3>
+        <p id="sig-modal-desc">Document · Transaction</p>
+      </div>
+      <button class="close-btn" onclick="closeSigModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="sig-doc-select-wrap" style="display:none">
+        <div class="field">
+          <label>TRANSACTION</label>
+          <select>
+            <option value="">— Select a transaction —</option>
+            <option>628 Prince Dr, Greenwood, IN</option>
+            <option>4412 Sunridge Blvd, Indianapolis, IN</option>
+            <option>214 Maple Creek Ln, Franklin, IN</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>DOCUMENT</label>
+          <select>
+            <option value="">— Select a document —</option>
+            <option>Purchase Agreement</option>
+            <option>Inspection Report</option>
+            <option>Seller's Disclosure</option>
+            <option>Listing Agreement</option>
+            <option>Buyer's Agency Agreement</option>
+            <option>Showing Agreement</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>SELECT SIGNERS</label>
+        <div class="signer-chips">
+          <div class="signer-chip selected" onclick="toggleSigner(this)"><div class="chip-dot"></div>Sarah Chen (Buyer)</div>
+          <div class="signer-chip selected" onclick="toggleSigner(this)"><div class="chip-dot"></div>Mark Chen (Buyer)</div>
+          <div class="signer-chip" onclick="toggleSigner(this)"><div class="chip-dot" style="background:var(--amber)"></div>Tom Weaver (Buyer Agent)</div>
+          <div class="signer-chip" onclick="toggleSigner(this)"><div class="chip-dot" style="background:var(--teal)"></div>Title Co. (Review)</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>MESSAGE TO SIGNERS (OPTIONAL)</label>
+        <textarea rows="3" placeholder="Please review and sign at your earliest convenience…"></textarea>
+      </div>
+      <div class="sig-integration-note">
+        <strong>E-Signature Integration</strong>
+        <span>Connect DocuSign, DotLoop, or Authentisign in Settings to send directly from Velvet Elves.</span>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-secondary" onclick="closeSigModal()">Cancel</button>
+      <button class="btn-primary" onclick="handleSend()">Send for Signature</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PREVIEW MODAL ═══ -->
+<div class="modal-wrap" id="previewModal">
+  <div class="preview-modal">
+    <div class="preview-topbar">
+      <span class="preview-filename" id="preview-filename">Document.pdf</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="tiny-btn download" onclick="showToast('Download started.','')">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Download
+        </button>
+        <button class="close-btn" onclick="closePreview()">✕</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div class="preview-pdf-stub">
+        <div style="font-size:40px;margin-bottom:12px">📄</div>
+        <div style="font-size:13px;font-weight:700;margin-bottom:4px" id="preview-doc-name">Document</div>
+        <div style="font-size:12px;color:var(--ghost)">In-app PDF viewer renders here</div>
+      </div>
+    </div>
+    <div class="preview-foot">
+      <span style="font-size:11.5px;color:var(--ghost)">Page 1 of 4</span>
+      <button class="btn-primary" style="font-size:12px;padding:8px 14px" onclick="closePreview();openSigModal(currentPreviewDoc,currentPreviewTx)">Send for Signature</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ FLOATING AI ═══ -->
+<div class="floating-ai" onclick="showToast('AI Coach opening…','Document suggestions ready.')">
+  <div style="font-size:20px">✦</div>
+  <div>
+    <strong>AI Coach</strong>
+    <span>3 doc gaps need your attention</span>
+  </div>
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div class="toast" id="toast">
+  <div style="font-size:18px">✓</div>
+  <div>
+    <strong id="toast-title">Done</strong>
+    <span id="toast-sub"></span>
+  </div>
+  <div class="toast-close" onclick="hideToast()">✕</div>
+</div>
+
+<script>
+  /* ════════════════════════════════════════
+     STATE
+  ════════════════════════════════════════ */
+  let currentView = 'tx';
+  let activeStatFilter = null;
+  let activeStatBtn = null;
+  let activeStatClass = null;
+  let currentTypeFilter = 'all';
+  let currentPreviewDoc = '';
+  let currentPreviewTx = '';
+  let toastTimer;
+
+  /* ════════════════════════════════════════
+     TRANSACTION CARD TOGGLE
+  ════════════════════════════════════════ */
+  function toggleTx(id) {
+    const card = document.getElementById('txc-' + id);
+    const exp  = document.getElementById('txexp-' + id);
+    const chev = document.getElementById('txchev-' + id);
+    const isOpen = card.classList.contains('is-open');
+    card.classList.toggle('is-open', !isOpen);
+    exp.classList.toggle('open', !isOpen);
+  }
+
+  /* ════════════════════════════════════════
+     CATEGORY CARD TOGGLE
+  ════════════════════════════════════════ */
+  function toggleCat(id) {
+    const card = document.getElementById('cat-' + id);
+    card.classList.toggle('is-open');
+  }
+
+  /* ════════════════════════════════════════
+     VIEW TOGGLE — tx vs type
+  ════════════════════════════════════════ */
+  function setView(view) {
+    currentView = view;
+    document.getElementById('tx-view').style.display   = view === 'tx'   ? '' : 'none';
+    document.getElementById('type-view').style.display = view === 'type' ? '' : 'none';
+    document.getElementById('btn-view-tx').classList.toggle('active',   view === 'tx');
+    document.getElementById('btn-view-type').classList.toggle('active', view === 'type');
+  }
+
+  /* ════════════════════════════════════════
+     TYPE FILTER TABS (Buyer/Listing/All)
+  ════════════════════════════════════════ */
+  function setTypeFilter(btn, filter) {
+    activeStatFilter = null;
+    if (activeStatBtn) {
+      activeStatBtn.classList.remove('active-filter', activeStatClass);
+      activeStatBtn = null; activeStatClass = null;
+    }
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    currentTypeFilter = filter;
+    applyFilters();
+  }
+
+  /* ════════════════════════════════════════
+     STAT BAR CLICK FILTER
+  ════════════════════════════════════════ */
+  function filterByStat(status, btnId, cssClass) {
+    const btn = document.getElementById(btnId);
+    if (activeStatFilter === status) {
+      btn.classList.remove('active-filter', cssClass);
+      activeStatFilter = null; activeStatBtn = null; activeStatClass = null;
+      applyFilters(); return;
+    }
+    if (activeStatBtn) activeStatBtn.classList.remove('active-filter', activeStatClass);
+    btn.classList.add('active-filter', cssClass);
+    activeStatFilter = status; activeStatBtn = btn; activeStatClass = cssClass;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    currentTypeFilter = 'all';
+    applyFilters();
+  }
+
+  /* ════════════════════════════════════════
+     APPLY ALL FILTERS
+  ════════════════════════════════════════ */
+  function applyFilters() {
+    const q = (document.getElementById('doc-search').value || '').toLowerCase();
+    let anyVisible = false;
+
+    document.querySelectorAll('.tx-card').forEach(card => {
+      // Side filter
+      const sideOk = currentTypeFilter === 'all' || card.dataset.side === currentTypeFilter;
+
+      // Status filter — card is visible if it contains at least one doc row matching the status
+      const statusOk = !activeStatFilter ||
+        Array.from(card.querySelectorAll('.doc-row')).some(r => r.dataset.status === activeStatFilter);
+
+      // Search filter — card is visible if any doc name matches
+      const searchOk = !q ||
+        Array.from(card.querySelectorAll('.doc-row')).some(r => (r.dataset.name || '').includes(q));
+
+      const show = sideOk && statusOk && searchOk;
+      card.style.display = show ? '' : 'none';
+      if (show) anyVisible = true;
+    });
+
+    const emptyEl = document.getElementById('empty-state');
+    if (emptyEl) emptyEl.classList.toggle('visible', !anyVisible);
+  }
+
+  function applySearch() { applyFilters(); }
+
+  function resetFilters() {
+    document.getElementById('doc-search').value = '';
+    if (activeStatBtn) {
+      activeStatBtn.classList.remove('active-filter', activeStatClass);
+      activeStatFilter = null; activeStatBtn = null; activeStatClass = null;
+    }
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.filter-tab').classList.add('active');
+    currentTypeFilter = 'all';
+    applyFilters();
+  }
+
+  /* ════════════════════════════════════════
+     UPLOAD MODAL
+  ════════════════════════════════════════ */
+  function openUploadModal() {
+    document.getElementById('upload-tx-select').value = '';
+    document.querySelectorAll('.doc-type-chip').forEach(c => c.classList.remove('selected'));
+    document.getElementById('uploadModal').classList.add('open');
+  }
+
+  function openUploadModalFor(docName, txAddress) {
+    const sel = document.getElementById('upload-tx-select');
+    if (txAddress.includes('628'))  sel.value = '628';
+    else if (txAddress.includes('4412')) sel.value = '4412';
+    else if (txAddress.includes('214'))  sel.value = '214';
+    else sel.value = '';
+    document.querySelectorAll('.doc-type-chip').forEach(c => {
+      c.classList.toggle('selected', c.textContent.trim() === docName);
+    });
+    document.getElementById('uploadModal').classList.add('open');
+  }
+
+  function closeUploadModal() { document.getElementById('uploadModal').classList.remove('open'); }
+
+  function handleUpload() {
+    closeUploadModal();
+    showToast('Document uploaded.', 'Assigned and saved to transaction.');
+  }
+
+  function selectDocType(el) {
+    document.querySelectorAll('.doc-type-chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  /* ════════════════════════════════════════
+     SIGNATURE MODAL
+  ════════════════════════════════════════ */
+  function openSigModalStandalone() {
+    document.getElementById('sig-modal-desc').textContent = 'Select a document and transaction below';
+    document.getElementById('sig-doc-select-wrap').style.display = '';
+    document.getElementById('sigModal').classList.add('open');
+  }
+
+  function openSigModal(docName, txAddress) {
+    document.getElementById('sig-modal-desc').textContent = docName + ' · ' + txAddress;
+    document.getElementById('sig-doc-select-wrap').style.display = 'none';
+    document.getElementById('sigModal').classList.add('open');
+  }
+
+  function closeSigModal() { document.getElementById('sigModal').classList.remove('open'); }
+
+  function handleSend() {
+    closeSigModal();
+    showToast('Sent for signature.', 'Signers will receive an email link.');
+  }
+
+  function toggleSigner(el) { el.classList.toggle('selected'); }
+
+  /* ════════════════════════════════════════
+     PREVIEW MODAL
+  ════════════════════════════════════════ */
+  function openPreview(docName, txAddress) {
+    currentPreviewDoc = docName; currentPreviewTx = txAddress;
+    document.getElementById('preview-filename').textContent = docName + '.pdf';
+    document.getElementById('preview-doc-name').textContent = docName;
+    document.getElementById('previewModal').classList.add('open');
+  }
+
+  function closePreview() { document.getElementById('previewModal').classList.remove('open'); }
+
+  /* ════════════════════════════════════════
+     TOAST
+  ════════════════════════════════════════ */
+  function showToast(title, sub) {
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-sub').textContent   = sub || '';
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 3400);
+  }
+
+  function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+  /* ════════════════════════════════════════
+     BACKDROP CLOSE
+  ════════════════════════════════════════ */
+  ['uploadModal','sigModal','previewModal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('open');
+      }
+    });
+  });
+
+  /* ════════════════════════════════════════
+     KEYBOARD
+  ════════════════════════════════════════ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['uploadModal','sigModal','previewModal'].forEach(id =>
+        document.getElementById(id).classList.remove('open')
+      );
+    }
+  });
+</script>
+</body>
+</html>

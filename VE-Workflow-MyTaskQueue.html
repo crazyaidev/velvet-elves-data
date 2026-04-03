@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Velvet Elves — My Task Queue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Lora:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════
+       DESIGN TOKENS — identical to revised dashboard
+    ═══════════════════════════════════════════════ */
+    :root{
+      --orange:#E26812;
+      --orange-dark:#B85107;
+      --orange-light:#FFF2E7;
+      --orange-soft:#FFF9F4;
+      --orange-border:#F1C79E;
+      --navy:#1E3356;
+      --bg:#F2F1EE;
+      --surface:#FFFFFF;
+      --surface-2:#FAFAF8;
+      --line:#E3E2DE;
+      --line-strong:#CEC9C0;
+      --text:#181818;
+      --muted:#686868;
+      --ghost:#929292;
+      --green:#14704B;
+      --green-bg:#EEF8F3;
+      --green-border:#B9DEC9;
+      --amber:#A56A08;
+      --amber-bg:#FFF8EC;
+      --amber-border:#EACB93;
+      --red:#BE3431;
+      --red-bg:#FFF2F2;
+      --red-border:#F0C7C7;
+      --blue:#2C4C7F;
+      --blue-bg:#EEF4FF;
+      --blue-border:#C0D1EF;
+      --purple:#6545B6;
+      --purple-bg:#F5F0FF;
+      --purple-border:#D7C8FF;
+      --teal:#0E6E70;
+      --teal-bg:#EDFAFA;
+      --teal-border:#A8D8DA;
+      --shadow:0 4px 16px rgba(20,20,20,.06);
+      --shadow-md:0 8px 28px rgba(20,20,20,.09);
+      --radius:18px;
+      --font-body:'IBM Plex Sans',sans-serif;
+      --font-serif:'Lora',serif;
+      --font-mono:'IBM Plex Mono',monospace;
+      --sidebar:228px;
+      --top:60px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:var(--font-body);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+    button,input,select,textarea{font:inherit}
+    a{color:inherit;text-decoration:none}
+    .app{display:grid;grid-template-columns:var(--sidebar) 1fr;height:100vh;overflow:hidden}
+
+    /* ═══════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════ */
+    .sidebar{background:linear-gradient(180deg,#1a2d4e,#152340);color:#fff;display:flex;flex-direction:column;border-right:1px solid rgba(255,255,255,.07)}
+    .brand{display:flex;align-items:center;gap:12px;padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+    .brand-icon{width:38px;height:38px;border-radius:11px;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:17px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.18)}
+    .brand-name strong{font-family:var(--font-serif);font-size:17px;color:#fff;font-weight:700;display:block;line-height:1}
+    .brand-name span{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55);margin-top:4px;display:block}
+    .side-block{padding:12px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .side-label{font-family:var(--font-mono);font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:9px}
+    .side-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .mini{background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);border-radius:11px;padding:10px}
+    .mini .num{font-family:var(--font-mono);font-size:21px;font-weight:600;line-height:1;margin-bottom:5px}
+    .mini .cap{font-size:10px;color:rgba(255,255,255,.72);line-height:1.3}
+    .num.red{color:#ff9090}.num.green{color:#7ed8a8}.num.orange{color:#ffbc7a}.num.blue{color:#94bfff}
+    .nav{padding:8px 7px;overflow:auto;flex:1}
+    .nav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:rgba(255,255,255,.85);padding:9px 11px;border-radius:9px;font-size:13px;font-weight:500;position:relative;transition:.14s}
+    .nav a:hover{background:rgba(255,255,255,.055)}
+    .nav a.active{background:rgba(226,104,18,.18);color:#ffe0c2}
+    .nav a.active:before{content:'';position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 3px 3px 0;background:var(--orange)}
+    .nav .badge{margin-left:auto;font-family:var(--font-mono);font-size:10px;background:rgba(255,255,255,.09);padding:2px 6px;border-radius:999px}
+    .nav-section{font-family:var(--font-mono);font-size:9px;letter-spacing:1.6px;text-transform:uppercase;color:rgba(255,255,255,.38);padding:14px 11px 5px}
+    .side-footer{padding:11px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:8px}
+    .upgrade-nudge{background:rgba(226,104,18,.12);border:1px solid rgba(226,104,18,.22);border-radius:11px;padding:10px 11px;cursor:pointer;transition:.14s}
+    .upgrade-nudge:hover{background:rgba(226,104,18,.18)}
+    .upgrade-nudge strong{display:block;font-size:12px;color:#ffcf9e;margin-bottom:3px}
+    .upgrade-nudge span{display:block;font-size:11px;color:rgba(255,255,255,.6);line-height:1.35}
+    .user-row{display:flex;align-items:center;gap:9px}
+    .s-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .user-info strong{display:block;font-size:12px;color:rgba(255,255,255,.9)}
+    .user-info span{display:block;font-size:10px;color:rgba(255,255,255,.5);font-family:var(--font-mono)}
+
+    /* ═══════════════════════════════════════════════
+       SHARED BUTTONS
+    ═══════════════════════════════════════════════ */
+    .btn-primary,.btn-secondary,.btn-ghost,.btn-chip,.btn-outline-orange{border:none;border-radius:11px;cursor:pointer;transition:.15s ease;font-weight:600;font-family:var(--font-body)}
+    .btn-primary{background:var(--orange);color:#fff;padding:10px 14px;font-weight:700;font-size:13px}
+    .btn-primary:hover{background:var(--orange-dark)}
+    .btn-secondary{background:#fff;border:1px solid var(--line);color:var(--text);padding:9px 12px;font-size:13px}
+    .btn-secondary:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 11px;font-size:12px}
+    .btn-ghost:hover{background:#fff}
+    .btn-chip{background:var(--orange-light);border:1px solid var(--orange-border);color:#8f480b;padding:6px 10px;font-size:12px;font-weight:700;border-radius:9px}
+    .btn-chip:hover{background:#fce8d4}
+
+    /* ═══════════════════════════════════════════════
+       SHARED PILLS
+    ═══════════════════════════════════════════════ */
+    .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 8px;font-family:var(--font-mono);font-size:10px;font-weight:600;white-space:nowrap}
+    .pill.red{background:var(--red-bg);border:1px solid var(--red-border);color:#8a201d}
+    .pill.amber{background:var(--amber-bg);border:1px solid var(--amber-border);color:#865405}
+    .pill.green{background:var(--green-bg);border:1px solid var(--green-border);color:#0d5537}
+    .pill.blue{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .pill.purple{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+
+    /* ═══════════════════════════════════════════════
+       TOPBAR
+    ═══════════════════════════════════════════════ */
+    .main{display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:var(--top);display:flex;align-items:center;gap:12px;padding:0 20px;background:rgba(255,255,255,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);flex-shrink:0}
+    .top-title{font-family:var(--font-serif);font-size:20px;font-weight:700;flex:1}
+    .search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:9px 12px;min-width:220px;color:var(--ghost)}
+    .search svg{flex-shrink:0;opacity:.5}
+    .search input{border:none;background:transparent;outline:none;width:100%;font-size:13px}
+    .top-actions{display:flex;align-items:center;gap:8px}
+    .top-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center}
+    .notif-btn{width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.14s}
+    .notif-btn:hover{background:var(--surface-2)}
+    .notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px;border:1.5px solid #fff}
+    .content{overflow:auto;padding:18px 22px 36px;display:flex;flex-direction:column;gap:14px}
+
+    /* ═══════════════════════════════════════════════
+       AI BRIEFING STRIP
+    ═══════════════════════════════════════════════ */
+    .ai-briefing{background:linear-gradient(135deg,#1a2d4e,#233d6a);color:#fff;border-radius:var(--radius);padding:16px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;box-shadow:var(--shadow-md)}
+    .ai-briefing-icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;font-size:18px;flex-shrink:0}
+    .ai-briefing-copy .eyebrow{font-family:var(--font-mono);font-size:9px;letter-spacing:1.9px;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px}
+    .ai-briefing-copy strong{display:block;font-family:var(--font-serif);font-size:18px;line-height:1.1;margin-bottom:5px}
+    .ai-briefing-copy p{font-size:12.5px;color:rgba(255,255,255,.8);line-height:1.5;max-width:680px}
+    .ai-briefing-actions{display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .ai-briefing-actions .btn-primary{font-size:12px;padding:8px 13px;box-shadow:none;white-space:nowrap}
+    .ai-briefing-actions .ai-meta{font-family:var(--font-mono);font-size:10px;color:rgba(255,255,255,.55);text-align:right}
+
+    /* ═══════════════════════════════════════════════
+       PROGRESS BAR
+    ═══════════════════════════════════════════════ */
+    .progress-bar-wrap{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:20px}
+    .progress-stats{display:flex;gap:20px;flex-shrink:0}
+    .ps{display:flex;flex-direction:column;align-items:center;gap:2px}
+    .ps .n{font-family:var(--font-mono);font-size:22px;font-weight:700;line-height:1}
+    .ps .l{font-size:10.5px;color:var(--muted)}
+    .ps .n.red{color:var(--red)}.ps .n.amber{color:var(--amber)}.ps .n.green{color:var(--green)}.ps .n.blue{color:var(--blue)}
+    .ps-divider{width:1px;height:36px;background:var(--line)}
+    .progress-visual{flex:1}
+    .progress-label{display:flex;justify-content:space-between;margin-bottom:6px}
+    .progress-label span{font-size:11.5px;color:var(--muted)}
+    .progress-label strong{font-size:11.5px;font-family:var(--font-mono);color:var(--green)}
+    .progress-track{height:8px;background:var(--line);border-radius:999px;overflow:hidden}
+    .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green),#1d9e6a);transition:width .5s ease}
+    .progress-seg-label{display:flex;gap:12px;margin-top:5px}
+    .psl{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--muted)}
+    .psl-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+    .psl-dot.red{background:var(--red)}.psl-dot.amber{background:var(--amber)}.psl-dot.green{background:var(--green)}
+
+    /* ═══════════════════════════════════════════════
+       CONTROLS BAR
+    ═══════════════════════════════════════════════ */
+    .queue-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .filter-tabs{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+    .filter-tab{background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;transition:.13s;display:flex;align-items:center;gap:6px}
+    .filter-tab:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .filter-tab.active{background:var(--orange-light);border-color:var(--orange-border);color:#8b470c}
+    .filter-tab .tab-count{font-family:var(--font-mono);font-size:10px;background:rgba(0,0,0,.07);border-radius:999px;padding:1px 6px}
+    .filter-tab.active .tab-count{background:rgba(139,71,12,.15)}
+    .sort-select{background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-size:12px;color:var(--text);cursor:pointer;outline:none;font-weight:600}
+    .sort-select:hover{border-color:var(--line-strong)}
+    .toggle-completed{display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:7px 11px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:.13s;white-space:nowrap}
+    .toggle-completed:hover{background:var(--surface-2);border-color:var(--line-strong)}
+    .toggle-completed.on{color:var(--green);border-color:var(--green-border);background:var(--green-bg)}
+
+    /* ═══════════════════════════════════════════════
+       TASK GROUP HEADERS
+    ═══════════════════════════════════════════════ */
+    .task-group{display:flex;flex-direction:column;gap:0}
+    .group-header{display:flex;align-items:center;gap:10px;padding:0 0 8px}
+    .group-label{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.7px;text-transform:uppercase;font-weight:600}
+    .group-count{font-family:var(--font-mono);font-size:10px;background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;color:var(--muted)}
+    .group-line{flex:1;height:1px;background:var(--line)}
+
+    /* ═══════════════════════════════════════════════
+       TYPE BADGES
+    ═══════════════════════════════════════════════ */
+    .task-type-badge{display:inline-flex;align-items:center;gap:4px;border-radius:6px;padding:2px 7px;font-family:var(--font-mono);font-size:9.5px;font-weight:600;white-space:nowrap}
+    .type-doc{background:var(--blue-bg);border:1px solid var(--blue-border);color:var(--blue)}
+    .type-comm{background:var(--teal-bg);border:1px solid var(--teal-border);color:var(--teal)}
+    .type-milestone{background:var(--purple-bg);border:1px solid var(--purple-border);color:var(--purple)}
+    .type-admin{background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+
+    /* ═══════════════════════════════════════════════
+       TASK CARD — COLLAPSED ROW
+       The entire collapsed body is a click zone.
+       Checkbox and any link inside stop propagation.
+    ═══════════════════════════════════════════════ */
+    .task-card{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      margin-bottom:8px;
+      transition:box-shadow .15s, border-color .15s;
+    }
+    .task-card:last-child{margin-bottom:0}
+    .task-card.is-open{border-color:var(--line-strong);box-shadow:var(--shadow-md)}
+    .task-card.done{border-color:var(--green-border);background:var(--green-bg)}
+    .task-card.done .task-collapsed{opacity:.5}
+
+    /* Priority accent — left border via wrapper */
+    .task-card.priority-critical{border-left:4px solid var(--red)}
+    .task-card.priority-attention{border-left:4px solid var(--amber)}
+    .task-card.priority-track{border-left:4px solid var(--green)}
+    .task-card.priority-info{border-left:4px solid var(--blue)}
+
+    /* Collapsed clickable row */
+    .task-collapsed{
+      display:grid;
+      grid-template-columns:28px 1fr auto;
+      gap:13px;
+      align-items:center;
+      padding:13px 15px 13px 14px;
+      cursor:pointer;
+      user-select:none;
+      transition:background .12s;
+    }
+    .task-collapsed:hover{background:var(--surface-2)}
+    .task-card.is-open .task-collapsed{background:var(--surface-2)}
+
+    /* Inline checkbox on collapsed row — small, stops propagation */
+    .row-check{
+      width:20px;height:20px;border-radius:6px;
+      border:2px solid var(--line-strong);
+      background:#fff;
+      display:grid;place-items:center;
+      flex-shrink:0;cursor:pointer;
+      transition:border-color .15s, background .15s;
+      position:relative;z-index:2; /* sits above click zone */
+    }
+    .row-check:hover{border-color:var(--green);background:var(--green-bg)}
+    .row-check.checked{border-color:var(--green);background:var(--green-bg)}
+    .row-check.checked::after{content:'✓';font-size:11px;font-weight:700;color:var(--green)}
+    .task-card.priority-critical .row-check:not(.checked):hover{border-color:var(--red);background:var(--red-bg)}
+
+    /* Collapsed summary text */
+    .task-summary{}
+    .task-title-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+    .task-title{font-size:13.5px;font-weight:700;line-height:1.3}
+    .task-card.done .task-title{text-decoration:line-through;color:var(--muted)}
+    .task-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .task-txn{font-size:12px;color:var(--muted);font-weight:600}
+    .task-due{font-family:var(--font-mono);font-size:11px;font-weight:600}
+    .task-due.overdue{color:var(--red)}
+    .task-due.due-today{color:var(--amber)}
+    .task-due.due-soon{color:#865405}
+    .task-due.on-track{color:var(--green)}
+
+    /* Chevron on collapsed row */
+    .task-chevron{
+      width:26px;height:26px;border-radius:7px;border:1px solid var(--line);
+      background:#fff;display:grid;place-items:center;
+      font-size:14px;color:var(--ghost);
+      flex-shrink:0;transition:transform .2s, background .13s, border-color .13s;
+      line-height:1;
+    }
+    .task-card.is-open .task-chevron{transform:rotate(90deg);background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+
+    /* ═══════════════════════════════════════════════
+       TASK EXPAND PANEL — 4 clear zones
+    ═══════════════════════════════════════════════ */
+    .task-expand{
+      display:none;
+      border-top:1px solid var(--line);
+      background:var(--surface-2);
+    }
+    .task-expand.open{display:block}
+
+    /* Section label inside expand */
+    .exp-label{
+      font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;
+      text-transform:uppercase;color:var(--ghost);
+      margin-bottom:8px;font-weight:600;
+    }
+
+    /* ── Clickable progress stats ──────────────── */
+    .ps-btn{
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      cursor:pointer;border-radius:10px;padding:6px 10px;
+      border:1px solid transparent;transition:background .13s,border-color .13s;
+      background:transparent;font-family:var(--font-body);
+    }
+    .ps-btn:hover{background:var(--surface-2);border-color:var(--line)}
+    .ps-btn.active-filter{border-color:var(--line-strong);background:var(--surface-2)}
+    .ps-btn.active-filter.red-filter{background:var(--red-bg);border-color:var(--red-border)}
+    .ps-btn.active-filter.amber-filter{background:var(--amber-bg);border-color:var(--amber-border)}
+    .ps-btn.active-filter.blue-filter{background:var(--blue-bg);border-color:var(--blue-border)}
+    .ps-btn.active-filter.green-filter{background:var(--green-bg);border-color:var(--green-border)}
+    .ps-btn .n{font-family:var(--font-mono);font-size:22px;font-weight:700;line-height:1}
+    .ps-btn .l{font-size:10.5px;color:var(--muted)}
+
+    /* ── Zone 1: How to complete ───────────────── */
+    .exp-zone-complete{
+      padding:16px 18px;
+      border-bottom:1px solid var(--line);
+      background:#fff;
+    }
+    /* Two-column: Notes + AI Assistance (mirrors V1 screenshot) */
+    .exp-top-cols{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .exp-col-label{
+      font-family:var(--font-mono);font-size:9px;letter-spacing:1.7px;
+      text-transform:uppercase;color:var(--ghost);
+      margin-bottom:7px;font-weight:600;
+    }
+    /* Notes box */
+    .exp-notes-box{
+      font-size:12.5px;color:var(--text);line-height:1.55;
+      background:var(--surface-2);border:1px solid var(--line);
+      border-radius:10px;padding:11px 13px;height:100%;
+    }
+    /* AI Assistance callout */
+    .exp-ai-box{
+      background:linear-gradient(135deg,var(--purple-bg),#fdfcff);
+      border:1px solid var(--purple-border);
+      border-radius:10px;padding:11px 13px;
+    }
+    .exp-ai-box .ai-title{
+      display:block;font-size:12px;color:var(--purple);
+      font-weight:700;margin-bottom:5px;
+    }
+    .exp-ai-box p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:9px}
+    .exp-ai-actions{display:flex;gap:7px;flex-wrap:wrap}
+    /* Legacy alias kept for compact on-track tasks that skip two-col */
+    .exp-ai-panel{
+      background:linear-gradient(135deg,var(--purple-bg),#fdfcff);
+      border:1px solid var(--purple-border);
+      border-radius:10px;padding:11px 13px;margin-top:10px;
+    }
+    .exp-ai-panel strong{display:block;font-size:12px;color:var(--purple);margin-bottom:4px}
+    .exp-ai-panel p{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}
+    .exp-cta-row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+
+    /* Completion checkbox — large, inside expand panel */
+    .exp-complete-row{
+      display:flex;align-items:center;gap:12px;
+      margin-top:14px;padding-top:14px;
+      border-top:1px solid var(--line);
+    }
+    .exp-checkbox{
+      width:22px;height:22px;border-radius:7px;
+      border:2px solid var(--line-strong);
+      background:#fff;
+      display:grid;place-items:center;
+      cursor:pointer;flex-shrink:0;
+      transition:border-color .15s,background .15s;
+    }
+    .exp-checkbox:hover{border-color:var(--green);background:var(--green-bg)}
+    .exp-checkbox.checked{border-color:var(--green);background:var(--green-bg)}
+    .exp-checkbox.checked::after{content:'✓';font-size:12px;font-weight:700;color:var(--green)}
+    .exp-complete-label{font-size:13px;font-weight:700;cursor:pointer;color:var(--text)}
+    .exp-complete-label.done-label{text-decoration:line-through;color:var(--muted)}
+    .exp-undo{font-size:11.5px;color:var(--orange);font-weight:700;cursor:pointer;margin-left:auto}
+    .exp-undo:hover{text-decoration:underline}
+
+    /* ── Zone 2: Contacts ──────────────────────── */
+    .exp-zone-contacts{
+      padding:14px 18px;
+      border-bottom:1px solid var(--line);
+    }
+    .contact-list{display:flex;flex-direction:column;gap:7px}
+    .contact-row{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;
+      background:#fff;border:1px solid var(--line);
+      border-radius:10px;padding:9px 12px;
+    }
+    .cr-left{}
+    .cr-left strong{display:block;font-size:13px;font-weight:700;margin-bottom:1px}
+    .cr-left span{font-size:11px;color:var(--muted)}
+    .cr-btns{display:flex;gap:6px;flex-shrink:0}
+    .tiny-btn{
+      display:flex;align-items:center;gap:5px;
+      height:30px;border-radius:8px;
+      border:1px solid var(--line);background:#fff;
+      cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);
+      padding:0 9px;transition:.13s;white-space:nowrap;
+    }
+    .tiny-btn:hover{background:var(--orange-light);border-color:var(--orange-border);color:var(--orange-dark)}
+    .tiny-btn.call{color:var(--green);border-color:var(--green-border);background:var(--green-bg)}
+    .tiny-btn.call:hover{background:#d5f0e3}
+    .tiny-btn.email{color:var(--blue);border-color:var(--blue-border);background:var(--blue-bg)}
+    .tiny-btn.email:hover{background:#dae8fd}
+
+    /* ── Zone 3: Reschedule ────────────────────── */
+    .exp-zone-reschedule{
+      padding:14px 18px;
+      border-bottom:1px solid var(--line);
+    }
+    .reschedule-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .date-input{
+      border:1px solid var(--line);border-radius:10px;
+      padding:7px 11px;font-size:12.5px;background:#fff;
+      outline:none;transition:.14s;cursor:pointer;font-family:var(--font-body);
+    }
+    .date-input:focus{border-color:var(--orange);box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+    .snooze-chips{display:flex;gap:6px;flex-wrap:wrap}
+    .snooze-chip{
+      background:var(--surface-2);border:1px solid var(--line);
+      border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;
+      color:var(--muted);cursor:pointer;transition:.13s;
+    }
+    .snooze-chip:hover{background:#fff;border-color:var(--line-strong);color:var(--text)}
+
+    /* ── Zone 4: Footer — Open Transaction ─────── */
+    .exp-zone-footer{
+      padding:12px 18px;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;background:#fff;
+    }
+    .exp-meta{font-size:11.5px;color:var(--ghost)}
+    .exp-open-txn{
+      display:flex;align-items:center;gap:8px;
+      background:var(--navy);color:#fff;
+      border-radius:11px;padding:9px 15px;
+      font-size:13px;font-weight:700;cursor:pointer;
+      border:none;transition:.15s;white-space:nowrap;
+    }
+    .exp-open-txn:hover{background:#2a4472;transform:translateY(-1px)}
+    .exp-open-txn .arrow{font-size:14px;transition:transform .15s}
+    .exp-open-txn:hover .arrow{transform:translateX(2px)}
+
+    /* ═══════════════════════════════════════════════
+       COMPLETED SECTION
+    ═══════════════════════════════════════════════ */
+    .completed-section{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;display:none}
+    .completed-section.visible{display:block}
+    .completed-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;transition:.13s}
+    .completed-toggle-row:hover{background:var(--surface-2)}
+    .completed-toggle-left{display:flex;align-items:center;gap:10px}
+    .completed-toggle-left strong{font-size:13px;font-weight:700;color:var(--green)}
+    .completed-toggle-left span{font-size:12px;color:var(--muted)}
+    .completed-chevron{font-size:12px;color:var(--ghost);transition:.2s;display:inline-block}
+    .completed-chevron.open{transform:rotate(90deg)}
+    .completed-list{display:none;border-top:1px solid var(--line)}
+    .completed-list.open{display:block}
+    .c-task{display:grid;grid-template-columns:26px 1fr auto;gap:12px;align-items:center;padding:11px 16px;border-bottom:1px solid var(--line);opacity:.65}
+    .c-task:last-child{border-bottom:none}
+    .c-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--green-border);background:var(--green-bg);display:grid;place-items:center}
+    .c-check::after{content:'✓';font-size:11px;font-weight:700;color:var(--green)}
+    .c-title{font-size:13px;text-decoration:line-through;color:var(--muted)}
+    .c-meta{font-size:11px;color:var(--ghost);margin-top:2px;font-family:var(--font-mono)}
+    .c-time{font-family:var(--font-mono);font-size:11px;color:var(--ghost);white-space:nowrap}
+
+    /* ═══════════════════════════════════════════════
+       EMPTY STATE
+    ═══════════════════════════════════════════════ */
+    .empty-state{background:#fff;border:1px solid var(--line);border-radius:14px;padding:40px 24px;text-align:center;display:none}
+    .empty-state.visible{display:block}
+    .empty-icon{font-size:32px;margin-bottom:12px}
+    .empty-state h3{font-family:var(--font-serif);font-size:20px;margin-bottom:7px}
+    .empty-state p{font-size:13px;color:var(--muted);line-height:1.5;max-width:340px;margin:0 auto 16px}
+
+    /* ═══════════════════════════════════════════════
+       ADD TASK MODAL
+    ═══════════════════════════════════════════════ */
+    .modal-wrap{position:fixed;inset:0;background:rgba(20,20,20,.5);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);padding:16px}
+    .modal-wrap.open{display:flex}
+    .modal{background:#fff;border-radius:20px;width:100%;max-width:560px;box-shadow:0 24px 60px rgba(20,20,20,.2);overflow:hidden}
+    .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 16px;border-bottom:1px solid var(--line)}
+    .modal-head h3{font-family:var(--font-serif);font-size:20px;margin-bottom:4px}
+    .modal-head p{font-size:12.5px;color:var(--muted);line-height:1.4}
+    .close-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:14px;flex-shrink:0;transition:.13s}
+    .close-btn:hover{background:var(--red-bg);border-color:var(--red-border);color:var(--red)}
+    .modal-body{padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+    .field label{display:block;font-size:12px;font-weight:700;margin-bottom:5px;color:var(--muted)}
+    .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13px;background:var(--surface-2);transition:.14s;outline:none;resize:vertical}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--orange);background:#fff;box-shadow:0 0 0 3px rgba(226,104,18,.1)}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .modal-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 18px;border-top:1px solid var(--line);background:var(--surface-2)}
+
+    /* ═══════════════════════════════════════════════
+       FLOATING AI
+    ═══════════════════════════════════════════════ */
+    .floating-ai{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--navy),#233d6a);color:#fff;border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;box-shadow:0 8px 30px rgba(30,51,86,.35);transition:.2s;z-index:100;max-width:280px;border:1px solid rgba(255,255,255,.1)}
+    .floating-ai:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(30,51,86,.45)}
+    .floating-ai strong{display:block;font-size:13px;margin-bottom:2px}
+    .floating-ai span{display:block;font-size:11px;color:rgba(255,255,255,.7);line-height:1.35}
+
+    /* ═══════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════ */
+    .toast{position:fixed;bottom:90px;right:24px;background:#fff;border:1px solid var(--green-border);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-md);display:flex;align-items:center;gap:10px;z-index:300;transform:translateY(12px);opacity:0;transition:.25s ease;pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1;pointer-events:auto}
+    .toast strong{display:block;font-size:13px;margin-bottom:1px}
+    .toast span{font-size:11.5px;color:var(--muted)}
+    .toast-close{margin-left:auto;width:24px;height:24px;border-radius:6px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0}
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ═══════════════════════════════ SIDEBAR -->
+  <nav class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">✦</div>
+      <div class="brand-name">
+        <strong>Velvet Elves</strong>
+        <span>Transaction OS</span>
+      </div>
+    </div>
+    <div class="side-block">
+      <div class="side-label">Portfolio today</div>
+      <div class="side-summary">
+        <div class="mini"><div class="num orange">17</div><div class="cap">Active files</div></div>
+        <div class="mini"><div class="num red">3</div><div class="cap">Critical</div></div>
+        <div class="mini"><div class="num amber">4</div><div class="cap">Closing 7d</div></div>
+        <div class="mini"><div class="num blue">5</div><div class="cap">Stale comms</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nav-section">Deals</div>
+      <a href="#"><span>⊞</span> Dashboard</a>
+      <a href="#"><span>◈</span> Active Transactions <span class="badge">17</span></a>
+      <a href="#"><span>◔</span> Pending <span class="badge">3</span></a>
+      <a href="#"><span>◉</span> Closed</a>
+      <a href="#"><span>◻</span> All Transactions</a>
+      <div class="nav-section">Workflow</div>
+      <a href="#" class="active"><span>✓</span> My Task Queue <span class="badge" id="sidebar-badge">14</span></a>
+      <a href="#"><span>◻</span> All Documents <span class="badge">4</span></a>
+      <a href="#"><span>◷</span> Closing Calendar</a>
+      <div class="nav-section">Intelligence</div>
+      <a href="#"><span>✦</span> AI Suggestions <span class="badge">4</span></a>
+      <a href="#"><span>◈</span> Analytics</a>
+      <a href="#"><span>◻</span> Settings</a>
+    </div>
+    <div class="side-footer">
+      <div class="upgrade-nudge">
+        <strong>✦ Add AI Coach</strong>
+        <span>Grow your business between transactions. Lead gen, scripts & coaching.</span>
+      </div>
+      <div class="user-row">
+        <div class="s-avatar">JM</div>
+        <div class="user-info">
+          <strong>Jordan Mills</strong>
+          <span>Solo Agent</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════ MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div class="top-title">My Task Queue</div>
+      <div class="search">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input id="task-search" placeholder="Search tasks, transactions, contacts…" oninput="applyFilters()" />
+      </div>
+      <div class="top-actions">
+        <div class="notif-btn"><span style="font-size:15px">🔔</span><div class="notif-dot"></div></div>
+        <div class="top-avatar">JM</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- AI BRIEFING -->
+      <div class="ai-briefing">
+        <div class="ai-briefing-icon">✦</div>
+        <div class="ai-briefing-copy">
+          <div class="eyebrow">Today's AI task briefing</div>
+          <strong>Clear Rogers and Patel before noon — everything else can wait.</strong>
+          <p>14 open tasks across 6 transactions. Two are deadline-critical before 1:00 PM. The inspection amendment on Rogers is the highest-risk item in your portfolio right now. Click any task to expand it and see exactly how to complete it.</p>
+        </div>
+        <div class="ai-briefing-actions">
+          <button class="btn-primary" onclick="showToast('AI run order drafted.','Check your AI panel.')">Draft run order</button>
+          <div class="ai-meta">Updated 7 min ago</div>
+        </div>
+      </div>
+
+      <!-- PROGRESS BAR -->
+      <div class="progress-bar-wrap">
+        <div class="progress-stats">
+          <button class="ps-btn red-filter" id="psb-critical" onclick="filterByPriority('critical')" title="Filter: Critical tasks">
+            <div class="n red" id="stat-critical">2</div><div class="l">Critical</div>
+          </button>
+          <div class="ps-divider"></div>
+          <button class="ps-btn amber-filter" id="psb-attention" onclick="filterByPriority('attention')" title="Filter: Attention tasks">
+            <div class="n amber" id="stat-attention">5</div><div class="l">Attention</div>
+          </button>
+          <div class="ps-divider"></div>
+          <button class="ps-btn blue-filter" id="psb-track" onclick="filterByPriority('track')" title="Filter: On track tasks">
+            <div class="n blue" id="stat-track">7</div><div class="l">On track</div>
+          </button>
+          <div class="ps-divider"></div>
+          <button class="ps-btn green-filter" id="psb-done" onclick="toggleCompletedSection()" title="Show completed tasks">
+            <div class="n green" id="stat-done">4</div><div class="l">Done today</div>
+          </button>
+        </div>
+        <div class="progress-visual">
+          <div class="progress-label">
+            <span>Today's progress</span>
+            <strong id="progress-pct">22% complete</strong>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progress-fill" style="width:22%"></div>
+          </div>
+          <div class="progress-seg-label" style="margin-top:6px">
+            <div class="psl"><div class="psl-dot red"></div>Critical</div>
+            <div class="psl"><div class="psl-dot amber"></div>Attention</div>
+            <div class="psl"><div class="psl-dot green"></div>On track</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLS -->
+      <div class="queue-controls">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" onclick="setFilter(this,'all')">All <span class="tab-count" id="tab-all">14</span></button>
+          <button class="filter-tab" data-filter="doc" onclick="setFilter(this,'doc')">Documents <span class="tab-count" id="tab-doc">5</span></button>
+          <button class="filter-tab" data-filter="comm" onclick="setFilter(this,'comm')">Communication <span class="tab-count" id="tab-comm">4</span></button>
+          <button class="filter-tab" data-filter="milestone" onclick="setFilter(this,'milestone')">Milestones <span class="tab-count" id="tab-milestone">3</span></button>
+          <button class="filter-tab" data-filter="admin" onclick="setFilter(this,'admin')">Admin <span class="tab-count" id="tab-admin">2</span></button>
+        </div>
+        <select class="sort-select" onchange="sortTasks(this.value)">
+          <option value="priority">Sort: Priority</option>
+          <option value="due">Sort: Due date</option>
+          <option value="txn">Sort: Transaction</option>
+          <option value="type">Sort: Task type</option>
+        </select>
+        <button class="toggle-completed" id="completed-toggle-btn" onclick="toggleCompletedSection()">Show completed</button>
+        <button class="btn-primary" style="font-size:12px;padding:8px 13px" onclick="openAddTaskModal()">+ Add task</button>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           TASK LIST
+      ══════════════════════════════════════════ -->
+      <div id="task-list-container">
+
+        <!-- ─── GROUP: CRITICAL ─────────────────── -->
+        <div class="task-group" id="group-critical">
+          <div class="group-header">
+            <div class="group-label" style="color:var(--red)">● Critical</div>
+            <div class="group-count" id="gc-critical">2 tasks</div>
+            <div class="group-line"></div>
+          </div>
+
+          <!-- TASK 1 -->
+          <div class="task-card priority-critical" data-type="doc" data-txn="rogers" data-priority="critical" id="task-1">
+            <!-- Collapsed row: click anywhere except checkbox -->
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-1')">
+              <div class="row-check" id="rc-task-1" onclick="handleCheckClick(event,'task-1')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Send inspection amendment to buyer and listing side</div>
+                  <div class="task-type-badge type-doc">📄 Document</div>
+                  <div class="pill red">Critical</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Rogers · 1542 Sugar Maple Ln</div>
+                  <div class="task-due overdue">⏰ Due 1:00 PM today</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <!-- Expand panel -->
+            <div class="task-expand" id="expand-task-1">
+              <!-- Zone 1: How to complete -->
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">Amendment is AI-drafted and attached to the Rogers file. Primary action: confirm buyer language is final, then send via DocuSign to both sides. Call listing agent (Dan Forsythe) directly if no reply within 30 minutes.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">Script ready</span>
+                      <p>Use the listing agent accountability script after 10:30 AM if there is still no reply. AI can also draft an escalation email to the listing broker.</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('Drafting escalation email…','Check AI panel.')">Draft email</button>
+                        <button class="btn-chip" onclick="showToast('Script loaded.','Listing agent script ready in AI panel.')">Get script</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Opening Rogers file…','Amendment ready to send in Active Transactions.')">Open file &amp; send amendment</button>
+                  <button class="btn-chip" onclick="showToast('Voicemail draft ready.','Check AI panel.')">Draft voicemail</button>
+                </div>
+                <!-- Mark complete row -->
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-1" onclick="markDone('task-1')"></div>
+                  <div class="exp-complete-label" id="ecl-task-1" onclick="markDone('task-1')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-1" style="display:none" onclick="undoDone('task-1')">Undo</span>
+                </div>
+              </div>
+              <!-- Zone 2: Contacts -->
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Emily Rogers</strong>
+                      <span>Buyer · Signed amendment 8:12 AM · Primary contact</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Emily Rogers…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Emily…','')">✉ Email</button>
+                    </div>
+                  </div>
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Dan Forsythe</strong>
+                      <span>Listing agent · No reply since yesterday · Action needed</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Dan Forsythe…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Dan…','')">✉ Email</button>
+                    </div>
+                  </div>
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Title desk</strong>
+                      <span>Ready for closing packet · No action needed yet</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling title desk…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to title…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- Zone 3: Reschedule -->
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-18" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 1 hour.','Task resurfaces at 11:00 AM.')">Snooze 1h</button>
+                    <button class="snooze-chip" onclick="showToast('Snoozed 2 hours.','Task resurfaces at 12:00 PM.')">Snooze 2h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Task due tomorrow morning.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <!-- Zone 4: Footer -->
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Created by AI parser · Today 8:14 AM</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Rogers file loading.')">
+                  Open Rogers transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TASK 2 -->
+          <div class="task-card priority-critical" data-type="comm" data-txn="patel" data-priority="critical" id="task-2">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-2')">
+              <div class="row-check" id="rc-task-2" onclick="handleCheckClick(event,'task-2')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Call lender for clear-to-close — 2 days of silence</div>
+                  <div class="task-type-badge type-comm">☎ Communication</div>
+                  <div class="pill red">Critical</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Patel · 2239 Harbor Pointe Ct</div>
+                  <div class="task-due due-today">⏰ Due today — closing in 5 days</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-2">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">Call before 2 PM. If no answer, leave a voicemail with a specific callback deadline. Send follow-up email immediately after. If no CTC by end of business, escalate to Raj Patel (buyer) to apply pressure from the borrower side. Title confirmed their closing packet is ready — lender is the only blocker.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">Lender accountability script ready</span>
+                      <p>AI has a CTC follow-up script calibrated to the Patel file timeline and closing date. Designed to create urgency without damaging the lender relationship. Recommended call window: before 2:00 PM.</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('Script ready.','Open AI panel.')">Get script</button>
+                        <button class="btn-chip" onclick="showToast('Follow-up email drafted.','Check AI panel.')">Draft follow-up email</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Dialing Karen Moss…','Lender CTC script ready in AI panel.')">Call Karen Moss now</button>
+                  <button class="btn-chip" onclick="showToast('Voicemail draft ready.','Check AI panel.')">Draft voicemail</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-2" onclick="markDone('task-2')"></div>
+                  <div class="exp-complete-label" id="ecl-task-2" onclick="markDone('task-2')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-2" style="display:none" onclick="undoDone('task-2')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Karen Moss</strong>
+                      <span>Lender · Last contact 2 days ago · Primary action</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Karen Moss…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Karen…','')">✉ Email</button>
+                    </div>
+                  </div>
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Raj Patel</strong>
+                      <span>Buyer · Backup escalation if lender unresponsive</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Raj Patel…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Raj…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-18" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 2 hours.','Resurfaces at 12:00 PM.')">Snooze 2h</button>
+                    <button class="snooze-chip" onclick="showToast('Snoozed 4 hours.','Resurfaces at 2:00 PM.')">Snooze 4h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Due tomorrow AM.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Auto-generated · No lender update in 48h</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Patel file loading.')">
+                  Open Patel transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── GROUP: ATTENTION ────────────────── -->
+        <div class="task-group" id="group-attention" style="margin-top:6px">
+          <div class="group-header">
+            <div class="group-label" style="color:var(--amber)">● Attention</div>
+            <div class="group-count" id="gc-attention">5 tasks</div>
+            <div class="group-line"></div>
+          </div>
+
+          <!-- TASK 3 -->
+          <div class="task-card priority-attention" data-type="doc" data-txn="nguyen" data-priority="attention" id="task-3">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-3')">
+              <div class="row-check" id="rc-task-3" onclick="handleCheckClick(event,'task-3')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Upload signed seller disclosure — detected in your inbox</div>
+                  <div class="task-type-badge type-doc">📄 Document</div>
+                  <div class="pill amber">Attention</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Nguyen · 801 Meadow Walk Dr</div>
+                  <div class="task-due due-today">⏰ Due today — blocks lender package</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-3">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">AI found the signed seller disclosure in your inbox at 9:03 AM. Click "Attach now" to confirm and attach it directly to the Nguyen transaction file. Once attached, the lender package unblocks automatically. Spot-check page 4 (signature page) if you want to verify manually first.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">Document pre-verified by AI</span>
+                      <p>Seller signature confirmed. Property address matches. No missing pages detected. Safe to attach immediately — no manual review needed.</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('Document preview ready.','Check AI panel for full doc view.')">Preview document</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Disclosure attached.','Nguyen file updated. Lender package unblocked.')">Attach disclosure now</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-3" onclick="markDone('task-3')"></div>
+                  <div class="exp-complete-label" id="ecl-task-3" onclick="markDone('task-3')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-3" style="display:none" onclick="undoDone('task-3')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Minh Nguyen</strong>
+                      <span>Seller · Sent disclosure at 9:03 AM · No further action needed from seller</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Minh Nguyen…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Minh…','')">✉ Email</button>
+                    </div>
+                  </div>
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Karen Moss</strong>
+                      <span>Lender · Waiting on disclosure upload to finalize package</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Karen Moss…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Karen…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-18" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 1 hour.','Resurfaces at 11:00 AM.')">Snooze 1h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Due tomorrow AM.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Detected in inbox · 9:03 AM today</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Nguyen file loading.')">
+                  Open Nguyen transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TASK 4 -->
+          <div class="task-card priority-attention" data-type="comm" data-txn="lopez" data-priority="attention" id="task-4">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-4')">
+              <div class="row-check" id="rc-task-4" onclick="handleCheckClick(event,'task-4')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Follow up with HOA — no response to docs request in 3 days</div>
+                  <div class="task-type-badge type-comm">☎ Communication</div>
+                  <div class="pill amber">Attention</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Lopez · 4811 Creekside Blvd</div>
+                  <div class="task-due due-soon">⏰ Due tomorrow — buyer review milestone blocked</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-4">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">Call Greenstone Property Management — ask for Sarah Briggs (317-555-0198). Request expedited processing citing a contract-driven timeline. After the call, send the AI-drafted follow-up email immediately to create a paper trail. If no response by end of day, escalate to the HOA board contact.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">HOA escalation email drafted</span>
+                      <p>AI has written a firm but non-adversarial HOA email citing the contract timeline and requesting expedited processing. Ready to send immediately after your call.</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('Email ready in AI panel.','HOA escalation draft loaded.')">Use draft</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Calling Greenstone PM…','Sarah Briggs · 317-555-0198')">Call HOA now</button>
+                  <button class="btn-chip" onclick="showToast('HOA escalation email ready.','Check AI panel.')">Use AI email draft</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-4" onclick="markDone('task-4')"></div>
+                  <div class="exp-complete-label" id="ecl-task-4" onclick="markDone('task-4')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-4" style="display:none" onclick="undoDone('task-4')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Sarah Briggs — Greenstone PM</strong>
+                      <span>HOA manager · 317-555-0198 · No reply in 3 days</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Sarah Briggs…','317-555-0198')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Greenstone…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-19" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 4 hours.','Resurfaces at 2:00 PM.')">Snooze 4h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Due tomorrow AM.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Auto-generated · 3 days since last HOA contact</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Lopez file loading.')">
+                  Open Lopez transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TASK 5 -->
+          <div class="task-card priority-attention" data-type="comm" data-txn="kim" data-priority="attention" id="task-5">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-5')">
+              <div class="row-check" id="rc-task-5" onclick="handleCheckClick(event,'task-5')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Send client check-in — no logged touch in 3 days</div>
+                  <div class="task-type-badge type-comm">☎ Communication</div>
+                  <div class="pill amber">Attention</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Kim · 2207 Westbrook Crossing</div>
+                  <div class="task-due due-soon">⏰ Due today — communication drift alert</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-5">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">Kim (seller) tends to be anxious — keep the message brief and positive. Mention the confirmed walkthrough date (March 29) and that closing is on schedule. This takes 30 seconds and protects the referral relationship.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">Check-in text drafted</span>
+                      <p>"Hi [Kim], quick update — everything looks good heading into your closing on March 30. Final walkthrough confirmed for the 29th at 4 PM. Nothing needed from you right now."</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('Text sent to Kim.','Logged in comms history.')">Send this</button>
+                        <button class="btn-chip" onclick="showToast('Editing mode open.','Edit in AI panel.')">Edit first</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Check-in text sent to Kim.','Logged in comms history.')">Send AI draft text</button>
+                  <button class="btn-chip" onclick="showToast('Opening text for editing.','Edit in AI panel before sending.')">Edit first</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-5" onclick="markDone('task-5')"></div>
+                  <div class="exp-complete-label" id="ecl-task-5" onclick="markDone('task-5')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-5" style="display:none" onclick="undoDone('task-5')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Kim (Seller)</strong>
+                      <span>Last touch 3 days ago · Tends to be anxious — keep update brief and positive</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Kim…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Kim…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-18" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 2 hours.','Resurfaces at 12:00 PM.')">Snooze 2h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Due tomorrow AM.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Auto-generated · 72h communication drift</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Kim file loading.')">
+                  Open Kim transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TASK 6 -->
+          <div class="task-card priority-attention" data-type="doc" data-txn="nguyen" data-priority="attention" id="task-6">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-6')">
+              <div class="row-check" id="rc-task-6" onclick="handleCheckClick(event,'task-6')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Confirm HOA docs package for Nguyen — found in contract addendum</div>
+                  <div class="task-type-badge type-doc">📄 Document</div>
+                  <div class="pill amber">Attention</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Nguyen · 801 Meadow Walk Dr</div>
+                  <div class="task-due due-soon">⏰ Due tomorrow</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-6">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">AI flagged an HOA mention in addendum paragraph 3.2. First: confirm with Minh Nguyen (seller) whether the property is under HOA jurisdiction. If yes, initiate the HOA docs request immediately — typical turnaround is 5–10 business days, which barely fits the closing timeline.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">HOA request template ready</span>
+                      <p>If HOA is confirmed, AI has an HOA docs request letter ready to send — includes property address, transaction timeline, and expedited processing request.</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('HOA request template ready.','Check AI panel.')">Get template</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Opening Nguyen file…','Review addendum paragraph 3.2.')">Review contract addendum</button>
+                  <button class="btn-chip" onclick="showToast('HOA request template ready.','Check AI panel.')">Get HOA request template</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-6" onclick="markDone('task-6')"></div>
+                  <div class="exp-complete-label" id="ecl-task-6" onclick="markDone('task-6')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-6" style="display:none" onclick="undoDone('task-6')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Minh Nguyen</strong>
+                      <span>Seller · Confirm HOA status before ordering docs</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling Minh…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to Minh…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-19" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 4 hours.','Resurfaces at 2:00 PM.')">Snooze 4h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Due tomorrow AM.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">AI-detected from contract addendum § 3.2</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Nguyen file loading.')">
+                  Open Nguyen transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TASK 7 -->
+          <div class="task-card priority-attention" data-type="milestone" data-txn="rogers" data-priority="attention" id="task-7">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-7')">
+              <div class="row-check" id="rc-task-7" onclick="handleCheckClick(event,'task-7')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Confirm wire instructions with title — Rogers closing Mar 21</div>
+                  <div class="task-type-badge type-milestone">◷ Milestone</div>
+                  <div class="pill amber">Attention</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Rogers · 1542 Sugar Maple Ln</div>
+                  <div class="task-due due-soon">⏰ Due Mar 20 — closing the next day</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-7">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-top-cols">
+                  <div>
+                    <div class="exp-col-label">Notes</div>
+                    <div class="exp-notes-box">Call the title desk and verbally verify wire instructions — do not rely on email alone. Confirm the amount, routing number, and account number. Log the call with the name of the person you spoke with and the exact time. This is a fraud-prevention step.</div>
+                  </div>
+                  <div>
+                    <div class="exp-col-label">AI Assistance</div>
+                    <div class="exp-ai-box">
+                      <span class="ai-title">Wire verification checklist ready</span>
+                      <p>AI has a 5-point wire instruction verification checklist for the closing call. Protects you and your client from wire fraud exposure.</p>
+                      <div class="exp-ai-actions">
+                        <button class="btn-chip" onclick="showToast('Checklist ready.','Open AI panel to view.')">Get checklist</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Calling title desk…','Log name + time of confirmation.')">Call title desk</button>
+                  <button class="btn-chip" onclick="showToast('Wire checklist ready.','Check AI panel.')">Get verification checklist</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-7" onclick="markDone('task-7')"></div>
+                  <div class="exp-complete-label" id="ecl-task-7" onclick="markDone('task-7')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-7" style="display:none" onclick="undoDone('task-7')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left">
+                      <strong>Title desk</strong>
+                      <span>Ready for closing packet · Verbal wire confirmation required</span>
+                    </div>
+                    <div class="cr-btns">
+                      <button class="tiny-btn call" onclick="showToast('Calling title desk…','')">☎ Call</button>
+                      <button class="tiny-btn email" onclick="showToast('Opening email to title…','')">✉ Email</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-20" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips">
+                    <button class="snooze-chip" onclick="showToast('Snoozed 4 hours.','Resurfaces at 2:00 PM.')">Snooze 4h</button>
+                    <button class="snooze-chip" onclick="showToast('Moved to tomorrow.','Due tomorrow AM.')">Tomorrow AM</button>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Milestone task · Closing Mar 21</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Rogers file loading.')">
+                  Open Rogers transaction <span class="arrow">→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── GROUP: ON TRACK ─────────────────── -->
+        <div class="task-group" id="group-track" style="margin-top:6px">
+          <div class="group-header">
+            <div class="group-label" style="color:var(--blue)">● On track</div>
+            <div class="group-count" id="gc-track">7 tasks</div>
+            <div class="group-line"></div>
+          </div>
+
+          <!-- TASKS 8–14 — on-track tasks use same pattern, more compact expand -->
+
+          <!-- TASK 8 -->
+          <div class="task-card priority-track" data-type="milestone" data-txn="patel" data-priority="track" id="task-8">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-8')">
+              <div class="row-check" id="rc-task-8" onclick="handleCheckClick(event,'task-8')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Confirm final walkthrough with buyer — Patel</div>
+                  <div class="task-type-badge type-milestone">◷ Milestone</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Patel · 2239 Harbor Pointe Ct</div>
+                  <div class="task-due on-track">Due Mar 22</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-8">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Confirm walkthrough date and time with Raj Patel (buyer). Schedule for Mar 22 or 23 — one day before closing. Log the confirmed time in the file.</div>
+                <div class="exp-cta-row">
+                  <button class="btn-primary" onclick="showToast('Scheduling walkthrough…','Calendar invite drafted.')">Schedule walkthrough</button>
+                </div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-8" onclick="markDone('task-8')"></div>
+                  <div class="exp-complete-label" id="ecl-task-8" onclick="markDone('task-8')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-8" style="display:none" onclick="undoDone('task-8')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts">
+                <div class="exp-label">Contacts for this task</div>
+                <div class="contact-list">
+                  <div class="contact-row">
+                    <div class="cr-left"><strong>Raj Patel</strong><span>Buyer · Confirm walkthrough window</span></div>
+                    <div class="cr-btns"><button class="tiny-btn call" onclick="showToast('Calling Raj…','')">☎ Call</button><button class="tiny-btn email" onclick="showToast('Email to Raj…','')">✉ Email</button></div>
+                  </div>
+                </div>
+              </div>
+              <div class="exp-zone-reschedule">
+                <div class="exp-label">Reschedule or snooze</div>
+                <div class="reschedule-row">
+                  <input type="date" class="date-input" value="2026-03-22" onchange="showToast('Due date updated.','Task rescheduled.')" />
+                  <div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Resurfaces tomorrow.')">Tomorrow AM</button></div>
+                </div>
+              </div>
+              <div class="exp-zone-footer">
+                <div class="exp-meta">Standard milestone · No blockers</div>
+                <button class="exp-open-txn" onclick="showToast('Opening Active Transactions…','Patel file loading.')">Open Patel transaction <span class="arrow">→</span></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TASK 9 -->
+          <div class="task-card priority-track" data-type="admin" data-txn="henderson" data-priority="track" id="task-9">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-9')">
+              <div class="row-check" id="rc-task-9" onclick="handleCheckClick(event,'task-9')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Review Henderson contract checklist for compliance</div>
+                  <div class="task-type-badge type-admin">◻ Admin</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Henderson · 903 Millstone Way</div>
+                  <div class="task-due on-track">Due Mar 22</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-9">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Open the Henderson compliance checklist and verify all required items are checked. Focus on disclosure items and dual-representation flags.</div>
+                <div class="exp-cta-row"><button class="btn-primary" onclick="showToast('Opening Henderson checklist…','')">Open checklist</button></div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-9" onclick="markDone('task-9')"></div>
+                  <div class="exp-complete-label" id="ecl-task-9" onclick="markDone('task-9')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-9" style="display:none" onclick="undoDone('task-9')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts"><div class="exp-label">Contacts for this task</div><div class="contact-list"><div class="contact-row"><div class="cr-left"><strong>Henderson buyers</strong><span>Contact if compliance issue found</span></div><div class="cr-btns"><button class="tiny-btn call" onclick="showToast('Calling Henderson…','')">☎ Call</button><button class="tiny-btn email" onclick="showToast('Email to Henderson…','')">✉ Email</button></div></div></div></div>
+              <div class="exp-zone-reschedule"><div class="exp-label">Reschedule or snooze</div><div class="reschedule-row"><input type="date" class="date-input" value="2026-03-22" onchange="showToast('Rescheduled.','')"/><div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Tomorrow AM.')">Tomorrow AM</button></div></div></div>
+              <div class="exp-zone-footer"><div class="exp-meta">Admin task · Routine compliance</div><button class="exp-open-txn" onclick="showToast('Opening Henderson file…','')">Open Henderson transaction <span class="arrow">→</span></button></div>
+            </div>
+          </div>
+
+          <!-- TASK 10 -->
+          <div class="task-card priority-track" data-type="doc" data-txn="martinez" data-priority="track" id="task-10">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-10')">
+              <div class="row-check" id="rc-task-10" onclick="handleCheckClick(event,'task-10')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Upload executed buyer agency agreement — Martinez</div>
+                  <div class="task-type-badge type-doc">📄 Document</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Martinez · 110 Fieldstone Ct</div>
+                  <div class="task-due on-track">Due Mar 23</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-10">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Locate the executed buyer agency agreement (signed by all parties) and upload it to the Martinez transaction file. Verify buyer and agent signatures are both present.</div>
+                <div class="exp-cta-row"><button class="btn-primary" onclick="openAddTaskModal()">Upload document</button></div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-10" onclick="markDone('task-10')"></div>
+                  <div class="exp-complete-label" id="ecl-task-10" onclick="markDone('task-10')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-10" style="display:none" onclick="undoDone('task-10')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts"><div class="exp-label">Contacts for this task</div><div class="contact-list"><div class="contact-row"><div class="cr-left"><strong>Martinez buyers</strong><span>Primary client on this file</span></div><div class="cr-btns"><button class="tiny-btn call" onclick="showToast('Calling Martinez…','')">☎ Call</button><button class="tiny-btn email" onclick="showToast('Email to Martinez…','')">✉ Email</button></div></div></div></div>
+              <div class="exp-zone-reschedule"><div class="exp-label">Reschedule or snooze</div><div class="reschedule-row"><input type="date" class="date-input" value="2026-03-23" onchange="showToast('Rescheduled.','')"/><div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Tomorrow AM.')">Tomorrow AM</button></div></div></div>
+              <div class="exp-zone-footer"><div class="exp-meta">Standard doc task · No blockers</div><button class="exp-open-txn" onclick="showToast('Opening Martinez file…','')">Open Martinez transaction <span class="arrow">→</span></button></div>
+            </div>
+          </div>
+
+          <!-- TASK 11 -->
+          <div class="task-card priority-track" data-type="milestone" data-txn="kim" data-priority="track" id="task-11">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-11')">
+              <div class="row-check" id="rc-task-11" onclick="handleCheckClick(event,'task-11')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Confirm final walkthrough scheduled — Kim closing Mar 30</div>
+                  <div class="task-type-badge type-milestone">◷ Milestone</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Kim · 2207 Westbrook Crossing</div>
+                  <div class="task-due on-track">Mar 29 — confirmed</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-11">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Walkthrough is confirmed for March 29 at 4:00 PM. Log the confirmation in the Kim file and mark complete. No further action needed unless the time changes.</div>
+                <div class="exp-cta-row"><button class="btn-primary" onclick="showToast('Logged in Kim file.','Walkthrough confirmed Mar 29 4:00 PM.')">Log confirmation</button></div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-11" onclick="markDone('task-11')"></div>
+                  <div class="exp-complete-label" id="ecl-task-11" onclick="markDone('task-11')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-11" style="display:none" onclick="undoDone('task-11')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts"><div class="exp-label">Contacts for this task</div><div class="contact-list"><div class="contact-row"><div class="cr-left"><strong>Kim (Seller)</strong><span>Walkthrough confirmed Mar 29 at 4:00 PM</span></div><div class="cr-btns"><button class="tiny-btn call" onclick="showToast('Calling Kim…','')">☎ Call</button><button class="tiny-btn email" onclick="showToast('Email to Kim…','')">✉ Email</button></div></div></div></div>
+              <div class="exp-zone-reschedule"><div class="exp-label">Reschedule or snooze</div><div class="reschedule-row"><input type="date" class="date-input" value="2026-03-29" onchange="showToast('Rescheduled.','')"/><div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Tomorrow AM.')">Tomorrow AM</button></div></div></div>
+              <div class="exp-zone-footer"><div class="exp-meta">Walkthrough confirmed · No blockers</div><button class="exp-open-txn" onclick="showToast('Opening Kim file…','')">Open Kim transaction <span class="arrow">→</span></button></div>
+            </div>
+          </div>
+
+          <!-- TASK 12 -->
+          <div class="task-card priority-track" data-type="admin" data-txn="henderson" data-priority="track" id="task-12">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-12')">
+              <div class="row-check" id="rc-task-12" onclick="handleCheckClick(event,'task-12')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Send brokerage disclosure form to Henderson buyers</div>
+                  <div class="task-type-badge type-admin">◻ Admin</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Henderson · 903 Millstone Way</div>
+                  <div class="task-due on-track">Due Mar 24</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-12">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Send the Indiana brokerage disclosure form to the Henderson buyers via DocuSign. AI has the standard form ready. Required before contract execution.</div>
+                <div class="exp-cta-row"><button class="btn-primary" onclick="showToast('Disclosure queued…','AI sending to Henderson buyers.')">Send via AI</button></div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-12" onclick="markDone('task-12')"></div>
+                  <div class="exp-complete-label" id="ecl-task-12" onclick="markDone('task-12')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-12" style="display:none" onclick="undoDone('task-12')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts"><div class="exp-label">Contacts for this task</div><div class="contact-list"><div class="contact-row"><div class="cr-left"><strong>Henderson buyers</strong><span>Disclosure sent via DocuSign</span></div><div class="cr-btns"><button class="tiny-btn email" onclick="showToast('Email to Henderson…','')">✉ Email</button></div></div></div></div>
+              <div class="exp-zone-reschedule"><div class="exp-label">Reschedule or snooze</div><div class="reschedule-row"><input type="date" class="date-input" value="2026-03-24" onchange="showToast('Rescheduled.','')"/><div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Tomorrow AM.')">Tomorrow AM</button></div></div></div>
+              <div class="exp-zone-footer"><div class="exp-meta">Compliance task · Required before contract execution</div><button class="exp-open-txn" onclick="showToast('Opening Henderson file…','')">Open Henderson transaction <span class="arrow">→</span></button></div>
+            </div>
+          </div>
+
+          <!-- TASK 13 -->
+          <div class="task-card priority-track" data-type="doc" data-txn="martinez" data-priority="track" id="task-13">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-13')">
+              <div class="row-check" id="rc-task-13" onclick="handleCheckClick(event,'task-13')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Order title commitment — Martinez</div>
+                  <div class="task-type-badge type-doc">📄 Document</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Martinez · 110 Fieldstone Ct</div>
+                  <div class="task-due on-track">Due Mar 25</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-13">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Contact the title company and initiate the title commitment order for 110 Fieldstone Ct. Provide the legal description and purchase price. Typical turnaround is 5–7 business days.</div>
+                <div class="exp-cta-row"><button class="btn-primary" onclick="showToast('Title order initiated…','Confirmation sent to title company.')">Order title commitment</button></div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-13" onclick="markDone('task-13')"></div>
+                  <div class="exp-complete-label" id="ecl-task-13" onclick="markDone('task-13')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-13" style="display:none" onclick="undoDone('task-13')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts"><div class="exp-label">Contacts for this task</div><div class="contact-list"><div class="contact-row"><div class="cr-left"><strong>Title company</strong><span>Initiate title commitment order</span></div><div class="cr-btns"><button class="tiny-btn call" onclick="showToast('Calling title…','')">☎ Call</button><button class="tiny-btn email" onclick="showToast('Email to title…','')">✉ Email</button></div></div></div></div>
+              <div class="exp-zone-reschedule"><div class="exp-label">Reschedule or snooze</div><div class="reschedule-row"><input type="date" class="date-input" value="2026-03-25" onchange="showToast('Rescheduled.','')"/><div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Tomorrow AM.')">Tomorrow AM</button></div></div></div>
+              <div class="exp-zone-footer"><div class="exp-meta">Standard title task · No blockers</div><button class="exp-open-txn" onclick="showToast('Opening Martinez file…','')">Open Martinez transaction <span class="arrow">→</span></button></div>
+            </div>
+          </div>
+
+          <!-- TASK 14 -->
+          <div class="task-card priority-track" data-type="comm" data-txn="henderson" data-priority="track" id="task-14">
+            <div class="task-collapsed" onclick="handleRowClick(event,'task-14')">
+              <div class="row-check" id="rc-task-14" onclick="handleCheckClick(event,'task-14')" title="Mark complete"></div>
+              <div class="task-summary">
+                <div class="task-title-row">
+                  <div class="task-title">Schedule Henderson post-inspection call with buyer</div>
+                  <div class="task-type-badge type-comm">☎ Communication</div>
+                  <div class="pill blue">On track</div>
+                </div>
+                <div class="task-meta">
+                  <div class="task-txn">Henderson · 903 Millstone Way</div>
+                  <div class="task-due on-track">Due Mar 26</div>
+                </div>
+              </div>
+              <div class="task-chevron">›</div>
+            </div>
+            <div class="task-expand" id="expand-task-14">
+              <div class="exp-zone-complete">
+                <div class="exp-label">How to complete this task</div>
+                <div class="exp-how"><strong>Steps</strong>Call Henderson buyer to walk through inspection findings and agree on any repair requests. Have the inspection report open during the call. After the call, document any agreed repair requests in the file.</div>
+                <div class="exp-cta-row"><button class="btn-primary" onclick="showToast('Calendar invite drafted…','Check AI panel.')">Schedule call</button></div>
+                <div class="exp-complete-row">
+                  <div class="exp-checkbox" id="ec-task-14" onclick="markDone('task-14')"></div>
+                  <div class="exp-complete-label" id="ecl-task-14" onclick="markDone('task-14')">Mark task as complete</div>
+                  <span class="exp-undo" id="eu-task-14" style="display:none" onclick="undoDone('task-14')">Undo</span>
+                </div>
+              </div>
+              <div class="exp-zone-contacts"><div class="exp-label">Contacts for this task</div><div class="contact-list"><div class="contact-row"><div class="cr-left"><strong>Henderson buyer</strong><span>Post-inspection discussion</span></div><div class="cr-btns"><button class="tiny-btn call" onclick="showToast('Calling Henderson…','')">☎ Call</button><button class="tiny-btn email" onclick="showToast('Email to Henderson…','')">✉ Email</button></div></div></div></div>
+              <div class="exp-zone-reschedule"><div class="exp-label">Reschedule or snooze</div><div class="reschedule-row"><input type="date" class="date-input" value="2026-03-26" onchange="showToast('Rescheduled.','')"/><div class="snooze-chips"><button class="snooze-chip" onclick="showToast('Snoozed.','Tomorrow AM.')">Tomorrow AM</button></div></div></div>
+              <div class="exp-zone-footer"><div class="exp-meta">Communication task · Routine buyer update</div><button class="exp-open-txn" onclick="showToast('Opening Henderson file…','')">Open Henderson transaction <span class="arrow">→</span></button></div>
+            </div>
+          </div>
+
+        </div><!-- /group-track -->
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">✓</div>
+          <h3>No tasks here.</h3>
+          <p>Either you've cleared everything in this category or the filter is hiding them. Try a different tab or show completed tasks.</p>
+          <button class="btn-primary" onclick="setFilter(document.querySelector('[data-filter=all]'),'all')">Show all tasks</button>
+        </div>
+
+      </div><!-- /task-list-container -->
+
+      <!-- COMPLETED SECTION -->
+      <div class="completed-section" id="completed-section">
+        <div class="completed-toggle-row" onclick="toggleCompletedList()">
+          <div class="completed-toggle-left">
+            <span style="font-size:16px;color:var(--green)">✓</span>
+            <strong>Completed today</strong>
+            <span id="completed-count-label">4 tasks done</span>
+          </div>
+          <span class="completed-chevron" id="completed-chevron">›</span>
+        </div>
+        <div class="completed-list" id="completed-list">
+          <div class="c-task"><div class="c-check"></div><div><div class="c-title">Verify Patel wire instructions with title desk</div><div class="c-meta">Patel · Completed 8:41 AM</div></div><div class="c-time">8:41 AM</div></div>
+          <div class="c-task"><div class="c-check"></div><div><div class="c-title">Attach Rogers EM receipt from inbox</div><div class="c-meta">Rogers · Completed 8:55 AM</div></div><div class="c-time">8:55 AM</div></div>
+          <div class="c-task"><div class="c-check"></div><div><div class="c-title">Send Nguyen appraisal confirmation to lender</div><div class="c-meta">Nguyen · Completed 9:18 AM</div></div><div class="c-time">9:18 AM</div></div>
+          <div class="c-task"><div class="c-check"></div><div><div class="c-title">Review Kim purchase agreement addendum</div><div class="c-meta">Kim · Completed 9:44 AM</div></div><div class="c-time">9:44 AM</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div>
+
+<!-- FLOATING AI -->
+<div class="floating-ai">
+  <span style="font-size:18px;flex-shrink:0">✦</span>
+  <div>
+    <strong>Ask Velvet Elves</strong>
+    <span>Draft emails, chase signatures, explain risk, summarize any file</span>
+  </div>
+</div>
+
+<!-- ADD TASK MODAL -->
+<div class="modal-wrap" id="addTaskModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h3>Add a task</h3>
+        <p>Manual tasks are tracked with the same priority system as AI-generated tasks.</p>
+      </div>
+      <button class="close-btn" onclick="closeAddTaskModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>Task description</label><input placeholder="What needs to happen?" id="new-task-title" /></div>
+      <div class="field-row">
+        <div class="field"><label>Transaction</label><select><option value="">Select transaction…</option><option>Rogers · 1542 Sugar Maple Ln</option><option>Patel · 2239 Harbor Pointe Ct</option><option>Nguyen · 801 Meadow Walk Dr</option><option>Lopez · 4811 Creekside Blvd</option><option>Kim · 2207 Westbrook Crossing</option><option>Henderson · 903 Millstone Way</option><option>Martinez · 110 Fieldstone Ct</option></select></div>
+        <div class="field"><label>Task type</label><select><option>Document</option><option>Communication</option><option>Milestone</option><option>Admin</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Priority</label><select><option>Attention</option><option>Critical</option><option>On track</option></select></div>
+        <div class="field"><label>Due date</label><input type="date" /></div>
+      </div>
+      <div class="field"><label>Notes (optional)</label><textarea placeholder="Context, contacts, or instructions for this task…" rows="3"></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-ghost" onclick="closeAddTaskModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitNewTask()">Add to queue</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div style="font-size:16px;flex-shrink:0">✓</div>
+  <div><strong id="toast-title">Done.</strong><span id="toast-sub"></span></div>
+  <button class="toast-close" onclick="hideToast()">✕</button>
+</div>
+
+<script>
+  /* ════════════════════════════════════════════════
+     STATE
+  ════════════════════════════════════════════════ */
+  const completedIds = new Set();         // tasks marked done this session
+  let currentFilter  = 'all';
+  let completedVisible   = false;         // completed section shown?
+  let completedListOpen  = false;         // completed list expanded?
+  let toastTimer = null;
+  const PRESEED_DONE = 4;                 // tasks already done before page load
+
+  /* ════════════════════════════════════════════════
+     TASK ROW CLICK — expand/collapse
+     Only fires when the click target is NOT the
+     checkbox (.row-check) or a button inside the row.
+  ════════════════════════════════════════════════ */
+  function handleRowClick(event, taskId) {
+    // Allow clicks on .row-check and any button to pass through without toggling
+    if (
+      event.target.classList.contains('row-check') ||
+      event.target.closest('.row-check') ||
+      event.target.tagName === 'BUTTON' ||
+      event.target.tagName === 'A'
+    ) return;
+
+    toggleExpand(taskId);
+  }
+
+  /* ════════════════════════════════════════════════
+     CHECKBOX ON COLLAPSED ROW
+     Stops propagation so it doesn't also trigger expand.
+  ════════════════════════════════════════════════ */
+  function handleCheckClick(event, taskId) {
+    event.stopPropagation();
+    toggleDone(taskId);
+  }
+
+  /* ════════════════════════════════════════════════
+     EXPAND / COLLAPSE
+  ════════════════════════════════════════════════ */
+  function toggleExpand(taskId) {
+    const card   = document.getElementById(taskId);
+    const expand = document.getElementById('expand-' + taskId);
+    if (!card || !expand) return;
+
+    const isOpen = card.classList.contains('is-open');
+
+    // Close all other open cards first
+    document.querySelectorAll('.task-card.is-open').forEach(c => {
+      c.classList.remove('is-open');
+      const exp = document.getElementById('expand-' + c.id);
+      if (exp) exp.classList.remove('open');
+    });
+
+    if (!isOpen) {
+      card.classList.add('is-open');
+      expand.classList.add('open');
+      // Smooth scroll into view if partially off-screen
+      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    }
+  }
+
+  /* ════════════════════════════════════════════════
+     MARK DONE / UNDO — shared by row-check and
+     expand panel checkbox. Both stay in sync.
+  ════════════════════════════════════════════════ */
+  function markDone(taskId) {
+    if (completedIds.has(taskId)) return; // already done — use undoDone()
+    completedIds.add(taskId);
+    syncDoneState(taskId, true);
+    showToast('Task marked complete.', 'Logged in completed section below.');
+    updateProgress();
+    updateCounts();
+    syncSidebarBadge();
+  }
+
+  function undoDone(taskId) {
+    completedIds.delete(taskId);
+    syncDoneState(taskId, false);
+    updateProgress();
+    updateCounts();
+    syncSidebarBadge();
+  }
+
+  // toggleDone is used by the small row checkbox (supports undo)
+  function toggleDone(taskId) {
+    if (completedIds.has(taskId)) {
+      undoDone(taskId);
+    } else {
+      markDone(taskId);
+    }
+  }
+
+  function syncDoneState(taskId, done) {
+    const card  = document.getElementById(taskId);
+    const rcEl  = document.getElementById('rc-' + taskId);  // row check
+    const ecEl  = document.getElementById('ec-' + taskId);  // expand check
+    const eclEl = document.getElementById('ecl-' + taskId); // expand check label
+    const euEl  = document.getElementById('eu-' + taskId);  // undo link
+
+    if (!card) return;
+
+    card.classList.toggle('done', done);
+    if (rcEl)  rcEl.classList.toggle('checked', done);
+    if (ecEl)  ecEl.classList.toggle('checked', done);
+    if (eclEl) {
+      eclEl.textContent  = done ? 'Completed ✓' : 'Mark task as complete';
+      eclEl.classList.toggle('done-label', done);
+    }
+    if (euEl) euEl.style.display = done ? '' : 'none';
+
+    // If marking done, collapse the expand panel after a short delay
+    if (done) {
+      setTimeout(() => {
+        card.classList.remove('is-open');
+        const exp = document.getElementById('expand-' + taskId);
+        if (exp) exp.classList.remove('open');
+      }, 600);
+    }
+  }
+
+  /* ════════════════════════════════════════════════
+     PROGRESS BAR
+  ════════════════════════════════════════════════ */
+  function updateProgress() {
+    const allCards = document.querySelectorAll('.task-card[id^="task-"]');
+    const total    = allCards.length + PRESEED_DONE;
+    const done     = completedIds.size + PRESEED_DONE;
+    const pct      = Math.round((done / total) * 100);
+
+    const fillEl = document.getElementById('progress-fill');
+    const pctEl  = document.getElementById('progress-pct');
+    const doneEl = document.getElementById('stat-done');
+    if (fillEl) fillEl.style.width = pct + '%';
+    if (pctEl)  pctEl.textContent  = pct + '% complete';
+    if (doneEl) doneEl.textContent  = done;
+
+    // Update completed count label if section is open
+    const cLabel = document.getElementById('completed-count-label');
+    if (cLabel) cLabel.textContent = done + ' tasks done';
+  }
+
+  /* ════════════════════════════════════════════════
+     GROUP COUNTS
+  ════════════════════════════════════════════════ */
+  function updateCounts() {
+    ['critical','attention','track'].forEach(g => {
+      const group   = document.getElementById('group-' + g);
+      const countEl = document.getElementById('gc-' + g);
+      if (!group || !countEl) return;
+      const cards   = group.querySelectorAll('.task-card[id^="task-"]');
+      const pending = Array.from(cards).filter(c => !completedIds.has(c.id)).length;
+      countEl.textContent = pending + ' task' + (pending !== 1 ? 's' : '');
+    });
+  }
+
+  function syncSidebarBadge() {
+    const total   = document.querySelectorAll('.task-card[id^="task-"]').length;
+    const pending = total - completedIds.size;
+    const el = document.getElementById('sidebar-badge');
+    if (el) el.textContent = Math.max(0, pending);
+  }
+
+  /* ════════════════════════════════════════════════
+     FILTER BY PRIORITY — triggered by progress stat clicks
+     Maps priority group → hides non-matching task cards,
+     highlights the clicked stat button, and clears the
+     type-tab active state so both filters don't conflict.
+  ════════════════════════════════════════════════ */
+  let activePriorityFilter = null; // 'critical' | 'attention' | 'track' | null
+
+  function filterByPriority(priority) {
+    // Toggle off if clicking the same priority again
+    if (activePriorityFilter === priority) {
+      activePriorityFilter = null;
+      clearPriorityStatHighlight();
+      applyFilters();
+      return;
+    }
+
+    activePriorityFilter = priority;
+    clearPriorityStatHighlight();
+    const btn = document.getElementById('psb-' + priority);
+    if (btn) btn.classList.add('active-filter');
+
+    // Show/hide task cards by data-priority
+    document.querySelectorAll('.task-card[id^="task-"]').forEach(card => {
+      const match = card.dataset.priority === priority;
+      card.style.display = match ? '' : 'none';
+    });
+
+    // Show/hide group headers
+    ['critical','attention','track'].forEach(g => {
+      const group = document.getElementById('group-' + g);
+      if (!group) return;
+      group.style.display = (g === priority) ? '' : 'none';
+    });
+
+    const emptyEl = document.getElementById('empty-state');
+    if (emptyEl) emptyEl.classList.remove('visible');
+
+    // Clear type-tab active state — priority filter takes over
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    currentFilter = 'all'; // reset so next type-tab click works cleanly
+  }
+
+  function clearPriorityStatHighlight() {
+    ['psb-critical','psb-attention','psb-track','psb-done'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active-filter');
+    });
+  }
+
+  /* ════════════════════════════════════════════════
+     FILTER TABS — clear priority filter when a type tab is clicked
+  ════════════════════════════════════════════════ */
+  function setFilter(btn, filter) {
+    // Clear any active priority filter
+    activePriorityFilter = null;
+    clearPriorityStatHighlight();
+
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    currentFilter = filter;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const q = (document.getElementById('task-search').value || '').toLowerCase();
+
+    document.querySelectorAll('.task-card[id^="task-"]').forEach(card => {
+      const typeOk  = currentFilter === 'all' || card.dataset.type === currentFilter;
+      const title   = card.querySelector('.task-title')?.textContent.toLowerCase() || '';
+      const txn     = card.querySelector('.task-txn')?.textContent.toLowerCase()   || '';
+      const searchOk = !q || title.includes(q) || txn.includes(q);
+      card.style.display = (typeOk && searchOk) ? '' : 'none';
+    });
+
+    // Hide group headers whose tasks are all hidden
+    ['critical','attention','track'].forEach(g => {
+      const group   = document.getElementById('group-' + g);
+      if (!group) return;
+      const visible = Array.from(group.querySelectorAll('.task-card')).some(c => c.style.display !== 'none');
+      group.style.display = visible ? '' : 'none';
+    });
+
+    const anyVisible = document.querySelectorAll('.task-card[id^="task-"][style=""], .task-card[id^="task-"]:not([style])').length > 0;
+    const emptyEl = document.getElementById('empty-state');
+    if (emptyEl) emptyEl.classList.toggle('visible', !anyVisible);
+  }
+
+  /* ════════════════════════════════════════════════
+     SORT
+  ════════════════════════════════════════════════ */
+  function sortTasks(sortBy) {
+    const typeOrder = { doc:0, comm:1, milestone:2, admin:3 };
+    const container = document.getElementById('task-list-container');
+    const emptyEl   = document.getElementById('empty-state');
+    const groups    = ['critical','attention','track'].map(g => document.getElementById('group-' + g));
+
+    if (sortBy === 'priority') {
+      groups.forEach(g => { if (g) container.insertBefore(g, emptyEl); });
+    } else if (sortBy === 'type') {
+      groups.forEach(group => {
+        if (!group) return;
+        const cards = Array.from(group.querySelectorAll('.task-card[id^="task-"]'));
+        cards.sort((a,b) => (typeOrder[a.dataset.type]||9) - (typeOrder[b.dataset.type]||9));
+        cards.forEach(c => group.appendChild(c));
+      });
+    }
+    showToast('Tasks re-sorted.', 'By: ' + sortBy.charAt(0).toUpperCase() + sortBy.slice(1));
+  }
+
+  /* ════════════════════════════════════════════════
+     COMPLETED SECTION
+  ════════════════════════════════════════════════ */
+  function toggleCompletedSection() {
+    completedVisible = !completedVisible;
+    const sec = document.getElementById('completed-section');
+    const btn = document.getElementById('completed-toggle-btn');
+    sec.classList.toggle('visible', completedVisible);
+    btn.classList.toggle('on', completedVisible);
+    btn.textContent = completedVisible ? 'Hide completed' : 'Show completed';
+  }
+
+  function toggleCompletedList() {
+    completedListOpen = !completedListOpen;
+    document.getElementById('completed-list').classList.toggle('open', completedListOpen);
+    document.getElementById('completed-chevron').classList.toggle('open', completedListOpen);
+  }
+
+  /* ════════════════════════════════════════════════
+     ADD TASK MODAL
+  ════════════════════════════════════════════════ */
+  function openAddTaskModal()  { document.getElementById('addTaskModal').classList.add('open');    }
+  function closeAddTaskModal() { document.getElementById('addTaskModal').classList.remove('open'); }
+
+  function submitNewTask() {
+    const title = document.getElementById('new-task-title').value.trim();
+    if (!title) { document.getElementById('new-task-title').focus(); return; }
+    closeAddTaskModal();
+    document.getElementById('new-task-title').value = '';
+    showToast('Task added to queue.', '"' + title.substring(0,48) + (title.length>48?'…':'') + '"');
+  }
+
+  document.getElementById('addTaskModal').addEventListener('click', function(e) {
+    if (e.target === this) closeAddTaskModal();
+  });
+
+  /* ════════════════════════════════════════════════
+     TOAST
+  ════════════════════════════════════════════════ */
+  function showToast(title, sub) {
+    document.getElementById('toast-title').textContent = title;
+    document.getElementById('toast-sub').textContent   = sub || '';
+    document.getElementById('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(hideToast, 3400);
+  }
+  function hideToast() { document.getElementById('toast').classList.remove('show'); }
+
+  /* ════════════════════════════════════════════════
+     KEYBOARD
+  ════════════════════════════════════════════════ */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAddTaskModal();
+  });
+
+  /* ════════════════════════════════════════════════
+     INIT
+  ════════════════════════════════════════════════ */
+  updateProgress();
+  updateCounts();
+  syncSidebarBadge();
+</script>
+</body>
+</html>
