@@ -3,7 +3,7 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 PROJECT MILESTONES (22-WEEK TIMELINE)
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-03-31 (Multi-provider AI — switchable OpenAI / Claude support)
+Last Updated: 2026-04-06 (Pre-Phase 3 design review — workflow logic alignment)
 Start Date: Week 1 (2026-03-09)
 End Date: Week 22 (2026-08-02)
 Budget: Under USD $40,000 (Fixed-Price)
@@ -322,9 +322,86 @@ Success Criteria: Agents/elves can operate from the approved Active
 
 
 ================================================================================
+PHASE 2.5: PRE-PHASE 3 DESIGN REVIEW & WORKFLOW LOGIC ALIGNMENT
+Week 8.5 (Apr 6 - Apr 13, overlapping with Phase 2 closeout)
+================================================================================
+
+MILESTONE 2.5 - Frontend UI Workflow Logic Design Review
+-----------------------------------------------------------------------------
+PURPOSE: Before proceeding to Phase 3 implementation, complete a full design
+  review pass across all approved designs and requirements to ensure
+  consistency, identify gaps, and produce a canonical workflow specification
+  that governs all future frontend implementation.
+
+Deliverables:
+  [x] Generate complete frontend UI workflow logic specification
+      (FRONTEND_UI_WORKFLOW_LOGIC.md) covering every route with 10-section
+      structure: Page Identity & Access, Entry Conditions & Data Loading,
+      Layout & Component Hierarchy, User Actions & State Transitions,
+      Conditional Rendering Logic, Navigation Flows, AI Integration Points,
+      Real-Time & Notification Behavior, Cross-Page Relationships,
+      Edge Cases & Special Behaviors
+  [x] Design 12 cross-cutting end-to-end workflows (A–L):
+      A. New Transaction Creation (quick-create modal + full wizard)
+      B. Transaction Lifecycle Management (status transitions, type switching)
+      C. Task Management (generation, manual create, AI intelligence, approval)
+      D. Document Lifecycle (upload, AI classify, version, email, e-sign)
+      E. Communication & AI Email (inbound processing, auto-respond, drafts)
+      F. AI Chatbot Interaction (floating panel, context, quick actions)
+      G. Attorney Workflow (packet upload, review, release, state rules)
+      H. FSBO Customer Journey (property-centric, milestones, sharing)
+      I. Team Lead Workflow (team view, agent board, bulk approval)
+      J. Notification & Reminder System (in-app, push, email, escalation)
+      K. Admin Configuration (users, templates, confidence, tenant)
+      L. Profile & Settings (personal, checklists, integrations)
+  [x] Define 9 global interaction patterns for consistent cross-page behavior
+  [x] Update project requirements (requirements.txt) with workflow-derived
+      additions:
+      - Transaction status definitions and transitions
+      - Onboarding wizard steps per role
+      - Quick-create modal vs full wizard distinction
+      - Dashboard auto-routing logic
+      - Client portal and vendor portal page specs
+      - Public milestone viewer requirements
+      - Optimistic UI and error handling patterns
+      - Admin UI requirements (users, templates, confidence, audit, tenant)
+      - Intelligence section UI requirements (AI suggestions, analytics)
+      - Deep-linking requirements
+  [x] Update system design (SYSTEM_DESIGN.md) with new API endpoints:
+      - AI Suggestions CRUD (/api/v1/ai/suggestions)
+      - Analytics aggregation (/api/v1/analytics)
+      - Notifications (/api/v1/notifications)
+      - Task Queue (/api/v1/tasks/queue)
+      - Attorney Actions (/api/v1/attorney/approve, release-packet)
+      - Client Portal (/api/v1/client/*)
+      - Public Milestone Viewer (/api/v1/milestones/shared/:token)
+      - Admin endpoints (/api/v1/admin/users, audit-logs)
+      - Updated permission matrix and frontend state architecture
+  [x] Update project milestones (milestones.txt) to reference workflow
+      specification as input to Phase 3+ implementation
+  [ ] Review 10 approved HTML designs against workflow spec for visual
+      alignment and flag any inconsistencies
+  [ ] Finalize design review signoff with client
+
+Success Criteria: FRONTEND_UI_WORKFLOW_LOGIC.md approved as the canonical
+  frontend specification; all three project documents (requirements, system
+  design, milestones) updated and internally consistent; no ambiguity
+  remains for Phase 3 frontend implementation.
+
+NOTE: This milestone does not add calendar time to the overall timeline.
+  It runs during the Phase 2 → Phase 3 transition week and formalizes
+  design decisions that would otherwise be made ad-hoc during implementation.
+
+
+================================================================================
 PHASE 3: AI WIZARD & DOCUMENT MANAGEMENT
 Weeks 9-13 (May 4 - Jun 7)
 ================================================================================
+
+NOTE: All Phase 3+ frontend implementation must align with the workflow logic
+  specification in FRONTEND_UI_WORKFLOW_LOGIC.md, which defines per-page
+  entry conditions, data requirements, user actions, conditional rendering,
+  navigation flows, AI integration points, and edge cases.
 
 MILESTONE 3.1 - AI Document Parsing Engine (Weeks 9-10)
 -----------------------------------------------------------------------------
@@ -359,6 +436,10 @@ Success Criteria: AI accurately extracts key fields from real estate documents,
 
 MILESTONE 3.2 - Wizard UI & Flow (Week 11)
 -----------------------------------------------------------------------------
+  NOTE: Implementation must follow FRONTEND_UI_WORKFLOW_LOGIC.md §4.5 (New
+  Transaction) and Cross-Cutting Workflow A (New Transaction Creation Flow)
+  for full action specifications, conditional rendering, and edge cases.
+
 Deliverables:
   [ ] Build wizard Step 1: Document upload interface (drag-drop, multi-file)
   [ ] Add global drag-and-drop upload from anywhere in the authenticated
@@ -389,6 +470,10 @@ Success Criteria: Complete wizard flow from upload to transaction creation,
 
 MILESTONE 3.3 - Document Management System (Week 12)
 -----------------------------------------------------------------------------
+  NOTE: Implementation must follow FRONTEND_UI_WORKFLOW_LOGIC.md §5.3 (All
+  Documents), §4.6 Transaction Detail Documents tab, and Cross-Cutting
+  Workflow B (Document Upload & AI Processing) for UI flows and edge cases.
+
 Deliverables:
   [ ] Build document center UI (upload, view, download, email, archive)
   [ ] Build cross-transaction All Documents UI with AI-assisted search
@@ -442,6 +527,11 @@ Success Criteria: Documents can be sent for e-signature, tracked, returned,
 ================================================================================
 PHASE 4: COMMUNICATION ENGINE & AI EMAIL
 Weeks 14-16 (Jun 8 - Jun 28)
+
+NOTE: Communication features must align with FRONTEND_UI_WORKFLOW_LOGIC.md
+  Cross-Cutting Workflow E (Communication Logging), §5.3 (All Documents),
+  and §7 (Intelligence Section — AI Settings) for email integration points,
+  communication log UI, and AI provider configuration.
 ================================================================================
 
 MILESTONE 4.1 - Email Integration (Week 14)
@@ -525,6 +615,11 @@ Success Criteria: Vendor communication automated with structured responses,
 ================================================================================
 PHASE 5: DASHBOARDS, PAYMENTS & PROFILES
 Weeks 17-19 (Jun 29 - Jul 19)
+
+NOTE: Dashboard and profile implementations must align with
+  FRONTEND_UI_WORKFLOW_LOGIC.md §3 (Dashboard Landing Pages), §8 (FSBO
+  Customer Workspace), §9 (Client Portal), §10 (Admin Section), §11
+  (Profile), and Cross-Cutting Workflow K (Dashboard Auto-Routing).
 ================================================================================
 
 MILESTONE 5.1 - Role-Specific Dashboards (Week 17)
@@ -693,6 +788,11 @@ Success Criteria: All profile types operational, closing checklists generating,
 ================================================================================
 PHASE 6: WHITE-LABEL, INTEGRATIONS & ADVERTISING HOOKS
 Weeks 20-21 (Jul 20 - Aug 2)
+
+NOTE: White-label and tenant configuration must align with
+  FRONTEND_UI_WORKFLOW_LOGIC.md §10.8 (Tenant Settings) for branding
+  configuration UI and §1 (Shared Shell Reference) for theme application
+  across internal and customer-facing shells.
 ================================================================================
 
 MILESTONE 6.1 - White-Label & Multi-Tenant (Week 20)
@@ -743,6 +843,12 @@ Success Criteria: Ad slot architecture in place, basic ad management working,
 ================================================================================
 PHASE 7: TESTING, DEPLOYMENT & LAUNCH
 Week 22 (Aug 3 - Aug 9)
+
+NOTE: End-to-end testing must verify all workflows defined in
+  FRONTEND_UI_WORKFLOW_LOGIC.md Cross-Cutting Workflows A–L, Global
+  Interaction Patterns 1–9, and Constraints & Rules 1–10. Each page's
+  edge cases and error states documented in the spec must have test
+  coverage.
 ================================================================================
 
 MILESTONE 7.1 - Comprehensive Testing & Hardening (Week 22 - First Half)

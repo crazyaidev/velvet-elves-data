@@ -3,7 +3,7 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 ESTABLISHED PROJECT REQUIREMENTS
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-03-31 (Multi-provider AI — switchable OpenAI / Claude support)
+Last Updated: 2026-04-06 (Pre-Phase 3 design review — workflow logic alignment)
 Timeline: 22 Weeks (MVP delivery)
 Budget: Under USD $40,000 (Fixed-Price)
 Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
@@ -109,17 +109,47 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
     - Reminders for closed transactions (tax exemptions, reviews)
     - Ability to turn on/off notifications
 
-1.6 New User Experience
+1.6 New User Experience & Onboarding
     - Overlay tutorial for first-time users (walkthrough)
     - Can be skipped and re-viewed at any time
     - After the first transaction upload, prompt the user to complete their
       profile/setup if required fields or checklist templates are missing
+    - Multi-step onboarding wizard (/onboarding) shown after first login
+      when onboarding_completed === false:
+      Agent/Elf/Team Lead: Welcome → Profile Basics → Email Connection →
+        E-Signature Setup → Notification Preferences → Checklist Templates
+        (Agent/TL only) → Complete
+      Attorney: Welcome → Profile Basics → State Rules Configuration →
+        Email Connection → Notification Preferences → Complete
+      Client: Welcome → Profile Basics → Notification Preferences → Complete
+      FSBO Customer: Welcome → Profile Basics → Notification Preferences →
+        Complete
+      Vendor: Welcome → Profile Basics → Complete
+      Admin: Welcome → Profile Basics → Tenant Configuration (first admin) →
+        AI Provider Selection → Notification Preferences → Complete
+    - Each step auto-saves on "Next"; "Skip" links on optional integration
+      steps (email, e-sign); progress preserved across sessions
+    - "Go to Dashboard" on final step sets onboarding_completed = true
 
 1.7 Client & FSBO Portals
     Standard Client Portal:
       - Ability to turn on/off notifications
       - Share milestones from profile
       - Agent BIO section: "Learn About Your Agent"
+      - Client portal routes: /client/transactions, /client/documents,
+        /client/milestones, /client/agent
+      - Client can view transaction overview, key dates, milestones, and
+        documents (view/upload only); cannot see tasks, internal notes,
+        or communication logs
+      - Document status indicators visible to client: Missing, In Progress,
+        Uploaded, Verified, Complete
+      - "Flag for deletion" button available (sends request to agent/elf)
+
+    Vendor Portal:
+      - Redirected to document-scoped view on login
+      - Upload documents (own only), see own uploads, receive documents
+      - Cannot view full document center, tasks, timelines, or other
+        transaction details
 
     FSBO Customer Workspace:
       - Dashboard sections: Overview, My Properties, Documents,
@@ -168,6 +198,17 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
     - FSBO property views should support prep milestones such as disclosures,
       photo approval, marketing/go-live target, and launch checklist
 
+2.1a Transaction Statuses
+    - Active: live transaction in progress
+    - Incomplete: wizard started but not confirmed; saved as draft
+    - Paused: agent manually pauses (task reminders stop; editing still
+      allowed)
+    - Completed: all tasks done + closing date passed
+    - Closed: admin/agent marks as closed after post-closing review
+    - Status transitions: Incomplete → Active (wizard confirmed);
+      Active → Paused → Active (agent toggle);
+      Active → Completed → Closed (manual or time-based)
+
 2.2 Transaction Type Switching
     - If transaction type changes mid-process (e.g., Financing to Cash):
       targeted updates only (not full regeneration)
@@ -206,6 +247,22 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
       for v2
     - Export capabilities: CSV, Excel, PDF
     - Modern data-table UX
+    - Deep-linking: all filter, sort, search, tab, and highlight states
+      must be encodable as URL query parameters for sharing and AI-driven
+      navigation (e.g., /transactions/active?filter=overdue&sort=close_date
+      &highlight=:transactionId)
+
+2.4a Transaction Quick-Create vs Full Wizard
+    - Quick-create modal (from topbar/sidebar CTA on any internal page):
+      AI Import paste area + file drop zone, manual fields (Client Name,
+      Property Address, City/ZIP, Transaction Type, Purchase Price, Contract
+      Date, Projected Closing Date, Lender/Title Company, Notes),
+      "Create with AI Checklist" action
+    - Full Wizard (/transactions/new): 6-step flow (Document Upload →
+      AI Parsing Progress → Address Confirmation → Purchase Information
+      Validation → Missing Information Handling → Confirmation Page)
+    - Both entry points create the same transaction object; quick-create
+      is a shortcut for manual/AI-assisted entry without full wizard flow
 
 2.5 Payment Processing
     - Integrate Stripe for secure credit-card processing
@@ -422,13 +479,31 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
          - Critical red / warning amber / healthy green / neutral gray
          - AI surfaces use subtle champagne glow accents only
 
-2.7 Full Transaction View
-    - Overview Tab / Transaction Log
+2.7 Full Transaction View (/transactions/:id)
+    - Tabbed view: Overview | Tasks | Documents | Parties | Communications
+    - Overview Tab: transaction summary card, key dates (editable), recent
+      activity timeline, AI suggestions card
+    - Tasks Tab: full task list grouped by status (Overdue, Upcoming,
+      Completed, Blocked, Skipped); dependency visualization; sleeping
+      tasks section (soft-deleted, restorable); inline complete, edit, delete
+    - Documents Tab: document list with status/signature indicators; upload,
+      download, email, e-sign, rename, version history, soft delete;
+      drag-drop upload zone; AI search within transaction
+    - Parties Tab: grouped contact cards by role (Buyer, Seller, Agents,
+      Lender, Title, Attorney, Inspector, Appraiser, etc.); add/edit/remove;
+      vendor contact card feature (link for vendors to add contacts)
+    - Communications Tab: immutable communication log; search/filter by
+      date/party/keyword; resend icon on email entries; AI draft review
+      with "Approve / Edit & Send" buttons; side-by-side review UI
     - Ability to resend emails with one click (icon on the far right of note)
     - "Print Checklist" action pulls from user/team profile templates and
       generates Buyer vs Seller variants
     - Tagged notes can be included in printed checklist output
     - Seller checklist supports escrow overage reminders and closing guidance
+    - Role-based tab visibility: Client sees Overview (limited) + Documents
+      (view/upload) + Parties (view only); Vendor sees Documents (own only);
+      FSBO sees Overview + Documents + Milestones; Attorney sees all tabs +
+      sign-off actions
 
 
 ================================================================================
@@ -617,10 +692,21 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
     - Daily summary email (only when tasks are due, not when there are none)
 
 4.9 Task Sorting & Views
+    - My Task Queue (/tasks/queue): personal task queue grouped by urgency
+      sections: Overdue (red header) | Due Today (amber) | Upcoming | Completed
+      (collapsed by default)
+    - Sort options: Urgency (default), Due Date, Transaction, Status
+    - Filter tabs: All | Overdue | Due Today | Upcoming | Completed
+    - Per-task actions menu: Complete, Edit, Change Due Date (inline popover),
+      Reassign (team members dropdown), View Transaction, Skip Task, Delete
+    - Team Lead toggle: "My Tasks" / "Team Tasks" (team view shows all
+      members' tasks with assignee column)
     - Sort tasks by vendor ("vendor carts"): follow up all tasks for one vendor
       in one email across multiple transactions
-    - Tasks by status: previous, today, upcoming
     - Highlight tasks with upcoming deadlines
+    - Task Detail page (/tasks/:id): full task info, dependencies, activity
+      timeline, parent transaction link, AI confidence/reason for
+      AI-recommended tasks
 
 4.10 AI-Generated Closing Checklists
     - Generate 2 closing sheets: 1 for agent, 1 for client
@@ -750,9 +836,15 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
       human owner/support contact (if AI-sent)
 
 6.6 In-App Notifications
-    - Notifications for all external communications sent
+    - Notification bell icon in topbar across all internal pages
+    - Notifications for: task assignments, task due dates, document actions,
+      AI email sends, communications received, milestone sharing views
     - Optional escalations (reminders after 24-48 hours, configurable)
-    - Push notifications support
+    - Push notifications support (browser push)
+    - Daily summary email: only when tasks are due, not when everything
+      is clear
+    - Configurable notification preferences per user: per-channel toggles
+      (email/push/in-app) for each notification category
 
 6.7 SMS & Voice Communication Hooks
     - Communication architecture should support future SMS and call-provider
@@ -935,6 +1027,47 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
     - WCAG AA compliance
     - Multilingual support capability
 
+9.4a Public Milestone Viewer
+    - Route: /milestones/:shareToken (public, no authentication required)
+    - Read-only view of transaction milestone progress shared by
+      Client or FSBO Customer via expirable link
+    - Shows: tenant branding, property address, milestone timeline
+      (Contract → EM → Inspection → Appraisal → CD → CTC → Close),
+      key dates with status indicators, document status cues (name +
+      status only — no download/view links)
+    - Does NOT show: internal notes, tasks, full documents, contact
+      details (except agent name), workflow logic
+    - Expired/invalid tokens show friendly expiry message with tenant
+      contact info
+    - Viewer-open notification: when someone opens the link, the link
+      creator receives a notification
+    - Share link creation: FSBO/Client can set expiration (24h/48h/7d/
+      30d/custom), optionally name the recipient
+    - Share management page (/fsbo/share or client profile): view active
+      links, create new, revoke existing
+
+9.4b Optimistic UI & Error Handling
+    - Task completion, date editing, and contact addition use optimistic
+      updates with rollback on API failure
+    - Offline detection: show "You're offline" banner; queue actions for
+      sync when reconnected
+    - API failures: show specific error toasts with actionable messages;
+      retry buttons where appropriate
+    - Loading states: skeleton placeholders matching the content shape
+      (card skeletons, row skeletons, chart placeholders)
+    - Empty states: contextual illustrations with guidance text and primary
+      CTA (e.g., "No active transactions — create your first one")
+
+9.4c Dashboard Auto-Routing
+    - /dashboard route auto-redirects based on user role:
+      Solo Agent → /dashboard/agent
+      Agent/Elf on team, Team Lead → /dashboard/team
+      Attorney → /dashboard/attorney
+      Admin → /dashboard/admin
+      Client → /client/transactions
+      FSBO Customer → /fsbo
+      Vendor → /client/documents (vendor-scoped)
+
 9.5 White-Label Customization
     - Upload custom logos, set brand colors/themes
     - Configure custom domain or subdomain per tenant
@@ -972,6 +1105,42 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
 10.4 Backup & Disaster Recovery
     - Backup strategies and disaster recovery plans
     - Business continuity assurance
+
+
+10.5 Admin UI Requirements
+    - User Management (/admin/users): data table with Name, Email, Role,
+      Team, Status, Last Login; filter by role/status/team; search;
+      "+ Invite User" modal (email, role, team, optional transaction);
+      edit/deactivate/activate actions; drill-down to /admin/users/:userId
+    - Task Templates (/admin/task-templates): data table with filter by
+      category/use case/automation level; edit/duplicate/deactivate;
+      import from CSV (/admin/task-templates/import); dependency rule
+      builder UI; condition builder (visual JSON editor)
+    - AI Confidence Settings (/admin/confidence): "Ship It" threshold
+      slider, "Review Required" threshold slider, global minimum floor;
+      task category overrides table; team-specific overrides (cannot go
+      below global floor); real-time validation with warnings
+    - Audit Logs (/admin/audit-logs): system-wide log table with filter
+      by user/entity type/action/date range/keyword; expandable rows
+      showing before/after state diff; export as CSV; 50 per page
+    - Tenant Settings (/admin/tenant): branding (logo, colors, domain),
+      AI provider toggle (OpenAI/Claude), feature flags, data retention
+
+10.6 Intelligence Section UI Requirements
+    - AI Suggestions (/ai-suggestions): pending suggestion cards with
+      type icon, confidence ring, title, description, source, transaction
+      link; action buttons: Accept, Edit & Accept, Dismiss (with optional
+      reason); scope radio: "Apply to this transaction" / "Apply to all
+      future"; filter by type/confidence/transaction; bulk actions for
+      high-confidence suggestions
+    - Analytics (/analytics): KPI summary row, chart grid (closings by
+      month, revenue trend, task completion rate, transaction type
+      distribution, AI suggestion effectiveness, deal drift reasons);
+      period selector (month/quarter/year/custom); export; team lead
+      sees per-agent filter
+    - Settings (/settings): tabbed — Personal Settings (all roles),
+      Workspace Settings (Agent/TL), Team Settings (TL), System Settings
+      (Admin with AI provider toggle)
 
 
 ================================================================================
@@ -1034,6 +1203,31 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
 13.5 APIs
     - Modular and documented
     - RESTful with webhook support
+
+
+================================================================================
+14. WORKFLOW LOGIC SPECIFICATION REFERENCE
+================================================================================
+
+14.1 Frontend UI Workflow Logic
+    - Complete page-by-page workflow specification lives in
+      FRONTEND_UI_WORKFLOW_LOGIC.md (generated 2026-04-06)
+    - Covers every route with 10-section structure: Page Identity & Access,
+      Entry Conditions & Data Loading, Layout & Component Hierarchy,
+      User Actions & State Transitions, Conditional Rendering Logic,
+      Navigation Flows, AI Integration Points, Real-Time & Notification
+      Behavior, Cross-Page Relationships, Edge Cases & Special Behaviors
+    - Includes 12 cross-cutting workflow designs (A–L): New Transaction
+      Creation, Transaction Lifecycle, Task Management, Document Lifecycle,
+      Communication & AI Email, AI Chatbot, Attorney Workflow, FSBO
+      Journey, Team Lead Workflow, Notification System, Admin Config,
+      Profile & Settings
+    - Includes 9 global interaction patterns: drag-drop document intake,
+      global search, AI briefing chip, new transaction CTA, print
+      checklist, audit logging, sidebar deal-state filters, AI confidence
+      indicators, white-label theming
+    - This specification is the canonical reference for frontend
+      implementation; all Phase 3+ frontend work must align with it
 
 
 ================================================================================

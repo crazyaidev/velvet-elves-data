@@ -1,9 +1,9 @@
 # Velvet Elves - System Design Document
 
 **Date:** 2026-03-05
-**Last Updated:** 2026-03-31 (Multi-provider AI — switchable OpenAI / Claude support)
-**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions; Active Transactions UI fully aligned with ve-active_transactions.html
-**Reference:** ListedKit.com functionality as design benchmark
+**Last Updated:** 2026-04-06 (Pre-Phase 3 design review — workflow logic alignment)
+**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions; Active Transactions UI fully aligned with ve-active_transactions.html; complete frontend workflow logic specification finalized (FRONTEND_UI_WORKFLOW_LOGIC.md)
+**Reference:** ListedKit.com functionality as design benchmark; FRONTEND_UI_WORKFLOW_LOGIC.md as canonical frontend specification
 
 ---
 
@@ -1167,6 +1167,102 @@ GET    /api/v1/dashboard/fsbo/share-link    # Milestone sharing:
 POST   /api/v1/dashboard/fsbo/share-link    #   create/manage expirable read-only links
 ```
 
+#### AI Suggestions (`/api/v1/ai/suggestions`)
+
+```
+GET    /api/v1/ai/suggestions              # List pending AI suggestions
+                                           #   type, title, description, transaction_id,
+                                           #   confidence, source, reason, suggested_action
+                                           #   Supports: ?type=task_add|task_remove|deadline_adjust|
+                                           #     email_draft|document_request|risk_alert,
+                                           #   ?min_confidence=0.75, ?transaction_id=
+GET    /api/v1/ai/suggestions/stats        # Summary: pending count, accepted/rejected this week,
+                                           #   confidence distribution
+POST   /api/v1/ai/suggestions/{id}/accept  # Accept suggestion: { scope: 'transaction'|'all_future' }
+POST   /api/v1/ai/suggestions/{id}/dismiss # Dismiss suggestion: { reason: 'optional text' }
+```
+
+#### Analytics (`/api/v1/analytics`)
+
+```
+GET    /api/v1/analytics/dashboard         # Aggregated analytics:
+                                           #   closings_by_month, revenue_trend,
+                                           #   task_completion_rates, avg_days_to_close,
+                                           #   transaction_type_distribution,
+                                           #   ai_suggestion_acceptance_rate, drift_reasons
+                                           #   Supports: ?period=month|quarter|year|custom,
+                                           #   ?start=, ?end=, ?agent_id= (team view)
+```
+
+#### Notifications (`/api/v1/notifications`)
+
+```
+GET    /api/v1/notifications               # List notifications for current user
+                                           #   Supports: ?read=true|false, ?page=, ?limit=
+PUT    /api/v1/notifications/{id}/read     # Mark notification as read
+PUT    /api/v1/notifications/read-all      # Mark all as read
+GET    /api/v1/notifications/preferences   # Get notification preferences
+PUT    /api/v1/notifications/preferences   # Update preferences (per-channel toggles)
+```
+
+#### Task Queue (`/api/v1/tasks/queue`)
+
+```
+GET    /api/v1/tasks/queue                 # Personal task queue:
+                                           #   Supports: ?assignee=me|team,
+                                           #   ?filter=overdue|due_today|upcoming|completed,
+                                           #   ?sort=urgency|due_date|transaction|status,
+                                           #   ?group_by=vendor (vendor cart view)
+```
+
+#### Attorney Actions (`/api/v1/attorney`)
+
+```
+POST   /api/v1/attorney/approve            # Sign-off on a review item:
+                                           #   { matter_id, item_id, action: 'approve'|'hold' }
+POST   /api/v1/attorney/release-packet     # Release a legal packet:
+                                           #   { matter_id, recipients[], document_ids[] }
+                                           #   ALWAYS human-initiated; no AI auto-release
+PATCH  /api/v1/attorney/matters/{id}       # Update matter status (e.g., hold with reason)
+GET    /api/v1/attorney/releases           # List release-ready matters
+GET    /api/v1/attorney/state-rules        # State rules reference: ?state=
+GET    /api/v1/attorney/recording-calendar # Recording calendar: ?start=&end=
+```
+
+#### Client Portal (`/api/v1/client`)
+
+```
+GET    /api/v1/client/transactions         # List transactions where user is a party
+GET    /api/v1/client/documents            # Documents visible to client role
+                                           #   (view/download/upload, no delete)
+GET    /api/v1/client/milestones           # Milestone timeline for client's transactions
+POST   /api/v1/client/documents/{id}/flag-deletion  # Request document deletion review
+```
+
+#### Public Milestone Viewer (`/api/v1/milestones/shared`)
+
+```
+GET    /api/v1/milestones/shared/{token}   # Public milestone data (no auth required):
+                                           #   property_address, milestone_steps[],
+                                           #   key_dates[], document_status_cues[]
+                                           #   Returns 404 if token expired/invalid
+POST   /api/v1/milestones/shared/{token}/viewed  # Record viewer-open event;
+                                           #   triggers notification to link creator
+```
+
+#### Admin (`/api/v1/admin`)
+
+```
+GET    /api/v1/admin/users                 # List all users in tenant:
+                                           #   ?role=, ?status=active|inactive, ?team_id=, ?search=
+PATCH  /api/v1/admin/users/{id}            # Update user (role, status, team assignment)
+POST   /api/v1/admin/invitations           # Send invitation: { email, role, team_id?, transaction_id? }
+GET    /api/v1/admin/audit-logs            # System-wide audit log:
+                                           #   ?user_id=, ?entity_type=, ?action=,
+                                           #   ?date_start=, ?date_end=, ?search=
+GET    /api/v1/admin/audit-logs/export     # Export filtered logs as CSV
+```
+
 #### Health & System
 
 ```
@@ -1194,12 +1290,26 @@ GET    /api/v1/health/ready                # Readiness check (DB connectivity)
 | Milestone sharing | No | No | No | No | No | Share own | Share own (expirable links) | No |
 | Confidence settings | Global floor | Team threshold | No | No | No | No | No | No |
 | Audit logs | Full | Team | No | No | Own matters | No | No | No |
+| AI Suggestions | All | Team | Own txn | Assigned | Attorney-relevant | No | No | No |
+| Analytics | System-wide | Team + per-agent | Own | No | No | No | No | No |
+| Notifications | Own | Own | Own | Own | Own | Own | Own | Own |
+| Client portal | No | No | No | No | No | Full | No | No |
+| FSBO workspace | No | No | No | No | No | No | Full | No |
+| Attorney release | No | No | No | No | Yes | No | No | No |
+| Public milestones | N/A | N/A | N/A | N/A | N/A | Create links | Create links | N/A |
 
 ---
 
 ## 4. Frontend UI/UX Design
 
 ### 4.1 Design System (Client-Approved Designs)
+
+**Workflow Logic Reference (2026-04-06):** The complete page-by-page frontend
+workflow specification is maintained in `FRONTEND_UI_WORKFLOW_LOGIC.md`. That
+document is the canonical reference for: entry conditions, data requirements,
+user actions and state transitions, conditional rendering logic, navigation
+flows, AI integration points, real-time behavior, and edge cases per route.
+All Phase 3+ frontend implementation must align with it.
 
 **Visual approach:** B2B institutional trust pack — dark sidebar + light content
 surface + high-density transaction cards. Customer-facing portals (FSBO) use a
@@ -1211,6 +1321,11 @@ simplified but brand-consistent shell.
 - `completed_designs/ve-homepage_dashboard-team_leader.html` — Team Leader dashboard landing
 - `completed_designs/ve-fsbo_dashboard.html` — FSBO Customer workspace
 - `completed_designs/ve-attorney_dashboard.html` — Attorney dashboard landing
+- `completed_designs/ve-workflow-closing_calendar.html` — Closing Calendar workspace
+- `completed_designs/ve-workflow-my_task_queue.html` — My Task Queue workspace
+- `completed_designs/ve-intelligence-analytics.html` — Analytics workspace
+- `completed_designs/ve-intelligence-ai_suggestions.html` — AI Suggestions workspace
+- `completed_designs/ve-workflow-all_documents.html` — All Documents workspace
 
 **Additional brand references:** `data/ve-brandkit.txt` and `data/ve-style-sheet.txt`
 
@@ -1378,11 +1493,18 @@ App
 |   |-- Milestone sharing (expirable read-only links)
 |   `-- Support/guide contact area
 |
-`-- Client Portal (protected — simplified)
-    |-- My Transactions
-    |-- Documents
-    |-- Milestones
-    `-- Agent Info
+|-- Client Portal (protected — simplified shell)
+|   |-- Sidebar: My Transactions | Documents | Milestones | Agent Info
+|   |-- /client/transactions — transaction cards (overview, dates, milestones)
+|   |-- /client/documents — view/upload (no delete; flag for deletion)
+|   |-- /client/milestones — timeline with plain-English descriptions
+|   `-- /client/agent — Agent BIO / "Learn About Your Agent"
+|
+|-- Vendor Portal (protected — minimal)
+|   `-- /client/documents (vendor-scoped: own uploads only)
+|
+`-- Public
+    `-- /milestones/:shareToken — read-only milestone viewer (no auth)
 ```
 
 ### 4.3 Key UI Components (Phase 1)
@@ -1851,6 +1973,12 @@ export const ROUTES = {
   FSBO_SHARE: '/fsbo/share',                        // NEW: milestone sharing
   FSBO_AI_HELP: '/fsbo/ask-ai',                     // NEW: plain-English AI guidance
 
+  // Client Portal
+  CLIENT_TRANSACTIONS: '/client/transactions',          // NEW: client transaction list
+  CLIENT_DOCUMENTS: '/client/documents',                // NEW: client document view
+  CLIENT_MILESTONES: '/client/milestones',              // NEW: client milestone timeline
+  CLIENT_AGENT: '/client/agent',                        // NEW: agent bio page
+
   // Admin
   ADMIN_USERS: '/admin/users',              // NEW
   ADMIN_USER_DETAIL: '/admin/users/:userId',
@@ -1886,7 +2014,15 @@ React Query (TanStack Query)
 |   |-- /documents                    -> transaction documents
 |   |-- /documents/search             -> all-documents AI search
 |   |-- /task-templates               -> template library
-|   `-- /audit-logs                   -> audit trail
+|   |-- /audit-logs                   -> audit trail
+|   |-- /ai/suggestions              -> pending AI suggestions
+|   |-- /analytics/dashboard         -> analytics aggregation
+|   |-- /notifications               -> user notification list
+|   |-- /tasks/queue                 -> personal task queue
+|   |-- /attorney/releases           -> release-ready matters
+|   |-- /client/transactions         -> client transaction list
+|   |-- /client/milestones           -> client milestone timeline
+|   `-- /milestones/shared/:token    -> public milestone viewer
 |
 |-- Client State (React Context)
 |   |-- AuthContext                   -> JWT token, user session, current role
@@ -1895,7 +2031,8 @@ React Query (TanStack Query)
 |   |-- WorkspaceFilterContext        -> deal-state + page-tab filters
 |   |-- DashboardContext              -> role-specific dashboard state, command grid layout
 |   |-- GlobalDropzoneContext         -> workspace-wide document drop handling
-|   `-- NotificationContext           -> toast/alert state
+|   |-- NotificationContext           -> toast/alert state
+|   `-- OnlineStatusContext          -> offline detection + action queue
 |
 `-- Form State (React Hook Form)
     |-- TransactionForm
