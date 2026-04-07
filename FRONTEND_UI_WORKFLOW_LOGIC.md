@@ -34,16 +34,16 @@ All internal pages share a common app shell. This section defines it once; indiv
 
 ### Internal Shell
 
-- **Topbar (58px):** Brand lockup + AI indicator | "Today's AI Briefing" chip (Critical / Needs Attention / On Track counts — clickable as filter shortcuts) | Global search input | Notification bell | User avatar chip | Contextual CTA (e.g., "+ New Transaction")
+- **Topbar (58px):** Brand lockup + AI indicator | "Today's AI Briefing" chip (Critical / Needs Attention / On Track counts — clickable as filter shortcuts) | Global search input | Notification bell | User avatar chip (click opens menu: Settings, Profile, Sign Out) | Contextual CTA (e.g., "+ New Transaction")
 - **Left Sidebar (220px, dark navy `#1E3356`):**
   - 2×2 KPI tiles (role-specific; default for Agent: Overdue Tasks, Closing This Week, Active Deals, Pipeline Value)
   - Navigation groups:
     - **Dashboard** — role-specific landing
     - **Deals** — Active Transactions (badge), Pending (badge), Closed, All Transactions
     - **Workflow** — My Task Queue (badge), All Documents, Closing Calendar
-    - **Intelligence** — AI Suggestions (badge), Analytics, Settings
+    - **Intelligence** — AI Suggestions (badge), Analytics
     - **Team** (Team Lead only) — Agents, Task Templates
-  - Footer: Pinned "+ New Transaction" CTA button | User profile card (avatar, name, role)
+  - Footer: Pinned "+ New Transaction" CTA button | User profile card (avatar, name, role; click opens menu: Settings, Profile, Sign Out)
 - **Page Header:** Title + count pill | Action buttons (Export CSV, Print Report) | Tab bar (page-level filter tabs with live counts) | Sort control + inline search
 - **Content Area:** Scrollable, padded, receives primary page content
 
@@ -1074,6 +1074,7 @@ This is a pure redirect route. No UI rendered.
 - **Sidebar state:** "Active Transactions" nav link active (highlighted with orange indicator). KPI tiles: Overdue Tasks (count, red if > 0), Closing This Week (count), Active Deals (count), Pipeline Value (currency). Deals section counts: Active Transactions (badge), Pending (badge), Closed, All Transactions.
 - **Topbar state:** AI briefing chip with Critical/Needs Attention/On Track counts (each clickable to set filter). Global search input. Notification bell. User chip. "+ New Transaction" CTA button.
 - **Page header:**
+  - Breadcrumb: Deals > Active Transactions
   - "Active Transactions" title + count pill (total matching current filter, mono font)
   - Action buttons: "Export CSV" | "Print Report"
   - Tab bar: All (count) | Overdue (count, red text if > 0) | Due Today (count, amber) | Closing Soon (count) | In Inspection (count) | On Track (count, green) | Unhealthy (count, red)
@@ -1362,6 +1363,7 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "Pending" nav link active
+- **Page header breadcrumb:** Deals > Pending
 - **Identical to Active Transactions workspace** — this route serves as a named alias. The sidebar "Pending" link navigates here, and the page renders the same workspace with the same data (active, non-closed transactions). This preserves a future hook for differentiating "Active" (listings) from "Pending" (under contract) in v2.
 - **All components, overlays, actions, and behaviors:** Same as `/transactions/active`
 
@@ -1391,7 +1393,7 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "Closed" nav link active
-- **Page header:** "Closed Transactions" title + count pill | "Export CSV" action
+- **Page header:** Breadcrumb: Deals > Closed | "Closed Transactions" title + count pill | "Export CSV" action
 - **Tab bar:** None (closed transactions do not need status filter tabs)
 - **Sort options:** Close Date (default, newest first) | Client Name | Price
 - **Transaction cards:** Same card pattern as Active Transactions but:
@@ -1442,7 +1444,7 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "All Transactions" nav link active
-- **Page header:** "All Transactions" title + count pill | "Export CSV"
+- **Page header:** Breadcrumb: Deals > All Transactions | "All Transactions" title + count pill | "Export CSV"
 - **Tab bar:** All | Active | Incomplete | Paused | Completed | Closed (each with count)
 - **Sort options:** Urgency | Close Date | Client Name | Price | Status
 - **Transaction cards:** Same pattern; status pill reflects actual status (Active, Incomplete, Paused, Completed, Closed) with appropriate colors
@@ -1535,7 +1537,7 @@ This is a pure redirect route. No UI rendered.
 - **Shell variant:** Internal shell (or Client/FSBO shell for those roles)
 - **Sidebar state:** Parent "Active Transactions" or "All Transactions" highlighted
 - **Page header:**
-  - Breadcrumb: Transactions > [Client Name]
+  - Breadcrumb: Deals > Active Transactions > [Client Name]
   - Title: Client name + address
   - Status pill + "why" badges
   - Milestone bar
@@ -1676,7 +1678,7 @@ This is a pure redirect route. No UI rendered.
 - **Shell variant:** Internal shell
 - **Sidebar state:** "My Task Queue" nav link active (with badge count for overdue)
 - **Topbar state:** AI briefing chip; "+ New Transaction" CTA
-- **Page header:** "My Task Queue" title + total count pill | "Export" action
+- **Page header:** Breadcrumb: Workflow > My Task Queue | "My Task Queue" title + total count pill | "Export" action
 - **Tab bar:** All | Overdue (red count) | Due Today (amber count) | Upcoming | Completed
 - **Sort control:** Urgency (default) | Due Date | Transaction | Status
 - **Primary content area:**
@@ -1795,7 +1797,7 @@ This is a pure redirect route. No UI rendered.
 - **Shell variant:** Internal shell
 - **Sidebar state:** "My Task Queue" or parent transaction highlighted
 - **Page header:**
-  - Breadcrumb: My Task Queue > [Task Name] (or Transaction > Tasks > [Task Name])
+  - Breadcrumb: Workflow > My Task Queue > [Task Name] (or Deals > [Transaction Name] > Tasks > [Task Name])
   - Task name (editable inline)
   - Status pill (Pending / InProgress / Completed / Blocked / Skipped)
   - Action buttons: Complete Task | Edit | Delete
@@ -1843,7 +1845,7 @@ This is a pure redirect route. No UI rendered.
 - **Shell variant:** Internal shell
 - **Sidebar state:** "Closing Calendar" nav link active
 - **Topbar state:** Standard
-- **Page header:** "Closing Calendar" title | Month/Year selector + navigation arrows (< Month >) | View toggle: Month | Week | List
+- **Page header:** Breadcrumb: Workflow > Closing Calendar | "Closing Calendar" title | Month/Year selector + navigation arrows (< Month >) | View toggle: Month | Week | List
 - **Primary content area:**
 
   **Month View (default):**
@@ -1932,7 +1934,7 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "All Documents" nav link active
-- **Page header:** "All Documents" title + count pill | "Upload" button | "Export" button
+- **Page header:** Breadcrumb: Workflow > All Documents | "All Documents" title + count pill | "Upload" button | "Export" button
 - **Search bar:** Prominent AI-assisted search: "Search by document name, buyer, seller, transaction, or keyword…" with AI search icon
 - **Filter bar:** Document type dropdown | Transaction filter | Date range | Status (all/pending/processed/signed)
 - **Primary content area:**
@@ -2045,7 +2047,7 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "AI Suggestions" nav link active (with badge count)
-- **Page header:** "AI Suggestions" title + pending count pill
+- **Page header:** Breadcrumb: Intelligence > AI Suggestions | "AI Suggestions" title + pending count pill
 - **Filter bar:** Type filter (All | Tasks | Deadlines | Emails | Documents | Risks) | Confidence slider (show only above X%) | Transaction filter
 - **Primary content area:**
   - Suggestion cards stacked vertically:
@@ -2144,7 +2146,7 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "Analytics" nav link active
-- **Page header:** "Analytics" title | Period selector (This Month | This Quarter | This Year | Custom Range) | Export button
+- **Page header:** Breadcrumb: Intelligence > Analytics | "Analytics" title | Period selector (This Month | This Quarter | This Year | Custom Range) | Export button
 - **Primary content area:**
   - KPI summary row: Total Closings (period) | Total Volume | Avg Days to Close | Task Completion Rate | AI Acceptance Rate
   - Chart grid (2×3 or 3×2):
@@ -2191,7 +2193,7 @@ This is a pure redirect route. No UI rendered.
 
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
-- **Sidebar state:** "Settings" nav link active
+- **Sidebar state:** No nav link active (Settings is accessed via user avatar chip menu in topbar or user profile card in sidebar footer)
 - **Page header:** "Settings" title
 - **Primary content area — tabbed settings:**
 
