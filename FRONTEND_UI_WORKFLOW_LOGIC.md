@@ -1087,7 +1087,7 @@ This is a pure redirect route. No UI rendered.
   - Left edge: Vertical color bar indicating urgency (red = critical, amber = warning, green = on track)
   - Row 1: Client name (bold) | Property address | Status pill (Critical / Needs Attention / On Track / In Inspection / Unhealthy) + "why" badges (e.g., "2 overdue", "no client touch 5 days", "missing inspection response")
   - Row 2: AI next-step banner (champagne glow background, orange left border): icon + "Next step: [action description]" + context sub-text + CTA button (e.g., "Send Response", "Request Docs")
-  - Row 3: Primary contact (name, role) with one-click phone and email icons | Milestone bar: Contract → EM → Inspection → Appraisal → CD Delivered → CTC → Close (filled steps = green, current = amber, future = gray, overdue = red)
+  - Row 3: Primary contact (name, role) with clickable `tel:` phone link and `mailto:` email link (stopPropagation to avoid card toggle) | Milestone bar: Contract → EM → Inspection → Appraisal → CD Delivered → CTC → Close (filled steps = green, current = amber, future = gray, overdue = red)
   - Row 4: Info badges: Tasks (overdue/total) | Emails | Notes | Missing Docs | Client Touch (days) | Lender Touch (days) | History count
   - Right summary block: Days to Close (mono, large) | Overdue count or "No Overdue" (green/red) | Purchase Price (mono)
   - Expand chevron (right side)
@@ -1119,7 +1119,7 @@ This is a pure redirect route. No UI rendered.
   - Secondary contact support: "Add contact" link under existing primary
 
   **Below columns:**
-  - AI Suggestions panel: "AI Suggestions for this deal" with 2–3 contextual suggestions (e.g., "Draft inspection response", "Summarize lender email thread", "Generate repair credit counter-offer") — each with an action button
+  - AI Suggestions panel: "AI Suggestions for This Deal" with up to 3 contextual suggestions computed client-side from card state: overdue task review, draft inspection response (if date missing), prepare closing checklist (if close ≤14 days), upload documents (if doc_count=0), AI next-step help. Each suggestion button opens AI Chat panel. Panel only renders when ≥1 suggestion applies.
   - Footer actions bar: "View/Add Documents" | "Print Checklist" | "Transaction History" | Price display
 
 - **Overlay/modal inventory:**
@@ -1157,44 +1157,56 @@ This is a pure redirect route. No UI rendered.
 
 **Transaction card click (expand/collapse):**
 - Trigger: Click on card (not on interactive elements within card)
-- Immediate UI: Card expands with slide-down animation showing 3-column drawer; other expanded cards collapse (accordion behavior)
-- API call: `GET /api/v1/transactions/:id/detail` (tasks, key dates, contacts, AI suggestions) — lazy loaded on first expand
-- Success: Drawer populates with data
-- Failure: Drawer shows error placeholder with retry
+- Immediate UI: Card expands with slide-down animation showing 3-column drawer (tasks, key dates, contacts)
+- Data source: All drawer data (task sections, key dates, contact groups, AI suggestions) is included in the `GET /api/v1/dashboard/transaction-cards` response — no separate detail fetch needed
+- AI suggestions panel: Populated client-side from card state (overdue task count, missing key dates, approaching close date, document count)
+
+**AI next-step banner (`tab-banner-sub` text):**
+- **Data source:** `TransactionCardAPI.ai_next_step` returned by `GET /api/v1/dashboard/transaction-cards`. Each card also reports `ai_next_step_source: 'ai' | 'rule'` and `ai_next_step_updated_at`. Both fields exist only for internal frontend logic and are not displayed — the banner looks identical in both modes so users never see an "AI vs rule" distinction.
+- **Cache strategy:** Backend caches the AI-generated sentence in `transactions.ai_next_step_text` / `_cta` / `_updated_at`. On dashboard load, the endpoint serves the cached text if it's non-null and less than 24 hours old (`ai_next_step_cache.is_fresh`) → `source: 'ai'`. Otherwise it returns the rule-based fallback from `_derive_ai_next_step` (inline, instant) → `source: 'rule'`, AND schedules a background `BackgroundTasks` job (`_background_refresh_ai_next_steps`) that regenerates the real AI text via `AIService.generate_next_step_guidance` with bounded concurrency (`REFRESH_CONCURRENCY = 4`).
+- **Silent frontend auto-refresh:** `TransactionListPage` watches `cardsResponse.items`. Whenever any card has `source === 'rule'` and its transaction ID hasn't been refreshed in this session yet, the page waits 3 seconds (time for the LLM call to complete) and calls `queryClient.invalidateQueries({ queryKey: ['dashboard', 'transaction-cards'] })`. The subsequent refetch picks up the freshly-cached AI text and the banner content updates in place. A session-scoped `pendingAiRefreshRef` Set dedupes so each transaction triggers at most one silent refresh per page lifetime, preventing loops when the LLM provider is unavailable.
+- **Cache invalidation (cost minimization):** The cache is cleared only at state-change write sites — any call that can shift the next-deadline task or key inputs:
+  - `POST /api/v1/tasks` (new task may become next deadline)
+  - `PATCH /api/v1/tasks/:id` when `name`, `status`, or `due_date` changes
+  - `PUT /api/v1/tasks/:id/status` (always)
+  - `DELETE /api/v1/tasks/:id` (always)
+  - `PATCH /api/v1/transactions/:id` when `closing_date`, `address`, or `use_case` changes
+  - `PUT /api/v1/transactions/:id/key-dates` (always — any key date shifts the timeline)
+  All invalidations route through `ai_next_step_cache.invalidate()` which nulls the three DB columns. No state change = no invalidation = 0 LLM calls. Each real state change produces exactly **one** LLM call on the next dashboard fetch, which is then cached for 24 hours.
+- **Graceful failure:** If the LLM provider is unavailable, `refresh_one` logs a warning and leaves the cache untouched. The next dashboard fetch still serves the rule-based fallback so the banner is never empty. The retry only happens on the next state change (not on every page load), avoiding runaway costs during provider outages.
 
 **AI next-step CTA button click (e.g., "Send Response"):**
 - Trigger: Click
-- Immediate UI: Opens AI Chat panel with pre-filled action context (e.g., drafts an inspection response for review)
-- API call: `POST /api/v1/ai/action` with `{ transaction_id, action: 'draft_inspection_response' }`
-- Success: AI chat panel opens with draft content for user review
-- Failure: Toast; panel opens with error "Unable to generate draft"
+- Immediate UI: Opens AI Chat side panel
+- Current state: Chat panel uses `POST /api/v1/dashboard/ai-chat` which returns placeholder responses. Full AI action engine (draft generation, contextual responses) deferred to Phase 3 (Milestone 3.1+)
+- Future: Pre-filled action context with `POST /api/v1/ai/action` for contextual draft generation
 
 **Task checkbox click (complete task):**
-- Trigger: Click checkbox in task list
-- Immediate UI: Optimistic update — checkbox fills, task text strikes through, moves to "Completed" group
-- API call: `PATCH /api/v1/tasks/:id` with `{ status: 'Completed', completed_at: now() }`
-- Success: Task confirmed completed; info badge updates; milestone bar may advance; stage pill may recalculate
-- Failure: Rollback — checkbox unchecks, task returns to previous group; error toast
-- Side effects: Audit log; notification to transaction participants; task-dependent tasks may become unblocked
+- Trigger: Click checkbox in expanded task list (only non-completed tasks are clickable)
+- API call: `PATCH /api/v1/tasks/:id` with `{ status: 'Completed' }` — backend automatically sets `completed_at`
+- Success: Dashboard query cache invalidated → card refreshes with updated task sections, counts, and stage pill; toast "Task completed"
+- Failure: Error toast "Failed to complete task"
+- Side effects: Backend writes audit log; task-dependent tasks may become unblocked
 
 **"+ Add Task" click:**
-- Trigger: Click
-- Immediate UI: Opens Add Task modal
-- Modal fields: Task Name, Completion Method (Phone Call | Email | DocuSign/E-Signature | In Person | Upload Document | Online Portal | AI Agent | Other), Due Date, Assign To (self | AI Agent | team members dropdown)
-- "Get AI Suggestions on How to Complete This Task" button → expandable AI Suggested Approaches section
-- On submit: API call `POST /api/v1/tasks` → before saving, AI checks for similar incomplete tasks → presents Add / Combine / Disregard choice if match found
-- Success: Task appears in task list; modal closes; toast "Task added"
-- Failure: Validation errors in modal; API error toast
+- Trigger: Click "+ Add" header link or "+ Add Task" dashed button in expanded tasks column
+- Immediate UI: Opens Add Task modal with transaction context (deal name badge, transactionId passed through)
+- Modal fields: Task Name (required), Completion Method (phone_call | email | e_signature | in_person | upload_document | online_portal | ai_agent | other), Due Date, Assign To (Myself | AI Agent)
+- "Get AI Suggestions on How to Complete" button → `POST /api/v1/ai/suggest-task-approach` with `{ task_name, completion_method?, transaction_id? }`; returns `{ approaches: [{ description, suggested_method, rationale }] }`. MVP uses a keyword-based rule engine on the backend (inspection/appraisal, signing/contract, upload/document, call/follow-up, title/escrow/loan — falls back to a generic trio). Panel renders inline below the form with a loading spinner during the fetch; each approach is a clickable card. Clicking a card auto-fills the Completion Method dropdown with the suggested method and shows a toast confirming the selection. Panel includes Regenerate and Hide buttons. Phase 3 will upgrade the backend path to a live chat-completion provider call while preserving the same request/response contract.
+- On submit: `POST /api/v1/tasks` with `{ name, transaction_id, completion_method?, due_date?, assigned_to? }`
+- Success: Dashboard cache invalidated → card refreshes; modal clears and closes; toast "Task added"
+- Failure: Error toast with API message; modal stays open
+- Loading state: Submit button shows spinner and is disabled during request
+- Future: AI similar-task dedup check before saving (Phase 3)
 
-**Key date pencil-edit click:**
-- Trigger: Click pencil icon next to a date
-- Immediate UI: Inline popover appears with date picker, current value pre-filled
-- Popover has Save and Cancel buttons
-- Save click: API call `PATCH /api/v1/transactions/:id/dates` with `{ field: 'inspection_response_date', value: '2026-04-15' }`
-- Success: Date updates in place; popover closes; if date moved, dependent tasks may recalculate (toast if tasks affected: "3 task deadlines adjusted")
-- Failure: Error toast; popover stays open
+**Key date row click (edit):**
+- Trigger: Click anywhere on a key date row (row highlights on hover with "(click to edit)" hint in section header)
+- Immediate UI: `DateEditPopover` appears anchored near the clicked row with date picker, Save and Cancel buttons
+- Save click: Optimistic local display update (formatted date, green color) + API call `PUT /api/v1/transactions/:id/key-dates` with `{ [field_name]: 'YYYY-MM-DD' }` where field_name comes from the backend's `KeyDateAPI.field_name` (e.g., `em_delivered_date`, `inspection_response_date`, `closing_date`)
+- Success: Dashboard cache invalidated → card refreshes; toast "Date updated"
+- Failure: Error toast "Failed to update date" (local optimistic display remains until cache refresh corrects it)
 - Cancel click: Popover closes, no changes
-- Side effects: Audit log with before/after state; dependent task recalculation; notifications if closing date changed
+- Side effects: Backend writes audit log with before/after state
 
 **Contact phone icon click:**
 - Trigger: Click phone icon
@@ -1205,13 +1217,14 @@ This is a pure redirect route. No UI rendered.
 - Trigger: Click email icon
 - Immediate UI: Opens email compose (either in-app compose if email connected, or `mailto:` fallback)
 
-**"Add [role]" contact link click:**
-- Trigger: Click "Add title company" link
-- Immediate UI: Opens Add Contact inline modal
-- Fields: Company Name, First Name, Last Name, Phone Number, Email Address
-- Submit: `POST /api/v1/transactions/:id/parties` with contact data
-- Success: Contact appears in contacts column; modal closes
-- Side effects: Contact also added to centralized contact directory for reuse
+**"Add [role]" contact link click / contact "+" button click:**
+- Trigger: Click dashed "Add [role]" placeholder (empty group) or the "+" button on an existing contact row
+- Immediate UI: Opens Add Contact modal with role label pre-set and transactionId passed through
+- Fields: Company Name (shown for Lender/Title roles), First Name (required), Last Name, Phone Number, Email Address
+- Submit: `POST /api/v1/transactions/:id/parties` with `{ party_role, full_name, email?, phone?, company? }` — role label mapped to API role (e.g., "Lender" → "loan_officer", "Title" → "title_rep")
+- Success: Dashboard cache invalidated → contacts column refreshes; modal clears and closes; toast "Contact added"
+- Failure: Error toast with API message; modal stays open
+- Loading state: Submit button shows spinner and is disabled during request
 
 **"View/Add Documents" footer click:**
 - Trigger: Click
@@ -1257,7 +1270,7 @@ This is a pure redirect route. No UI rendered.
   - "In Inspection" tab only shows count > 0 when transactions have unsent inspection responses
   - "Why" badges compute from: overdue tasks, missing documents, stale communication (no client/lender touch), approaching deadline with blockers
   - Stage pills computed from transaction state + task status + dates + message counts + missing docs
-  - AI next-step banner: only shown if AI has a recommendation for this transaction
+  - AI next-step banner: shown whenever the transaction has an active deadline task; text is AI-generated (cached 24h) with a keyword rule-based fallback on cold cache or LLM failure
   - Empty contact slots: show "Add [role]" placeholder
   - Time-of-day fields on Closing Date and Possession: show "Time: TBD" until set
 - **Feature flags:** None on this page
