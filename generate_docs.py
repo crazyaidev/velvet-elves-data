@@ -852,8 +852,141 @@ def _add_feedback_block(doc, lines=8):
         blank.paragraph_format.space_after = Pt(6)
 
 
+def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"):
+    """Generate a client-friendly Markdown version of the testing review."""
+    lines = []
+    lines.append("# Velvet Elves — Frontend Client Testing Review")
+    lines.append("")
+    lines.append("## Features Currently Complete — Client Feedback Requested")
+    lines.append("")
+    lines.append("**Last Updated:** April 15, 2026  ")
+    lines.append("**Test Environment:** http://dev.velvetelves.com/  ")
+    lines.append("**Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  ")
+    lines.append("**Reviewer:** Client — please fill in the Feedback block under each feature")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+    lines.append("## How To Use This Document")
+    lines.append("")
+    lines.append("### What is in this document")
+    lines.append("")
+    lines.append("- This document lists every frontend feature that is currently complete and needs your review.")
+    lines.append("- Each feature includes the page address, the exact steps to test, the expected result, our ideas for future improvements, and a blank Feedback area for your notes.")
+    lines.append("- Features that are still being built (for example placeholder 'Coming Soon' pages) are intentionally left out of this review.")
+    lines.append("")
+    lines.append("### How to fill in the Feedback area")
+    lines.append("")
+    lines.append("- **Status** — write Pass, Fail, or Needs Work after you try the feature.")
+    lines.append("- **Comments** — anything you noticed: confusing text, slow actions, wrong results, missing fields, visual issues.")
+    lines.append("- **Improvement priority** — for the ideas listed under 'Future Improvement Suggestions', please mark each as High, Medium, Low, or Skip.")
+    lines.append("")
+    lines.append("### Accounts you will need")
+    lines.append("")
+    lines.append("- **Agent or Elf** — covers the main day-to-day workflow.")
+    lines.append("- **Team Lead or Admin** — needed to see the Delete button on transactions, the admin-only Task Templates pages, and the Deletion Queue on the Documents page.")
+    lines.append("- **Attorney** — loads the attorney-specific workspace at /transactions.")
+    lines.append("- **FSBO Customer** — verifies the FSBO sidebar layout.")
+    lines.append("- **Admin with a known user ID** — needed only for the direct user-detail link at /admin/users/<userId>.")
+    lines.append("")
+    lines.append("### Suggested order of testing")
+    lines.append("")
+    lines.append("1. Public pages and sign-in / sign-up")
+    lines.append("2. Onboarding and the first-time tutorial")
+    lines.append("3. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)")
+    lines.append("4. Team Lead or Admin extras (delete permission, task templates, deletion queue)")
+    lines.append("5. Attorney workspace")
+    lines.append("6. FSBO-customer sidebar")
+    lines.append("7. Direct links and error pages")
+    lines.append("")
+    lines.append("---")
+    lines.append("")
+
+    def _render_md_bullets(items, indent=""):
+        out = []
+        for entry in items:
+            if isinstance(entry, str):
+                out.append(f"{indent}- {entry}")
+            else:
+                main, subs = entry
+                out.append(f"{indent}- {main}")
+                for sub in subs:
+                    out.append(f"{indent}  - {sub}")
+        return out
+
+    category_order = []
+    categories = {}
+    for f in TESTING_REVIEW_FEATURES:
+        cat = f["category"]
+        if cat not in categories:
+            categories[cat] = []
+            category_order.append(cat)
+        categories[cat].append(f)
+
+    for section_index, cat in enumerate(category_order, start=1):
+        lines.append(f"## Section {section_index} — {cat}")
+        lines.append("")
+        for feature in categories[cat]:
+            lines.append(f"### {feature['no']}. {feature['feature']}")
+            lines.append("")
+
+            lines.append("**Route / Location**")
+            lines.append("")
+            lines.append(feature["route"])
+            lines.append("")
+
+            lines.append("**How To Test**")
+            lines.append("")
+            lines.extend(_render_md_bullets(feature["how_to_test"]))
+            lines.append("")
+
+            lines.append("**Expected Result**")
+            lines.append("")
+            lines.extend(_render_md_bullets(feature["expected_result"]))
+            lines.append("")
+
+            lines.append("**Future Improvement Suggestions**")
+            lines.append("")
+            lines.extend(_render_md_bullets(feature["future_ideas"]))
+            lines.append("")
+
+            lines.append("**Feedback**")
+            lines.append("")
+            lines.append("_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._")
+            lines.append("")
+            lines.append("> _Status:_ ")
+            lines.append("> ")
+            lines.append("> _Comments:_ ")
+            lines.append("> ")
+            lines.append("> _Improvement priority:_ ")
+            lines.append("")
+            lines.append("---")
+            lines.append("")
+
+    lines.append("## Overall Feedback")
+    lines.append("")
+    overall_labels = [
+        "Biggest usability wins you noticed",
+        "Biggest friction points you noticed",
+        "Features you would like prioritized next",
+        "Additional requests or general notes",
+    ]
+    for label in overall_labels:
+        lines.append(f"### {label}")
+        lines.append("")
+        lines.append("> ")
+        lines.append("> ")
+        lines.append("> ")
+        lines.append("")
+
+    output_path = BASE_DIR / output_filename
+    output_path.write_text("\n".join(lines), encoding="utf-8")
+    print(f"Created {output_path.name}")
+
+
 def create_testing_review_doc():
-    """Generate a .docx for client testing review with per-feature feedback space."""
+    """Generate both .docx and .md for client testing review, with per-feature feedback space."""
+    _write_testing_review_md()
+
     doc = Document()
 
     for section in doc.sections:
@@ -1640,81 +1773,430 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 27,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Transaction detail page",
-        "route": "/transactions/<transactionId>",
+        "feature": "All Documents page — overview and access",
+        "route": "/documents",
         "how_to_test": [
-            ("Open a transaction either from the list or from the dashboard.", [
-                "Property address, created date, status badge, and status dropdown are visible.",
+            ("Open /documents and check the header.", [
+                "The page title reads 'All Documents' (with a small 'Workflow > All Documents' breadcrumb on wide screens).",
+                "Next to the title, an orange count pill shows '{N} files / {N} missing'.",
             ]),
-            ("Change the status using the dropdown.", []),
-            ("Sign in as Team Lead or Admin — confirm the Delete button is visible and asks for confirmation.", []),
-            ("Open each tab and try the available actions.", [
-                "Overview — summary card, key dates, status, use case, price.",
-                "Tasks — add a task, change status, toggle complete, open task details.",
-                "Documents — upload and list documents.",
-                "Parties — currently an intentional empty placeholder. No feedback needed yet.",
-                "Communications — currently an intentional empty placeholder. No feedback needed yet.",
+            ("Check the top-right header buttons.", [
+                "'Upload Document' (or 'Upload' on a narrow screen) is always visible.",
+                "'Send for Signature' is visible.",
+                "'Deletion Queue' is visible only when you are signed in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).",
+            ]),
+            ("Try opening /documents as a non-internal role (for example as a Client if that account is available).", [
+                "You should be redirected to /dashboard instead of seeing the page.",
+            ]),
+            ("Force the empty state.", [
+                "Apply filters that return no results — confirm 'No documents match this filter' with a 'Clear filters' button.",
+            ]),
+            ("Force the error state.", [
+                "Briefly turn off your internet and reload — the page should show 'Failed to load documents' with a 'Retry' button.",
             ]),
         ],
         "expected_result": [
-            "The header reflects the status changes you make.",
-            "A successful delete takes the user back to /transactions.",
-            "Overview, Tasks, and Documents tabs are fully interactive.",
+            "The title, count pill, and header buttons all render correctly for the signed-in role.",
+            "Client or non-internal users cannot reach this page.",
+            "Empty and error states are clear and give a way forward.",
         ],
         "future_ideas": [
-            "Finish the AI Suggestions block on the Overview tab with real-time deal insights.",
-            "Add an activity sidebar showing recent emails and task updates at a glance.",
+            "Show a small tooltip on the count pill that explains what 'missing' means in plain language.",
+            "On the redirect for non-internal users, briefly explain why they cannot see this page.",
+            "Add a 'Report an issue' link on the error state so clients can flag problems directly.",
+        ],
+    },
+    {
+        "no": "27.1",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — search, filter tabs, side filters, and view toggle",
+        "route": "/documents (controls below the header)",
+        "how_to_test": [
+            ("Use the search box at the top of the content area.", [
+                "The placeholder reads 'Search documents, addresses, types...'.",
+                "Type a partial document name, a transaction address, or a document type and confirm the list narrows as you type.",
+                "Click the small 'x' inside the search box to clear it.",
+            ]),
+            ("Use the filter tabs: All, Signed, Pending Review, Sent for Sig., Missing.", [
+                "Each tab shows a count badge.",
+                "Confirm the 'Missing' badge turns red when the count is greater than zero.",
+                "Click each tab and confirm the list below updates.",
+            ]),
+            ("Use the side filter pills.", [
+                "Options: All, Buyer Side, Listing Side.",
+                "Each pill shows a transaction count.",
+                "The active pill has an orange background.",
+            ]),
+            ("Use the view toggle at the top-right of the list.", [
+                "'By Transaction' (shown as 'Txn' on a narrow screen) groups documents per transaction.",
+                "'By Status' (shown as 'Status' on a narrow screen) groups documents per signature status.",
+            ]),
+            ("Combine multiple controls at once.", [
+                "For example: search 'inspection' + Buyer Side + Signed tab + By Status view. Confirm the list still makes sense.",
+            ]),
+        ],
+        "expected_result": [
+            "Search updates the list in real time.",
+            "Filter tabs, side filters, and view toggle each change what is shown.",
+            "All controls can be used together without the list breaking.",
+        ],
+        "future_ideas": [
+            "Remember the last-used view (By Transaction vs. By Status) per user.",
+            "Let the user save filter presets such as 'My overdue reviews'.",
+            "Add an 'Export this filtered list' button so the user can share the current view as CSV.",
+        ],
+    },
+    {
+        "no": "27.2",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — AI Briefing and completion progress",
+        "route": "/documents (top of the content area)",
+        "how_to_test": [
+            ("Look at the AI Briefing strip at the top of the list.", [
+                "A small 'AI BRIEFING' tag with a sparkle icon is visible.",
+                "A one-sentence summary of your overall document state is shown.",
+                "A primary action button appears on the right. The button text changes based on what is most urgent — for example 'Focus missing docs', 'Review signature queue', 'Review pending docs', or 'Review signed docs'.",
+            ]),
+            ("Click the primary action button and watch which filter tab becomes active.", []),
+            ("Look at the completion progress bar directly below the briefing.", [
+                "A green-gradient bar is labelled 'Completion {%}' and shows the percentage of documents that are fully signed.",
+            ]),
+        ],
+        "expected_result": [
+            "The briefing sentence reflects the most urgent state of your document portfolio right now.",
+            "Clicking the action button switches to the matching filter tab.",
+            "The percentage on the progress bar matches the ratio of signed documents to total documents.",
+        ],
+        "future_ideas": [
+            "Show a small trend indicator next to the completion percentage (up / down vs. last week).",
+            "Make the whole briefing sentence clickable, not just the action button.",
+            "Add a 'Email this briefing to my manager' one-click action.",
+        ],
+    },
+    {
+        "no": "27.3",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Transaction View (documents grouped by transaction)",
+        "route": "/documents with 'By Transaction' selected",
+        "how_to_test": [
+            ("Switch the view toggle to 'By Transaction'.", []),
+            ("Inspect each transaction card header when it is collapsed.", [
+                "Property address on the left.",
+                "A side badge: 'BUYER SIDE' (blue), 'LISTING SIDE' (amber), or 'BOTH SIDES' (purple).",
+                "Closing date shown as 'Close: {date}'.",
+                "Status pills: red '{N} missing doc(s)' if any are missing, or amber 'Sig. Pending' when signatures are outstanding.",
+                "A mini progress bar on the right showing {signed}/{total}, green when all signed, amber when at or above 50%, red below 50%.",
+            ]),
+            ("Click a transaction card to expand it.", [
+                "The drawer contains up to four sections (only shown when they have items): 'SIGNED / EXECUTED' (green), 'NEEDS ATTENTION' (amber), 'SENT FOR SIGNATURE' (amber), and 'MISSING / REQUIRED' (red).",
+                "Each section shows its own count badge.",
+            ]),
+            ("At the bottom of the expanded drawer, check the extra controls.", [
+                "A '+ Add another document to this transaction' button opens the Upload Document modal with this transaction already selected.",
+                "A footer row shows close date, full address, side, and an 'Open Transaction' button that navigates to the transaction detail page.",
+            ]),
+            ("Scroll to the bottom of the whole list.", [
+                "If any document has not been assigned to a transaction, an 'UNASSIGNED DOCUMENTS' group appears with those rows.",
+            ]),
+        ],
+        "expected_result": [
+            "The header summarises each transaction's document state at a glance.",
+            "Only sections that contain items appear in the expanded drawer.",
+            "'Add another document' pre-fills the correct transaction.",
+            "'Open Transaction' navigates to the transaction detail page for that deal.",
+        ],
+        "future_ideas": [
+            "Add 'Expand all' and 'Collapse all' buttons at the top of the list.",
+            "Show the assigned agent and elf on the card header for team lead visibility.",
+            "Add a 'Resend client-facing packet' shortcut inside the card footer.",
+        ],
+    },
+    {
+        "no": "27.4",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Status View (grouped by signature status)",
+        "route": "/documents with 'By Status' selected",
+        "how_to_test": [
+            ("Switch the view toggle to 'By Status'.", []),
+            ("Confirm the four status groups appear in this order, each with a coloured icon.", [
+                "Signed / Executed (green check).",
+                "Sent for Signature (amber diamond).",
+                "Pending Review (blue dot).",
+                "Missing / Required (red exclamation).",
+            ]),
+            ("Each group header shows the status title plus '{N} items across {M} transactions'.", []),
+            ("Click a group to expand and confirm each document row shows the transaction address it belongs to.", []),
+        ],
+        "expected_result": [
+            "All four groups render in the correct order.",
+            "Groups align with whatever search, side filter, and filter tab are currently active.",
+        ],
+        "future_ideas": [
+            "Add a 'Group by document type' option alongside 'Group by status'.",
+            "Let the user drag-reorder groups for personal preference.",
+        ],
+    },
+    {
+        "no": "27.5",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — missing required documents and 'Upload Now'",
+        "route": "/documents (MISSING / REQUIRED rows in both views)",
+        "how_to_test": [
+            ("The app automatically flags certain required documents based on the transaction. Examples you can test:", [
+                "'Appraisal Report' — appears for a buyer-side deal that is financed.",
+                "'Counter Offer Addendum' — appears for a listing-side deal that has a counter offer on file.",
+                "'Wire Instructions' — appears for a listing-side deal with a title/escrow closing mode.",
+            ]),
+            ("Confirm the visual style of a missing row.", [
+                "Dashed pink/red border.",
+                "Light red background.",
+                "A 'MISSING' status badge.",
+            ]),
+            ("Click the 'Upload Now' button on a missing row.", [
+                "The Upload Document modal opens with the transaction, suggested document type, and document label pre-filled.",
+                "A 'SUGGESTED DOCUMENT' banner appears at the top of the modal with the label.",
+            ]),
+        ],
+        "expected_result": [
+            "Missing documents appear according to the rules above.",
+            "'Upload Now' pre-fills the transaction, document type, and label correctly so the user can upload without retyping.",
+        ],
+        "future_ideas": [
+            "Let admins customise the missing-document rules per tenant.",
+            "Show a short reason next to each missing row ('Required because financing is conventional', etc.) so users understand why.",
+        ],
+    },
+    {
+        "no": "27.6",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Upload Document modal",
+        "route": "Opens from 'Upload Document' header button, 'Upload Now' on missing rows, or '+ Add another document…' inside a transaction card",
+        "how_to_test": [
+            ("Open the Upload Document modal from the header button.", []),
+            ("Check the 'ASSIGN TO TRANSACTION' dropdown.", [
+                "It lists all active transactions by full address.",
+                "Leaving it blank is allowed (the document becomes an unassigned upload).",
+            ]),
+            ("Check the 'DOCUMENT TYPE' selector.", [
+                "Shows toggle chips for each type: Purchase Agreement, Inspection Report, Appraisal, Amendment, and others.",
+                "At most one type can be selected at a time.",
+            ]),
+            ("Check the 'FILE' drop zone.", [
+                "Drag and drop a file, or click 'Click to browse' to pick a file.",
+                "Allowed types: .pdf, .doc, .docx, .png, .jpg, .jpeg, .webp, .txt, .csv, .xlsx, .xls.",
+                "Max size: 50 MB. Try a file larger than 50 MB and confirm the modal blocks it with a clear error.",
+            ]),
+            ("Confirm a spinner appears while the file uploads.", []),
+            ("Click Cancel to close without uploading, and Upload Document to save.", []),
+        ],
+        "expected_result": [
+            "The new file appears in both Transaction View and Status View.",
+            "The upload is tagged with the chosen transaction and document type.",
+            "Files over 50 MB or of unsupported types are rejected with a clear message.",
+        ],
+        "future_ideas": [
+            "Suggest the document type automatically using AI on upload.",
+            "Allow multi-file drag-and-drop in a single action.",
+            "Add an 'Upload later' queue for users who are offline.",
+        ],
+    },
+    {
+        "no": "27.7",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Preview and Download",
+        "route": "/documents (row actions on each document)",
+        "how_to_test": [
+            ("Click the eye (Preview) icon on a document row.", [
+                "The Preview modal shows the file name in the header.",
+                "For PDFs and images, the file renders inline.",
+                "For other file types, the modal says 'Preview not available — download to view.'",
+            ]),
+            ("In the Preview modal header, click the green 'Download' button.", []),
+            ("On any document row, click the standalone Download icon without opening preview first.", []),
+            ("Inside the Preview footer, click the orange 'Send for Signature' button.", [
+                "The Send for Signature modal opens with this document already selected.",
+            ]),
+        ],
+        "expected_result": [
+            "PDFs and images preview inline. Unsupported types prompt the user to download.",
+            "Download always opens or saves the file.",
+            "Send for Signature from the preview hands off cleanly to the signature flow.",
+        ],
+        "future_ideas": [
+            "Add inline annotations on the preview (highlight, comment) for collaborative review.",
+            "Remember the last zoom level between previews.",
+            "Allow side-by-side comparison of two versions in the preview window.",
+        ],
+    },
+    {
+        "no": "27.8",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Send for Signature",
+        "route": "'Send for Signature' header button, row action, or Preview footer",
+        "how_to_test": [
+            ("Open the Send for Signature modal from each of the three entry points at least once.", []),
+            ("If you opened it from the header (no document pre-selected), confirm the extra fields appear.", [
+                "A 'TRANSACTION' dropdown.",
+                "A 'DOCUMENT' dropdown that filters by the chosen transaction.",
+            ]),
+            ("Configure the signers.", [
+                "Toggle chips for Client (Buyer), Co-Buyer, Agent, and Title Co. (Review).",
+                "At least one signer must be selected for the Send button to enable.",
+            ]),
+            ("Optionally write a note in 'MESSAGE TO SIGNERS'.", []),
+            ("Read the blue info box that explains connecting an e-signature provider in Settings.", []),
+            ("Click Send for Signature.", []),
+        ],
+        "expected_result": [
+            "A success toast reads 'Sent for signature' with the document name and transaction address.",
+            "NOTE for the client: the actual integration with DocuSign / DotLoop / Authentisign is not yet wired. This screen captures your intent; real signature delivery is planned for a later phase.",
+        ],
+        "future_ideas": [
+            "Wire the actual e-signature provider integration (DocuSign / DotLoop / Authentisign).",
+            "Let the sender pick a signing order (sequential vs. parallel).",
+            "Show live signature status as each signer completes their part.",
+        ],
+    },
+    {
+        "no": "27.9",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Email Document modal",
+        "route": "Three-dot menu on any document row (internal roles only)",
+        "how_to_test": [
+            ("Sign in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).", []),
+            ("Open the three-dot menu on a document and click 'Email Document'.", []),
+            ("Check the modal fields.", [
+                "Attached document name is shown at the top (readonly, light orange background).",
+                "'TO' field: accepts addresses separated by commas, semicolons, or spaces.",
+                "'CC' field: optional, same format.",
+                "'SUBJECT' field: pre-filled with 'Document: {filename}'.",
+                "'MESSAGE' field: pre-filled with a ready-to-use template.",
+            ]),
+            ("Try to send with no recipient and confirm an inline error appears.", []),
+            ("Add one or more valid recipients and click 'Send Email'.", []),
+        ],
+        "expected_result": [
+            "A success toast reads 'Email queued' with the recipient count.",
+            "The email is queued on the backend and will be logged in the communication history.",
+        ],
+        "future_ideas": [
+            "Offer saved templates such as 'Client intro', 'Lender hand-off', 'Title company request'.",
+            "Offer a 'Schedule for later' option.",
+            "Flag invalid email addresses live as the user types.",
+        ],
+    },
+    {
+        "no": "27.10",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Rename / Reclassify modal",
+        "route": "Three-dot menu on any document row (internal roles only)",
+        "how_to_test": [
+            ("Sign in as an internal role.", []),
+            ("Open the three-dot menu and click 'Rename / Reclassify'.", []),
+            ("Check the modal fields.", [
+                "'FILE NAME' (required) is pre-filled with the current file name.",
+                "'DISPLAY LABEL (optional)' — example placeholder: 'Executed PA — Smith'.",
+                "'DOCUMENT TYPE' dropdown shows the current type selected, with all other types available.",
+            ]),
+            ("Try to save with an empty file name and confirm it is blocked.", []),
+            ("Change one or more fields and click Save.", []),
+        ],
+        "expected_result": [
+            "The document row updates its name, label, and type immediately after save.",
+        ],
+        "future_ideas": [
+            "Use AI to suggest the correct document type based on the file content.",
+            "Preview how the new name will appear in email subjects and the client portal before saving.",
+        ],
+    },
+    {
+        "no": "27.11",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Version History (and Upload New Version)",
+        "route": "Three-dot menu on any document row",
+        "how_to_test": [
+            ("Open the three-dot menu and click 'Version History'.", []),
+            ("Check the modal content.", [
+                "Loading skeletons appear while versions load.",
+                "Each version is listed with a label such as 'v1', 'v2', etc., the file name, size, upload date, and a 'Download' button.",
+                "The newest version has a green 'Current' badge; older versions have a grey 'Legacy' badge.",
+                "Empty state if no versions yet: 'No versions yet'.",
+            ]),
+            ("Click 'Upload New Version' and pick a replacement file.", [
+                "A success toast appears: 'New version uploaded — v{N+1} is now current.'",
+            ]),
+            ("Reopen the modal and confirm the new version is marked Current.", []),
+            ("Click Download on any historical version to confirm it still downloads.", []),
+        ],
+        "expected_result": [
+            "All versions are listed in chronological order.",
+            "Uploading a new version moves the previous Current version to Legacy.",
+            "Downloads work for any version in the list.",
+        ],
+        "future_ideas": [
+            "Show a side-by-side diff between two versions.",
+            "Allow rolling back to a prior version and marking it current again.",
+        ],
+    },
+    {
+        "no": "27.12",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Archive (internal) and Flag for Deletion (non-internal)",
+        "route": "Three-dot menu on any document row",
+        "how_to_test": [
+            ("Sign in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).", [
+                "Open the three-dot menu and click 'Archive Document'.",
+                "Confirm the dialog: 'Archive this document? The document will be archived (soft-deleted) and can be restored by an authorized user.'",
+                "Click Archive and confirm the document disappears from the list.",
+            ]),
+            ("Separately, sign in as a non-internal role if one is available.", [
+                "Open the three-dot menu — the action is labelled 'Flag for Deletion' instead of 'Archive Document'.",
+                "Confirm the explanatory text: 'Because you're not authorized to delete documents directly, your request will be reviewed by an agent or transaction coordinator before the document is archived.'",
+                "Type a reason (minimum 3 characters) and click Submit Request.",
+            ]),
+        ],
+        "expected_result": [
+            "Internal users can archive directly, with a confirmation dialog to prevent accidents.",
+            "Non-internal users must submit a reason. A 'Flagged for deletion' toast confirms the request has been sent.",
+        ],
+        "future_ideas": [
+            "Add a 'Restore archived document' area for admins so they can undo accidental archives.",
+            "Let the requester track the status of their flag-for-deletion request.",
+        ],
+    },
+    {
+        "no": "27.13",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Deletion Approval Queue",
+        "route": "'Deletion Queue' header button on /documents (internal roles only)",
+        "how_to_test": [
+            ("Sign in as an internal role and click 'Deletion Queue' in the page header.", []),
+            ("Check each queued request card.", [
+                "Document name (bold) and flagged date.",
+                "Document type badge, if set.",
+                "The reason the requester gave, in a light grey box.",
+                "A 'DECISION NOTES (optional)' textarea for the reviewer.",
+                "Two buttons: 'Reject' and 'Approve & Archive'.",
+            ]),
+            ("Check the empty state.", [
+                "When there are no requests, the panel reads 'No pending deletion requests.'",
+            ]),
+            ("Approve one request and confirm the toast: 'Deletion approved — Document archived.'", []),
+            ("Reject another request and confirm the toast: 'Deletion rejected — Document remains active.'", []),
+        ],
+        "expected_result": [
+            "All flagged requests from non-internal users appear in order.",
+            "Approve archives (soft-deletes) the document. Reject leaves it active.",
+            "Both decisions are recorded for audit purposes.",
+        ],
+        "future_ideas": [
+            "Notify the original requester automatically when their request is approved or rejected.",
+            "Allow bulk approve / bulk reject for high-volume cleanup.",
+            "Show the reviewer who flagged the document (requester name) alongside the reason.",
         ],
     },
     {
         "no": 28,
-        "category": "Daily Agent / Elf Workflow",
-        "feature": "Task detail page (direct link)",
-        "route": "/tasks/<taskId>",
-        "how_to_test": [
-            ("Open a known task URL.", [
-                "Confirm name, status, due date, description, automation level, and metadata all appear.",
-            ]),
-            ("Click Edit Task, change a few fields, and Save.", []),
-            ("Click Cancel to exit edit mode without saving.", []),
-            ("Open /tasks/non-existent to check the error state.", []),
-        ],
-        "expected_result": [
-            "Edits save and the page returns to read-only view.",
-            "An invalid ID shows a clean 'Task not found' screen.",
-        ],
-        "future_ideas": [
-            "Add a 'Open task detail' button inside expanded transaction cards so users don't need to type URLs.",
-            "Add a comments thread on each task for collaboration.",
-        ],
-    },
-    {
-        "no": 29,
-        "category": "Daily Agent / Elf Workflow",
-        "feature": "Documents page",
-        "route": "/documents",
-        "how_to_test": [
-            ("Open /documents.", [
-                "Verify the page header and Upload button.",
-            ]),
-            ("Type in the search box to filter documents by name.", []),
-            ("Toggle between grid and list view.", []),
-            ("Upload a supported file.", []),
-            ("Click a document to open its detail dialog.", []),
-        ],
-        "expected_result": [
-            "Search narrows the list by file name.",
-            "Uploads appear in the list.",
-            "The detail dialog shows file size, upload date, transaction it belongs to, and storage path.",
-        ],
-        "future_ideas": [
-            "Add bulk-select with bulk download or bulk delete.",
-            "Add AI auto-tagging of document types on upload.",
-            "Add filter chips by transaction and document type.",
-        ],
-    },
-    {
-        "no": 30,
         "category": "Daily Agent / Elf Workflow",
         "feature": "My Profile page",
         "route": "/profile",
@@ -1734,7 +2216,7 @@ TESTING_REVIEW_FEATURES = [
         ],
     },
     {
-        "no": 31,
+        "no": 29,
         "category": "Daily Agent / Elf Workflow",
         "feature": "Settings — Integrations tab",
         "route": "/settings (Integrations tab)",
@@ -1756,7 +2238,7 @@ TESTING_REVIEW_FEATURES = [
     # SECTION 4 — ADMIN / TEAM LEAD EXTRAS
     # ============================================================
     {
-        "no": 32,
+        "no": 30,
         "category": "Admin / Team Lead Extras",
         "feature": "Task Templates list",
         "route": "/admin/task-templates",
@@ -1778,7 +2260,7 @@ TESTING_REVIEW_FEATURES = [
         ],
     },
     {
-        "no": 33,
+        "no": 31,
         "category": "Admin / Team Lead Extras",
         "feature": "Task Template detail",
         "route": "/admin/task-templates/<templateId>",
@@ -1801,7 +2283,7 @@ TESTING_REVIEW_FEATURES = [
         ],
     },
     {
-        "no": 34,
+        "no": 32,
         "category": "Admin / Team Lead Extras",
         "feature": "Admin user detail (direct link)",
         "route": "/admin/users/<userId>",
@@ -1823,7 +2305,7 @@ TESTING_REVIEW_FEATURES = [
     # SECTION 5 — ROLE-SPECIFIC WORKSPACES
     # ============================================================
     {
-        "no": 35,
+        "no": 33,
         "category": "Role-Specific Workspaces",
         "feature": "Attorney workspace",
         "route": "/transactions (as Attorney)",
@@ -1856,7 +2338,7 @@ TESTING_REVIEW_FEATURES = [
         ],
     },
     {
-        "no": 36,
+        "no": 34,
         "category": "Role-Specific Workspaces",
         "feature": "FSBO customer sidebar",
         "route": "Sidebar (as FSBO Customer)",
@@ -1883,7 +2365,7 @@ TESTING_REVIEW_FEATURES = [
     # SECTION 6 — DIRECT LINKS AND ERROR PAGES
     # ============================================================
     {
-        "no": 37,
+        "no": 35,
         "category": "Direct Links and Error Pages",
         "feature": "Unauthorized page",
         "route": "/unauthorized (or any blocked page)",
@@ -1904,7 +2386,7 @@ TESTING_REVIEW_FEATURES = [
         ],
     },
     {
-        "no": 38,
+        "no": 36,
         "category": "Direct Links and Error Pages",
         "feature": "Not Found (404) page",
         "route": "Any unknown URL, for example /this-does-not-exist",
