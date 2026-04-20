@@ -1778,12 +1778,17 @@ TESTING_REVIEW_FEATURES = [
         "how_to_test": [
             ("Open /documents and check the header.", [
                 "The page title reads 'All Documents' (with a small 'Workflow > All Documents' breadcrumb on wide screens).",
-                "Next to the title, an orange count pill shows '{N} files / {N} missing'.",
+                "Next to the title, an orange count pill shows '{N} files'. When there is at least one missing required document it extends to '{N} files / {N} missing'.",
             ]),
             ("Check the top-right header buttons.", [
-                "'Upload Document' (or 'Upload' on a narrow screen) is always visible.",
-                "'Send for Signature' is visible.",
-                "'Deletion Queue' is visible only when you are signed in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).",
+                "'Upload Document' (or just 'Upload' on a narrow screen) is always visible.",
+                "'Send for Signature' is visible (the label collapses to an icon on narrow screens).",
+                "'Deletion Queue' is visible only on wide screens AND when you are signed in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).",
+            ]),
+            ("Check the underline-style filter tabs directly below the title row.", [
+                "Tabs: All, Signed, Pending Review, Sent for Sig., Missing — each shows a count badge.",
+                "The active tab is highlighted with an orange underline and orange text.",
+                "The 'Missing' badge turns red when the count is greater than zero.",
             ]),
             ("Try opening /documents as a non-internal role (for example as a Client if that account is available).", [
                 "You should be redirected to /dashboard instead of seeing the page.",
@@ -1796,7 +1801,7 @@ TESTING_REVIEW_FEATURES = [
             ]),
         ],
         "expected_result": [
-            "The title, count pill, and header buttons all render correctly for the signed-in role.",
+            "The title, count pill, filter tabs, and header buttons all render correctly for the signed-in role and screen size.",
             "Client or non-internal users cannot reach this page.",
             "Empty and error states are clear and give a way forward.",
         ],
@@ -1809,68 +1814,95 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "27.1",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "All Documents — search, filter tabs, side filters, and view toggle",
-        "route": "/documents (controls below the header)",
+        "feature": "All Documents — unified command bar (search, side filters, view toggle)",
+        "route": "/documents (Unified Command Bar — second tier, directly below the AI Briefing)",
         "how_to_test": [
-            ("Use the search box at the top of the content area.", [
+            ("Locate the Unified Command Bar. It is a single white card with two tiers — the bottom tier holds the controls described here (Tier 1 is covered in 27.2).", []),
+            ("Use the search box on the left of Tier 2.", [
                 "The placeholder reads 'Search documents, addresses, types...'.",
                 "Type a partial document name, a transaction address, or a document type and confirm the list narrows as you type.",
+                "Confirm the search field gains an orange focus ring when selected.",
                 "Click the small 'x' inside the search box to clear it.",
-            ]),
-            ("Use the filter tabs: All, Signed, Pending Review, Sent for Sig., Missing.", [
-                "Each tab shows a count badge.",
-                "Confirm the 'Missing' badge turns red when the count is greater than zero.",
-                "Click each tab and confirm the list below updates.",
             ]),
             ("Use the side filter pills.", [
                 "Options: All, Buyer Side, Listing Side.",
                 "Each pill shows a transaction count.",
-                "The active pill has an orange background.",
+                "The active pill has an orange background and bold amber text.",
+                "On narrow screens the pills scroll horizontally rather than wrapping.",
             ]),
-            ("Use the view toggle at the top-right of the list.", [
-                "'By Transaction' (shown as 'Txn' on a narrow screen) groups documents per transaction.",
-                "'By Status' (shown as 'Status' on a narrow screen) groups documents per signature status.",
+            ("Use the view toggle at the far right of the command bar.", [
+                "Hover each toggle to see a tooltip: 'View grouped by transaction' or 'View grouped by status'.",
+                "On wide screens each toggle shows its icon plus the text 'By Transaction' / 'By Status'.",
+                "On narrow screens only the icons are visible (the text is hidden for accessibility but still read by screen readers).",
+                "The active toggle has an amber background and the inactive toggle is plain white.",
+            ]),
+            ("Confirm the filter tabs in the page header still work together with these controls.", [
+                "Header tabs: All, Signed, Pending Review, Sent for Sig., Missing.",
+                "The header filter tabs and the Tier 1 status chips (see 27.2) always stay in sync — switching one updates the other.",
             ]),
             ("Combine multiple controls at once.", [
                 "For example: search 'inspection' + Buyer Side + Signed tab + By Status view. Confirm the list still makes sense.",
             ]),
         ],
         "expected_result": [
-            "Search updates the list in real time.",
-            "Filter tabs, side filters, and view toggle each change what is shown.",
+            "Search updates the list in real time and the focus ring confirms the input is active.",
+            "Side filter pills, view toggle, header filter tabs, and Tier 1 status chips each change what is shown.",
             "All controls can be used together without the list breaking.",
         ],
         "future_ideas": [
             "Remember the last-used view (By Transaction vs. By Status) per user.",
             "Let the user save filter presets such as 'My overdue reviews'.",
             "Add an 'Export this filtered list' button so the user can share the current view as CSV.",
+            "Add text labels under the view-toggle icons on narrow screens so new users know what the icons mean without hovering.",
         ],
     },
     {
         "no": "27.2",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "All Documents — AI Briefing and completion progress",
-        "route": "/documents (top of the content area)",
+        "feature": "All Documents — AI Briefing, status quick-filters, and completion progress",
+        "route": "/documents (AI Briefing strip + Tier 1 of the Unified Command Bar, at the top of the content area)",
         "how_to_test": [
-            ("Look at the AI Briefing strip at the top of the list.", [
-                "A small 'AI BRIEFING' tag with a sparkle icon is visible.",
-                "A one-sentence summary of your overall document state is shown.",
-                "A primary action button appears on the right. The button text changes based on what is most urgent — for example 'Focus missing docs', 'Review signature queue', 'Review pending docs', or 'Review signed docs'.",
+            ("Look at the AI Briefing strip at the top of the list (redesigned on April 20, 2026).", [
+                "A small 'AI BRIEFING' tag with an orange sparkle icon is visible on the left.",
+                "On wide screens, a muted 'Updated {date}' (or 'No recent document activity') timestamp sits at the far right of the badge row; on narrow screens that same timestamp appears below the summary paragraph instead.",
+                "A bold one-line headline and a slightly lighter one-sentence summary are shown below the badge row.",
+                "A blue primary action button sits on the right on wide screens and centres below the text on narrow screens. Its label changes based on what is most urgent — for example 'Focus missing docs', 'Review signature queue', 'Review pending docs', or 'Review signed docs'.",
+                "While the briefing is loading, the strip shows the AI Briefing badge with a spinner plus two skeleton lines (no layout jump when it resolves).",
             ]),
-            ("Click the primary action button and watch which filter tab becomes active.", []),
-            ("Look at the completion progress bar directly below the briefing.", [
-                "A green-gradient bar is labelled 'Completion {%}' and shows the percentage of documents that are fully signed.",
+            ("Click the primary action button.", [
+                "The view resets to 'By Transaction' and the matching filter tab / status chip activates.",
+            ]),
+            ("Directly below the briefing, find the Unified Command Bar. Focus on Tier 1 (the top row of the bar).", [
+                "Tier 1 contains four status quick-filter chips followed by the completion progress bar.",
+                "Chips, in order: 'Signed' (green number), 'Pending' (blue number), 'Sent' (amber number), 'Missing' (red number) — each with a large count and a small label.",
+                "On narrow screens the four chips sit in a 2x2 or 4-column grid; on wide screens they sit in a single row.",
+            ]),
+            ("Click one of the status chips.", [
+                "The chip gains a coloured border and tinted background matching its number colour (green, blue, amber, or red).",
+                "The list below filters to only that status, and the header filter tab with the matching name also becomes active — the two controls stay in sync.",
+                "Hovering a chip shows a tooltip such as 'Filter by missing' when inactive, or 'Showing missing — click to clear' when active.",
+            ]),
+            ("Click the already-active chip a second time.", [
+                "The chip returns to its transparent state and the filter resets to 'All'.",
+            ]),
+            ("Look at the completion progress bar on the right side of Tier 1.", [
+                "The label 'Completion' appears to the left of the bar on screens at least 640 px wide (hidden on small phones to save space).",
+                "A thin green-gradient bar shows the percentage of tracked documents that are fully signed.",
+                "The numeric percentage is shown in bold green on the right of the bar.",
+                "On wide screens a thin vertical divider separates the chip group from the completion bar.",
             ]),
         ],
         "expected_result": [
-            "The briefing sentence reflects the most urgent state of your document portfolio right now.",
-            "Clicking the action button switches to the matching filter tab.",
-            "The percentage on the progress bar matches the ratio of signed documents to total documents.",
+            "The AI briefing headline and summary reflect the most urgent state of your document portfolio right now, and the timestamp tells you how fresh the underlying data is.",
+            "Clicking the primary action button switches to the matching filter tab and 'By Transaction' view.",
+            "Each status quick-filter chip filters the list and stays in sync with the header filter tabs; clicking an active chip clears the filter.",
+            "The percentage on the progress bar matches the ratio of signed documents to the total of signed + pending + sent (missing rows are excluded from the denominator).",
         ],
         "future_ideas": [
             "Show a small trend indicator next to the completion percentage (up / down vs. last week).",
             "Make the whole briefing sentence clickable, not just the action button.",
             "Add a 'Email this briefing to my manager' one-click action.",
+            "Let the user pin a favourite status chip so it is always pre-filtered on page load.",
         ],
     },
     {
