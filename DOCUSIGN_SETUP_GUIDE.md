@@ -86,9 +86,9 @@ Edit `velvet-elves-backend/.env`. The Integration Key and Secret are already set
 ```env
 DOCUSIGN_INTEGRATION_KEY="xxx"
 DOCUSIGN_SECRET_KEY="xxx"
-DOCUSIGN_OAUTH_BASE_URL="xxx"
-DOCUSIGN_SCOPES="xxx"
-DOCUSIGN_REDIRECT_URI="xxx"
+DOCUSIGN_OAUTH_BASE_URL="https://account-d.docusign.com"
+DOCUSIGN_SCOPES="signature"
+DOCUSIGN_REDIRECT_URI="http://localhost:8000/api/v1/integrations/docusign/callback"
 ```
 
 Pinning `DOCUSIGN_REDIRECT_URI` explicitly is important. Without it, the backend derives the URI from the request host, which can be fragile behind proxies.
@@ -105,8 +105,8 @@ cd velvet-elves-backend
 SSH into EC2 and edit the backend's `.env` file. Set the same values as above, but change the redirect URI to the dev URL:
 
 ```env
-DOCUSIGN_INTEGRATION_KEY="b69b0237-468f-4b71-9c8a-68dfe3c82664"
-DOCUSIGN_SECRET_KEY="fae3fe29-2c27-4b20-8087-f6aae9e01ede"
+DOCUSIGN_INTEGRATION_KEY="xxx"
+DOCUSIGN_SECRET_KEY="xxx"
 DOCUSIGN_OAUTH_BASE_URL="https://account-d.docusign.com"
 DOCUSIGN_SCOPES="signature"
 DOCUSIGN_REDIRECT_URI="https://dev.velvetelves.com/api/v1/integrations/docusign/callback"
