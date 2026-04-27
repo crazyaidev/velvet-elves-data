@@ -1,0 +1,17 @@
+Subject: Re: Re: Heads up on LM & PRM modules
+
+Hey Jake,
+
+Thanks, this gives me what I need.
+
+One thing worth acting on now: your PRM contact scoping rules are a shift from what's in TM today. The contact directory in the backend is tenant-shared currently (anyone in the tenant can see any contact). Your rules require:
+- Clients scoped per-user (Agent A's client doesn't auto-complete for Agent B)
+- Vendors (loan officers, title reps) stay shared
+- Duplicate detection on email/phone within a user's records, with a "this already exists" prompt
+
+I'd rather apply these to TM now so there's nothing to migrate when PRM arrives. Small scope add to the current build. OK to proceed?
+
+One clarification on co-agents: paragraph 1 of your note grouped "vendor/co-agents" together, but paragraph 2 put co-agents in "everything else should not be shared". My read is that co-agent records are per-user, but auto-complete can still surface cross-user matches filtered by company + state. Want to confirm before I implement.
+
+Thanks!
+Jan

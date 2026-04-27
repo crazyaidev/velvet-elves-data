@@ -1,0 +1,26 @@
+Subject: Re: Heads up on LM & PRM modules
+
+Hey Jake,
+
+Got it on the testing notes. I'll wait for the finalized directives from you and Audri.
+
+Count me in on LM and PRM. A few questions to help me decide what to bake into the TM build now vs. defer:
+
+LM → TM handoff
+- I've already reserved an "Active Listings" sidebar hook for v2, and the FSBO workspace supports a listing-prep state before a file becomes an active transaction. Is LM meant to extend those, or is it a separate agent-facing listings module distinct from the FSBO self-guided flow?
+- When a listing flips under contract, does it become a new transaction that references the listing record, or does the listing record itself convert? What data should carry across (property details, pricing history, days on market, comps, AI tips)?
+- Is the LM AI-managed upcharge separate from TM's subscription, or does it upgrade into a matching TM tier on conversion? And does that AI context (comps, past suggestions) stay attached to the deal post-flip or get archived?
+
+PRM
+- I've already built a centralized contact directory where contacts persist across transactions (co-agents, loan officers, title reps, attorneys, buyers, sellers). Should PRM share that store, or is PRM strictly the agent's personal sphere (past clients, leads, referral partners) kept separate? If shared, I'd want to unify now rather than migrate later.
+- The immutable communication log already captures emails, document actions, and AI sends (with SMS/voice hooks already planned). Should those count as "last touch" signals for PRM, and should TM notes be accessible to PRM's AI for personalization context?
+
+General
+- Assuming LM and PRM live inside the existing multi-tenant model with per-module entitlements on the user. Just want to confirm before I lay in any feature-flag hooks.
+
+If answers are still in flux, no stress. The two pieces I'd most like to get right early are the contact/person model and the communication/activity log. Those are painful to refactor later, and everything else I can evolve.
+
+Happy to hop on a call if easier.
+
+Thanks!
+Jan

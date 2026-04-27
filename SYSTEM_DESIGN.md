@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS public.tenants (
 {
   "ai_provider": "openai",       // "openai" | "claude"
   "ai_provider_config": {
-    "openai_model": "gpt-4o",
+    "openai_model": "gpt-5.4",
     "claude_model": "claude-sonnet-4-20250514"
   }
 }
