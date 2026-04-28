@@ -1773,25 +1773,37 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 27,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "All Documents page — overview and access",
+        "feature": "All Documents page — overview, access, and deep-link entry",
         "route": "/documents",
         "how_to_test": [
             ("Open /documents and check the header.", [
                 "The page title reads 'All Documents' (with a small 'Workflow > All Documents' breadcrumb on wide screens).",
                 "Next to the title, an orange count pill shows '{N} files'. When there is at least one missing required document it extends to '{N} files / {N} missing'.",
+                "While the document list is fetching, the count pill is replaced by a smaller pill that reads 'Loading' with a spinner.",
             ]),
             ("Check the top-right header buttons.", [
                 "'Upload Document' (or just 'Upload' on a narrow screen) is always visible.",
-                "'Send for Signature' is visible (the label collapses to an icon on narrow screens).",
-                "'Deletion Queue' is visible only on wide screens AND when you are signed in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).",
+                "'Send for Signature' is visible. The text label collapses to a pen icon on narrow screens.",
+                "'Deletion Queue' is visible only when you are signed in as an internal role (Agent, Transaction Coordinator, Team Lead, Attorney, or Admin). The text label collapses to a flag icon on narrow screens.",
             ]),
             ("Check the underline-style filter tabs directly below the title row.", [
                 "Tabs: All, Signed, Pending Review, Sent for Sig., Missing — each shows a count badge.",
                 "The active tab is highlighted with an orange underline and orange text.",
                 "The 'Missing' badge turns red when the count is greater than zero.",
             ]),
-            ("Try opening /documents as a non-internal role (for example as a Client if that account is available).", [
+            ("Try opening /documents as a non-internal role (for example as a For-Sale-By-Owner Customer if that account is available).", [
                 "You should be redirected to /dashboard instead of seeing the page.",
+                "Note: as a result, the 'Flag for Deletion' path no longer applies on this page — non-internal flagging now happens only inside a transaction's documents tab.",
+            ]),
+            ("Confirm the page loads every document, not just the most recent 100.", [
+                "If your tenant has more than 100 documents, scroll down or use the search box to find an older one — it should still appear (the page paginates through every page on load).",
+            ]),
+            ("Test the Cmd/Ctrl+K global search deep-link entry.", [
+                "Press Cmd+K (Mac) or Ctrl+K (Windows) anywhere in the app to open the global search palette.",
+                "Search for a document by name and press Enter on the matching result.",
+                "/documents opens with the matching transaction's drawer expanded, the matching row scrolled into view, and a brief amber flash animation on that row.",
+                "Confirm the 'focus' and 'tx' query parameters are stripped from the URL afterwards (so a refresh does not re-flash forever).",
+                "If the document was deleted or filtered out, a toast appears: 'Document not found in the current view'.",
             ]),
             ("Force the empty state.", [
                 "Apply filters that return no results — confirm 'No documents match this filter' with a 'Clear filters' button.",
@@ -1802,13 +1814,15 @@ TESTING_REVIEW_FEATURES = [
         ],
         "expected_result": [
             "The title, count pill, filter tabs, and header buttons all render correctly for the signed-in role and screen size.",
-            "Client or non-internal users cannot reach this page.",
+            "Client / non-internal users cannot reach this page.",
+            "Cmd+K deep-links open the right transaction, scroll to the matching row, flash it, and then clean the URL.",
             "Empty and error states are clear and give a way forward.",
         ],
         "future_ideas": [
             "Show a small tooltip on the count pill that explains what 'missing' means in plain language.",
             "On the redirect for non-internal users, briefly explain why they cannot see this page.",
             "Add a 'Report an issue' link on the error state so clients can flag problems directly.",
+            "Persist the last opened transaction drawer between visits, so users do not lose their place when navigating away and back.",
         ],
     },
     {
@@ -1817,7 +1831,9 @@ TESTING_REVIEW_FEATURES = [
         "feature": "All Documents — unified command bar (search, side filters, view toggle)",
         "route": "/documents (Unified Command Bar — second tier, directly below the AI Briefing)",
         "how_to_test": [
-            ("Locate the Unified Command Bar. It is a single white card with two tiers — the bottom tier holds the controls described here (Tier 1 is covered in 27.2).", []),
+            ("Locate the Unified Command Bar. It is a single white card with two tiers — the bottom tier holds the controls described here (Tier 1 is covered in 27.2).", [
+                "Scroll the document list down. The Unified Command Bar should stick to the top of the scroll area with a soft frosted-glass backdrop so the search and filters stay reachable while you scan a long list.",
+            ]),
             ("Use the search box on the left of Tier 2.", [
                 "The placeholder reads 'Search documents, addresses, types...'.",
                 "Type a partial document name, a transaction address, or a document type and confirm the list narrows as you type.",
@@ -2014,17 +2030,19 @@ TESTING_REVIEW_FEATURES = [
                 "At most one type can be selected at a time.",
             ]),
             ("Check the 'FILE' drop zone.", [
+                "The hint underneath the drop zone reads 'PDF, DOC, DOCX, JPG, PNG, WEBP, GIF, TXT · Max 20 MB'.",
                 "Drag and drop a file, or click 'Click to browse' to pick a file.",
-                "Allowed types: .pdf, .doc, .docx, .png, .jpg, .jpeg, .webp, .txt, .csv, .xlsx, .xls.",
-                "Max size: 50 MB. Try a file larger than 50 MB and confirm the modal blocks it with a clear error.",
+                "Allowed types: .pdf, .doc, .docx, .jpg, .jpeg, .png, .webp, .gif, .txt.",
+                "Max size: 20 MB. Try a file larger than 20 MB and confirm the modal surfaces a clear backend error.",
+                "Note: spreadsheet types (.csv, .xlsx, .xls) are no longer accepted by the upload endpoint.",
             ]),
-            ("Confirm a spinner appears while the file uploads.", []),
+            ("Confirm a spinner appears in the drop zone while the file uploads, and that the primary button text changes to 'Uploading...'.", []),
             ("Click Cancel to close without uploading, and Upload Document to save.", []),
         ],
         "expected_result": [
             "The new file appears in both Transaction View and Status View.",
             "The upload is tagged with the chosen transaction and document type.",
-            "Files over 50 MB or of unsupported types are rejected with a clear message.",
+            "Files over 20 MB or of unsupported types are rejected with a clear message.",
         ],
         "future_ideas": [
             "Suggest the document type automatically using AI on upload.",
@@ -2063,30 +2081,54 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "27.8",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "All Documents — Send for Signature",
-        "route": "'Send for Signature' header button, row action, or Preview footer",
+        "feature": "All Documents — Send for Signature (live DocuSign integration)",
+        "route": "'Send for Signature' header button, row action (pen icon), or Preview footer",
         "how_to_test": [
-            ("Open the Send for Signature modal from each of the three entry points at least once.", []),
-            ("If you opened it from the header (no document pre-selected), confirm the extra fields appear.", [
-                "A 'TRANSACTION' dropdown.",
-                "A 'DOCUMENT' dropdown that filters by the chosen transaction.",
+            ("Open the Send for Signature modal from each of the three entry points at least once.", [
+                "Header button: opens with no document pre-selected.",
+                "Row pen icon: opens with both transaction and document pre-selected.",
+                "Preview footer 'Send for Signature' button: opens with the previewed document already selected and the preview modal closed in the background.",
             ]),
-            ("Configure the signers.", [
-                "Toggle chips for Client (Buyer), Co-Buyer, Agent, and Title Co. (Review).",
-                "At least one signer must be selected for the Send button to enable.",
+            ("If you opened the modal from the header (no document pre-selected), confirm the extra picker fields appear.", [
+                "A 'TRANSACTION' dropdown listing every active transaction by full address.",
+                "A 'DOCUMENT' dropdown that filters its options by the chosen transaction (or shows everything when no transaction is selected).",
+                "Switching the transaction after picking a document that belongs to a different file clears the document selection.",
+            ]),
+            ("Confirm the DocuSign connection check at the top of the modal body.", [
+                "If your DocuSign account is not yet connected, a red alert banner appears: 'No e-signature provider connected'.",
+                "The banner has a 'Connect DocuSign' button that opens the inline DocuSign Connect wizard (covered in 27.14).",
+                "Once connected, the red banner is replaced with a green confirmation: 'Connected to {provider}' with a one-line note that envelopes are sent from your account and that signed copies replace the original automatically.",
+            ]),
+            ("Configure the signers using the new manual recipient list.", [
+                "Suggested-party chips appear above the list when the chosen transaction has parties on file (buyer, co-buyer, listing agent, etc.). Each chip shows '+ {name} ({party_role})'.",
+                "Click a suggested chip to add that party as a signer with their name and email pre-filled. Clicking the same chip a second time is a no-op (duplicate emails are ignored).",
+                "Click '+ Add signer' on the right of the SIGNERS label to add a blank row and type a name and email manually.",
+                "Each signer row shows '#1', '#2', '#3' on the left so the routing order is obvious; rows can be removed with the small red X on the right.",
+                "Confirm the empty-state message reads 'Add signers from the transaction's parties, or use \"Add signer\" to enter one manually.' when no signers have been added.",
+            ]),
+            ("Edit the 'SUBJECT' field at the bottom.", [
+                "Pre-filled with 'Please sign the attached document' (250-character limit).",
+                "Whatever you type here becomes the email subject DocuSign sends to the recipients.",
             ]),
             ("Optionally write a note in 'MESSAGE TO SIGNERS'.", []),
-            ("Read the blue info box that explains connecting an e-signature provider in Settings.", []),
+            ("Confirm Send button validation.", [
+                "The Send button stays disabled until: a document and transaction are selected, every signer row has both a non-empty name and a syntactically valid email, AND DocuSign is connected.",
+                "Try saving with a malformed email — confirm an inline red error appears: 'Each signer needs a name and a valid email address.'",
+                "While sending, the button label changes to 'Sending...'.",
+            ]),
             ("Click Send for Signature.", []),
         ],
         "expected_result": [
             "A success toast reads 'Sent for signature' with the document name and transaction address.",
-            "NOTE for the client: the actual integration with DocuSign / DotLoop / Authentisign is not yet wired. This screen captures your intent; real signature delivery is planned for a later phase.",
+            "The matching document row in the list flips to the 'Sent for Sig.' status badge and gains an 'Awaiting: {names}' line under the metadata.",
+            "If the Send call fails, a red 'Send for signature failed' toast appears AND the error is shown inline at the bottom of the modal so the user does not have to re-open it.",
+            "The DocuSign envelope is created in your linked account; signers receive the email immediately.",
         ],
         "future_ideas": [
-            "Wire the actual e-signature provider integration (DocuSign / DotLoop / Authentisign).",
-            "Let the sender pick a signing order (sequential vs. parallel).",
-            "Show live signature status as each signer completes their part.",
+            "Let the sender pick a signing order explicitly (sequential vs. parallel) — currently the order is the order the signers were added.",
+            "Add support for additional providers (DotLoop, Authentisign, Adobe Sign) alongside DocuSign.",
+            "Show live signature status updates inside the modal as each signer completes their part, instead of waiting for the row to refresh.",
+            "Persist subject/message templates per user so common envelopes (e.g. 'Inspection addendum sign request') can be re-used in one click.",
         ],
     },
     {
@@ -2095,7 +2137,7 @@ TESTING_REVIEW_FEATURES = [
         "feature": "All Documents — Email Document modal",
         "route": "Three-dot menu on any document row (internal roles only)",
         "how_to_test": [
-            ("Sign in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).", []),
+            ("Sign in as an internal role (Agent, Transaction Coordinator, Team Lead, Attorney, or Admin).", []),
             ("Open the three-dot menu on a document and click 'Email Document'.", []),
             ("Check the modal fields.", [
                 "Attached document name is shown at the top (readonly, light orange background).",
@@ -2173,27 +2215,26 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "27.12",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "All Documents — Archive (internal) and Flag for Deletion (non-internal)",
-        "route": "Three-dot menu on any document row",
+        "feature": "All Documents — Archive (internal-only on this page)",
+        "route": "Three-dot menu on any document row (/documents)",
         "how_to_test": [
-            ("Sign in as an internal role (Agent, Elf, Team Lead, Attorney, or Admin).", [
-                "Open the three-dot menu and click 'Archive Document'.",
+            ("Sign in as an internal role (Agent, Transaction Coordinator, Team Lead, Attorney, or Admin).", [
+                "Open the three-dot menu and click 'Archive Document' at the bottom (red text).",
                 "Confirm the dialog: 'Archive this document? The document will be archived (soft-deleted) and can be restored by an authorized user.'",
-                "Click Archive and confirm the document disappears from the list.",
+                "Click Archive and confirm the document disappears from the list and a 'Document archived' toast appears.",
             ]),
-            ("Separately, sign in as a non-internal role if one is available.", [
-                "Open the three-dot menu — the action is labelled 'Flag for Deletion' instead of 'Archive Document'.",
-                "Confirm the explanatory text: 'Because you're not authorized to delete documents directly, your request will be reviewed by an agent or transaction coordinator before the document is archived.'",
-                "Type a reason (minimum 3 characters) and click Submit Request.",
+            ("Confirm the non-internal flagging path is no longer reachable from /documents.", [
+                "Non-internal users (For-Sale-By-Owner Customers, etc.) are redirected to /dashboard before they can reach the page, so the 'Flag for Deletion' modal does not open here.",
+                "If the client wants to flag a document, they must do it from the documents tab inside an individual transaction (covered in section 23 / Documents window on a transaction card).",
             ]),
         ],
         "expected_result": [
-            "Internal users can archive directly, with a confirmation dialog to prevent accidents.",
-            "Non-internal users must submit a reason. A 'Flagged for deletion' toast confirms the request has been sent.",
+            "Internal users can archive directly, with a confirmation dialog to prevent accidents and a toast on success.",
+            "Non-internal users never see the dropdown action on /documents because the page redirects them away.",
         ],
         "future_ideas": [
             "Add a 'Restore archived document' area for admins so they can undo accidental archives.",
-            "Let the requester track the status of their flag-for-deletion request.",
+            "Add an undo toast immediately after archiving so an accidental click can be reverted in one tap.",
         ],
     },
     {
@@ -2225,6 +2266,101 @@ TESTING_REVIEW_FEATURES = [
             "Notify the original requester automatically when their request is approved or rejected.",
             "Allow bulk approve / bulk reject for high-volume cleanup.",
             "Show the reviewer who flagged the document (requester name) alongside the reason.",
+        ],
+    },
+    {
+        "no": "27.14",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Connect DocuSign wizard (inline OAuth)",
+        "route": "'Connect DocuSign' button inside the Send for Signature modal (only when no provider is connected yet)",
+        "how_to_test": [
+            ("Make sure your DocuSign account is NOT connected, then open the Send for Signature modal (header button is fine).", [
+                "The red 'No e-signature provider connected' banner appears.",
+                "Click the 'Connect DocuSign' button on the banner — a new modal opens on top.",
+            ]),
+            ("Inspect the wizard's intro step.", [
+                "Header reads 'Connect DocuSign' on a soft amber gradient with a pen icon.",
+                "Subheading: 'Link your DocuSign account so you can send documents for signature.'",
+                "Body has three explainer rows: 'Tokens are encrypted at rest', 'Envelopes are sent from your DocuSign account', 'You can disconnect anytime'.",
+                "A three-dot step indicator near the top shows you are on step 1 of 3.",
+                "Footer buttons: Cancel and 'Continue to DocuSign' (with an external-link icon).",
+            ]),
+            ("Click 'Continue to DocuSign'.", [
+                "The wizard advances to the authorize step. A spinner and the message 'Complete the sign-in in the DocuSign window' appear.",
+                "A new browser popup opens pointing at DocuSign's OAuth screen.",
+                "Helper text below the spinner: 'Popup blocked? Enable popups for this site and click Retry.'",
+            ]),
+            ("Complete the DocuSign login in the popup.", [
+                "DocuSign closes the popup automatically and the wizard advances to the 'Done' step.",
+                "A green check icon, the headline 'DocuSign connected', and a one-line summary 'Connected to {account_name} as {email}' (or just the email if the account name is not available) are shown.",
+                "The footer button changes to 'Back to Send for Signature' (green).",
+            ]),
+            ("Click 'Back to Send for Signature'.", [
+                "The wizard closes. The Send for Signature modal underneath now shows the green 'Connected to {provider}' confirmation, and the Send button enables once you add a valid signer.",
+                "A page-level toast 'DocuSign connected — You can now send documents for signature.' confirms success.",
+            ]),
+            ("Test the failure path.", [
+                "Cancel the DocuSign popup before it finishes.",
+                "The wizard stays on the authorize step, the spinner is replaced by the message 'Waiting for a response from DocuSign…' and 'If the window closed without finishing, click Retry below.'",
+                "If the OAuth handshake itself fails, a red 'Connection failed' banner shows the underlying error and the Retry button stays enabled.",
+            ]),
+        ],
+        "expected_result": [
+            "Connecting to DocuSign happens entirely inside Velvet Elves — the user never has to leave the documents page.",
+            "On success, a toast confirms the connection and the Send for Signature flow becomes usable without a page refresh.",
+            "If the user cancels or hits an OAuth error, they can retry without re-opening the wizard from scratch.",
+            "Tokens are stored encrypted at rest on the user's profile (not visible in app logs).",
+        ],
+        "future_ideas": [
+            "Detect popup-blocked browsers up-front and offer a fallback redirect flow instead of a popup.",
+            "After a successful connection, auto-send a tiny test envelope to the signed-in user's own email so they can verify the link works.",
+            "Surface the connected DocuSign account name in the profile menu (so users can tell at a glance which account is linked).",
+        ],
+    },
+    {
+        "no": "27.15",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "All Documents — Manage in-flight envelopes (Refresh, Void, Declined / Voided states)",
+        "route": "Document rows whose signature status is sent / pending / declined / voided",
+        "how_to_test": [
+            ("Send a document for signature (see 27.8) but do not let the recipients sign yet.", [
+                "Confirm the row's status badge changes to 'Sent for Sig.' and a new 'Awaiting: {name1}, {name2} +{N} more' line appears under the metadata.",
+                "Hover the awaiting line — a tooltip lists every recipient with their role (e.g. 'Jane Smith (signer)').",
+                "On wide screens the pen icon in the row's action strip is replaced with a circular Refresh icon (with the tooltip 'Refresh signature status'). On narrow screens the same action lives inside the three-dot menu as 'Refresh Signature Status'.",
+            ]),
+            ("Open the page (or refresh it) and confirm the auto-sync behaviour.", [
+                "On every page load, the page silently calls DocuSign in the background for every in-flight envelope. This heals docs whose webhook was missed.",
+                "Auto-sync runs at most once per document per page mount; failures are silent (the manual Refresh button stays available as the user's escape hatch).",
+            ]),
+            ("Click the Refresh icon on an in-flight envelope.", [
+                "While the call is in flight, the icon spins and is disabled.",
+                "On success a toast appears: 'Signature status refreshed — {Document name} - {Signature complete | Envelope voided | Envelope declined | Status: {raw status}}'.",
+                "If the envelope finished, the row immediately flips to 'Signed' (green) without a manual refresh.",
+            ]),
+            ("Open the three-dot menu on an in-flight envelope and click 'Void Envelope'.", [
+                "A toast appears: 'Envelope voided — {Document name} - recipients will no longer be able to sign.'",
+                "The row gains a soft pink background, a red '! Voided' pill next to the status badge, and an inline message: 'Previous envelope voided. Send a new one when ready.'",
+                "The pen icon is restored on the row (replacing the Refresh icon) and its tooltip becomes 'Resend for Signature (previous voided)'. The dropdown's send option label also updates to 'Resend for Signature'.",
+            ]),
+            ("Simulate a declined envelope (the recipient clicks Decline in DocuSign).", [
+                "After the next sync, the row turns the same soft-pink background and shows a '! Declined' pill plus the inline message: 'A signer declined the previous envelope. Resend to try again.'",
+                "Just like the voided case, the action becomes 'Resend for Signature' so the user can immediately recover.",
+            ]),
+            ("Click 'Resend for Signature' from a declined or voided row.", [
+                "The Send for Signature modal opens with the same document already selected so the user can adjust signers / message and re-send.",
+            ]),
+        ],
+        "expected_result": [
+            "Awaiting recipients are visible at a glance without having to open DocuSign in another tab.",
+            "Refresh and Void are reachable from both the row's action strip (wide screens) and the three-dot menu (mobile).",
+            "Declined and voided envelopes are surfaced clearly with red styling, a descriptive inline message, and a one-click 'Resend' path so a stuck file never feels permanent.",
+            "Auto-sync on page load means most stuck envelopes heal themselves before the user notices.",
+        ],
+        "future_ideas": [
+            "Add a 'Why did this fail?' link to the declined/voided message that opens the DocuSign envelope page in a new tab.",
+            "When voiding an envelope, prompt the user for a short reason and pass it to DocuSign so signers see context.",
+            "Surface awaiting recipients on the transaction card header (not just on the document row) so a team lead can see which deal is stuck on whom from the list view.",
+            "Add a manual 'Force-sync all' button that runs the sync logic across every in-flight envelope without a page reload.",
         ],
     },
     {
