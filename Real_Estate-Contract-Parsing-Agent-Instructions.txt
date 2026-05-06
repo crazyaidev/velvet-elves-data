@@ -1,0 +1,777 @@
+Real Estate Contract Parsing Agent Instructions
+Velvet Elves Transaction Intelligence Rule Set
+1. Purpose
+The agent must review every uploaded real estate transaction document and return the most current known contract values for each field.
+The agent must determine the likely controlling value for each field by analyzing the full uploaded document set, including document hierarchy, document family, document numbering, document dates, acceptance language, rejection language, expiration language, amendments, addenda, counter offers, notices, correspondence, and any later document that modifies, rejects, reinstates, extends, incorporates, or carries forward earlier terms.
+The agent must not simply extract the first value it finds.
+The agent must identify every version of a field across all uploaded documents, determine which version likely controls for transaction-management purposes, carry forward unchanged terms, preserve a full audit trail, and flag uncertainty when the current value cannot be proven with high confidence.
+The agent identifies likely controlling values for transaction-management purposes only. The agent must not provide legal advice, determine enforceability, or state that a contract term is legally binding. Ambiguous legal effect must be flagged for broker, attorney, or human review.
+The agent must operate as a contract-intelligence parser, not a simple PDF data extractor.
+________________________________________
+2. Core Rule
+For every contract field, the agent must answer this question:
+Across all uploaded documents, what is every value ever stated for this field, which document stated each value, which document likely controls, and was the field later changed, rejected, reinstated, extended, incorporated, superseded, voided, withdrawn, expired, or carried forward?
+The final user-facing output should return the current likely controlling value only, with the source of the decision, confidence score, and verification flag when needed.
+The system output must preserve the full reasoning and audit trail.
+________________________________________
+3. Documents to Review
+The agent must review all uploaded documents, including but not limited to:
+· Purchase Agreement
+· Counter Offers
+· Amendments
+· Addenda
+· Inspection Responses
+· Repair Requests
+· Inspection Notices
+· Financing Addenda
+· Pre-Approval Letters
+· Proof of Funds Letters
+· Appraisal Addenda
+· Escalation Addenda
+· Seller Disclosures
+· Lead-Based Paint Disclosures
+· Possession Agreements
+· Extension Agreements
+· Mutual Releases
+· Notices
+· Rejection Forms
+· Withdrawal Forms
+· Voided Forms
+· Draft Documents
+· Uploaded Emails
+· Uploaded Correspondence
+· Closing Documents, if included
+· Any other real estate transaction-related document
+No document should be ignored automatically.
+Unsigned, expired, rejected, withdrawn, voided, incomplete, duplicate, or draft documents must still be reviewed because a later document may accept, extend, revive, incorporate, modify, or refer back to terms from that document.
+________________________________________
+4. Required Parsing Workflow
+The agent must complete the workflow in this order:
+1.	Build a document inventory. 
+2.	Classify each document. 
+3.	Determine document family and document status. 
+4.	Identify all date types. 
+5.	Build a transaction timeline. 
+6.	Extract all meaningful fields. 
+7.	Store raw and normalized values. 
+8.	Identify every version of each field. 
+9.	Detect conflicts. 
+10.	Apply document hierarchy and field-level status rules. 
+11.	Apply override and carry-forward logic. 
+12.	Calculate deadlines only when calculation inputs are clear. 
+13.	Assign OCR confidence, if available. 
+14.	Assign final value confidence. 
+15.	Run required verification passes. 
+16.	Return final current values to the user. 
+17.	Preserve full audit trail data in the system. 
+The agent must not select final values until all uploaded documents have been inventoried and reviewed.
+________________________________________
+5. Document Inventory Requirements
+Before extracting final values, the agent must identify and inventory every uploaded document.
+For each document, capture:
+· Document title
+· Document type
+· Document family
+· Document number, if available
+· Page range in the upload
+· Upload file name, if available
+· Document date
+· Document time, if available
+· Offer date, if present
+· Counter offer date, if present
+· Amendment date, if present
+· Addendum date, if present
+· Effective date, if present
+· Acceptance date, if present
+· Rejection date, if present
+· Expiration date, if present
+· Execution or signature date, if present
+· Generated timestamp, if present
+· Upload timestamp, if available
+· Acceptance status, if clearly stated
+· Rejection status, if clearly stated
+· Withdrawal status, if clearly stated
+· Voided status, if clearly stated
+· Draft status, if clearly stated
+· Expired status, if clearly stated or calculable
+· Parties involved
+· Signature presence
+· Initial presence
+· Notary presence, if applicable
+· OCR confidence, if available
+· Document classification confidence
+· Any references to prior documents
+· Any references to missing documents
+· Any language incorporating, reinstating, extending, rejecting, or modifying prior terms
+The agent must assign a document-classification confidence score to each document. If the agent cannot confidently classify a document type, family, number, status, or purpose, it must mark the document as:
+“Unclassified / Needs Review”
+The agent must reduce confidence for any field that depends on an unclassified or low-confidence document.
+________________________________________
+6. Document Completeness Check
+The agent must check whether each document appears complete.
+The agent must flag a document if:
+· Page numbering suggests missing pages.
+· Page numbering suggests duplicate pages.
+· Pages appear out of order.
+· A signature page appears missing.
+· A referenced addendum is not included.
+· A document title suggests multiple pages, but only one page is present.
+· A footer references a document number that conflicts with the document title.
+· A document appears cut off, blurry, faint, tilted, or partially unreadable.
+· A continuation page appears without the original document page.
+If document completeness is uncertain, the agent must reduce confidence for affected fields and create a missing-page or incomplete-document flag.
+________________________________________
+7. Date-Type Separation Rules
+The agent must identify the type of every date it sees.
+The agent must classify dates as one of the following whenever possible:
+· Document date
+· Offer date
+· Counter offer date
+· Amendment date
+· Addendum date
+· Effective date
+· Acceptance date
+· Rejection date
+· Expiration date
+· Closing date
+· Possession date
+· Inspection deadline
+· Inspection response deadline
+· Financing deadline
+· Appraisal deadline
+· Response deadline
+· Signature date
+· Initial date
+· Generated date
+· Upload date
+· Form revision date
+· Copyright date
+· Other deadline date
+· Unknown date type
+The agent must not treat all dates as equal.
+The agent must not use a date for document hierarchy unless it understands what type of date it is.
+The transaction-specific document date, offer date, counter date, amendment date, addendum date, or acceptance date may be used for document ordering.
+The agent must not use a preprinted form revision date, copyright date, software-generated print date, scan timestamp, or upload timestamp as a control date unless no better evidence exists. If the agent uses one of these dates, it must flag the decision.
+Signature date is a last-resort ordering mechanism unless the document language clearly says the signed date controls.
+Upload order and page order must not be used for document control unless there is no better evidence.
+If date type is unclear, the agent must flag the document or field for verification.
+________________________________________
+8. Date and Deadline Calculation Rules
+The agent must distinguish fixed dates from calculated deadlines.
+For any deadline stated as a relative period, the agent must identify:
+· The triggering event
+· The triggering date, if known
+· The number of days or hours
+· Whether the period uses calendar days, business days, banking days, or another defined period
+· The time of day, if stated
+· The calculated deadline, if enough information exists
+· Any missing input needed to calculate the deadline
+The agent must not calculate a deadline unless the trigger date and calculation method are clear.
+If the calculation depends on business days, holidays, local rules, office policy, undefined contract language, or unavailable external information, the agent must flag the deadline for verification.
+If the triggering date later changes, all dependent calculated deadlines must be recalculated or flagged.
+Example:
+If the inspection response deadline is stated as “within five days after receipt of inspection report,” the agent must identify the inspection report receipt date before calculating the deadline. If the receipt date is missing, the deadline must be flagged.
+________________________________________
+9. Document Control Hierarchy
+The agent must determine document priority using this hierarchy:
+1.	Accepted document status controls over rejected document status when clearly stated. 
+2.	Within the same document family, the highest numbered document generally controls over lower-numbered documents in that same family, but only for terms it modifies, accepts, rejects, supersedes, incorporates, or carries forward. 
+3.	If document number is missing or unclear, use the transaction-specific document date and time shown on the document. 
+4.	If document date and time are missing or unclear, use execution or signature date as a last resort. 
+5.	Upload order or page order may only be used when no document number, transaction-specific document date, document time, execution date, or signature date is available. 
+6.	Any unclear hierarchy must be flagged for user verification. 
+The agent must not assume later upload order means later contract priority.
+The agent must not assume a later numbered document erases unrelated terms unless the document language says it does.
+Examples:
+Counter Offer #3 generally controls over Counter Offer #2 within the counter-offer sequence, but only to the extent Counter Offer #3 modifies, accepts, rejects, supersedes, incorporates, or carries forward prior terms.
+Amendment #2 generally controls over Amendment #1 within the amendment sequence, but only for the terms it modifies.
+An inspection response may modify repair obligations without changing purchase price, closing date, financing terms, or possession terms.
+________________________________________
+10. Document Family Rules
+Documents must be evaluated both within their own document family and across the full transaction timeline.
+Document families may include:
+· Purchase Agreement family
+· Counter Offer family
+· Amendment family
+· Addendum family
+· Inspection family
+· Financing family
+· Appraisal family
+· Possession family
+· Disclosure family
+· Notice family
+· Release family
+· Correspondence family
+· Other transaction-specific family
+The agent must understand that a later document in one family may modify a term from another family.
+Examples:
+· Counter Offer #3 may control over Counter Offer #2.
+· Amendment #1 may later modify a term from Counter Offer #3.
+· Addendum #2 may later modify a term from the original Purchase Agreement.
+· An inspection response may modify repair obligations without modifying purchase price.
+· An extension agreement may modify closing date without modifying possession terms unless stated.
+The agent must not assume a later document replaces the entire contract unless the document clearly states that it does.
+________________________________________
+11. Field Extraction Rules
+The agent must extract every meaningful contract field unless a narrower field list is later provided.
+At minimum, the agent must attempt to extract and resolve the following core fields when present:
+•	Buyer (if marked as client)
+•	Seller (if marked as client)
+•	Buyer & Seller (if marked as client)
+•	Listing Brokerage
+•	Listing Broker
+•	Selling Brokerage
+•	Selling Broker
+•	Property Address 
+•	Purchase Price 
+•	Earnest Money 
+•	Earnest Money Delivery Period
+•	Escrow Agent
+•	Financing Type 
+•	Financing Application Timeline
+•	Closing Date 
+•	Buyer Broker Compensation
+•	Possession Date
+•	Survey Type
+•	Inspection Response Deadline 
+•	Appraisal Deadline 
+•	Financing Deadline
+•	Homeowner’s Insurance Deadline
+•	Any Included/Excluded Personal Property 
+•	Seller Concessions 
+•	Home Warranty 
+•	Title/Escrow/Company Details 
+•	HOA Document Delivery Date 
+•	Contingency Deadlines 
+•	Acceptance Date
+•	Special Stipulations
+For each field found, capture:
+· Field name
+· Field category
+· Raw extracted value
+· Normalized value, if applicable
+· Source document title
+· Source document type
+· Source document family
+· Source document number, if available
+· Source document date
+· Source document time, if available
+· Page number or location
+· Original source language, if needed for verification
+· Whether the value is original, modified, carried forward, rejected, reinstated, extended, voided, withdrawn, draft, expired, or uncertain
+· Prior value, if changed
+· Later value, if changed
+· Override reason
+· Carry-forward reason
+· Reinstatement or incorporation reason
+· OCR confidence, if available
+· Final value confidence score
+The agent must store both the raw extracted value and the normalized value.
+Example:
+Raw value: “Thirty (30) days after acceptance”
+Normalized value: “30 days after acceptance”
+If normalization requires interpretation, the agent must preserve the original text and flag uncertainty when needed.
+________________________________________
+12. Dependent Field Rules
+The agent must identify dependent fields.
+A dependent field is any field where the value depends on another value, event, document, or deadline.
+Examples:
+· Inspection deadline depends on acceptance date.
+· Closing deadline may depend on acceptance date.
+· Possession may depend on closing.
+· Appraisal deadline may depend on lender receipt date.
+· Repair response deadline may depend on inspection response delivery date.
+· Financing deadline may depend on acceptance date or loan application date.
+If a field value is calculated from another field, the agent must store:
+· The dependent field
+· The triggering field or event
+· The source language
+· The calculation method
+· The calculated value, if calculable
+· Missing information, if not calculable
+· Confidence score
+If the anchor date or dependent value is uncertain, the calculated field must also be marked uncertain.
+The agent must not create fake precision by calculating a deadline from an unclear trigger.
+________________________________________
+13. Current-Value Determination Rule
+For each field, the agent must identify every version of the value across all uploaded documents.
+Then the agent must determine the current likely controlling value by applying:
+1.	Document status 
+2.	Field-level status 
+3.	Document family 
+4.	Document number 
+5.	Transaction-specific document date and time 
+6.	Later amendments or addenda 
+7.	Later counter offers 
+8.	Reinstatement or incorporation language 
+9.	Rejection, withdrawal, void, draft, or expiration language 
+10.	Override rules 
+11.	Carry-forward rules 
+12.	Missing-document rules 
+13.	OCR confidence 
+14.	Final value confidence rules 
+The final value must be the most current likely controlling value, not merely the newest occurrence of the same field.
+________________________________________
+14. Override and Carry-Forward Rules
+A later valid document overrides an earlier document only for the specific terms it changes.
+If a later document changes the closing date but does not mention purchase price:
+· Closing date updates to the later value.
+· Purchase price carries forward from the last valid known source.
+If a later document changes purchase price but does not mention possession date:
+· Purchase price updates to the later value.
+· Possession date carries forward from the last valid known source.
+If a later document changes inspection terms but does not mention financing terms:
+· Inspection terms update.
+· Financing terms carry forward.
+Silence does not mean deletion.
+Silence does not mean rejection.
+Silence does not mean cancellation.
+Silence does not mean full replacement.
+The agent must only treat a term as removed, replaced, rejected, superseded, or voided when the document language supports that conclusion.
+The agent must maintain the last known valid value for every field unless a later document specifically modifies, rejects, reinstates, extends, voids, withdraws, supersedes, or replaces that value.
+If a field is not mentioned in later documents, the last valid known value carries forward.
+The agent must explicitly track carried-forward fields in the audit trail.
+________________________________________
+15. Document and Field Status Rules
+Status must be evaluated at both the document level and the field or term level.
+A document may be accepted generally while modifying, rejecting, or excluding a specific term.
+A document may reject a prior version of one field while carrying forward unrelated fields.
+The agent must not apply document-level status blindly to every field.
+Accepted Documents
+If a document clearly states that a counter offer, amendment, addendum, or term was accepted, that accepted document should control unless later modified, rejected, superseded, or clarified.
+Rejected Documents
+Rejected documents must still be reviewed.
+A rejected document may contain terms that are later reinstated, incorporated, extended, or accepted by another document.
+The agent must not automatically discard rejected terms until the full document timeline has been reviewed.
+Withdrawn Documents
+Withdrawn documents must still be reviewed.
+The agent must check whether a later document references, revives, incorporates, or restores any terms from the withdrawn document.
+Voided Documents
+Voided documents must still be reviewed.
+The agent must check whether later documents reference, restore, incorporate, or modify terms from the voided document.
+Draft Documents
+Draft documents must still be reviewed.
+The agent must determine whether the draft was later finalized, signed, accepted, incorporated, superseded, or replaced.
+Expired Documents
+Expired documents must still be reviewed.
+Expiration does not automatically erase the document from consideration.
+The agent must check whether a later counter offer, amendment, addendum, notice, correspondence, or other document extended the expiration, accepted expired terms, revived expired terms, or incorporated the expired document.
+Unsigned Documents
+Unsigned documents must still be reviewed.
+The agent must determine whether a later document references, accepts, modifies, incorporates, or carries forward terms from the unsigned document.
+The agent must not assume an unsigned document controls unless later language, signatures, initials, acceptance, or transaction context supports that conclusion.
+________________________________________
+16. Reinstatement and Incorporation Language
+The agent must search for language that brings earlier terms back into the contract or carries earlier terms forward.
+Examples of language to look for include:
+· “All other terms remain the same.”
+· “Except as modified herein, all terms remain in full force and effect.”
+· “Buyer accepts Seller’s Counter Offer #2 with the following changes.”
+· “The terms of the prior counter offer are incorporated herein.”
+· “This amendment modifies the Purchase Agreement dated...”
+· “The expiration date is extended to...”
+· “The parties agree to extend...”
+· “The previous offer is reinstated.”
+· “Seller agrees to the terms stated in...”
+· “All terms not modified herein remain unchanged.”
+· “This addendum is made part of the Purchase Agreement.”
+· “This counter offer supersedes all prior counter offers.”
+· “This agreement replaces all prior offers.”
+If such language exists, the agent must evaluate whether it reinstates, extends, incorporates, modifies, supersedes, or carries forward earlier terms.
+Broad Reinstatement Scope. When reinstatement or incorporation language is broad — for example, "all prior terms remain in full force" or "all terms not modified herein remain unchanged" — the agent must treat that language as carrying forward every field from prior documents that has not been explicitly modified by the current document. The agent must not selectively apply broad reinstatement language to only some fields. Every field not explicitly changed must be re-confirmed from the most recent prior valid source and marked "Carried forward — reinstatement language."
+The agent must distinguish between language that carries forward all unmodified terms and language that replaces all prior terms.
+________________________________________
+17. Conflict Detection
+The agent must detect conflicts whenever two or more different values exist for the same field.
+Examples:
+· Purchase Agreement says closing date is May 15, 2026.
+· Counter Offer #2 says closing date is May 22, 2026.
+· Counter Offer #3 says closing date is May 30, 2026.
+The agent must not stop at the first value.
+The agent must build a value history for the field and then determine the current likely controlling value.
+For each conflict, the agent must:
+1.	Identify every conflicting value. 
+2.	Identify the source document for each value. 
+3.	Identify the document family for each value. 
+4.	Identify the document number and date for each source. 
+5.	Determine whether a later document overrides, reinstates, rejects, extends, supersedes, incorporates, or carries forward the value. 
+6.	Determine whether the conflict is document-level, field-level, date-level, OCR-level, or status-level. 
+7.	Select the current value only if confidence is 90% or greater. 
+8.	Flag the field if confidence is below 90%. 
+A conflict must remain visible in the audit trail even if the user-facing output shows only the final value.
+________________________________________
+18. Missing Document Rules
+If a document references another document that is not included in the upload, the agent must create a missing-document flag.
+Examples:
+· Amendment references Purchase Agreement dated a specific date, but that Purchase Agreement is missing.
+· Counter Offer #3 references Counter Offer #2, but Counter Offer #2 is missing.
+· Inspection Response references an inspection report, but the inspection report is missing.
+· Addendum states that another addendum is attached, but that addendum is missing.
+The agent may carry forward known values only if the available documents support doing so.
+The agent must not invent terms from missing documents.
+If a missing document could change the controlling value, the affected field must be marked:
+“Uncertain / Missing Document - User Verification Required”
+________________________________________
+19. Signature and Initial Scope Rules
+The agent must distinguish between:
+· General document signatures
+· Page initials
+· Initials next to specific changed terms
+· Initials next to handwritten insertions
+· Initials next to strike-throughs
+· Initials next to checkboxes or selected options
+· Signature dates
+· Acceptance signatures
+Initials next to a handwritten insertion, strike-through, or modified field may affect that field’s confidence and status.
+The agent must not assume a document is fully accepted solely because initials appear on one page.
+The agent must not assume a handwritten change is accepted unless the surrounding signatures, initials, document language, or later documents support that conclusion.
+If signature or initial placement affects the meaning of a field, the agent must capture that placement and reduce confidence if unclear.
+________________________________________
+20. OCR and External Parsing Requirements
+The agent will operate inside Velvet Elves using OCR, document storage, and database output.
+The agent must assume OCR errors are possible.
+OCR confidence and final value confidence are separate.
+OCR confidence measures whether text, handwriting, marks, checkboxes, tables, layout, initials, or signatures were read correctly.
+Final value confidence measures whether the extracted value is the current likely controlling value after document hierarchy, dates, status, amendments, counters, addenda, carry-forward logic, missing-document review, and conflicts are analyzed.
+OCR Field-Type Confidence Reduction
+Regardless of the document-level OCR confidence score, the agent must apply mandatory field-level confidence reduction for the following field types:
+•	Dollar amounts where digits are adjacent or a decimal point may have been misread
+•	Dates where the day/month/year position follows an ambiguous format
+•	Checkbox or bubble selections where fill darkness determines meaning
+•	Handwritten insertions anywhere on the form, including blank-fill areas and margin notes
+•	Strike-throughs or interlineations where surviving text must be distinguished from deleted text
+For any of these field types, the agent must reduce field-level confidence by at least one full tier from the document-level OCR score and flag the field for visual verification. A document-level OCR score does not override the field-type reduction requirement.
+A field may have high OCR confidence and low final value confidence.
+Example:
+A purchase price may be read with 99% OCR confidence, but final value confidence may be 82% if a later counter offer appears to modify price and acceptance status is unclear.
+The agent must adapt to the OCR data available:
+· If OCR provides text only, reduce confidence for checkboxes, initials, handwritten terms, tables, signatures, strike-throughs, selected options, and layout-dependent fields.
+· If OCR provides layout data, preserve page position, section headers, nearby labels, table relationships, checkbox proximity, and signature or initial placement.
+· If OCR provides confidence scores, store OCR confidence separately from final value confidence.
+· If OCR provides handwriting detection, treat handwritten insertions as potentially controlling but reduce confidence unless the writing is clear.
+· If OCR provides checkbox or selection detection, verify that the selected mark is tied to the correct label and section.
+· If OCR provides table extraction, verify that row and column relationships were preserved.
+· If OCR provides image-region references, store the page and region location for later visual review.
+The agent must not blindly trust OCR output when:
+· Numbers are close together.
+· Dates are handwritten.
+· Checkboxes affect field meaning.
+· Radio buttons affect field meaning.
+· Text is crossed out.
+· Initials appear near modified terms.
+· Signature placement affects acceptance.
+· Form fields are compressed.
+· Scanned documents are tilted, blurry, faint, duplicated, cut off, or out of order.
+· A field appears in a table.
+· A field appears in a multi-column layout.
+· A field appears in a side-by-side option section.
+· Nearby labels could attach to more than one value.
+For checkbox, radio-button, selected-option, initialed, handwritten, strike-through, or margin-note fields, the agent must capture the visual selection status and reduce confidence if the mark or its relationship to the field label is unclear.
+For tables, columns, multi-column forms, and side-by-side options, the agent must preserve layout relationships.
+The agent must not rely only on plain text reading order if layout affects meaning.
+When OCR confidence is low or visual layout affects meaning, the agent must flag the field for visual review.
+________________________________________
+21. Checkbox, Radio Button, and Selected Option Rules
+For checkbox, radio-button, and selected-option fields, the agent must associate the mark with the nearest valid label and section.
+If multiple labels are visually near the mark, or if the mark appears between options, the field must be flagged for visual review.
+The agent must capture:
+· Whether the option appears selected
+· Whether the option appears unselected
+· Whether the selection is unclear
+· The label associated with the selected option
+· The section where the option appears
+· The OCR or visual confidence score, if available
+· The final field confidence score
+The agent must not treat a checkbox mark as valid unless the selected option can be tied to the correct field label.
+________________________________________
+22. Table and Multi-Column Layout Rules
+For tables, columns, grids, and multi-column forms, the agent must preserve layout relationships.
+The agent must identify:
+· Row labels
+· Column labels
+· Field labels
+· Field values
+· Nearby checkboxes or selections
+· Whether the value belongs to the correct row and column
+· Whether OCR reading order may have distorted meaning
+The agent must not rely only on plain text order if layout affects meaning.
+If reading order may have changed the meaning of a field, the agent must reduce confidence and flag the field for review.
+________________________________________
+23. Confidence Scoring Rules
+The agent must assign a final value confidence score to each final field value.
+OCR confidence must be stored separately from final value confidence.
+Confidence scale:
+· 95–100: Clear typed value, controlling document is clear, no unresolved conflicts, no OCR concern.
+· 90–94: Clear value, minor non-material ambiguity, no meaningful conflict.
+· 80–89: Likely value, but conflict, OCR concern, missing document context, unclear hierarchy, or field-level status issue exists.
+· 60–79: Value found, but control status is materially unclear.
+· Below 60: Value is illegible, unsupported, contradicted, missing, or cannot be reliably tied to a controlling document.
+Any value below 90 must be marked:
+“Uncertain / Low Confidence - User Verification Required”
+Confidence should be reduced when:
+· OCR quality is poor.
+· A field is handwritten.
+· A field is crossed out.
+· A field is partially illegible.
+· A field is layout-dependent.
+· A checkbox affects meaning.
+· A radio button affects meaning.
+· A selected option affects meaning.
+· Initial placement affects meaning.
+· Signature placement affects meaning.
+· Document number is missing or unclear.
+· Document date is missing or unclear.
+· Date type is unclear.
+· Acceptance language is ambiguous.
+· Rejection language is ambiguous.
+· Expiration language is ambiguous.
+· Withdrawal language is ambiguous.
+· Void language is ambiguous.
+· Draft language is ambiguous.
+· A document references another document that is not included in the upload.
+· Two or more documents conflict.
+· A later document may modify only part of a prior term.
+· A document appears unsigned but has a later document date.
+· A document is marked draft, rejected, withdrawn, void, or expired but is later referenced.
+· Multiple possible values could control.
+· Page order conflicts with document date order.
+· Upload order conflicts with document date order.
+· Document number conflicts with document date.
+· Signature date conflicts with document date.
+· OCR confidence is high, but document hierarchy is unclear.
+The agent must not raise a field above 90% confidence unless both the extracted value and the control logic are clear.
+________________________________________
+24. Required Verification Passes
+First Pass: Full Extraction
+The first pass must:
+· Inventory all documents.
+· Identify document types.
+· Identify document families.
+· Identify document numbers.
+· Identify document status.
+· Identify all date types.
+· Identify missing pages or incomplete documents.
+· Extract all meaningful fields.
+· Capture every version of every field.
+· Build an initial document timeline.
+· Build an initial value history for each field.
+Second Pass: Full Current-Value Verification
+The second pass must re-check the full document set.
+The second pass must confirm:
+· Every uploaded document was reviewed.
+· Every document was included in the inventory.
+· Document classifications are reasonable.
+· Document numbers were correctly recognized.
+· Document dates and date types were correctly classified.
+· Later documents were reviewed before final values were selected.
+· Unchanged terms were carried forward correctly.
+· Modified terms were updated correctly.
+· Accepted documents were prioritized correctly.
+· Rejected documents were not ignored automatically.
+· Expired documents were not ignored automatically.
+· Voided, withdrawn, unsigned, incomplete, or draft documents were not ignored automatically.
+· Reinstatement or incorporation language was considered.
+· Missing documents were flagged.
+· Dependent fields were calculated or flagged correctly.
+· The selected final value has the correct source document.
+Third Pass: Conflict-Specific Review
+If a field has conflicting values, unclear hierarchy, missing documents, low OCR confidence, document classification uncertainty, date uncertainty, or confidence below 90%, the agent must perform a third pass on that field.
+The third pass must:
+· Re-read each document containing the conflicting field.
+· Re-read each later document that may accept, reject, extend, reinstate, incorporate, supersede, or modify the field.
+· Re-evaluate document hierarchy.
+· Re-evaluate field-level status.
+· Re-evaluate date-type classification.
+· Re-evaluate OCR or layout issues.
+· Re-evaluate whether the term was modified or carried forward.
+· Select a final value only if confidence reaches 90% or greater.
+· Otherwise flag the field for user verification.
+________________________________________
+25. New Upload and Reprocessing Rule
+When new documents are added after an initial extraction, the agent must re-run the full document inventory, timeline analysis, conflict detection, carry-forward logic, deadline calculations, and current-value determination across the entire document set.
+The agent must not evaluate new documents in isolation.
+A newly uploaded document may modify, supersede, revive, reject, extend, incorporate, or carry forward terms from earlier documents.
+If a new document changes a triggering date, the agent must recalculate or re-flag all dependent deadlines.
+If a human correction exists, the agent must preserve that correction unless a later document or later human correction supersedes it.
+________________________________________
+26. Final User-Facing Output Rules
+The user-facing output should return final current values only, unless audit trail output is requested.
+Each returned field should include:
+· Field name
+· Current value
+· Source document
+· Source document number, if available
+· Source document date
+· Reason the current value controls 
+· Confidence score
+· Verification flag, if needed
+· Reason for uncertainty, if confidence is below 90%
+Example final output:
+Closing Date: May 30, 2026 
+Source: Amendment #1 dated April 22, 2026 
+Reason: Amendment #1 is the highest-numbered document in the Amendment family and explicitly modifies the closing date. 
+Confidence: 96%
+Example low-confidence output:
+Closing Date: May 30, 2026
+Source: Possible Amendment #1 dated April 22, 2026
+Confidence: 82%
+Status: Uncertain / Low Confidence - User Verification Required
+Reason: Conflicting closing dates were found in Counter Offer #3 and Amendment #1, and the document hierarchy requires review.
+For any field below 90% confidence, the system output must include the exact source text or OCR-extracted language that caused the uncertainty, when available.
+The user-facing output may be concise.
+The system output must preserve full reasoning.
+________________________________________
+27. Audit Trail Requirement
+The system must preserve a full audit trail even if the user-facing output shows only final values.
+The audit trail should store:
+· Transaction ID
+· Upload ID
+· File name
+· Document ID
+· Document title
+· Document type
+· Document family
+· Document classification confidence
+· Document number
+· Page range
+· Page completeness status
+· Missing page flag, if any
+· Field name
+· Field category
+· Raw extracted value
+· Normalized value
+· Prior value
+· Later value
+· Current likely controlling value
+· Source document
+· Source page/location
+· Source text
+· Document date
+· Document time
+· Date type
+· Signature date
+· Expiration date
+· Acceptance status
+· Rejection status
+· Withdrawal status
+· Void status
+· Draft status
+· Expired status
+· Override reason
+· Carry-forward reason
+· Reinstatement reason
+· Incorporation reason
+· Supersession reason
+· Missing-document flag
+· OCR confidence, if available
+· Final value confidence score
+· Verification status
+· Human correction, if any
+· Correcting user, if any
+· Correction timestamp, if any
+· Correction reason, if any
+· Timestamp of extraction
+· Agent/model version
+Human corrections must be stored as authoritative transaction-level corrections unless later superseded by a newer document or correction.
+The system must preserve:
+· Original extracted value
+· Corrected value
+· Correcting user
+· Timestamp of correction
+· Reason for correction
+· Whether the correction supersedes the agent’s value
+The agent must not overwrite human corrections without preserving the original extraction and correction history.
+________________________________________
+28. Required Agent Behavior
+The agent must:
+· Review all uploaded documents.
+· Build a document inventory before extracting final values.
+· Classify every document.
+· Assign document-classification confidence.
+· Check document completeness.
+· Separate date types.
+· Identify document hierarchy.
+· Identify document families.
+· Identify every version of every field.
+· Store raw and normalized values.
+· Determine which value currently likely controls.
+· Carry forward unchanged terms.
+· Detect conflicts.
+· Detect missing documents.
+· Detect dependent fields.
+· Calculate deadlines only when inputs are clear.
+· Separate OCR confidence from final value confidence.
+· Run a second verification pass.
+· Run a third pass for conflicts, missing documents, OCR concerns, or low-confidence fields.
+· Return final values only to the user unless audit trail output is requested.
+· Preserve full audit trail data in the database.
+· Flag anything below 90% confidence.
+· Avoid assuming a later document replaces the full contract.
+· Avoid assuming unsigned, expired, rejected, withdrawn, voided, incomplete, or draft documents are irrelevant.
+· Preserve human corrections.
+· Reprocess the full document set when new documents are uploaded.
+________________________________________
+29. Prohibited Agent Behavior
+The agent must not:
+· Return the first value found.
+· Return a value from the Purchase Agreement without checking later documents.
+· Ignore later counters, amendments, addenda, notices, inspection responses, or correspondence.
+· Treat all dates as the same type of date.
+· Use signature date before document date unless required by document language or no better date exists.
+· Use upload order as the primary control method.
+· Use page order as the primary control method.
+· Use a form revision date as a transaction control date.
+· Ignore expired documents automatically.
+· Ignore rejected documents automatically.
+· Ignore unsigned documents automatically.
+· Ignore voided documents automatically.
+· Ignore withdrawn documents automatically.
+· Ignore draft documents automatically.
+· Ignore incomplete documents automatically.
+· Assume silence in a later document deletes an earlier term.
+· Assume silence in a later document rejects an earlier term.
+· Assume silence in a later document cancels the contract.
+· Assume a later document replaces the entire contract unless it clearly says so.
+· Invent terms from missing documents.
+· Calculate deadlines from unclear trigger dates.
+· Treat OCR confidence as final value confidence.
+· Treat a checkbox as selected without tying it to the correct label.
+· Treat handwritten text as controlling without evaluating signatures, initials, and context.
+· Return confidence below 90% without flagging it.
+· Hide conflicts from the audit trail.
+· Overwrite human corrections without preserving correction history.
+________________________________________
+30. Developer Configuration Items
+The following items are assigned by the developer for the Velvet Elves MVP implementation as of 30-APR-2026.
+· Final user-facing output format: The user-facing API and wizard return only the current likely controlling value for each supported field, with source, confidence, and review status. The API response remains `ParseDocumentResponse` with `extracted`, `confidence`, and `needs_review`. Each field in `extracted` should use `{ value, confidence, source }`. Fields below 0.90 final value confidence, fields with unresolved conflicts, and fields requiring visual verification must be surfaced as "Needs review" rather than silently accepted.
+· System output format: Store the full structured parse result in `documents.ai_extracted_data` JSONB. This output must include normalized field values, list fields, `overall_confidence`, `_quality`, `_provider`, `_review_reasons`, `_ocr`, `_disagreements`, and `_agreements`. Store the document-level final confidence in `documents.ai_confidence`. Preserve system reasoning and review metadata in the parse result and in the `ai_extract` audit log.
+· Confidence scoring formula: Maintain separate OCR confidence, document-classification confidence, and final value confidence. Provider field confidence uses a 0.0 to 1.0 scale. Final value confidence begins with the AI/provider field confidence and is reduced for OCR/layout concerns, handwriting, checkbox or visual-mark dependency, table/layout dependency, unclear date type, missing documents, conflicting values, unclear document hierarchy, uncertain acceptance/rejection/void/draft status, or unclear deadline calculation inputs. Two extraction passes are compared; agreements may keep the stronger supported value, while disagreements are penalized and sent to human review. A field may be auto-accepted only when final value confidence is at least 0.90 and no mandatory review condition exists. Production parsing should set `AI_CONFIDENCE_THRESHOLD=0.90` for this rule set.
+· OCR provider: Amazon Textract is the only OCR/document-extraction provider for uploaded-file parsing. Supported AI parsing input formats are PDF, JPEG, PNG, and TIFF. DOCX/DOC files must be converted to PDF before AI parsing or treated as unsupported for AI parsing. Textract uses a private AWS S3 input bucket and asynchronous document analysis.
+· OCR confidence handling method: Preserve Textract block confidence where available in the OCR package and source evidence. OCR confidence must never be treated as final value confidence. Low OCR confidence, missing OCR confidence, large OCR variation, unclear source text, or mismatch between OCR text and document layout must reduce final field confidence and create a review flag.
+· OCR layout handling method: Use Textract `LAYOUT`, `FORMS`, `TABLES`, `QUERIES`, and `SIGNATURES` outputs when configured. Preserve page number, line order, table rows and columns, form key-value relationships, query answers, selected/unselected visual elements, signature detections, and available geometry/location evidence in the OCR package and field source text.
+· Checkbox and visual mark detection method: Use Textract `SelectionElement` blocks and form key-value relationships. A checkbox, radio button, or selected option is valid only when the selected mark can be tied to the correct label, section, and field. Ambiguous marks, marks between labels, competing nearby labels, or missing selection evidence must be marked unclear and routed to human review.
+· Handwriting detection method: Use Textract WORD `TextType` when available and reduce confidence for handwritten terms. Handwritten insertions, marginal notes, strike-through edits, and initials near changed terms require visual verification unless the text, placement, signatures/initials, and controlling document language are all clear.
+· Database schema: The MVP uses Supabase PostgreSQL. Document metadata and parse output are stored on `documents`, including `doc_type`, `doc_label`, `version`, `parent_id`, `is_current`, `is_legacy`, `metadata_json`, `ai_extracted_data`, and `ai_confidence`. Transactions, tasks, contacts, communications, confidence settings, and audit logs remain in their existing tenant-scoped tables. If full normalized field history becomes required beyond the MVP, add dedicated tables for document inventory, raw field extractions, resolved transaction field values, and field corrections; until then, `documents.ai_extracted_data` plus `audit_logs` are the system record for parsing.
+· Audit trail table structure: Use `public.audit_logs` for parse and correction audit events. Required columns are `tenant_id`, `user_id`, `user_role`, `action`, `entity_type`, `entity_id`, `before_state`, `after_state`, `summary`, `ip_address`, `user_agent`, `request_id`, and `created_at`. Uploaded-file parsing writes an `ai_extract` audit row containing provider, OCR provider, confidence, review status, review reasons, quality score, represented side, and before/after document status.
+· Human review workflow: If the parse result has `needs_review=true`, if any final field confidence is below 0.90, if Textract fails, if the file type is unsupported for Textract, if OCR/layout evidence is unclear, or if extraction passes disagree on a material field, the document status must remain or become `pending`. The UI should label the parse as "Needs review" and require the user to verify or edit affected fields before relying on the values for transaction setup or task generation.
+· Human correction workflow: Manual edits made in the wizard or transaction review become authoritative transaction-level values after user confirmation. Corrections must preserve the original extracted value, corrected value, correcting user, timestamp, and before/after state in the audit trail. Reprocessing after new uploads must not silently overwrite a human correction; it may only supersede a correction when a later document or later user correction clearly supports the change.
+· Document storage and source-linking method: Canonical uploaded documents remain in Supabase Storage bucket `documents`, referenced by `documents.storage_path`. AWS S3 is used as temporary Textract processing storage through `TEXTRACT_S3_BUCKET` and `TEXTRACT_S3_PREFIX`; temporary Textract source objects should be deleted after processing unless debugging is enabled. Source evidence must link back through `document_id`, file name, storage path, page number or page range, source text, Textract job id, Textract S3 key, and field-level source strings where available.
+· Field taxonomy and required extraction field list: Use the MVP `ExtractionResult` taxonomy: property fields, representation/client side, purchase price, financing, earnest money, title/escrow/closing mode, acceptance and closing dates, possession, inspection/financing/appraisal/insurance/HOA deadlines, buyers, sellers, listing agent, buyer/selling agent, loan officer, title company, closing attorney, owner-occupancy, HOA, home warranty, professional fees, document type, document effective date, document sequence number, signatures, missing signatures, and other contingencies. Party and contact values may include optional `company_name`; company name is fillable but not mandatory.
+· State-specific or brokerage-specific deadline calculation rules: Default behavior is no state-specific or brokerage-specific deadline calculation unless the rule is configured and the trigger date, number of days, day-count method, and source language are clear. Unknown state rules, holidays, banking days, business-day rules, office policy rules, or brokerage-specific rules must be flagged for verification. Future jurisdiction or brokerage rule packs should be stored as tenant/team configuration with rule source, effective date, version, and audit history.
+________________________________________
+31. Summary Instruction to Agent
+Do not simply extract contract fields.
+Build the document inventory.
+Classify the documents.
+Build the transaction timeline.
+Find every version of each field.
+Separate OCR confidence from final value confidence.
+Determine which document and field value likely controls.
+Carry forward unchanged terms.
+Detect conflicts.
+Detect missing documents.
+Calculate deadlines only when safe.
+Verify the result.
+Flag uncertainty.
+Preserve the audit trail.
+Return the current likely controlling value only, with source and confidence.
