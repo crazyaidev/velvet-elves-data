@@ -1,10 +1,10 @@
 # Velvet Elves — Frontend UI Workflow Logic Specification
 
-**Version:** 1.0
-**Date:** 2026-04-06
+**Version:** 1.1
+**Date:** 2026-05-09
 **Scope:** Complete page-by-page frontend workflow logic for all routes
 **Reference Designs:** 10 approved HTML designs in `completed_designs/`
-**Status:** Pre-Phase 3 design review — covers all routes through MVP
+**Status:** Live as-built spec — sections 2.1 (Onboarding), 6.3 (Settings), 6.4 (AI Email Review), and §14.10 (Product Tour) have been rewritten to match the May 2026 implementation. Other sections still reflect the pre-Phase-3 design review and may drift from the build.
 
 ---
 
@@ -404,121 +404,143 @@ All internal pages share a common app shell. This section defines it once; indiv
 
 ## 2.1 Onboarding — `/onboarding`
 
+> **As-built (May 2026):** the wizard is now fully role-branched, OAuth-driven, and hands off completion to either the dashboard or a nested New Transaction wizard. This section reflects the live implementation in `OnboardingWizard.tsx`; the previous spec described a planned 6–7-step variant that was cut.
+
 ### 1. Page Identity & Access
 - **Route:** `/onboarding`
-- **Page title:** "Welcome to Velvet Elves"
+- **Page title:** "Set up your workspace"
 - **Allowed roles:** All authenticated roles where `onboarding_completed === false`
-- **Redirect rule:** If `onboarding_completed === true` → `/dashboard`. If unauthenticated → `/login`
-- **Auth requirement:** Protected
+- **Redirect rule:** On mount the wizard calls `GET /api/v1/onboarding/status`; if the server reports onboarding is already finished, replace-navigate to `/dashboard` before any step renders. If unauthenticated → `/login`.
+- **Auth requirement:** Protected. Forwarded to from `RegisterPage` (post sign-up), `InviteAcceptPage` (post invite acceptance), and `AuthLayout` on every login/refresh until `onboarding_completed === true`.
 
 ### 2. Entry Conditions & Data Loading
-- **Prerequisite state:** User authenticated, `onboarding_completed === false`
+- **Prerequisite state:** User authenticated.
 - **API endpoints on mount:**
-  - `GET /api/v1/users/me` — current user profile
-  - `GET /api/v1/tenants/:id` — tenant settings
-- **Loading state UI:** Full-page skeleton with progress bar at top
-- **Empty state UI:** N/A
-- **Error state UI:** Error toast + retry button
+  - `GET /api/v1/users/me` — current user profile (name, phone, role, company, logo URL).
+  - `GET /api/v1/onboarding/status` — bounce-out check (single-shot via `bounceCheckRef` to avoid race against the user's own "complete" click).
+- **Loading state UI:** Brief spinner over the dark-rail layout until `/me` resolves.
+- **Empty state UI:** N/A.
+- **Error state UI:** Destructive toast on save failure; user stays on the current step.
 
 ### 3. Layout & Component Hierarchy
-- **Shell variant:** Standalone full-page with progress stepper (no sidebar or topbar)
-- **Primary content area:** Multi-step wizard with progress indicator at top
+- **Shell variant:** Standalone full-page. Dark left rail (logo, vertical numbered stepper, privacy blurb) + white right panel with the active step's content. Mobile collapses the rail into a thin orange progress strip across the top.
+- **Footer:** **Back** (left, disabled on step 1) + **Continue** / **Skip for now** (right). Final step hides the footer.
+- **Step list is computed live from `user.role`:**
 
-**Steps vary by role:**
+  - **Internal roles** (Agent, Transaction Coordinator, Team Lead, Attorney, Admin): 4–5 steps.
+  - **External roles** (Client, FSBO, Vendor, anything not internal): 3 steps.
 
-**Agent / Elf / Team Lead:**
-1. **Welcome** — "Welcome, [Name]! Let's set up your workspace." Brief overview of what the platform does.
-2. **Profile Basics** — Avatar upload, phone number confirmation, bio (optional for agents), company name
-3. **Email Connection** — Connect Gmail / Outlook / iCloud for email integration; "Skip for now" option
-4. **E-Signature Setup** — Connect DocuSign / HelloSign; "Skip for now" option
-5. **Notification Preferences** — Toggle email/push/in-app notifications for: task reminders, document actions, AI emails, deadline alerts
-6. **Checklist Templates** (Agent/Team Lead only) — Set up Buyer and Seller closing checklist templates or use defaults; tagged note section; seller escrow overage reminder defaults
-7. **Complete** — "You're all set!" with "Go to Dashboard" CTA
+**Step content (in order):**
 
-**Attorney:**
-1. Welcome
-2. Profile Basics (name, phone, firm name, bar number via metadata)
-3. State Rules Configuration — Select states of practice, confirm recording/disbursement defaults
-4. Email Connection
-5. Notification Preferences
-6. Complete
+1. **Welcome (all roles).** Personalized greeting (`Hi {firstName}, let's set up your workspace`), role-specific intro line, and 2–4 value cards. Internal roles see four cards (Tell us about you, Connect inbox, E-sign with DocuSign, Land in dashboard); external roles see only the first and last. **Let's go** primary button advances. No Back. No Skip.
 
-**Client:**
-1. Welcome — "Your agent [Name] has added you to a transaction"
-2. Profile Basics — Name confirmation, phone
-3. Notification Preferences — Simplified (email on/off, milestone updates on/off)
-4. Complete
+2. **Your Profile (all roles).**
+   - Full name (text, prefilled from `/me`).
+   - Phone (tel, optional, auto-formats to `(555) 123-4567` on display, digit-only on submit).
+   - Role dropdown — every value in `USER_ROLES`. Changing it rebuilds the step list live; switching from internal → external mid-flow shrinks the wizard from 4–5 steps to 3, and the active index is clamped so the user does not fall off the end. A hint appears under the dropdown: "You'll be updated to this role after this step."
+   - **Internal roles only:** Company / brokerage (text), Brand logo drag-drop zone with preview, Upload/Replace + Remove buttons. Logo rules: PNG/JPEG/WEBP/SVG/GIF, ≤ 2 MB. Wrong type or oversize → destructive toast, no upload. Optimistic preview rendered via FileReader; reverts to prior URL on API failure.
+   - **Continue** persists the step before advancing (validation-by-save):
+     - `PATCH /api/v1/users/me` (name, phone)
+     - `PATCH /api/v1/onboarding/company` (company, role)
+     - `POST /api/v1/onboarding/logo` multipart on logo upload, or `PATCH /api/v1/onboarding/logo` with empty URL on Remove.
+   - Button shows "Saving…" with a spinner while the calls run; on any failure the wizard stops at this step.
 
-**FSBO Customer:**
-1. Welcome — "Welcome to Velvet Elves! We'll help coordinate your sale."
-2. Profile Basics — Name, phone, email confirmation
-3. Notification Preferences
-4. Complete
+3. **Email Inbox (internal roles only).**
+   - Two provider cards: **Gmail** (Google OAuth) and **Outlook** (Microsoft 365 OAuth).
+   - Connection runs through `useEmailProviderOAuth` — real OAuth popup; on success the integration list re-fetches and the card flips to a green "Connected" badge. Cancel/error → destructive toast; card stays in the unconnected state.
+   - Bottom safety blurb mentions Fernet-encrypted-at-rest tokens and the ability to disconnect from Settings.
+   - **Skip for now** advances without connecting (real toast confirms).
 
-**Vendor:**
-1. Welcome — "You've been invited to a transaction"
-2. Profile Basics — Company name, name, phone, email
-3. Complete
+4. **E-signature (Agent / TC / Team Lead / Attorney only — Admin and external roles do NOT see this step).**
+   - Single DocuSign provider card (same widget pattern). Live OAuth via `useDocuSignOAuth`.
+   - **Skip for now** is allowed.
 
-**Admin:**
-1. Welcome
-2. Profile Basics
-3. Tenant Configuration — Logo, brand colors, domain (if first admin)
-4. AI Provider Selection — OpenAI / Claude toggle with current model display
-5. Notification Preferences
-6. Complete
+5. **Final — All set (all roles).**
+   - Confetti burst (28 animated particles, plays once), party-popper badge, `You're all set, {firstName}.` headline, animated subhead.
+   - **Internal roles** see two action cards:
+     1. **Create your first transaction** (primary, "Recommended" kicker) — opens the full `NewTransactionModal` layered on top of the onboarding screen. Onboarding is NOT marked complete until that wizard either creates a transaction (then redirects to `/transactions?highlight={id}`) or is dismissed.
+     2. **Go straight to your dashboard** ("Or" kicker).
+   - **External roles** see only the dashboard card (relabelled "Recommended").
+   - Either CTA calls `POST /api/v1/onboarding/complete`, calls `markTourPending()` so `AppLayout` fires the product tour on the next mount, then `navigate(replace: true)`. Failure → destructive toast; user stays on the screen.
+
+- **Overlay/modal inventory:** `NewTransactionModal` may render layered on the final step.
 
 ### 4. User Actions & State Transitions
 
-**"Next" / "Continue" button (each step):**
-- Trigger: Click
-- Immediate UI: Validate current step fields; if valid, animate slide to next step; progress bar advances
-- API call: `PATCH /api/v1/users/me` with step-specific payload (saves incrementally)
-- Success: Advance to next step
-- Failure: Inline validation errors; do not advance
-- Side effects: Audit log for profile updates
+**Continue button (each step except the final):**
+- Trigger: Click.
+- Immediate UI: Button shows "Saving…" with spinner; fields disabled.
+- API calls: per-step (see step content above).
+- Success: Animate slide to next step; rail highlights advance.
+- Failure: Destructive toast; stay on current step; Continue button re-enables.
 
-**"Skip" links (email/e-sign steps):**
-- Trigger: Click
-- Immediate UI: Advance to next step without saving that integration
-- No API call needed; user can configure later in Profile settings
+**Stepper rail click:**
+- Trigger: Click a previous step in the rail.
+- Immediate UI: Jump backward (clears local edits not yet saved on the current step).
+- Forward jumps in the rail are intentionally **blocked** — users must click Continue so saves run.
 
-**"Go to Dashboard" (final step):**
-- Trigger: Click
-- API call: `PATCH /api/v1/users/me` with `{ onboarding_completed: true }`
-- Success: Redirect to `/dashboard`
-- Side effects: Audit log; `onboarding_completed` flag set
+**Skip for now (Email + E-signature steps):**
+- Trigger: Click.
+- Immediate UI: Toast confirms ("You can connect Gmail / DocuSign later from Settings"); advance to the next step.
+- No API call.
+
+**Provider OAuth card (Gmail / Outlook / DocuSign):**
+- Trigger: Click an unconnected card.
+- Immediate UI: Spinner overlay; OAuth popup opens.
+- Success: Integration list refetched; card flips to green "Connected" badge; toast confirms.
+- Failure / cancel: Destructive toast; card stays unconnected.
+
+**Logo upload (Step 2, internal roles):**
+- Trigger: Drop a file or click "Upload logo".
+- Immediate UI: Optimistic FileReader preview.
+- API call: `POST /api/v1/onboarding/logo` (multipart).
+- Failure: Revert preview to prior URL; destructive toast.
+- Remove: `PATCH /api/v1/onboarding/logo` with empty URL → preview cleared.
+
+**Final step CTAs (Create your first transaction / Go to dashboard):**
+- Trigger: Click.
+- API call: `POST /api/v1/onboarding/complete` (idempotent).
+- Side effects: Set `onboarding_completed: true` on the user, call `markTourPending()` (writes session-scoped `velvet_elves_tour_pending` flag).
+- Success — Dashboard CTA: `navigate('/dashboard', { replace: true })`.
+- Success — Create-your-first-transaction CTA: open `NewTransactionModal`; on transaction creation `navigate('/transactions?highlight={id}', { replace: true })`. If the modal is dismissed without creating, onboarding is still marked complete and user lands on `/dashboard`.
 
 ### 5. Conditional Rendering Logic
-- **Role-based visibility:** Steps 6 (Checklist Templates) only for Agent/Team Lead. State Rules only for Attorney. Tenant Configuration only for first Admin of a tenant.
-- **State-based visibility:** If email already connected (e.g., via OAuth login), skip email step or show "Connected" state
-- **Responsive behavior:** Single-column centered layout; stepper collapses to numbered dots on mobile
+- **Role-based visibility:**
+  - Email step (3) and E-signature step (4) hidden for external roles. Admin sees email but NOT e-signature.
+  - "Create your first transaction" final-step CTA shown to internal roles only; external roles see Dashboard CTA labelled "Recommended".
+  - Welcome step value cards (4 for internal, 2 for external).
+- **State-based visibility:** Logo Remove button only renders once a logo URL is set. Provider cards show green "Connected" badge + disabled state when integration is already linked.
+- **Responsive behavior:** Mobile collapses the dark rail into an orange progress strip; primary CTA cards on the final step stack vertically below 768px.
 
 ### 6. Navigation Flows
-- **Inbound routes:** `/login` redirect (after first login), `/auth/callback` redirect, `/invite/:token` flow
-- **Outbound routes:** `/dashboard` (on completion)
-- **Deep-link support:** None — always starts at step 1 (progress saved, resumes at last incomplete step)
-- **Back navigation:** "Back" button between steps; browser back returns to previous step. Leaving onboarding preserves progress for next visit.
+- **Inbound routes:** `RegisterPage` post-signup, `InviteAcceptPage` post-invite, `AuthLayout` redirect on login when `onboarding_completed === false`.
+- **Outbound routes:** `/dashboard` (replace), `/transactions?highlight={id}` (replace, after Create your first transaction).
+- **Deep-link support:** None — always starts at Step 1 on refresh. Field values auto-rehydrate from `/me`, but the active step index is not persisted.
+- **Back navigation:** Browser back goes to the prior page (typically nothing, since this is replace-navigated to). Within the wizard, the rail allows backward jumps and the footer Back button advances backward one step.
 
 ### 7. AI Integration Points
-- **AI data on page:** None during onboarding
-- **AI actions available:** None
-- **AI chat panel:** Not available during onboarding
+- **AI data on page:** None during onboarding itself. The nested `NewTransactionWizard` (opened from the final-step "Create your first transaction" CTA) does include AI document parsing — see §13.A.
+- **AI actions available:** None on this page.
+- **AI chat panel:** Not available.
 
 ### 8. Real-Time & Notification Behavior
-- **Live updates:** None
-- **Notification triggers:** None
-- **Toast/alert patterns:** Validation errors inline; success toasts for integration connections
+- **Live updates:** None.
+- **Notification triggers:** None.
+- **Toast/alert patterns:** Destructive toasts for save / OAuth / logo failures. Success toasts for integration connections and skip clicks.
 
 ### 9. Cross-Page Relationships
-- **Shared state:** User profile data populated here flows to all dashboard and workspace pages
-- **Data dependencies:** Checklist templates created here are used by "Print Checklist" throughout the app
+- **Shared state:** Profile data saved here flows into the topbar avatar, sidebar profile card, and `/profile` page. Logo URL flows into tenant-branded surfaces.
+- **Hand-off to product tour:** `markTourPending()` writes `sessionStorage.velvet_elves_tour_pending = "1"`. `AppLayout` consumes that flag on next mount and immediately auto-starts the role-aware product tour (see §14.10).
+- **Hand-off to NewTransactionModal:** the modal is launched from this screen but is the same component used by the rest of the app — see §13.A for full spec.
 
 ### 10. Edge Cases
-- **Browser refresh mid-wizard:** Resumes at last saved step (each step auto-saves on "Next")
-- **OAuth email already connected:** Show "Connected to Gmail" success state instead of connect prompt
-- **First admin of tenant:** Extra tenant configuration step appears
-- **User skips all optional steps:** Allowed — they can configure later from `/profile`
+- **Browser refresh mid-wizard:** Field values rehydrate from `/me`; the wizard restarts at Step 1. There is no "finish later" bookmark.
+- **Forward jump in rail:** Blocked by design — Continue must run save first.
+- **External-role mid-flow switch:** Picking an external role at Step 2 collapses the step list (4–5 → 3); the active step index is clamped so the user is never stranded past the new end.
+- **Provider already connected:** Card renders pre-disabled with the green "Connected" badge — no popup is launched.
+- **Bounce-out race:** `bounceCheckRef` ensures the `/onboarding/status` check fires only once per mount, preventing a self-redirect when the user finalizes onboarding.
+- **`NewTransactionModal` dismissed without creating:** Onboarding still marks complete (idempotent) and the user lands on `/dashboard`.
+- **Confetti accessibility:** Plays once; users with `prefers-reduced-motion` see a static badge instead of the burst (Framer Motion respects the system setting).
 
 ---
 
@@ -2190,56 +2212,297 @@ This is a pure redirect route. No UI rendered.
 
 ## 6.3 Settings — `/settings`
 
+> **As-built (May 2026):** the page is a single scrolling document with seven sections, NOT a tabbed surface. Role-gating is not enforced at the section level today — every signed-in user sees every section. Most sections beyond Email Integrations / E-Signature / Help & Tour are visual placeholders and do not persist on refresh.
+
 ### 1. Page Identity & Access
 - **Route:** `/settings`
 - **Page title:** "Settings"
-- **Allowed roles:** All authenticated internal roles
-- **Redirect rule:** Routes to user-appropriate settings. Admin sees system settings; others see personal settings.
-- **Auth requirement:** Protected
+- **Allowed roles:** Any authenticated user. The route is registered without `ProtectedRoute` (unlike `/team` and `/admin/*`), so TC/Elf, Team Lead, and Admin all see the same page with the same controls.
+- **Redirect rule:** None role-specific — the page renders identically for every role.
+- **Auth requirement:** Protected (auth required, no role gating).
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
-  - `GET /api/v1/users/me` — current user settings
-  - `GET /api/v1/tenants/:id/settings` (Admin only) — tenant settings
-  - `GET /api/v1/confidence-settings` (Admin/Team Lead) — confidence thresholds
-- **Loading state UI:** Settings form skeletons
+  - `GET /api/v1/users/me` — current user (for hero greeting / ownership scoping).
+  - `GET /api/v1/integrations` — provider connection status (Gmail, Outlook, DocuSign). Powers Snapshot Inbox/E-Sign tile counts and provider rows. Re-fetched on every Refresh click.
+- **Loading state UI:** Inline skeleton on the Email Integrations and E-Signature cards while integrations load. Hero and other sections render statically.
+- **Empty state UI:** N/A — Settings page always has its hero and seven sections.
+- **Error state UI:** Red banner above the Email Integrations rows when the integrations API errors; per-action red toasts for connect / disconnect failures.
 
 ### 3. Layout & Component Hierarchy
-- **Shell variant:** Internal shell
-- **Sidebar state:** No nav link active (Settings is accessed via user avatar chip menu in topbar or user profile card in sidebar footer)
-- **Page header:** "Settings" title
-- **Primary content area — tabbed settings:**
+- **Shell variant:** Internal shell.
+- **Sidebar state:** No nav link is active (Settings is reached from the user-avatar menu in the topbar or the user profile card in the sidebar footer).
+- **Page header:**
+  - Hero panel — orange-gradient top stripe, serif "Settings" title, brief subhead.
+  - **Snapshot tiles** — four clickable tiles below the title: **Inbox** (`connected/total` count from integrations), **E-Sign** (DocuSign connection state), **Credits** (hardcoded `250 of 1,000` — placeholder), **Templates** (hardcoded `5` — placeholder). Each tile scroll-jumps to its matching section header below.
+- **Sticky left-rail nav (`Sections`):** appears on screens ≥ 1024 px. IntersectionObserver-driven scroll-spy highlights the active section in orange. Click any item to scroll-jump.
+- **Primary content area — single scrolling document with seven sections (display order):**
 
-  **For all roles — Personal Settings tab:**
-  - Notification preferences (email/push/in-app toggles per category)
-  - Display preferences (date format, timezone)
-  - Connected integrations status (email, e-sign, calendar)
+  1. **Company.** Three text fields with hardcoded defaults (Company Name "Velvet Elves Realty", Contact Email, Phone) + **Save changes** button. *Visual-only — no onClick, no persistence.*
 
-  **For Agent/Team Lead — Workspace Settings tab:**
-  - Default sort preferences
-  - AI chat preferences (auto-open, context scope)
+  2. **Email Integrations** *(Milestone 4.1).* Section header has a **Refresh** button (spinner during fetch). Provider rows for **Gmail** and **Outlook** (iCloud row hidden behind `SHOW_ICLOUD = false`). Each row shows brand glyph, provider name, connected email or help text, "Connected" green pill + connection date if active, and a **Connect** (orange) or **Disconnect** (outline) button. Errors render as a red banner above the rows. *Fully wired — see §4 actions below.*
 
-  **For Team Lead — Team Settings tab:**
-  - Team-wide confidence thresholds (above admin minimum)
-  - Default task template override settings
-  - Team notification policies
+  3. **E-Signature.** Single DocuSign tile with logo, account email, connection date, and **Connect** / **Disconnect** button. Connect launches the 3-step wizard modal (Intro → Authorize popup → Done); see §27.14 in the testing doc / `ConnectEsignWizardModal` for full flow. Disconnect uses a native `confirm()` dialog. *Fully wired.*
 
-  **For Admin — System Settings tab:**
-  - AI provider selection (OpenAI / Claude toggle) with current model display
-  - Global confidence floor setting
-  - Tenant branding (logo, colors, domain)
-  - Feature flags
-  - Data retention settings
+  4. **Branding.** Logo upload tile (dashed placeholder + Upload logo button), Primary Color field (default `#E26812`) with swatch preview, Display Name field (default "Velvet Elves AI"), **Save branding** button. *Visual-only — no fields persist.*
 
-### 4. User Actions
-- Toggle/dropdown changes auto-save with debounce (no explicit Save button per field)
-- AI provider switch (Admin): Confirmation dialog "Switch AI provider to [Claude]? This affects all AI features."
-  - `PATCH /api/v1/tenants/:id` with updated `settings_json.ai_provider`
-  - Success: Toast "AI provider updated"; audit log
+  5. **AI Configuration.** Hero strip "AI Credits — 250 of 1,000 remaining" with 25% progress bar and **Upgrade plan** button. Three toggle rows: Auto-parse uploaded documents (on), Task recommendations (on), Smart email drafts (off). *Visual-only — toggles flip locally but do not persist; credit numbers are hardcoded.*
 
-### 5–10. Standard patterns
-- Role-based tab visibility
-- Deep-link: `?tab=team` or `?tab=system`
+  6. **Task Templates.** Card header has an **Import** button. Hardcoded list of 5 templates: Buyer Standard (12), Seller Standard (14), Dual Agency (18), Lease (8), Commercial (22), each with an **Edit** button. *Visual-only — neither Edit nor Import is wired. Real template management lives at `/admin/task-templates` (§10.3).*
+
+  7. **Help & Tour.** "Replay the guided walkthrough" hero card with **Start tour** button. *Fully wired — clears the user's tour-completed flag and immediately restarts the role-aware product tour (see §14.10).*
+
+- **Overlay/modal inventory:**
+  - `ConnectEsignWizardModal` — opens from the E-Signature **Connect** button.
+  - Native browser `confirm()` — used by Email Integrations and E-Signature **Disconnect** to prevent accidental disconnects.
+
+### 4. User Actions & State Transitions
+
+**Snapshot tile click (Inbox / E-Sign / Credits / Templates):**
+- Trigger: Click.
+- Immediate UI: Smooth scroll-jump to the matching section header below.
+- API call: None.
+
+**Section-rail click (sticky left-rail nav):**
+- Trigger: Click an item.
+- Immediate UI: Scroll-jump; the IntersectionObserver picks up the new active section once it crosses the threshold.
+- API call: None.
+
+**Email Integrations — Refresh button:**
+- Trigger: Click.
+- Immediate UI: Spinner on the button; integrations list re-fetches.
+- API call: `GET /api/v1/integrations`.
+- Success: Provider rows re-render with fresh state.
+- Failure: Red banner above the rows with the error message.
+
+**Email Integrations — Connect (Gmail / Outlook):**
+- Trigger: Click an unconnected provider's Connect button.
+- Immediate UI: OAuth popup opens.
+- API call: Provider OAuth round-trip via `useEmailProviderOAuth`; on success the integrations list is invalidated and re-fetched.
+- Success: Row flips to "Connected" green pill + connection date. Toast `"{Provider} connected!"`.
+- Failure / cancel: Destructive toast; row stays unconnected.
+
+**Email Integrations — Disconnect:**
+- Trigger: Click Disconnect.
+- Immediate UI: Native browser `confirm()` dialog: "Disconnecting … will stop syncing inbound mail and AI email automation will not be able to send …".
+- API call: `DELETE /api/v1/integrations/:id` (only after confirm).
+- Success: Row reverts to unconnected; success toast.
+- Failure: Red banner above the rows.
+
+**E-Signature — Connect:**
+- Trigger: Click Connect.
+- Immediate UI: `ConnectEsignWizardModal` opens (Intro → Authorize popup → Done).
+- API calls: DocuSign OAuth via `useDocuSignOAuth`; integrations refetch on success.
+- Success: Wizard advances to Done step; close handler flips the tile to Connected + green pill.
+- Failure: Wizard surfaces inline error and Retry button.
+
+**E-Signature — Disconnect:**
+- Trigger: Click Disconnect.
+- Immediate UI: Native `confirm()` dialog warning that future Send for Signature attempts will fail.
+- API call: `DELETE /api/v1/integrations/:docusignId`.
+- Success: Tile reverts; toast confirms.
+
+**Help & Tour — Start tour button:**
+- Trigger: Click.
+- Immediate UI: Tour-completion key for this user is cleared (`localStorage.velvet_elves_tour_completed:{userId}`); `TourProvider.start()` is invoked.
+- Side effect: Role-aware product tour fires immediately on top of the Settings page.
+
+**Visual-only controls (Company / Branding / AI Configuration / Task Templates):**
+- Click any Save / Upload / Edit / Import button → no-op (no onClick wiring). Toggles flip local state but do NOT call any API; refresh resets them.
+
+### 5. Conditional Rendering Logic
+- **Role-based visibility:** None today. *Planned:* gate Branding, Task Templates, and AI Configuration to Admin / Team Lead.
+- **State-based visibility:**
+  - Provider rows: "Connected" pill, account email, and Disconnect button only render once an integration is linked. Unconnected rows show help text + Connect button.
+  - iCloud row: hidden behind `SHOW_ICLOUD = false` flag.
+  - Snapshot Inbox tile shows live `connected/total` from `/api/v1/integrations`; E-Sign tile flips green when DocuSign is connected; Credits + Templates tiles are hardcoded.
+- **Feature flags:** `SHOW_ICLOUD` (off). No other tenant flags surfaced on this page.
+- **Responsive behavior:** Sticky left-rail nav hidden below 1024 px; Snapshot tiles wrap to 2x2 on narrow screens. Card body content stacks vertically.
+
+### 6. Navigation Flows
+- **Inbound routes:** Topbar avatar menu → Settings; sidebar profile card → Settings; "Connect Gmail / DocuSign" prompts elsewhere (e.g. AI Email Review error toast: "No active gmail integration") deep-link here.
+- **Outbound routes:**
+  - `/admin/task-templates` — *planned* link from the Task Templates section once that placeholder is replaced.
+  - DocuSign OAuth popup → returns to `/settings` (modal closes on success).
+- **Deep-link support:** Hash fragments (`/settings#email-integrations`, `/settings#help-tour`) supported via section IDs; query-string deep-links not yet implemented.
+- **Back navigation:** Browser back from Settings returns to the previous page.
+
+### 7. AI Integration Points
+- **AI data on page:** AI Configuration card displays AI Credits remaining (hardcoded today; backend hook planned).
+- **AI actions available:** None directly. The "Smart email drafts" toggle is a UI placeholder for the planned auto-send threshold setting.
+- **AI confidence display:** None.
+- **AI guardrails:** Not surfaced in UI. Backend `tenants.settings_json.ai_email` (tone, disclaimer, escalation hours, auto-send threshold) is admin-API only — no Settings UI exists for these yet.
+- **AI chat panel:** Available via the topbar Ask AI button while on this page.
+
+### 8. Real-Time & Notification Behavior
+- **Live updates:** Integrations list re-fetches on Refresh click and after any Connect/Disconnect action. No background polling.
+- **Notification triggers:** None.
+- **Toast/alert patterns:** Success/failure toasts for connect, disconnect, and refresh. Red banner for integrations API errors.
+
+### 9. Cross-Page Relationships
+- **Shared state:** Provider connection status here drives the green "Connected" badges in the Onboarding wizard's Email step and the AI Email Review queue's send affordances. Disconnecting Gmail here will cause AI Email Review's Approve & Send to fail with "No active gmail integration".
+- **Dashboard deep-linking:** None.
+- **Data dependencies:** Email integrations are a precondition for AI Email Review (§6.4) and Email Document modal (§5.4 / 27.9). DocuSign integration is a precondition for Send for Signature (§5.4 / 27.8 / 27.14).
+
+### 10. Edge Cases & Special Behaviors
+- **Visual-only sections persist on refresh:** Company / Branding / AI Configuration / Task Templates fields all reset to their hardcoded defaults on refresh — flag clearly to clients to avoid expectations of persistence.
+- **Popup-blocked OAuth:** Gmail / Outlook / DocuSign OAuth popups can be blocked by Safari and Brave. *Planned:* fallback redirect-based OAuth.
+- **Stale integration list:** If a popup completes successfully but the post-OAuth re-fetch fails (network blip), the row may stay "Unconnected" until the user clicks Refresh.
+- **Concurrent disconnects:** No optimistic UI; the row stays in its current state until the API confirms the disconnect.
+- **Tour replay during a tour:** Clicking Start tour while a tour is already running re-starts from step 1.
+
+---
+
+## 6.4 AI Email Review — `/ai-emails`
+
+> **As-built (May 2026):** Milestone 4.2 surface. Powered by Email Integrations configured in §6.3 (Milestone 4.1). The page replaces the older inline AI Email drawer concept and is now the canonical review queue for AI-prepared replies.
+
+### 1. Page Identity & Access
+- **Route:** `/ai-emails` (canonical). `/ai-emails/:logId` is registered for deep-links but the param is NOT yet read by the page (planned).
+- **Page title:** "AI Email Review"
+- **Allowed roles:** Any authenticated user can navigate to the URL. The list is server-scoped to drafts the caller's tenant + role can act on (Agent / TC / TeamLead / Admin who owns the file). FSBO and Attorney roles do not see the sidebar entry.
+- **Redirect rule:** None client-side.
+- **Auth requirement:** Protected.
+
+### 2. Entry Conditions & Data Loading
+- **Prerequisite state:** At least one connected email provider in Settings → Email Integrations is required for Approve & Send / Edit & Send to succeed end-to-end. With no provider, drafts still appear but actions surface "No active gmail integration" toast.
+- **API endpoints on mount:**
+  - `GET /api/v1/ai-emails/drafts` — list all drafts for the caller's tenant + role scope. Polled every 60 seconds (`refetchInterval: 60_000`, `staleTime: 30_000`).
+  - `GET /api/v1/ai-emails/drafts/:id/inbound` — lazy-loaded when a draft is selected; populates the Original Inbound card.
+- **Loading state UI:** Four pulsing grey skeleton rows in the list pane. Lazy skeleton in the Original Inbound card.
+- **Empty state UI:**
+  - All drafts empty → right pane: Mail icon + "Inbox is clear — When the AI prepares a reply that needs your sign-off, it will land here for review before sending."
+  - Filter slice empty (drafts exist, current tab is empty) → right pane: "Nothing in this view — Try a different filter, or wait for the next AI-prepared reply to land here."
+- **Error state UI:** Centered "Couldn't load drafts." card with a "Try again" link.
+
+### 3. Layout & Component Hierarchy
+- **Shell variant:** Internal shell.
+- **Sidebar state:** Sidebar → Intelligence → "AI Email Review" highlighted. Entry only renders for Agent / TC / Team Lead / Admin.
+- **Page header:**
+  - Breadcrumb: `Intelligence > AI Email Review`.
+  - Title `AI Email Review` + orange count pill (`{N} drafts` / `1 draft`).
+  - Right cluster (md+ only): muted `Updated {Xm} ago` timestamp + **Refresh** button (spinner during fetch).
+- **Filter tabs (under header):** five tabs with numeric count badges:
+  1. **All** — every draft.
+  2. **Needs Review** (red badge when count > 0) — `ai_kind === "uncertain"` OR has flagged assumptions.
+  3. **Ready to Send** — confidence ≥ 80%, kind ≠ "uncertain", no flagged assumptions.
+  4. **Low Confidence** — confidence < 50%.
+  5. **Escalated** (red badge when count > 0) — past the escalation deadline.
+- **Two-pane layout (≥ 1024 px):**
+  - **List pane (left, ~320 px):** vertical list of draft rows divided by hairlines. No search / sort / bulk-action UI. Tabs are the only filter.
+  - **Detail pane (right, fluid):** hero header + body grid (left) + right rail (right, 340 px) holding AI Verified From + Original Inbound cards. On mobile, the panes stack with the list above the detail.
+- **Per-row anatomy (list pane):**
+  - Left edge: orange bar when active; light-grey hover.
+  - Status dot: green (high), amber (medium), red (low / escalated), grey (unknown).
+  - Subject (bolder when selected, falls back to "(no subject)").
+  - Recipient email(s) — monospaced, truncated.
+  - Pill row: Kind label (color-coded), Confidence percent, Escalated red pill if applicable.
+  - Right side: relative timestamp + chevron on hover/active.
+- **Detail pane — hero header:** AI Draft sparkles badge + Kind pill + Confidence meter (label + tiny progress bar + percent) + Escalated pill if applicable. Subject in serif. To/Cc lines (Cc rendered only when present; the file owner agent is auto-CC'd by default).
+- **Detail pane — body grid (left):** AI-drafted reply rendered as plain text. Hedged phrases wrapped in amber `<mark>` tags. If flagged assumptions exist, an amber-bordered "Flagged assumptions" panel lists each one explicitly below the body.
+- **Detail pane — right rail:**
+  - **AI Verified From** card — orange-eyebrowed; lists every `key: value` the AI cited (address, closing_date, status, document names, etc.). Empty case → orange dashed warning: "No source data was cited for this draft. Treat the body as a generic response and verify each fact manually."
+  - **Original Inbound** card — sender, timestamp, subject, body of the inbound that triggered the draft. Lazy-loaded with skeleton; failure case → "Couldn't load the original inbound message."
+- **Action footer (detail pane, bottom):**
+  - **View mode:** Approve & Send (orange primary), Edit (ghost), Regenerate (ghost), Discard (ghost, red).
+  - **Edit mode:** Subject + Body editable (live char counter). Send Edit (orange primary), Cancel (ghost).
+- **Overlay/modal inventory:** AlertDialog for Discard confirmation: "Discard this AI draft? The draft will be removed from your review queue. The original inbound message stays in your communication log."
+
+### 4. User Actions & State Transitions
+
+**Refresh button:**
+- Trigger: Click.
+- Immediate UI: Button spinner; list re-fetches.
+- API call: `GET /api/v1/ai-emails/drafts`.
+
+**Filter tab click:**
+- Trigger: Click any of the 5 tabs.
+- Immediate UI: List narrows; selection persists if the selected draft is still in the new slice; otherwise the first row of the new slice is auto-selected.
+
+**Row click (list pane):**
+- Trigger: Click a row.
+- Immediate UI: Row gains orange left edge; detail pane loads. `GET /api/v1/ai-emails/drafts/:id/inbound` fires lazily for the Original Inbound card.
+
+**Approve & Send (view mode):**
+- Trigger: Click.
+- Immediate UI: Button spinner.
+- API call: `POST /api/v1/ai-emails/drafts/:id/approve`.
+- Success: Toast "Sent — AI reply approved and delivered."; list invalidated immediately so the row disappears.
+- Failure: Red toast with the API error verbatim (e.g. "Send failed — No active gmail integration."). Detail pane stays in view mode.
+
+**Edit (view mode):**
+- Trigger: Click.
+- Immediate UI: Body card flips to editable mode; Subject and Body inputs render with live char counter.
+
+**Send Edit (edit mode):**
+- Trigger: Click.
+- Immediate UI: Button spinner.
+- API call: `POST /api/v1/ai-emails/drafts/:id/edit-and-send` with edited subject/body.
+- Success: Toast "Sent — Edited reply delivered."; list invalidated; detail pane returns to empty state. Server clears flagged assumptions for this draft.
+- Failure: Red toast; detail pane stays in edit mode with the user's draft intact.
+
+**Cancel (edit mode):**
+- Trigger: Click.
+- Immediate UI: Reverts to view mode; local edits discarded.
+
+**Regenerate (view mode):**
+- Trigger: Click.
+- Immediate UI: Spinner on the icon while running.
+- API call: `POST /api/v1/ai-emails/drafts/:id/regenerate` — the AI re-drafts from the original inbound.
+- Success: Toast "Regenerated — A fresh draft is ready for review."; the same row is replaced in the list with the new draft. Detail pane refreshes.
+- Failure: Red toast with API error.
+
+**Discard (view mode):**
+- Trigger: Click.
+- Immediate UI: AlertDialog opens.
+- Cancel: dialog closes, no API call.
+- Confirm: `POST /api/v1/ai-emails/drafts/:id/discard`. Success → row disappears, toast confirms. The inbound communication log is preserved server-side.
+
+### 5. Conditional Rendering Logic
+- **Role-based visibility:** Sidebar entry only for Agent / TC / Team Lead / Admin. Server enforces who can act on which drafts; UI does not pre-disable buttons by role (unauthorized clicks return error toasts).
+- **State-based visibility:**
+  - Escalated pill renders only when `escalation_due_at` has passed.
+  - Flagged assumptions panel renders only when at least one assumption exists.
+  - Cc line renders only when CC recipients exist.
+  - Action footer hides Approve / Regenerate / Discard while in edit mode (replaced with Send Edit / Cancel).
+- **Feature flags:** None on this page today. Tenant `settings_json.ai_email.auto_send_threshold` is consumed server-side; not surfaced in UI.
+- **Responsive behavior:** Below 1024 px the list and detail panes stack; above 1024 px they sit side-by-side with the list at ~320 px.
+
+### 6. Navigation Flows
+- **Inbound routes:** Sidebar → Intelligence → AI Email Review. Topbar bell → "N AI drafts awaiting review" callout. Notifications page row click.
+- **Outbound routes:** None directly (no per-draft "Open transaction" link yet — *planned*).
+- **Deep-link support:** `/ai-emails/:logId` route is registered but the param is NOT wired to auto-select the draft. *Planned* hand-off: notifications open the exact draft.
+- **Back navigation:** Standard browser back; selection state is not preserved in URL.
+
+### 7. AI Integration Points
+- **AI data on page:** Every draft is the AI's output. Confidence percent, kind taxonomy (Factual question / Document request / Vendor reply / Uncertain — review carefully / Other), flagged assumptions, and AI Verified From source list are all surfaced.
+- **AI actions available:** Approve & Send, Edit & Send (clears flags), Regenerate (re-drafts), Discard.
+- **AI confidence display:** Status dot (list pane) + Confidence meter (detail header). Five-tab taxonomy partitions the queue by confidence + flag state.
+- **AI guardrails:**
+  - "AI Verified From" rail surfaces every fact the AI cited so the reviewer can verify before sending.
+  - Empty AI Verified From triggers an explicit warning card.
+  - Flagged assumptions are highlighted inline AND listed explicitly in a side panel.
+  - Drafts past `escalation_due_at` are visually flagged on both panes.
+- **AI chat panel:** Available via topbar Ask AI; not directly integrated with the draft pane.
+
+### 8. Real-Time & Notification Behavior
+- **Live updates:** 60-second polling on the drafts list (no websocket). After every Approve / Edit & Send / Regenerate / Discard, the list is invalidated immediately so the acted-on draft disappears without waiting for the next poll. Bell badge polls on the same 60 s cadence.
+- **Notification triggers:** New drafts arriving fire the "N AI drafts awaiting review" badge in the topbar bell.
+- **Toast/alert patterns:** Per-action success ("Sent — …") and failure ("Send failed — {api error}") toasts. AlertDialog for Discard confirmation.
+
+### 9. Cross-Page Relationships
+- **Shared state:** Email integrations from §6.3 are the precondition for sending. DocuSign integration is unrelated to this page.
+- **Audit trail:** Every Approve / Edit & Send / Regenerate / Discard / Escalate writes to `audit_logs` server-side. The user-visible signals are the toast and the row disappearing from the queue.
+- **CC behavior:** The owner agent is always CC'd on outbound sends so they keep a copy in their Sent folder. Visible in the To/Cc header before sending.
+
+### 10. Edge Cases & Special Behaviors
+- **No connected email provider:** Drafts still appear, but Approve & Send / Edit & Send fail with "No active gmail integration". *Planned:* surface a banner at the top of the page when no provider is connected, with a "Connect inbox" deep-link.
+- **Draft acted on by another reviewer mid-poll:** The 60-second poll invalidates the local cache; the row disappears on the next refetch.
+- **Selected draft removed by another action:** First row of the current slice is auto-selected so the right pane is never stranded.
+- **Edit & Send clears flagged assumptions:** Server clears them because the human just rewrote the content. Regenerate keeps flagged assumptions because the AI is generating a new draft.
+- **Escalated drafts:** Past `escalation_due_at` they bump the Escalated tab counter (red badge) and gain a red pill in both panes. They do not auto-send — the reviewer still has to act on them.
+- **Long bodies:** Body card scrolls inside its grid cell; right rail and footer remain fixed.
+- **Original Inbound load failure:** Card renders an error string but does not block the rest of the page.
 
 ---
 
@@ -3048,13 +3311,14 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ## E. Communication & AI Email Flow
 
-1. **Inbound email:** System receives via connected email provider → logged in communication log → triggers AI processing
-2. **AI determination:** Is it a factual question (closing date, status), a document request, or uncertain?
-3. **Factual / document exists → AI auto-responds:** CC responsible internal owner (agent + elf). Only when confidence ≥ auto-proceed threshold (default 90%).
-4. **Document missing or uncertain → AI drafts but does NOT send:** Routes to human with "Approve / Edit & Send" button. All assumptions/inferences/interpretations bolded in draft.
-5. **Side-by-side review UI:** Left panel = draft with bolded assumptions; Right panel = source data with tooltips showing where each piece of information came from.
-6. **Vendor communication:** Constrained response format → AI parses reply → proposes date update → validates against timeline constraints. Vague replies ("soon") → AI sends clarification or routes to human.
-7. **Communication log:** Immutable, searchable, filterable by date/party/keyword. Download: one transaction at a time per user; multi-transaction requires admin.
+1. **Email account configuration (Milestone 4.1, prerequisite):** User connects Gmail and/or Outlook in Settings → Email Integrations (§6.3). At least one provider must be active for the AI to send replies. Tokens stored Fernet-encrypted at rest.
+2. **Inbound email:** System receives via the connected provider → logged in communication log → triggers AI processing.
+3. **AI determination:** AI tags the inbound with one of five `ai_kind` buckets — Factual question, Document request, Vendor reply, Uncertain — review carefully, Other — and computes a confidence percent and any flagged-assumption phrases.
+4. **High confidence + factual / document exists → AI may auto-respond** (when `tenants.settings_json.ai_email.auto_send_threshold` is met; default 90%). The owner agent is CC'd so they keep a copy in Sent.
+5. **Document missing, uncertain, or below threshold → AI drafts but does NOT send.** The draft lands in the AI Email Review queue (§6.4) at `/ai-emails`. Hedged phrases are wrapped in amber `<mark>` tags inside the body and listed explicitly in a "Flagged assumptions" panel.
+6. **Reviewer workflow (Milestone 4.2):** open `/ai-emails`, pick a draft, verify against the AI Verified From rail (every fact the AI cited) + Original Inbound card. Then choose Approve & Send, Edit & Send (clears flagged assumptions), Regenerate, or Discard. List polls every 60 s and bell badge stays in sync.
+7. **Vendor communication:** Constrained response format → AI parses reply → proposes date update → validates against timeline constraints. Vague replies ("soon") → AI sends clarification or routes to human via the same review queue.
+8. **Communication log:** Immutable, searchable, filterable by date/party/keyword. Download: one transaction at a time per user; multi-transaction requires admin.
 
 ---
 
@@ -3201,6 +3465,31 @@ These patterns must be consistently applied across all pages.
 - Primary/secondary colors override default tokens
 - Custom domain support
 - Email templates use tenant branding
+
+### 10. Product Tour (role-aware spotlight overlay)
+- Implemented in `<ProductTour />` mounted inside `AppLayout`, wrapped by `<TourProvider />`. Spotlights any element with a `data-tour="…"` anchor in the layout chrome.
+- **Auto-start triggers:**
+  - Onboarding completion → `markTourPending()` writes `sessionStorage.velvet_elves_tour_pending = "1"` → `AppLayout` consumes the flag on next mount and auto-starts the tour.
+  - First sign-in for a user whose per-user `localStorage.velvet_elves_tour_completed:{userId}` is unset.
+- **Manual restart:** Settings → Help & Tour → Start tour (clears the per-user completion key and calls `TourProvider.start()`).
+- **Step lists** (selected via `getTourSteps(role)`):
+  - **Internal** (Agent, TC, Team Lead, Admin, default fallback): 9 steps — Welcome → KPI tiles → Active Transactions nav → Task Queue nav → All Documents nav → AI Briefing top-bar button → Search ⌘K → Notifications bell → +New Transaction → Finale.
+  - **Attorney:** 5 steps — Welcome → Matter Queue (transactions nav, relabelled) → Documents → Today's AI briefing → Finale.
+  - **External (FSBO / Client / Vendor):** 5 steps — Welcome → My Properties (transactions nav, relabelled) → Documents → Ask Velvet Elves AI (sidebar AI nav) → Finale.
+- **Visual style:** Backdrop `rgba(15,20,30,0.55)` + 2 px blur painted with one `box-shadow` so the cutout is pixel-perfect at any DPR. Spotlight = orange border + soft halo + 2 s pulse ring with 8 px padding. Pointer events pass through so the underlying UI stays live. Tooltip card 360 px wide, white, drop shadow, orange gradient accent strip, small caret pointing at the spotlight. Tooltip placement auto-flips (top/bottom/left/right) and clamps inside the viewport. Welcome and Finale render as a centered hero card with a uniform dim backdrop (no spotlight).
+- **Animations:** Framer Motion fade + spring-tween on spotlight position changes (~0.28 s); pulse ring loops every 2 s. Re-measures on every animation frame so the spotlight tracks UI that reflows mid-tour, plus auto-scroll if the target is off-screen.
+- **Controls:**
+  - Next (orange primary, label flips to **Finish** on the last step).
+  - Back (ghost, disabled on step 1).
+  - Skip (small X in the top-right of the tooltip; clicking the dimmed area outside the spotlight also skips).
+  - Progress dots (one per step; current dot wide and orange; previously-seen dots clickable for backward jumps; forward jumps blocked).
+  - Step counter `2/9` style next to the dots.
+- **Keyboard:** `→` / `Enter` advance; `←` go back; `Esc` skip / dismiss. `⌘K` / `Ctrl+K` is **passed through** so global search remains reachable mid-tour.
+- **Persistence:**
+  - Marked complete only on Finish (or Esc on the final step). Skipping mid-tour does NOT mark complete.
+  - Storage keys: `localStorage.velvet_elves_tour_completed:{userId}` (per-user completion), `sessionStorage.velvet_elves_tour_pending` (cross-page hand-off from onboarding). Legacy `velvet_elves_tutorial_completed` is auto-deleted on first read so users stuck on the old broken global flag see the new tour.
+- **Resilience:** Steps whose target element does not exist for the role's sidebar are silently skipped after a ~1.2 s grace window for route-driven mounts. No broken arrows.
+- **Accessibility:** Rendered as `role="dialog" aria-modal="true"` with title id `ve-tour-title`. Pulse ring is `aria-hidden`. Respects `prefers-reduced-motion`.
 
 ---
 

@@ -1,0 +1,16 @@
+Subject: Re: Voice Agents are Advancing
+
+Hey Jake,
+
+Cool video. Agreed, this is a real step forward. The big change here isn't that the AI sounds more natural. It's that it can now think through what a caller actually wants and look up information live during the call. That's been the missing piece for voice agents to be genuinely useful.
+
+How it compares to Retell and Vapi (the platforms I mentioned earlier): those are basically middlemen. They wrap a voice AI together with phone-call routing and a dashboard, then sell the bundle. Now that OpenAI's model is strong enough on its own, building directly with OpenAI gives us a few wins. Tighter control over the conversation, deeper integration with our own data, and no third party sitting between us and our clients' information. Retell and Vapi are still fine if we want to launch quickly, but doing it in-house looks more attractive after this release.
+
+How we'd use it in Velvet Elves: imagine a voice agent that can answer "what's open on the Smith file?", call a buyer to chase a missing inspection report and mark the task done once they commit to a date, or call clients with closing updates and hand off to a real person when something goes off-script. All of that would run on the transaction, task, and communication-log data I've already built. No extra plumbing required when we're ready to plug it in.
+
+Still a post-MVP build. Just wanted to flag that I'm leaning a bit differently on the approach now.
+
+Exciting times.
+
+Thanks!
+Jan

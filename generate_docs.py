@@ -859,7 +859,7 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("")
     lines.append("## Features Currently Complete — Client Feedback Requested")
     lines.append("")
-    lines.append("**Last Updated:** April 15, 2026  ")
+    lines.append("**Last Updated:** May 9, 2026  ")
     lines.append("**Test Environment:** http://dev.velvetelves.com/  ")
     lines.append("**Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  ")
     lines.append("**Reviewer:** Client — please fill in the Feedback block under each feature")
@@ -891,12 +891,14 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("### Suggested order of testing")
     lines.append("")
     lines.append("1. Public pages and sign-in / sign-up")
-    lines.append("2. Onboarding and the first-time tutorial")
+    lines.append("2. Onboarding wizard and the product tour overlay")
     lines.append("3. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)")
-    lines.append("4. Team Lead or Admin extras (delete permission, task templates, deletion queue)")
-    lines.append("5. Attorney workspace")
-    lines.append("6. FSBO-customer sidebar")
-    lines.append("7. Direct links and error pages")
+    lines.append("4. Settings and Email Integrations (needed before AI Email Review can send)")
+    lines.append("5. AI Email Review queue at /ai-emails")
+    lines.append("6. Team Lead or Admin extras (delete permission, task templates, deletion queue)")
+    lines.append("7. Attorney workspace")
+    lines.append("8. FSBO-customer sidebar")
+    lines.append("9. Direct links and error pages")
     lines.append("")
     lines.append("---")
     lines.append("")
@@ -1009,7 +1011,7 @@ def create_testing_review_doc():
                          alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(13))
     doc.add_paragraph()
 
-    _add_plain_paragraph(doc, "Last Updated: April 15, 2026",
+    _add_plain_paragraph(doc, "Last Updated: May 9, 2026",
                          bold=True, space_after=Pt(3))
     _add_plain_paragraph(doc, "Test Environment: http://dev.velvetelves.com/",
                          space_after=Pt(3))
@@ -1050,12 +1052,14 @@ def create_testing_review_doc():
     _add_section_label(doc, "Suggested order of testing")
     _render_bullet_group(doc, [
         "1. Public pages and sign-in / sign-up",
-        "2. Onboarding and the first-time tutorial",
+        "2. Onboarding wizard and the product tour overlay",
         "3. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)",
-        "4. Team Lead or Admin extras (delete permission, task templates)",
-        "5. Attorney workspace",
-        "6. FSBO-customer sidebar",
-        "7. Direct links and error pages",
+        "4. Settings and Email Integrations (needed before AI Email Review can send)",
+        "5. AI Email Review queue at /ai-emails",
+        "6. Team Lead or Admin extras (delete permission, task templates, deletion queue)",
+        "7. Attorney workspace",
+        "8. FSBO-customer sidebar",
+        "9. Direct links and error pages",
     ])
 
     doc.add_page_break()
@@ -1381,66 +1385,133 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 12,
         "category": "First-Time User Experience",
-        "feature": "Onboarding wizard",
+        "feature": "Onboarding wizard (rewritten — role-aware flow)",
         "route": "/onboarding",
         "how_to_test": [
+            ("How you arrive on this page.", [
+                "Brand-new accounts are sent here automatically right after sign-up, after accepting an invite, and on every login until the wizard is finished.",
+                "If you sign in with an account that already finished onboarding, the page detects that on its own and forwards you to /dashboard.",
+            ]),
+            ("Wizard layout.", [
+                "Dark left rail with the Velvet Elves logo, a numbered step list, and a short privacy note.",
+                "White right panel that holds the active step's content.",
+                "Footer with a Back button on the left and a Continue (or 'Skip for now') button on the right. The final step hides the footer.",
+                "On a phone-sized screen the rail collapses into a thin orange progress strip across the top.",
+            ]),
             ("Step 1 — Welcome.", [
-                "Read the welcome copy and check the progress indicator.",
-                "Click Next.",
+                "Confirm a personal greeting that uses your first name (for example 'Hi Jake, let's set up your workspace').",
+                "Read the role-personalised intro line ('we'll personalise the workspace for you as a {your role}').",
+                "Internal roles (Agent, Transaction Coordinator, Team Lead, Attorney, Admin) see four value cards: Tell us about you, Connect inbox, E-sign with DocuSign, Land in dashboard.",
+                "External roles (Client, FSBO, Vendor) see only two value cards (no inbox or e-sign cards).",
+                "Click 'Let's go' to advance.",
             ]),
-            ("Step 2 — Role & Company.", [
-                "Change the Role dropdown.",
-                "Enter a company name.",
-                "Upload a company logo and confirm the preview appears.",
-                "Also test the Skip button on this step.",
+            ("Step 2 — Your Profile.", [
+                "Confirm Full name (pre-filled from your account) and Phone (optional, auto-formats to (555) 123-4567 as you type) appear.",
+                "Confirm a Role dropdown is present with every supported role.",
+                "Internal roles only: confirm a 'Company / brokerage' field and a 'Brand logo' drag-drop zone are also present.",
+                "Logo rules: PNG, JPEG, WEBP, SVG, or GIF, max 2 MB. Upload a wrong type or an oversize file and confirm a clear error toast appears (no silent failure).",
+                "Upload a valid logo and confirm the preview appears immediately, plus an Upload/Replace button and a Remove button.",
+                "Change the Role dropdown to an external role (e.g. Client). Confirm a hint appears under it ('You'll be updated to this role after this step') and that the email + e-sign steps disappear from the rail. Change it back and confirm those steps come back.",
+                "Click Continue. The button shows 'Saving…' while it persists your name, phone, role, company, and logo.",
             ]),
-            ("Step 3 — Integrations.", [
-                "Confirm the Gmail Connect button is shown.",
-                "Click Connect (if Gmail is configured, confirm the connected state).",
-                "Also test the Skip button.",
+            ("Step 3 — Email Inbox (internal roles only).", [
+                "Confirm two provider cards are visible: Gmail (Google OAuth) and Outlook (Microsoft 365 OAuth).",
+                "Click Gmail. A real Google sign-in popup should open. After approving, the card flips to a green 'Connected' badge.",
+                "Repeat for Outlook with a Microsoft account if you have one.",
+                "If you cancel the popup or the OAuth handshake fails, a red toast appears and the card stays in the 'Connect' state — try again or move on.",
+                "Confirm the bottom safety blurb mentions encrypted-at-rest tokens and that you can disconnect later from Settings.",
+                "Click 'Skip for now' to confirm you can advance without connecting.",
             ]),
-            ("Step 4 — First Transaction.", [
-                "Drag and drop a test PDF or use Browse Files.",
-                "Confirm the uploaded file name appears.",
-                "Also test the Skip button.",
+            ("Step 4 — E-signature (Agent / TC / Team Lead / Attorney only — Admin and external roles skip this step).", [
+                "Confirm a single DocuSign card with a bullet list of perks.",
+                "Click Connect. A real DocuSign OAuth popup opens. Approve to flip the card to Connected.",
+                "Click 'Skip for now' to confirm skipping is allowed.",
             ]),
-            ("Step 5 — All Set.", [
-                "Verify the final success screen.",
-                "Click Go to Dashboard.",
+            ("Final step — All set.", [
+                "Confirm a short confetti burst plays once, plus a 'You're all set, {first name}.' headline.",
+                "Internal roles see TWO action cards. The recommended one is 'Create your first transaction'. The other is 'Go straight to your dashboard'.",
+                "External roles see only the dashboard card (relabelled 'Recommended').",
+                "Click 'Create your first transaction'. Confirm the full New Transaction wizard opens layered on top of the onboarding screen — onboarding only completes once you create a transaction (or close that wizard).",
+                "Separately, click 'Go straight to your dashboard'. Confirm a small success step happens, you land on /dashboard with the URL replaced (back button does NOT re-open onboarding), and the product tour fires automatically on top of the dashboard (see feature 13).",
+            ]),
+            ("Save / resume / refresh behaviour.", [
+                "After clicking Continue on Step 2, refresh the browser. Your name, phone, role, company, and logo should auto-populate (the data was saved to the server).",
+                "However, the wizard always restarts at Step 1 on refresh — there is no 'finish later' bookmark yet.",
+                "Until you click one of the final-step CTAs, every login forwards you back to /onboarding.",
+                "Clicking a previous step in the rail jumps you back; jumping forward is intentionally blocked (you must use Continue so saves run).",
             ]),
         ],
         "expected_result": [
-            "Each step shows the correct fields and text.",
-            "Skip behaves as expected on every step.",
-            "Clicking Go to Dashboard at the end takes you to /dashboard.",
+            "Each step shows the correct fields and validation for the role you selected.",
+            "Internal roles see 4–5 steps; external roles see 3 steps.",
+            "Gmail / Outlook / DocuSign connections are real OAuth — connecting one shows a green 'Connected' badge that persists into Settings → Integrations.",
+            "Logo files outside the allowed types or larger than 2 MB are rejected with a clear toast.",
+            "Either final-step CTA marks onboarding complete on the server and triggers the product tour the next time the dashboard mounts.",
         ],
         "future_ideas": [
-            "Add a 'Save and finish later' option so users can leave and return.",
-            "Show a named progress bar at the top (Welcome → Role → Integrations → Transaction → Done).",
+            "Add a 'Save and finish later' option that remembers the current step (today only the field values are remembered).",
+            "Pre-flight check for popup-blocked browsers and offer a fallback redirect-based OAuth path.",
             "Preview the uploaded logo at the exact size it will appear in the app's sidebar.",
+            "Let a user preview which value cards / steps an external role will see before they switch the dropdown.",
         ],
     },
     {
         "no": 13,
         "category": "First-Time User Experience",
-        "feature": "First-time tutorial overlay",
-        "route": "/dashboard (first visit)",
+        "feature": "Product Tour overlay (rebuilt — role-aware spotlight tour)",
+        "route": "/dashboard (and any other signed-in page once the tour is started)",
         "how_to_test": [
-            ("On the first dashboard visit, an overlay should appear automatically.", [
-                "Click Next through all steps.",
-                "Click Back to verify you can go back.",
-                "Click Skip to verify it closes the overlay.",
+            ("First-time auto-start.", [
+                "Finish the onboarding wizard with a fresh test account, then click 'Go to Dashboard' (or 'Create your first transaction' and complete that flow). The product tour should fire automatically the moment the dashboard loads.",
+                "If you sign in with an existing account that has never seen the tour, the tour should also auto-start the first time the dashboard mounts.",
             ]),
-            ("On the last step, click Get Started.", []),
-            ("To test again: clear the browser storage key 'velvet_elves_tutorial_completed' and reload.", []),
+            ("Manual replay.", [
+                "Open Settings → Help & Tour → 'Replay the guided walkthrough' and click 'Start tour'.",
+                "Confirm the tour restarts immediately for whichever role you are signed in as.",
+            ]),
+            ("Step list — Agent / Transaction Coordinator / Team Lead / Admin.", [
+                "Step 1 — Welcome card (centered, no spotlight).",
+                "Step 2 — Spotlights the four KPI tiles in the sidebar ('Your week, in four numbers').",
+                "Step 3 — Spotlights 'Active Transactions' in the sidebar.",
+                "Step 4 — Spotlights 'My Task Queue' in the sidebar.",
+                "Step 5 — Spotlights 'All Documents' in the sidebar.",
+                "Step 6 — Spotlights the top-bar 'Today's AI Briefing' button.",
+                "Step 7 — Spotlights the top-bar search ('Search ⌘K').",
+                "Step 8 — Spotlights the top-bar notifications bell.",
+                "Step 9 — Spotlights the '+ New Transaction' button.",
+                "Final — Centered finale card; the 'Next' button changes to 'Finish'.",
+            ]),
+            ("Step list — Attorney (5 steps).", [
+                "Welcome → Matter Queue (sidebar transactions, relabelled) → Documents → Today's AI briefing → Finale.",
+            ]),
+            ("Step list — FSBO Customer / Client / Vendor (5 steps).", [
+                "Welcome → My Properties (sidebar transactions, relabelled) → Documents → Ask Velvet Elves AI (sidebar AI item) → Finale.",
+            ]),
+            ("Tour controls.", [
+                "Next / Finish — primary orange button on the right.",
+                "Back — ghost button (disabled on step 1).",
+                "Skip — small X in the top-right of the tooltip card. Clicking the dimmed area outside the spotlight also skips.",
+                "Progress dots and step counter (for example '2/9') appear inside the tooltip. Click any earlier dot to jump back. Forward jumps are blocked.",
+                "Keyboard: → or Enter to advance, ← to go back, Esc to skip. ⌘K / Ctrl+K is intentionally passed through so global search still works mid-tour.",
+            ]),
+            ("Persistence.", [
+                "Only clicking 'Finish' on the final step (or pressing Esc on the final step) marks the tour complete.",
+                "Skipping mid-tour does NOT mark it complete — open Settings → Help & Tour and click Start tour to resume from the beginning.",
+                "Once complete, the tour does not reappear automatically on the next login. You can always replay it from Settings.",
+            ]),
         ],
         "expected_result": [
-            "The overlay closes after Skip or Get Started.",
-            "The overlay does not reappear automatically on the next visit.",
+            "The tour spotlights the right element for each step, with an orange border, a soft halo, and a slow pulse ring.",
+            "Tooltips auto-flip to whichever side has room (top / bottom / left / right) and stay inside the viewport.",
+            "Internal roles see a 9-step tour. Attorney and external roles see 5-step tours with role-specific copy.",
+            "Skipping does not lock the tour; only Finish marks it complete.",
+            "The Settings → Help & Tour 'Start tour' button always replays the role-appropriate tour.",
         ],
         "future_ideas": [
-            "Create role-specific tutorials (different tips for Agents, Team Leads, and Attorneys).",
-            "Add a 'Replay tutorial' button inside the user menu so clients can rewatch it any time.",
+            "Add per-feature mini-tours (e.g. 'tour just the Documents page') reachable from inline 'New here?' badges.",
+            "Show a one-line tip about what to try after Finish (for example 'Try uploading your first contract').",
+            "Add an option to slow down the spotlight animation for users with motion sensitivity.",
+            "Track tour completion analytics (where users skip) so we can prioritise improvements.",
         ],
     },
 
@@ -2386,19 +2457,371 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 29,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — Integrations tab",
-        "route": "/settings (Integrations tab)",
+        "feature": "Settings page — overview and layout (rebuilt)",
+        "route": "/settings",
         "how_to_test": [
-            ("Open /settings and go to the Integrations tab.", []),
-            ("Click Refresh to reload integrations.", []),
-            ("For Gmail, try Connect and then Disconnect.", []),
+            ("Open /settings and confirm the new layout.", [
+                "The page is a single scrolling document — there are no tabs at the top any more.",
+                "A hero panel at the top shows the title 'Settings' with an orange-gradient stripe.",
+                "Below the title, four 'Snapshot' tiles are visible: Inbox, E-Sign, Credits, Templates. Each tile is clickable.",
+                "On screens wide enough, a sticky left-rail nav titled 'Sections' is visible. The active section is highlighted in orange and updates as you scroll.",
+            ]),
+            ("Snapshot tile jump behaviour.", [
+                "Click each Snapshot tile in turn. Each one should scroll-jump the page to the matching section header below.",
+                "The 'Inbox' tile shows a 'connected/total' count (e.g. 1/2) — confirm the number matches what is shown in the Email Integrations card below.",
+                "The 'Credits' and 'Templates' tiles currently show hardcoded numbers (250 of 1,000 and 5 templates) — flag if the values change unexpectedly.",
+            ]),
+            ("Section nav scroll-spy.", [
+                "Scroll the page slowly. As each section enters the viewport, the matching item in the left-rail nav should highlight orange.",
+                "Click any item in the left-rail nav. The page should jump to that section.",
+            ]),
+            ("Per-section deep-test.", [
+                "Each Settings section is covered in its own feature entry below: 29.1 Email Integrations (Milestone 4.1), 29.2 E-Signature, 29.3 Branding, 29.4 AI Configuration, 29.5 Task Templates, 29.6 Help & Tour.",
+            ]),
         ],
         "expected_result": [
-            "The Gmail row updates its connected state after each action.",
+            "Settings is a single scrolling page with a hero, four Snapshot tiles, and seven sections (Company, Email Integrations, E-Signature, Branding, AI Configuration, Task Templates, Help & Tour).",
+            "Snapshot tiles and the left-rail nav both jump cleanly to the correct section.",
+            "Scroll-spy keeps the left-rail nav highlight in sync with whichever section the user is reading.",
+            "Every signed-in role sees the same Settings page (no role-gating on individual sections today).",
         ],
         "future_ideas": [
-            "Add Microsoft / Outlook and Apple iCloud integrations next to Gmail.",
-            "Show a 'Last synced' timestamp and a sync-now button per integration.",
+            "Role-gate Branding, Task Templates, and AI Configuration so non-admin users cannot see them.",
+            "Persist the last-visited section so that returning to /settings scrolls to where the user left off.",
+            "Add a 'What's new in Settings' callout when major sections change between releases.",
+        ],
+    },
+    {
+        "no": "29.1",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Settings — Email Integrations (Milestone 4.1 — required for AI Email Review)",
+        "route": "/settings (Email Integrations section)",
+        "how_to_test": [
+            ("Confirm the section header.", [
+                "Section title reads 'Email Integrations' with a small kicker label like 'Connections'.",
+                "Top-right of the card has a 'Refresh' button — click it and confirm a brief spinner appears while the integrations list reloads.",
+            ]),
+            ("Confirm the provider rows.", [
+                "Two rows are visible by default: Gmail and Outlook. Each shows the brand glyph, provider name, and the connected email address (or help text 'Connect via Google sign-in' / 'Connect via Microsoft 365 sign-in').",
+                "An iCloud row is intentionally hidden right now (feature flag).",
+                "Each connected provider shows a green 'Connected' pill and the date you connected.",
+            ]),
+            ("Connect Gmail.", [
+                "Click 'Connect' on the Gmail row. A real Google sign-in popup opens.",
+                "After approving, the popup closes and the Gmail row flips to a 'Connected' pill plus a Disconnect button. A success toast 'Gmail connected!' appears at the bottom.",
+                "Cancel the popup before approving — the row should stay in the 'Connect' state with no error.",
+            ]),
+            ("Connect Outlook.", [
+                "Repeat the same flow on the Outlook row using a Microsoft 365 account.",
+            ]),
+            ("Disconnect a provider.", [
+                "On a connected row, click 'Disconnect'. A browser confirm dialog warns: 'Disconnecting … will stop syncing inbound mail and AI email automation will not be able to send …'.",
+                "Click Cancel — nothing changes.",
+                "Click OK / Confirm — the row flips back to the unconnected state and a toast confirms the disconnect.",
+            ]),
+            ("Error handling.", [
+                "If the integrations API returns an error (for example during planned downtime), a red banner appears at the top of the card with the error message.",
+                "Click Refresh to retry.",
+            ]),
+        ],
+        "expected_result": [
+            "Connecting Gmail or Outlook through the OAuth popup successfully links the account and shows a green 'Connected' pill.",
+            "Tokens are stored encrypted at rest (no password is ever typed into Velvet Elves).",
+            "Disconnecting always asks for confirmation first.",
+            "At least one provider must be connected for the AI Email Review queue (feature 29.7+) to send replies — flag this if the user is confused.",
+        ],
+        "future_ideas": [
+            "Surface a 'Last synced' timestamp and a manual 'Sync now' button per provider.",
+            "Re-enable the iCloud row once the Apple app-specific-password flow is reviewed by the client.",
+            "Show a small badge on the row when the linked mailbox has unread AI drafts waiting in /ai-emails.",
+            "Detect popup-blocked browsers and offer a redirect-based fallback OAuth path.",
+        ],
+    },
+    {
+        "no": "29.2",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Settings — E-Signature (DocuSign)",
+        "route": "/settings (E-Signature section)",
+        "how_to_test": [
+            ("Confirm the section.", [
+                "A single DocuSign tile is visible with the DocuSign logo, account email if connected, and the date you connected.",
+                "If not connected, a 'Connect' button is visible. If connected, a 'Disconnect' button is visible instead.",
+            ]),
+            ("Connect DocuSign.", [
+                "Click Connect. A 3-step wizard modal opens (Intro → Authorize via popup → Done) — same wizard described in feature 27.14.",
+                "Complete the OAuth and confirm the tile flips to Connected with the DocuSign account name shown.",
+            ]),
+            ("Disconnect DocuSign.", [
+                "Click Disconnect. A browser confirm dialog appears warning that future Send-for-Signature attempts will fail.",
+                "Confirm and the tile reverts to the unconnected state.",
+            ]),
+        ],
+        "expected_result": [
+            "DocuSign connect/disconnect works without leaving the Settings page (the OAuth happens in a popup).",
+            "Once connected, the green pill and account email match what is shown inside the Send for Signature modal in /documents.",
+        ],
+        "future_ideas": [
+            "Add support for additional providers (DotLoop, Authentisign, Adobe Sign) alongside DocuSign in this section.",
+            "Show monthly envelope count remaining on the connected tile so users do not hit DocuSign quota by surprise.",
+        ],
+    },
+    {
+        "no": "29.3",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Settings — Branding (visual-only — please do NOT rely on this yet)",
+        "route": "/settings (Branding section)",
+        "how_to_test": [
+            ("Inspect the Branding card.", [
+                "A logo upload tile (dashed placeholder + Upload logo button) is visible.",
+                "A Primary Color field defaults to the orange brand colour (#E26812) and shows a swatch preview.",
+                "A Display Name field defaults to 'Velvet Elves AI'.",
+                "A 'Save branding' button is visible at the bottom of the card.",
+            ]),
+            ("Try the controls.", [
+                "Click Upload logo, type a different display name, and try changing the colour. Click Save branding.",
+                "Refresh the page and confirm the changes did NOT persist — every field resets to the defaults.",
+            ]),
+        ],
+        "expected_result": [
+            "The Branding card is currently visual-only. No fields persist. This is a planned area not yet wired to the backend.",
+            "Please flag clearly if any client expects this section to be live — we will move it earlier in the roadmap.",
+        ],
+        "future_ideas": [
+            "Wire all three Branding fields to the tenant settings backend.",
+            "Add live preview cards showing the branded sidebar and a sample email so the user sees the changes before saving.",
+            "Add a tenant-wide 'Reset to Velvet Elves defaults' button.",
+        ],
+    },
+    {
+        "no": "29.4",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Settings — AI Configuration (visual-only toggles)",
+        "route": "/settings (AI Configuration section)",
+        "how_to_test": [
+            ("Inspect the AI Configuration card.", [
+                "A hero strip reads 'AI Credits — 250 of 1,000 remaining' with a 25% progress bar and an Upgrade plan button.",
+                "Three toggle rows are visible: 'Auto-parse uploaded documents' (on by default), 'Task recommendations' (on by default), 'Smart email drafts' (off by default).",
+            ]),
+            ("Try the controls.", [
+                "Flip each toggle. Confirm the toggle visually flips.",
+                "Refresh the page. Confirm the toggle resets to its default — settings are not yet persisted.",
+                "Click Upgrade plan. Nothing happens — this is a placeholder button.",
+            ]),
+        ],
+        "expected_result": [
+            "Toggles flip visually but do not persist on refresh.",
+            "AI Credits numbers are hardcoded and do NOT reflect real usage — please flag if a stakeholder expects them to.",
+        ],
+        "future_ideas": [
+            "Wire each toggle to the tenant AI settings (tone, disclaimer, escalation hours, auto-send threshold) so admins can actually configure AI behaviour.",
+            "Replace the hardcoded credit count with a real meter pulled from the AI usage backend.",
+            "Add a 'Smart email drafts' explainer link that opens a preview of what the AI Email Review queue will look like.",
+        ],
+    },
+    {
+        "no": "29.5",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Settings — Task Templates (visual-only)",
+        "route": "/settings (Task Templates section)",
+        "how_to_test": [
+            ("Inspect the card.", [
+                "A list of five hardcoded templates is shown: Buyer Standard (12 tasks), Seller Standard (14), Dual Agency (18), Lease (8), Commercial (22).",
+                "Each row has an 'Edit' button. The card header has an 'Import' button.",
+            ]),
+            ("Try the buttons.", [
+                "Click Edit on any row — nothing happens.",
+                "Click Import — nothing happens.",
+            ]),
+            ("Compare with the real Task Templates admin page.", [
+                "The fully-wired Task Templates page lives at /admin/task-templates (covered in features 30 and 31). The version on this Settings card is a quick visual placeholder only.",
+            ]),
+        ],
+        "expected_result": [
+            "The Task Templates section on the Settings page is a placeholder — neither Edit nor Import is wired.",
+            "Use /admin/task-templates for real template management.",
+        ],
+        "future_ideas": [
+            "Replace this placeholder with a live mini-list pulled from the Task Templates backend.",
+            "Or remove this section from Settings and link directly to /admin/task-templates instead.",
+        ],
+    },
+    {
+        "no": "29.6",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Settings — Help & Tour (replay the product tour)",
+        "route": "/settings (Help & Tour section)",
+        "how_to_test": [
+            ("Confirm the card.", [
+                "A 'Replay the guided walkthrough' card is visible with a brief description and a 'Start tour' button.",
+            ]),
+            ("Click Start tour.", [
+                "The page should reset the tour-completed flag for your user and immediately launch the role-aware product tour (see feature 13).",
+                "Confirm the tour fires whether or not you have already finished it once before.",
+            ]),
+        ],
+        "expected_result": [
+            "Start tour always launches the product tour for the role you are signed in as (9-step internal, 5-step Attorney / FSBO).",
+            "This is the only fully-wired control in the AI Configuration / Branding / Templates / Help cluster — please test it for every role.",
+        ],
+        "future_ideas": [
+            "Add a 'What's new in this release' card next to Replay tour so users can re-run a tour focused on recent changes only.",
+            "Add a per-feature mini-tour launcher (e.g. 'Replay Documents tour only').",
+            "Show a small completion timestamp ('Last completed Apr 28, 2026') so users know whether they've already seen the latest version.",
+        ],
+    },
+    {
+        "no": "29.7",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "AI Email Review — overview, list, and filter tabs (Milestone 4.2)",
+        "route": "/ai-emails",
+        "how_to_test": [
+            ("Reach the page.", [
+                "Open the sidebar → Intelligence → 'AI Email Review' (the entry only shows for Agent / TC / Team Lead / Admin — FSBO and Attorney do not see it).",
+                "You can also click the 'N AI drafts awaiting review' callout in the top-bar Notifications panel.",
+                "Confirm the URL is /ai-emails. The legacy deep-link /ai-emails/:logId currently still loads the page but does NOT pre-select that draft (planned).",
+            ]),
+            ("Confirm the page header.", [
+                "Breadcrumb 'Intelligence > AI Email Review'.",
+                "Title 'AI Email Review' with an orange count pill (e.g. '3 drafts' or '1 draft').",
+                "Right side: a muted 'Updated Xm ago' timestamp on wide screens, and a 'Refresh' button (spinner while fetching).",
+            ]),
+            ("Confirm the filter tabs.", [
+                "Five tabs in this order: All, Needs Review, Ready to Send, Low Confidence, Escalated.",
+                "Each tab has a numeric count badge.",
+                "'Needs Review' and 'Escalated' badges turn red when their count is greater than zero.",
+                "Click each tab in turn and confirm the list narrows to the matching subset.",
+            ]),
+            ("Auto-refresh and bell sync.", [
+                "Leave the page open for 60+ seconds. The list silently refetches every minute.",
+                "If a new draft lands while you have the page open, it appears in the list without a manual refresh.",
+                "Open the top-bar bell on any page — the unread count should match the All tab count here.",
+            ]),
+            ("Empty / loading / error states.", [
+                "When the list is loading, four pulsing grey skeleton rows are shown.",
+                "When there are no drafts at all, the right pane reads 'Inbox is clear — When the AI prepares a reply that needs your sign-off, it will land here for review before sending.'",
+                "When the current filter has no matches but other tabs do, the right pane reads 'Nothing in this view — Try a different filter, or wait for the next AI-prepared reply to land here.'",
+                "If the list fails to load, a centered 'Couldn't load drafts.' card is shown with a 'Try again' link.",
+            ]),
+        ],
+        "expected_result": [
+            "Sidebar navigation, breadcrumb, count pill, filter tabs, and refresh button all render correctly.",
+            "The list only contains drafts your role is allowed to act on (server-enforced).",
+            "Auto-refresh runs every 60 seconds; immediate invalidation happens after every Approve / Edit / Discard / Regenerate action.",
+            "Empty, loading, and error states all give the user a clear way forward.",
+        ],
+        "future_ideas": [
+            "Add an inline search box and sort control inside the list pane.",
+            "Add a per-row checkbox + bulk Approve / Discard so a reviewer can clear a backlog quickly.",
+            "Wire the deep-link /ai-emails/:logId so notifications open the exact draft in question.",
+            "Stream live updates over websocket so the list does not have to poll every minute.",
+        ],
+    },
+    {
+        "no": "29.8",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "AI Email Review — list pane row anatomy",
+        "route": "/ai-emails (left list pane)",
+        "how_to_test": [
+            ("Inspect any draft row.", [
+                "Status dot at the start: green for high-confidence drafts, amber for medium, red for low or escalated, grey when the AI could not score itself.",
+                "Subject line, bolded when the row is selected, falls back to '(no subject)' if missing.",
+                "Recipient email(s) shown beneath the subject in monospaced text.",
+                "Pill row beneath the recipient: a 'kind' label (Factual question / Document request / Vendor reply / Uncertain — review carefully / Other), a confidence percent, and an 'Escalated' red pill if past the escalation deadline.",
+                "Right side: relative timestamp (for example '12m ago') and a chevron that becomes visible on hover or when the row is selected.",
+            ]),
+            ("Click a row.", [
+                "The row gains an orange left edge bar and the detail pane on the right loads (see 29.9).",
+            ]),
+            ("Confirm there is no list-pane search / sort / bulk-action UI yet.", [
+                "Filter tabs at the top of the page are the ONLY filtering surface. Flag if the client expects per-row checkboxes or a search field.",
+            ]),
+        ],
+        "expected_result": [
+            "Every row exposes confidence, kind, recipient, subject, escalation status, and timestamp at a glance.",
+            "Selection persists across the 60-second auto-refetch as long as the draft is still in the filtered slice.",
+        ],
+        "future_ideas": [
+            "Expose the underlying transaction address on each row so a reviewer can scan deals without opening each draft.",
+            "Show a small 'Has attachments' icon (planned alongside attachment support).",
+            "Offer a compact / comfortable density toggle for high-volume reviewers.",
+        ],
+    },
+    {
+        "no": "29.9",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "AI Email Review — detail pane (AI Verified From + Original Inbound + flagged assumptions)",
+        "route": "/ai-emails (right detail pane)",
+        "how_to_test": [
+            ("Open any draft and inspect the detail pane.", [
+                "Hero header: pill row showing AI Draft badge (sparkles icon), Kind pill, a Confidence meter (label + tiny progress bar + percent), and an Escalated pill if past the deadline. Relative timestamp on the right.",
+                "Subject line in serif type below the pill row.",
+                "'To:' line (always shown, monospaced). 'Cc:' line only appears if the AI has CC'd anyone — by default the file owner agent is auto-CC'd so they keep a copy in Sent.",
+            ]),
+            ("Body grid — left.", [
+                "AI-drafted reply rendered as plain text.",
+                "Phrases the AI hedged on are wrapped in amber highlights so your eye lands on them first.",
+                "If any flagged assumptions exist, an amber-bordered 'Flagged assumptions' panel lists each one explicitly below the body.",
+            ]),
+            ("Right rail — AI Verified From.", [
+                "An orange-eyebrowed card lists every key/value the AI cited (address, closing_date, status, document names, etc.).",
+                "If the rail is empty, an orange dashed warning card reads 'No source data was cited for this draft. Treat the body as a generic response and verify each fact manually.'",
+            ]),
+            ("Right rail — Original Inbound.", [
+                "A separate small card shows the inbound sender, timestamp, subject, and body that triggered this AI draft.",
+                "While loading, a small skeleton renders. If the original cannot be loaded, the card reads 'Couldn't load the original inbound message.'",
+            ]),
+        ],
+        "expected_result": [
+            "Confidence percent, kind, and escalation pill in the hero header always match what the list pane shows.",
+            "Highlighted assumption phrases inside the body match the explicit list under 'Flagged assumptions'.",
+            "AI Verified From only contains keys the AI actually cited — never guess values.",
+            "Original Inbound is the email that triggered this reply, NOT the entire thread (full-thread view is a future improvement).",
+        ],
+        "future_ideas": [
+            "Show the entire thread, not just the immediate inbound, so a reviewer can see prior context.",
+            "Make each AI Verified From row clickable so it deep-links to the source field on the transaction record.",
+            "Add an inline 'Flag this fact as wrong' button that pushes a correction back into the AI's training data.",
+        ],
+    },
+    {
+        "no": "29.10",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "AI Email Review — actions (Approve & Send, Edit & Send, Regenerate, Discard)",
+        "route": "/ai-emails (action footer on the detail pane)",
+        "how_to_test": [
+            ("View-mode actions.", [
+                "Approve & Send (orange primary) — sends the AI draft as-is. A success toast 'Sent — AI reply approved and delivered.' appears.",
+                "Edit (ghost) — switches the body card into editable mode (see below).",
+                "Regenerate (ghost) — discards this draft and asks the AI to redraft from the original inbound. Toast 'Regenerated — A fresh draft is ready for review.'",
+                "Discard (ghost, red) — opens an AlertDialog: 'Discard this AI draft? The draft will be removed from your review queue. The original inbound message stays in your communication log.' Click Cancel or Discard.",
+            ]),
+            ("Edit-mode actions.", [
+                "Edit makes the Subject and Body editable, with a live character counter beneath the body.",
+                "Send Edit (orange primary) — sends your edited version. Editing also clears the AI's flagged assumptions on the server. Toast 'Sent — Edited reply delivered.'",
+                "Cancel — discards local edits and returns to view mode.",
+            ]),
+            ("Failure cases — confirm each action surfaces a clear error.", [
+                "If you have not connected an email provider (Settings → Email Integrations), Approve & Send fails with a red toast 'Send failed — No active gmail integration.'",
+                "If the API errors for any other reason, the toast shows the underlying error message verbatim — please copy it into your feedback so the team can debug.",
+            ]),
+            ("Confirm the actions that are NOT present yet.", [
+                "There is no Decline / Ignore button (Discard is the only 'no' action today).",
+                "There is no Reassign or 'Mark Reviewed' button.",
+                "There is no attachment chip area or attachment uploader.",
+                "There is no scheduled-send option or send-from identity picker (sends always come from the file owner's connected mailbox).",
+            ]),
+        ],
+        "expected_result": [
+            "Approve & Send, Edit & Send, Regenerate, and Discard all complete in the foreground with a toast and immediate list invalidation.",
+            "Editing a draft clears its flagged assumptions on the server because the human reviewer just rewrote the content.",
+            "Discard preserves the original inbound message in the communication log — only the draft disappears.",
+            "All four actions are server-role-enforced; an unauthorized user gets an error toast on click rather than a hidden button.",
+        ],
+        "future_ideas": [
+            "Add a Reassign button so a Team Lead can hand a draft to a colleague without opening it.",
+            "Add a Mark Reviewed (no-send) status for drafts the human read but does not want to send.",
+            "Add support for attachments when replying so contracts and addenda can ride out with the AI reply.",
+            "Add a per-tenant 'Auto-send when confidence is over X%' threshold (backend already supports it; no UI yet).",
         ],
     },
 
