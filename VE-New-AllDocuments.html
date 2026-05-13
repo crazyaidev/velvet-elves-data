@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>All Documents — Velvet Elves Transaction OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ── Reset ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+button { font-family: inherit; cursor: pointer; }
+html, body { height: 100%; }
+
+/* ── Brand Tokens ──────────────────────────────────────────────────── */
+:root {
+  --orange:      #EE7623;
+  --orange-soft: #FEF0E4;
+  --orange-ink:  #A04C0A;
+  --navy:        #1B2B3C;
+  --navy-soft:   #E4E9EE;
+  --ink:         #333333;
+  --ink2:        #4A4A4A;
+  --muted:       #6B7280;
+  --mute2:       #9CA3AF;
+  --bg:          #F5F7FA;
+  --surface:     #FFFFFF;
+  --surface2:    #EFF1F5;
+  --champagne:   #FFEEC2;
+  --line:        #E2E5EA;
+  --line2:       #ECEEF2;
+  --green:       #2F7D5B;
+  --green-soft:  #E3F1EA;
+  --red:         #B53A2B;
+  --red-soft:    #FBE8E4;
+  --amber:       #B8860B;
+  --amber-soft:  #FBF1D9;
+
+  --font-ui:   'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+
+  --radius:    6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+/* ── Base ──────────────────────────────────────────────────────────── */
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Layout ────────────────────────────────────────────────────────── */
+.app {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── Sidebar ───────────────────────────────────────────────────────── */
+.sidebar {
+  width: 232px;
+  background: var(--surface);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  transition: width 0.22s ease;
+  overflow: hidden;
+}
+.sidebar.collapsed { width: 64px; }
+
+.sidebar-logo {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line2);
+  flex-shrink: 0;
+}
+.sidebar.collapsed .sidebar-logo { justify-content: center; padding: 18px 0; }
+
+.monogram {
+  width: 28px; height: 28px;
+  border-radius: var(--radius);
+  background: var(--orange);
+  color: #fff;
+  display: grid; place-items: center;
+  font-weight: 700; font-size: 13px;
+  letter-spacing: -0.5px;
+  flex-shrink: 0;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.18);
+}
+.brand-name { font-size: 13px; font-weight: 700; color: var(--orange); letter-spacing: 0.2px; }
+.brand-sub  { font-size: 9px;  font-weight: 600; color: var(--muted);  letter-spacing: 1.6px; }
+
+.sidebar-wordmark { margin-left: 10px; }
+.sidebar.collapsed .sidebar-wordmark,
+.sidebar.collapsed .sidebar-label,
+.sidebar.collapsed .sidebar-count,
+.sidebar.collapsed .section-title { display: none; }
+
+.collapse-btn {
+  width: 26px; height: 26px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid; place-items: center;
+  color: var(--muted);
+}
+.expand-btn {
+  margin: 12px auto;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: none; place-items: center;
+  color: var(--muted);
+  transform: rotate(180deg);
+}
+.sidebar.collapsed .expand-btn  { display: grid; }
+.sidebar.collapsed .collapse-btn { display: none; }
+
+/* KPI tiles */
+.kpi-grid {
+  padding: 12px 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.sidebar.collapsed .kpi-grid { display: none; }
+
+.kpi-tile {
+  padding: 10px;
+  border-radius: var(--radius-md);
+  background: var(--surface2);
+}
+.kpi-value {
+  font-size: 18px; font-weight: 700;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.kpi-label { font-size: 10px; color: var(--muted); font-weight: 500; margin-top: 1px; }
+
+/* Nav sections */
+.sidebar-nav { flex: 1; padding: 6px 0; overflow-y: auto; }
+
+.section-title {
+  padding: 0 14px 8px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.2px; color: var(--mute2);
+  text-transform: uppercase;
+}
+.nav-section { margin-bottom: 14px; }
+
+.nav-item {
+  margin: 0 8px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  font-size: 13px; font-weight: 500;
+  color: var(--ink2);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+.nav-item:hover { background: var(--surface2); }
+.nav-item.active {
+  background: var(--orange-soft);
+  color: var(--orange-ink);
+  font-weight: 600;
+}
+.sidebar.collapsed .nav-item { justify-content: center; padding: 9px 0; }
+
+.nav-item-inner { display: flex; align-items: center; gap: 10px; }
+.nav-badge {
+  font-size: 11px; font-weight: 700;
+  color: var(--orange-ink);
+  background: var(--surface);
+  padding: 2px 7px; border-radius: 999px;
+}
+
+/* User footer */
+.sidebar-user {
+  padding: 14px;
+  border-top: 1px solid var(--line2);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.sidebar.collapsed .sidebar-user { justify-content: center; }
+.sidebar.collapsed .sidebar-user-info { display: none; }
+
+.avatar {
+  width: 32px; height: 32px;
+  border-radius: 999px;
+  background: var(--navy); color: #fff;
+  display: grid; place-items: center;
+  font-size: 12px; font-weight: 700;
+  flex-shrink: 0;
+}
+.user-name  { font-size: 13px; font-weight: 600; color: var(--ink); }
+.user-loc   { font-size: 11px; color: var(--muted); }
+
+/* ── Main area ─────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── TopBar ────────────────────────────────────────────────────────── */
+.topbar {
+  height: 60px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  flex-shrink: 0;
+}
+
+.search-box {
+  width: 360px; height: 36px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--surface2);
+  display: flex; align-items: center; gap: 8px;
+  color: var(--muted);
+  cursor: text;
+}
+.search-hint { font-size: 12.5px; color: var(--mute2); flex: 1; }
+.search-kbd  {
+  font-size: 10px; font-weight: 600; color: var(--muted);
+  font-family: var(--font-mono);
+  padding: 2px 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.notif-btn {
+  width: 34px; height: 34px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  display: grid; place-items: center;
+  color: var(--muted);
+  position: relative;
+}
+.notif-dot {
+  position: absolute; top: 6px; right: 7px;
+  width: 7px; height: 7px;
+  border-radius: 999px;
+  background: var(--red);
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  cursor: pointer;
+  white-space: nowrap;
+  border: none;
+  min-height: 48px;
+  padding: 8px 14px;
+  font-size: 13px;
+  transition: opacity 0.12s, filter 0.12s;
+}
+.btn:hover { filter: brightness(0.95); }
+.btn-sm { min-height: 36px; padding: 6px 12px; font-size: 12px; }
+
+.btn-primary { background: var(--orange); color: #fff; border: 1px solid var(--orange); }
+.btn-navy    { background: var(--navy);   color: #fff; border: 1px solid var(--navy);   }
+.btn-ghost   { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+.btn-soft    { background: var(--surface2); color: var(--ink); border: 1px solid transparent; }
+
+/* ── Content area ──────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  padding: 24px 36px 48px;
+  overflow-y: auto;
+}
+
+/* ── Page header ───────────────────────────────────────────────────── */
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--muted); margin-bottom: 6px;
+}
+.breadcrumb-sep { opacity: 0.5; }
+.breadcrumb-current { color: var(--ink2); font-weight: 500; }
+
+.page-header {
+  display: flex; align-items: flex-end;
+  justify-content: space-between; gap: 16px;
+  flex-wrap: wrap; margin-bottom: 18px;
+}
+.page-title {
+  font-size: 28px; font-weight: 700;
+  letter-spacing: -0.6px; color: var(--ink);
+  line-height: 36px;
+}
+.page-meta {
+  font-size: 13px; color: var(--muted); margin-top: 4px;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.page-meta strong { color: var(--ink); font-weight: 600; }
+.header-actions { display: flex; gap: 8px; }
+
+/* ── AI Hero ───────────────────────────────────────────────────────── */
+.ai-hero {
+  background: var(--champagne);
+  border: 1px solid #F2D9BF;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.ai-hero-glow {
+  position: absolute; top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(238,118,35,0.15), transparent 70%);
+  pointer-events: none;
+}
+.ai-eyebrow {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 1px; color: var(--orange-ink);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.ai-hero-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 28px; align-items: center;
+}
+.ai-hero-headline {
+  font-size: 24px; font-weight: 600; color: var(--ink);
+  line-height: 1.3; letter-spacing: -0.3px; margin-bottom: 10px;
+}
+.ai-hero-headline .blocked { color: var(--red); }
+.ai-hero-body {
+  font-size: 14px; color: var(--ink2);
+  line-height: 1.55; margin-bottom: 18px; max-width: 540px;
+}
+.ai-hero-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.ai-hero-cta {
+  padding: 12px 18px; border-radius: 10px;
+  background: var(--orange); color: #fff; border: none;
+  font-weight: 600; font-size: 14px; font-family: var(--font-ui);
+  cursor: pointer; display: inline-flex; align-items: center; gap: 9px;
+  min-height: 48px;
+  box-shadow: 0 6px 18px rgba(238,118,35,0.32);
+}
+.ai-hero-note { font-size: 11px; color: var(--muted); margin-left: 8px; }
+
+/* Briefing card */
+.briefing-card {
+  background: var(--surface);
+  border-radius: 12px;
+  border: 1px solid #F2D9BF;
+  padding: 16px;
+}
+.briefing-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 12px;
+}
+.briefing-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.6px; color: var(--muted); text-transform: uppercase;
+}
+.briefing-date { font-size: 10px; color: var(--muted); font-family: var(--font-mono); }
+.briefing-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 8px 2px;
+  border-bottom: 1px solid var(--line2);
+}
+.briefing-row:last-child { border-bottom: none; }
+.briefing-row-left { display: flex; align-items: center; gap: 10px; }
+.briefing-dot {
+  width: 8px; height: 8px;
+  border-radius: 999px; flex-shrink: 0;
+}
+.briefing-name  { font-size: 13px; color: var(--ink); font-weight: 500; }
+.briefing-note  { font-size: 11px; color: var(--muted); }
+.briefing-count {
+  font-size: 14px; font-weight: 700; color: var(--ink);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.briefing-footer {
+  margin-top: 12px; padding: 10px;
+  background: var(--surface2);
+  border-radius: 8px;
+  font-size: 12px; color: var(--ink2); line-height: 1.5;
+}
+
+/* ── Toolbar ───────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 10px 4px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 12px;
+}
+.toolbar-tabs { display: flex; gap: 4px; }
+
+.tab {
+  padding: 8px 14px; border: none;
+  background: transparent;
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  font-family: var(--font-ui); font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.12s;
+  min-height: 44px;
+}
+.tab.active {
+  font-weight: 600; color: var(--ink);
+  border-bottom-color: var(--orange);
+}
+.tab-badge {
+  padding: 1px 7px; border-radius: 999px; font-size: 10px;
+  background: var(--surface2); color: var(--muted); font-weight: 700;
+  font-family: var(--font-mono);
+}
+.tab.active .tab-badge {
+  background: var(--orange-soft); color: var(--orange-ink);
+}
+.tab-hot { color: var(--orange-ink); display: inline-flex; }
+
+.sort-btn {
+  padding: 6px 10px; border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface); font-size: 12px; color: var(--ink);
+  font-family: var(--font-ui); cursor: pointer;
+  display: inline-flex; gap: 6px; align-items: center;
+  min-height: 36px;
+}
+.sort-spark { color: var(--orange-ink); }
+
+/* ── Queue rows ────────────────────────────────────────────────────── */
+.queue { display: flex; flex-direction: column; gap: 10px; }
+
+.queue-row {
+  width: 100%; text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: grid;
+  grid-template-columns: 32px 1fr 200px 220px;
+  align-items: center; gap: 18;
+  cursor: pointer;
+  font-family: var(--font-ui);
+  min-height: 48px;
+  transition: border-color 0.12s;
+  gap: 18px;
+}
+.queue-row:hover { border-color: var(--orange); }
+
+.row-index {
+  font-size: 11px; font-weight: 700; color: var(--mute2);
+  font-family: var(--font-mono); text-align: center;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.row-doc-name {
+  font-size: 14.5px; font-weight: 600; color: var(--ink); letter-spacing: -0.1px;
+}
+.row-doc-meta {
+  font-size: 12.5px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 4px;
+}
+.row-txn   { color: var(--ink2); font-weight: 500; }
+.row-past  { color: var(--red); }
+
+.row-why {
+  font-size: 12px; color: var(--ink2); line-height: 1.45;
+  padding-left: 14px; padding-right: 8px;
+  border-left: 1px solid var(--line2);
+}
+.row-why-label {
+  color: var(--orange-ink); font-weight: 600; font-size: 11px;
+  letter-spacing: 0.5px; text-transform: uppercase;
+  display: flex; gap: 5px; align-items: center; margin-bottom: 3px;
+}
+
+.row-actions { display: flex; flex-direction: column; gap: 6px; }
+.row-primary-btn {
+  width: 100%; padding: 10px 12px; border-radius: 8px;
+  background: var(--navy); color: #fff; border: none;
+  font-family: var(--font-ui); font-weight: 600; font-size: 12.5px;
+  cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; gap: 7px; min-height: 48px;
+}
+.row-alts { display: flex; gap: 4px; justify-content: center; }
+.row-alt-btn {
+  flex: 1; padding: 6px 0; border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface); color: var(--muted);
+  cursor: pointer; display: inline-flex; align-items: center;
+  justify-content: center; gap: 4px; font-family: var(--font-ui);
+  font-size: 11px; min-height: 48px;
+}
+
+/* Pills */
+.sev-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px 8px; border-radius: 999px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.3px; text-transform: uppercase;
+}
+.sev-dot { width: 6px; height: 6px; border-radius: 999px; }
+
+.side-pill {
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 0.4px; text-transform: uppercase;
+}
+
+.doc-code {
+  font-size: 10.5px; color: var(--muted); font-family: var(--font-mono);
+}
+
+/* ── Recently Done ─────────────────────────────────────────────────── */
+.recently-done { margin-top: 28px; }
+.recently-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+}
+.recently-check {
+  width: 22px; height: 22px; border-radius: 999px;
+  background: var(--green-soft); color: var(--green);
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.recently-title  { font-size: 13px; font-weight: 600; color: var(--ink); }
+.recently-count  { font-size: 12px; color: var(--muted); }
+.recently-divider { flex: 1; height: 1px; background: var(--line2); }
+
+.recently-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.recently-card {
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+  font-size: 12px;
+}
+.recently-doc  { font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.recently-meta { color: var(--muted); font-size: 11px; }
+
+/* ── Sparkbar ──────────────────────────────────────────────────────── */
+.spark-track {
+  height: 4px; background: var(--line2);
+  border-radius: 999px; overflow: hidden;
+  margin-top: 4px;
+}
+.spark-fill { height: 100%; border-radius: 999px; }
+
+/* ── Modal ─────────────────────────────────────────────────────────── */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(20,18,15,0.42);
+  display: none; place-items: center;
+  z-index: 50; padding: 24px;
+  backdrop-filter: blur(2px);
+}
+.modal-backdrop.open { display: grid; }
+
+.modal {
+  width: min(560px, 100%);
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line);
+  box-shadow: 0 30px 80px rgba(20,18,15,0.25);
+  overflow: hidden;
+  font-family: var(--font-ui);
+}
+
+.modal-header {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 16px;
+}
+.modal-doc-name { font-size: 19px; font-weight: 600; color: var(--ink); letter-spacing: -0.2px; }
+.modal-txn-full { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.modal-close {
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface); display: grid; place-items: center;
+  cursor: pointer; color: var(--muted); flex-shrink: 0;
+}
+
+.modal-ai {
+  padding: 16px 22px;
+  background: var(--champagne);
+  border-bottom: 1px solid var(--line);
+}
+.modal-ai-label {
+  display: flex; align-items: center; gap: 7px;
+  color: var(--orange-ink); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.6px; text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.modal-ai-reason { font-size: 14px; color: var(--ink); line-height: 1.55; margin-bottom: 8px; }
+.modal-ai-note   { font-size: 13px; color: var(--ink2); line-height: 1.5; font-style: italic; }
+
+.modal-actions {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-actions-label {
+  font-size: 11px; color: var(--muted); letter-spacing: 0.5px;
+  text-transform: uppercase; font-weight: 600; margin-bottom: 10px;
+}
+.modal-primary-btn {
+  width: 100%; padding: 14px 16px; border-radius: 10px;
+  background: var(--orange); color: #fff; border: none;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; font-family: var(--font-ui); min-height: 48px;
+}
+.modal-primary-inner { display: flex; align-items: center; gap: 10px; }
+.modal-primary-name  { font-size: 14px; font-weight: 600; }
+.modal-primary-party { font-size: 12px; opacity: 0.85; }
+
+.modal-alt-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.modal-alt-btn {
+  padding: 7px 11px; border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink2);
+  font-size: 12px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 6px;
+  cursor: pointer; font-family: var(--font-ui); min-height: 48px;
+}
+
+.modal-footer {
+  padding: 14px 22px;
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+  font-size: 12px;
+}
+.modal-foot-label { color: var(--muted); margin-bottom: 4px; }
+.modal-foot-value { color: var(--ink); font-weight: 600; }
+.modal-foot-sub   { color: var(--muted); font-size: 11px; }
+.modal-foot-mono  { font-family: var(--font-mono); font-variant-numeric: tabular-nums lining-nums; }
+
+/* ── SVG icons (inline) ────────────────────────────────────────────── */
+svg { display: inline-block; vertical-align: middle; }
+
+/* ── Severity left-border helpers ─────────────────────────────────── */
+.sev-critical { border-left: 4px solid var(--red)   !important; }
+.sev-high     { border-left: 4px solid var(--orange) !important; }
+.sev-medium   { border-left: 4px solid var(--amber)  !important; }
+.sev-low      { border-left: 4px solid var(--muted)  !important; }
+
+/* ── Scroll ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══ SIDEBAR ══════════════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+
+    <div class="sidebar-logo">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="monogram">VE</div>
+        <div class="sidebar-wordmark">
+          <div class="brand-name">Velvet Elves</div>
+          <div class="brand-sub">TRANSACTION OS</div>
+        </div>
+      </div>
+      <button type="button" class="collapse-btn" onclick="toggleSidebar()" aria-label="Collapse sidebar">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+
+    <button type="button" class="expand-btn" onclick="toggleSidebar()" aria-label="Expand sidebar">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <div class="kpi-grid">
+      <div class="kpi-tile"><div class="kpi-value" style="color:var(--red)">1</div><div class="kpi-label">Overdue</div></div>
+      <div class="kpi-tile"><div class="kpi-value" style="color:var(--ink)">3</div><div class="kpi-label">This week</div></div>
+      <div class="kpi-tile"><div class="kpi-value" style="color:var(--navy)">11</div><div class="kpi-label">Active deals</div></div>
+      <div class="kpi-tile"><div class="kpi-value" style="color:var(--green)">$2.8M</div><div class="kpi-label">Pipeline</div></div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="section-title">Deals</div>
+        <div class="nav-item"><div class="nav-item-inner"><?= icon('home',16) ?><span class="sidebar-label">Dashboard</span></div></div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <span class="sidebar-label">Active Deals</span></div><span class="sidebar-count nav-badge">11</span></div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="sidebar-label">Pending</span></div></div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="sidebar-label">Closed</span></div></div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="sidebar-label">All Transactions</span></div></div>
+      </div>
+
+      <div class="nav-section">
+        <div class="section-title">Workflow</div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+          <span class="sidebar-label">My Task Queue</span></div></div>
+        <div class="nav-item active"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A04C0A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="sidebar-label">All Documents</span></div></div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="sidebar-label">Closing Calendar</span></div></div>
+      </div>
+
+      <div class="nav-section">
+        <div class="section-title">Intelligence</div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.3L19 9l-5.4 1.7L12 16l-1.6-5.3L5 9l5.4-1.7z"/></svg>
+          <span class="sidebar-label">AI Suggestions</span></div></div>
+        <div class="nav-item"><div class="nav-item-inner">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          <span class="sidebar-label">Analytics</span></div></div>
+      </div>
+    </nav>
+
+    <div class="sidebar-user">
+      <div class="avatar">JS</div>
+      <div class="sidebar-user-info">
+        <div class="user-name">Jake Stiles</div>
+        <div class="user-loc">Indianapolis · IN</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ══ MAIN ══════════════════════════════════════════════════════════ -->
+  <div class="main">
+
+    <!-- TopBar -->
+    <div class="topbar">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span class="search-hint">Search documents, addresses, parties…</span>
+        <span class="search-kbd">⌘K</span>
+      </div>
+      <div class="topbar-right">
+        <button type="button" class="notif-btn" aria-label="Notifications">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <button type="button" class="btn btn-primary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Transaction
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Page header -->
+      <div class="breadcrumb">
+        <span>Workflow</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current">All Documents</span>
+      </div>
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">All Documents</h1>
+          <div class="page-meta">
+            <strong>6</strong> need attention ·
+            102 of 115 complete ·
+            updated just now
+          </div>
+        </div>
+        <div class="header-actions">
+          <button type="button" class="btn btn-ghost btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filter
+          </button>
+          <button type="button" class="btn btn-ghost btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send for sig
+          </button>
+          <button type="button" class="btn btn-primary btn-sm">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload
+          </button>
+        </div>
+      </div>
+
+      <!-- AI Hero -->
+      <div class="ai-hero">
+        <div class="ai-hero-glow"></div>
+        <div class="ai-eyebrow">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.3L19 9l-5.4 1.7L12 16l-1.6-5.3L5 9l5.4-1.7z"/><path d="M19 14l.7 2.4L22 17l-2.3.6L19 20l-.7-2.4L16 17l2.3-.6z"/></svg>
+          Today's priority · 7:42 am
+        </div>
+        <div class="ai-hero-grid">
+          <div>
+            <div class="ai-hero-headline">
+              Closing on <span class="blocked">2310 Fox Dr</span> is blocked.<br>
+              One action gets it moving today.
+            </div>
+            <div class="ai-hero-body">
+              Closing date passed. Title cannot clear without it. Seller responded to last 2 emails within 4h. SMS likely faster.
+            </div>
+            <div class="ai-hero-actions">
+              <button type="button" class="ai-hero-cta" onclick="openModal('q1')">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                Request from seller
+              </button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="openModal('q1')">Show alternatives</button>
+              <span class="ai-hero-note">5 other docs flagged · briefing →</span>
+            </div>
+          </div>
+          <div class="briefing-card">
+            <div class="briefing-header">
+              <div class="briefing-label">Today's briefing</div>
+              <div class="briefing-date">May 7</div>
+            </div>
+            <div class="briefing-row">
+              <div class="briefing-row-left">
+                <span class="briefing-dot" style="background:var(--red)"></span>
+                <span class="briefing-name">Critical</span>
+                <span class="briefing-note">· Past due</span>
+              </div>
+              <span class="briefing-count">1</span>
+            </div>
+            <div class="briefing-row">
+              <div class="briefing-row-left">
+                <span class="briefing-dot" style="background:var(--orange)"></span>
+                <span class="briefing-name">High</span>
+                <span class="briefing-note">· Closes ≤ 21d</span>
+              </div>
+              <span class="briefing-count">2</span>
+            </div>
+            <div class="briefing-row">
+              <div class="briefing-row-left">
+                <span class="briefing-dot" style="background:var(--amber)"></span>
+                <span class="briefing-name">Medium</span>
+                <span class="briefing-note">· Routine</span>
+              </div>
+              <span class="briefing-count">2</span>
+            </div>
+            <div class="briefing-row">
+              <div class="briefing-row-left">
+                <span class="briefing-dot" style="background:var(--green)"></span>
+                <span class="briefing-name">On track</span>
+                <span class="briefing-note">· Signed / received</span>
+              </div>
+              <span class="briefing-count">101</span>
+            </div>
+            <div class="briefing-footer">
+              Tackle the top 3 and your pipeline moves <strong>6 days</strong> closer to closing.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toolbar / tabs -->
+      <div class="toolbar">
+        <div class="toolbar-tabs">
+          <button type="button" class="tab active" onclick="setTab(this)">
+            <span class="tab-hot">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.3L19 9l-5.4 1.7L12 16l-1.6-5.3L5 9l5.4-1.7z"/></svg>
+            </span>
+            AI priority
+            <span class="tab-badge">6</span>
+          </button>
+          <button type="button" class="tab" onclick="setTab(this)">All docs <span class="tab-badge">115</span></button>
+          <button type="button" class="tab" onclick="setTab(this)">Missing <span class="tab-badge">13</span></button>
+          <button type="button" class="tab" onclick="setTab(this)">Pending review <span class="tab-badge">101</span></button>
+          <button type="button" class="tab" onclick="setTab(this)">Sent for sig <span class="tab-badge">3</span></button>
+          <button type="button" class="tab" onclick="setTab(this)">Signed <span class="tab-badge">11</span></button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)">
+          <span>Sort:</span>
+          <button type="button" class="sort-btn">
+            <span class="sort-spark"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.3L19 9l-5.4 1.7L12 16l-1.6-5.3L5 9l5.4-1.7z"/></svg></span>
+            AI impact ↓
+          </button>
+        </div>
+      </div>
+
+      <!-- Queue -->
+      <div class="queue" id="queue"></div>
+
+      <!-- Recently Done -->
+      <div class="recently-done">
+        <div class="recently-header">
+          <div class="recently-check">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <span class="recently-title">Cleared today</span>
+          <span class="recently-count">· 4 documents</span>
+          <div class="recently-divider"></div>
+        </div>
+        <div class="recently-grid">
+          <div class="recently-card"><div class="recently-doc">Earnest Money Receipt</div><div class="recently-meta">2310 Fox Dr · 8m ago</div></div>
+          <div class="recently-card"><div class="recently-doc">Buyer Pre-Approval</div><div class="recently-meta">626 Deer Trail Dr · 34m ago</div></div>
+          <div class="recently-card"><div class="recently-doc">Listing Agreement</div><div class="recently-meta">88 Maple Ct · 2h ago</div></div>
+          <div class="recently-card"><div class="recently-doc">Counter Offer #2</div><div class="recently-meta">410 Cedar Ln · 5h ago</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ MODAL ═══════════════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="modalBackdrop" onclick="closeModal(event)">
+  <div class="modal" id="modalInner" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;" id="modalPills"></div>
+        <div class="modal-doc-name" id="modalDocName"></div>
+        <div class="modal-txn-full" id="modalTxnFull"></div>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal()" aria-label="Close">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-ai">
+      <div class="modal-ai-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.3L19 9l-5.4 1.7L12 16l-1.6-5.3L5 9l5.4-1.7z"/></svg>
+        AI recommendation
+      </div>
+      <div class="modal-ai-reason" id="modalReason"></div>
+      <div class="modal-ai-note" id="modalAiNote"></div>
+    </div>
+    <div class="modal-actions">
+      <div class="modal-actions-label">One-click action</div>
+      <button type="button" class="modal-primary-btn" id="modalPrimaryBtn">
+        <span class="modal-primary-inner" id="modalPrimaryInner"></span>
+        <span class="modal-primary-party" id="modalPrimaryParty"></span>
+      </button>
+      <div class="modal-alt-actions" id="modalAltActions"></div>
+    </div>
+    <div class="modal-footer">
+      <div>
+        <div class="modal-foot-label">Closing</div>
+        <div class="modal-foot-value modal-foot-mono" id="modalCloseDate"></div>
+      </div>
+      <div>
+        <div class="modal-foot-label">Counter-party</div>
+        <div class="modal-foot-value" id="modalParty"></div>
+        <div class="modal-foot-sub" id="modalPartyRole"></div>
+      </div>
+      <div>
+        <div class="modal-foot-label">File progress</div>
+        <div class="modal-foot-value modal-foot-mono" id="modalProgress"></div>
+        <div class="spark-track" style="width:100%">
+          <div class="spark-fill" id="modalSpark" style="background:var(--navy)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────
+const QUEUE = [
+  {
+    id:'q1', severity:'critical',
+    doc:'Seller Disclosure', docCode:'SDS-2024',
+    txn:'2310 Fox Dr', txnFull:'2310 Fox Dr, Franklin, IN 46131',
+    side:'Listing', closeDate:'Apr 28', closeRel:'past due 9d',
+    reason:'Closing date passed. Title cannot clear without it.',
+    suggested:'Request from seller', suggestedAction:'request',
+    party:'Margaret Chen', partyRole:'Seller',
+    altActions:['upload','waive','template'],
+    progress:{done:12,total:13},
+    aiNote:'Seller responded to last 2 emails within 4h. SMS likely faster.',
+  },
+  {
+    id:'q2', severity:'high',
+    doc:'Lead-Based Paint Disclosure', docCode:'LBP-1996',
+    txn:'154 E Washington St', txnFull:'154 E Washington St, Mooresville, IN 46158',
+    side:'Buyer', closeDate:'May 25', closeRel:'in 18d',
+    reason:'Property built 1962. Federally required before contract binds.',
+    suggested:'Generate from template', suggestedAction:'template',
+    party:'You', partyRole:'Agent',
+    altActions:['upload','request','waive'],
+    progress:{done:1,total:2},
+    aiNote:'Auto-fills 9 of 11 fields from MLS. ~30s to complete.',
+  },
+  {
+    id:'q3', severity:'high',
+    doc:'Wire Transfer Authorization', docCode:'WTA',
+    txn:'154 E Washington St #123456', txnFull:'154 E Washington St, Mooresville, IN — Closing #123456',
+    side:'Both', closeDate:'May 25', closeRel:'in 18d',
+    reason:'Sent for signature 6d ago. No view from buyer yet.',
+    suggested:'Resend with reminder', suggestedAction:'resend',
+    party:'James & Priya Patel', partyRole:'Buyer',
+    altActions:['call','void','replace'],
+    progress:{done:1,total:4},
+    aiNote:'Buyer opens email between 7–9am. Schedule resend for tomorrow 7:30am?',
+  },
+  {
+    id:'q4', severity:'medium',
+    doc:'HOA Estoppel Letter', docCode:'HOA-EST',
+    txn:'626 Deer Trail Dr', txnFull:'626 Deer Trail Dr, Indianapolis, IN 46217',
+    side:'Buyer', closeDate:'Jun 02', closeRel:'in 26d',
+    reason:'Carmel Ridge HOA averages 14 business days to issue.',
+    suggested:'Request from HOA', suggestedAction:'request',
+    party:'Carmel Ridge HOA', partyRole:'Third party',
+    altActions:['upload','template'],
+    progress:{done:0,total:1},
+    aiNote:'Form pre-filled. Last estoppel from this HOA took 11 days.',
+  },
+  {
+    id:'q5', severity:'medium',
+    doc:'Title Commitment', docCode:'TC-2026',
+    txn:'154 E Washington St #46158', txnFull:'154 E Washington St, Mooresville, IN 46158',
+    side:'Both', closeDate:'May 25', closeRel:'in 18d',
+    reason:'Pending review. Title co. uploaded 2d ago, no eyes on it.',
+    suggested:'Open for review', suggestedAction:'review',
+    party:'Heritage Title Co.', partyRole:'Title',
+    altActions:['approve','flag','forward'],
+    progress:{done:4,total:6},
+    aiNote:'Schedule B exception flagged: easement on east boundary.',
+  },
+  {
+    id:'q6', severity:'low',
+    doc:'Inspection Report', docCode:'INSP',
+    txn:'2310 Fox Dr', txnFull:'2310 Fox Dr, Franklin, IN 46131',
+    side:'Listing', closeDate:'Apr 28', closeRel:'past due 9d',
+    reason:'Sent for signature, awaiting buyer counter.',
+    suggested:'Nudge buyer agent', suggestedAction:'nudge',
+    party:'Tyler Brooks (Buyer Agent)', partyRole:'Co-agent',
+    altActions:['call','replace'],
+    progress:{done:8,total:13},
+    aiNote:'Last contact 3d ago via Brokermint. Try direct line: (317) 555-0144.',
+  },
+];
+
+// ── Icon helpers ──────────────────────────────────────────────────────
+const ICONS = {
+  upload:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  send:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+  sms:      `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
+  call:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`,
+  template: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>`,
+  waive:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>`,
+  review:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  approve:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  forward:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+  flag:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+  replace:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  void:     `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  request:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+  resend:   `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+  nudge:    `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>`,
+};
+
+const ACTION_LABELS = {
+  request:'Request', upload:'Upload', waive:'Mark N/A',
+  template:'Generate', call:'Call', nudge:'Nudge SMS',
+  resend:'Resend', review:'Review', approve:'Approve',
+  forward:'Forward', flag:'Flag', replace:'Replace', void:'Void',
+};
+
+function icon(action) {
+  return ICONS[action] || ICONS.review;
+}
+
+// ── Severity / side helpers ───────────────────────────────────────────
+const SEV_CONFIG = {
+  critical: { c:'var(--red)',    bg:'var(--red-soft)',   label:'Critical' },
+  high:     { c:'var(--orange)', bg:'var(--orange-soft)',label:'High'     },
+  medium:   { c:'var(--amber)',  bg:'var(--amber-soft)', label:'Medium'   },
+  low:      { c:'var(--muted)',  bg:'#F0EBE2',           label:'Low'      },
+};
+const SIDE_CONFIG = {
+  Listing: { c:'var(--orange-ink)', bg:'var(--orange-soft)' },
+  Buyer:   { c:'var(--navy)',       bg:'var(--navy-soft)'   },
+  Both:    { c:'#5B3A8A',           bg:'#ECE5F5'            },
+};
+
+function sevPillHTML(severity) {
+  const m = SEV_CONFIG[severity] || SEV_CONFIG.low;
+  return `<span class="sev-pill" style="background:${m.bg};color:${m.c}">
+    <span class="sev-dot" style="background:${m.c}"></span>${m.label}
+  </span>`;
+}
+function sidePillHTML(side) {
+  const m = SIDE_CONFIG[side] || SIDE_CONFIG.Buyer;
+  return `<span class="side-pill" style="background:${m.bg};color:${m.c}">${side} side</span>`;
+}
+
+// ── Render queue ──────────────────────────────────────────────────────
+function renderQueue() {
+  const el = document.getElementById('queue');
+  // Skip index 0 — it's the AI Hero item
+  el.innerHTML = QUEUE.slice(1).map((item, i) => {
+    const isPast = item.closeRel.includes('past');
+    const alts = item.altActions.slice(0,3).map(a =>
+      `<button type="button" class="row-alt-btn" title="${ACTION_LABELS[a]}"
+        aria-label="${ACTION_LABELS[a]}"
+        onclick="event.stopPropagation(); runAction('${item.id}','${a}')">
+        ${icon(a)}
+      </button>`
+    ).join('');
+
+    return `
+    <button type="button" class="queue-row sev-${item.severity}"
+      onclick="openModal('${item.id}')"
+      aria-label="Open ${item.doc} details">
+
+      <div class="row-index">#${i + 2}</div>
+
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;">
+          <span class="row-doc-name">${item.doc}</span>
+          ${sevPillHTML(item.severity)}
+          ${sidePillHTML(item.side)}
+          <span class="doc-code">${item.docCode}</span>
+        </div>
+        <div class="row-doc-meta">
+          <span class="row-txn">${item.txn}</span>
+          <span>·</span>
+          <span>Closes ${item.closeDate}</span>
+          <span>·</span>
+          <span class="${isPast ? 'row-past' : ''}">${item.closeRel}</span>
+        </div>
+      </div>
+
+      <div class="row-why">
+        <div class="row-why-label">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 5.3L19 9l-5.4 1.7L12 16l-1.6-5.3L5 9l5.4-1.7z"/></svg>
+          Why
+        </div>
+        ${item.reason}
+      </div>
+
+      <div class="row-actions" onclick="event.stopPropagation()">
+        <button type="button" class="row-primary-btn"
+          onclick="runAction('${item.id}','${item.suggestedAction}')">
+          ${icon(item.suggestedAction)} ${item.suggested}
+        </button>
+        <div class="row-alts">${alts}</div>
+      </div>
+    </button>`;
+  }).join('');
+}
+
+// ── Modal ─────────────────────────────────────────────────────────────
+let currentItem = null;
+
+function openModal(id) {
+  const item = QUEUE.find(q => q.id === id);
+  if (!item) return;
+  currentItem = item;
+
+  document.getElementById('modalPills').innerHTML =
+    sevPillHTML(item.severity) + sidePillHTML(item.side) +
+    `<span class="doc-code" style="margin-left:2px">${item.docCode}</span>`;
+
+  document.getElementById('modalDocName').textContent  = item.doc;
+  document.getElementById('modalTxnFull').textContent  = item.txnFull;
+  document.getElementById('modalReason').textContent   = item.reason;
+  document.getElementById('modalAiNote').textContent   = `"${item.aiNote}"`;
+  document.getElementById('modalCloseDate').textContent = `${item.closeDate} · ${item.closeRel}`;
+  document.getElementById('modalParty').textContent    = item.party;
+  document.getElementById('modalPartyRole').textContent = item.partyRole;
+  document.getElementById('modalProgress').textContent = `${item.progress.done}/${item.progress.total}`;
+
+  const pct = Math.min((item.progress.done / item.progress.total) * 100, 100);
+  document.getElementById('modalSpark').style.width = pct + '%';
+
+  document.getElementById('modalPrimaryBtn').onclick = () => runAction(item.id, item.suggestedAction);
+  document.getElementById('modalPrimaryInner').innerHTML =
+    `${icon(item.suggestedAction)} <span class="modal-primary-name">${item.suggested}</span>`;
+  document.getElementById('modalPrimaryParty').textContent = `→ ${item.party}`;
+
+  document.getElementById('modalAltActions').innerHTML = item.altActions.map(a =>
+    `<button type="button" class="modal-alt-btn" onclick="runAction('${item.id}','${a}')">
+      ${icon(a)} ${ACTION_LABELS[a]}
+    </button>`
+  ).join('');
+
+  document.getElementById('modalBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modalBackdrop')) return;
+  document.getElementById('modalBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('modalBackdrop').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+// ── Actions ───────────────────────────────────────────────────────────
+function runAction(id, action) {
+  console.log('[runAction]', action, '→', id);
+  // TODO: replace with real fetch calls
+  // POST /api/documents/:id/:action
+}
+
+// ── Sidebar toggle ────────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────
+function setTab(btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────
+renderQueue();
+</script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 
 ## Features Currently Complete — Client Feedback Requested
 
-**Last Updated:** May 9, 2026  
+**Last Updated:** May 13, 2026  
 **Test Environment:** http://dev.velvetelves.com/  
 **Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  
 **Reviewer:** Client — please fill in the Feedback block under each feature
@@ -26,22 +26,26 @@
 ### Accounts you will need
 
 - **Agent or Elf** — covers the main day-to-day workflow.
-- **Team Lead or Admin** — needed to see the Delete button on transactions, the admin-only Task Templates pages, and the Deletion Queue on the Documents page.
+- **Team Lead or Admin** — needed to see the Delete button on transactions, the admin-only Task Templates pages, the Deletion Queue on the Documents page, and the full Team Members admin page.
+- **Workspace Owner** — the very first person who registered the brokerage. Required for the Transfer ownership flow and the Settings → Danger Zone (schedule deletion).
+- **Invited member** — sign up by clicking an invite-email link (instead of /register). Required for the invite-accept flow and the invitee branch of the onboarding wizard.
 - **Attorney** — loads the attorney-specific workspace at /transactions.
 - **FSBO Customer** — verifies the FSBO sidebar layout.
-- **Admin with a known user ID** — needed only for the direct user-detail link at /admin/users/<userId>.
+- **Platform admin** (internal Velvet Elves staff only) — required for the /platform/tenants pages.
 
 ### Suggested order of testing
 
-1. Public pages and sign-in / sign-up
-2. Onboarding wizard and the product tour overlay
-3. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)
-4. Settings and Email Integrations (needed before AI Email Review can send)
-5. AI Email Review queue at /ai-emails
-6. Team Lead or Admin extras (delete permission, task templates, deletion queue)
-7. Attorney workspace
-8. FSBO-customer sidebar
-9. Direct links and error pages
+1. Public pages and sign-in / sign-up (including the new Organization field on /register)
+2. Invite-accept flow (open an invite link as a brand-new user)
+3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay
+4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)
+5. Settings and Email Integrations (needed before AI Email Review can send)
+6. AI Email Review queue at /ai-emails
+7. Team Lead or Admin extras — Team Overview, Team Members admin, invite teammate, ownership transfer, deactivate, Company Details, Danger Zone, plus task templates and deletion queue
+8. Attorney workspace
+9. FSBO-customer sidebar
+10. Platform admin pages (internal Velvet Elves staff only)
+11. Direct links and error pages
 
 ---
 
@@ -164,27 +168,40 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 **How To Test**
 
 - Check that every field is visible.
-  - Full name, Email, Password, Confirm Password, Phone (optional), Role, and the Terms / Privacy checkbox.
+  - Full name, Organization (optional), Email, Password, Confirm Password, Phone (optional), and the Terms / Privacy checkbox.
   - A Google sign-up button at the top of the form.
+  - Important: there is no Role dropdown anymore. The first person to register for an organization is automatically the Admin (and the workspace Owner) of that brand-new workspace. To join an existing brokerage, ask one of its admins to send you an invite — typing their name in the Organization field will NOT join you to them; it creates a separate, brand-new workspace.
+- Try the Organization field.
+  - Leave it blank and confirm the page accepts the form (the workspace just gets a default name based on your email).
+  - Type a name and confirm the helper text under it explains that this creates a new organization with you as its Admin.
+- Watch the email-availability check while you type.
+  - A small spinner appears in the email field while the page checks the address.
+  - Once the check is done, the icon switches to a green check (available) or a red alert (already in use).
+  - If the email is already in use, an inline message under the field offers a 'Sign in instead' link that goes straight to /login.
+- Watch the password-strength panel while you type.
+  - Five rules are listed: 8+ characters, an uppercase letter, a lowercase letter, a number, and a symbol. Each rule has a tick that flips from grey to green as it is met.
+  - A coloured strength bar fills as more rules are met (Very weak → Weak → Fair → Good → Strong).
 - Try invalid inputs and make sure the page stops you.
   - An invalid email address (for example 'abc' with no @).
-  - A weak password — confirm the password-strength hints appear.
-  - Mismatched Password and Confirm Password.
+  - A weak password — confirm the five rule ticks and the strength meter update live.
+  - Mismatched Password and Confirm Password — a live 'Passwords do not match' message appears under Confirm Password; when they match, a green 'Passwords match' message replaces it.
   - Leaving the Terms / Privacy box unchecked.
 - Submit a valid registration using a real email you can check.
 
 **Expected Result**
 
 - Each invalid case shows a clear inline message next to the field.
+- The Create Account button stays disabled while the email is already in use or the passwords do not match.
 - After a successful submission, one of two things should happen.
-  - You are signed in automatically and taken to the /onboarding page.
-  - Or you are taken to /login with a message asking you to confirm your email.
+  - You are signed in automatically and taken to the /onboarding page. A brand-new workspace is created for you and you are its Admin (and Owner).
+  - Or you are taken to /login with a message asking you to confirm your email first.
 
 **Future Improvement Suggestions**
 
-- Check email availability while typing (instead of only after submit).
 - Add an eye icon that shows / hides the password while typing.
-- Show a short sentence under each Role to explain what that role can do.
+- Show a one-line preview of how the Organization name will appear on outbound emails before you submit.
+- Add Microsoft / Outlook and Apple sign-up buttons next to Google.
+- Auto-suggest an Organization name from the email domain (for example 'acme-realty.com' suggests 'Acme Realty').
 
 **Feedback**
 
@@ -424,21 +441,37 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **How To Test**
 
-- Open the invite URL.
-  - Confirm the page shows the invited email and the invited role.
-  - Confirm the form fields for Full Name, Password, and optional Phone.
-- Submit the form with valid values.
-- Separately, open an invite URL with an invalid token.
+- Open the invite link from your email.
+  - Either form of the URL works: '/invite/<token>' (clean) or '/invite/accept?token=<token>' (the format used in invitation emails).
+  - While the page checks the token, a centred spinner says 'Verifying your invitation...'.
+- Confirm the invite page contents once the check is done.
+  - An orange-circle check icon at the top, with the headline 'You're invited!'.
+  - A line beneath the headline that reads 'Complete your account to join as {Role}', where the role is whatever the admin invited you for — for example Agent, Transaction Coordinator, Team Lead, Attorney, Client, FSBO Customer, or Vendor.
+  - The invited email shown in small grey text just below the role.
+- Fill in the form.
+  - Full name (required).
+  - Create password (required — must be at least 8 characters and include at least one number).
+  - Phone (optional).
+- Try invalid inputs and confirm the page blocks them.
+  - Empty full name.
+  - A password under 8 characters or with no number — an inline red message appears.
+- Click 'Join Velvet Elves' to submit.
+  - The button label changes to a small spinner while it works.
+- Separately, open a bad invite URL to confirm the error path.
+  - Paste a fake token (e.g. /invite/some-fake-token) in the browser bar.
+  - Confirm an 'Invalid Invitation' screen appears with a red warning icon, a clear message ('This invitation is invalid or has expired.'), and a 'Go to login' link.
 
 **Expected Result**
 
-- A valid invite signs the new user in and takes them to /onboarding.
-- An invalid token shows an 'Invalid Invitation' screen with a link back to login.
+- A valid invite signs the new user in, shows a green 'Account created successfully!' toast, and takes them to /onboarding.
+- On /onboarding, the wizard automatically detects the invitee and skips the 'Company / brokerage' step (see feature 12), showing a read-only 'Joining: {brokerage name}' banner instead.
+- An invalid or expired token shows the 'Invalid Invitation' screen with a 'Go to login' link rather than a broken page.
 
 **Future Improvement Suggestions**
 
-- Show a countdown for how long the invite is still valid.
-- Let the person who sent the invite resend or cancel it from the admin area when that page is built.
+- Show a countdown for how long the invite is still valid (e.g. 'Expires in 6 hours').
+- Add a password-strength meter that matches the one on the /register page so invitees see the same five rules.
+- Show the inviter's name (for example 'Sam Closer invited you to Acme Realty') so the recipient knows it is legitimate.
 
 **Feedback**
 
@@ -470,6 +503,10 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
   - White right panel that holds the active step's content.
   - Footer with a Back button on the left and a Continue (or 'Skip for now') button on the right. The final step hides the footer.
   - On a phone-sized screen the rail collapses into a thin orange progress strip across the top.
+- Founder vs. invitee branch (NEW).
+  - If you signed up by accepting an invite email (see feature 11), the wizard runs in 'invitee mode'. On Step 2 the 'Company / brokerage' field and the 'Brand logo' drag-drop zone are HIDDEN, and a read-only 'Joining: {brokerage name}' banner takes their place. This prevents an invitee from accidentally renaming or rebranding the workspace they just joined.
+  - If you self-registered on /register, the wizard runs in 'founder mode' and you DO see the Company / brokerage and Brand logo fields on Step 2.
+  - The wizard reads this signal from your account on the server, not from the URL. Re-signing in, or transferring ownership later, does not flip you back into founder mode by accident — see feature 32.5 for the ownership-transfer behaviour.
 - Step 1 — Welcome.
   - Confirm a personal greeting that uses your first name (for example 'Hi Jake, let's set up your workspace').
   - Read the role-personalised intro line ('we'll personalise the workspace for you as a {your role}').
@@ -479,11 +516,12 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 - Step 2 — Your Profile.
   - Confirm Full name (pre-filled from your account) and Phone (optional, auto-formats to (555) 123-4567 as you type) appear.
   - Confirm a Role dropdown is present with every supported role.
-  - Internal roles only: confirm a 'Company / brokerage' field and a 'Brand logo' drag-drop zone are also present.
-  - Logo rules: PNG, JPEG, WEBP, SVG, or GIF, max 2 MB. Upload a wrong type or an oversize file and confirm a clear error toast appears (no silent failure).
+  - Founders only (internal roles, NOT invitees): confirm a 'Company / brokerage' field and a 'Brand logo' drag-drop zone are also present.
+  - Invitees: confirm the read-only 'Joining: {brokerage name}' banner shows the brokerage you accepted the invite for, and that the company / logo fields are NOT shown.
+  - Logo rules (founders only): PNG, JPEG, WEBP, SVG, or GIF, max 2 MB. Upload a wrong type or an oversize file and confirm a clear error toast appears (no silent failure).
   - Upload a valid logo and confirm the preview appears immediately, plus an Upload/Replace button and a Remove button.
   - Change the Role dropdown to an external role (e.g. Client). Confirm a hint appears under it ('You'll be updated to this role after this step') and that the email + e-sign steps disappear from the rail. Change it back and confirm those steps come back.
-  - Click Continue. The button shows 'Saving…' while it persists your name, phone, role, company, and logo.
+  - Click Continue. The button shows 'Saving…' while it persists your name, phone, role, and — for founders only — your company and logo.
 - Step 3 — Email Inbox (internal roles only).
   - Confirm two provider cards are visible: Gmail (Google OAuth) and Outlook (Microsoft 365 OAuth).
   - Click Gmail. A real Google sign-in popup should open. After approving, the card flips to a green 'Connected' badge.
@@ -511,6 +549,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 - Each step shows the correct fields and validation for the role you selected.
 - Internal roles see 4–5 steps; external roles see 3 steps.
+- Founders see the Company / brokerage and Brand logo fields on Step 2; invitees see a read-only 'Joining: {brokerage name}' banner instead.
 - Gmail / Outlook / DocuSign connections are real OAuth — connecting one shows a green 'Connected' badge that persists into Settings → Integrations.
 - Logo files outside the allowed types or larger than 2 MB are rejected with a clear toast.
 - Either final-step CTA marks onboarding complete on the server and triggers the product tour the next time the dashboard mounts.
@@ -521,6 +560,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 - Pre-flight check for popup-blocked browsers and offer a fallback redirect-based OAuth path.
 - Preview the uploaded logo at the exact size it will appear in the app's sidebar.
 - Let a user preview which value cards / steps an external role will see before they switch the dropdown.
+- Add an invitee-only 'Welcome from {inviter name}' message under the Joining banner so the invitee knows who brought them in.
 
 **Feedback**
 
@@ -2484,26 +2524,529 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32. Admin user detail (direct link)
+### 32. Admin user detail
 
 **Route / Location**
 
-/admin/users/<userId>
+/admin/users/<userId> (reachable from any avatar tile on /team or any row on /admin/users)
 
 **How To Test**
 
-- As an Admin, open a known user ID URL.
-- Open an invalid user ID to check the error state.
+- Reach the page from the new Team Members admin list.
+  - From /admin/users, click a member's avatar, name, or 'View profile' button. The detail page opens with a 'Team › Members › {name}' breadcrumb and a back arrow.
+  - From /team, click any avatar tile in 'Recently added members' to open the same detail page.
+- Confirm the page renders.
+  - A profile card on the left with name, email, phone, joined date, last sign-in, and role.
+  - A side-rail with a status snapshot (active / inactive) and the role badge.
+  - If the user is the workspace owner, the avatar has a small orange crown badge.
+- Try a problem URL.
+  - Paste /admin/users/some-fake-id directly in the browser. A clear 'Failed to load user' error card should appear, NOT a white screen.
 
 **Expected Result**
 
-- A valid ID renders the user's profile card.
-- An invalid ID shows a clean error state.
+- A valid user id renders the profile card without errors.
+- An invalid or deleted user id shows a clean error state with a way to navigate back.
 
 **Future Improvement Suggestions**
 
-- Finish the Team Members list page so this page is reachable without typing URLs.
-- Add an audit trail showing the user's recent actions.
+- Add an audit trail showing the user's recent actions (logins, role changes, transactions worked).
+- Add an inline Edit form so an Admin can update name, phone, or role from this page (today edits happen via Settings or other admin tools).
+- Show recent transactions assigned to this user so a Team Lead has full context.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.1. Team Overview page
+
+**Route / Location**
+
+/team (Team Lead and Admin only)
+
+**How To Test**
+
+- Reach the page.
+  - Sign in as a Team Lead or Admin. Open the sidebar and click 'Team', or paste /team in the browser bar.
+  - If you are signed in below Team Lead (Agent, TC, Client, FSBO, Vendor, or Attorney), opening /team should redirect to /unauthorized.
+- Confirm the page header.
+  - A breadcrumb 'Team › Overview' on wide screens.
+  - Title 'Team Overview' next to an orange count pill ('{N} members').
+  - An orange 'Manage team' button on the right that opens /admin/users (feature 32.2).
+- Look at the four KPI tiles across the top.
+  - Active Members — total active members, plus a small hint with the number of roles covered.
+  - Pending Invites — count of invitations still waiting to be accepted.
+  - Seats Used — '{used} / {limit}' if your plan has a seat limit, just the count if seats are unlimited.
+  - Recently Active — how many people signed in within the last week.
+- Inspect the 'Recently added members' card.
+  - Up to 12 members are shown as small avatar tiles with role-tinted initials and their role label.
+  - The workspace owner has a small orange crown badge on their avatar.
+  - Click any avatar tile to open that member's detail page (feature 32).
+  - If you are the only member, the card shows a friendly empty state pointing at Team Members.
+- Look at the 'Role Coverage' rows at the bottom of the same card.
+  - Five rows (Admin, Team Lead, TC, Agent, Attorney) each show a role chip, a coverage bar, and 'count / total'.
+- Inspect the three side-rail cards.
+  - Pending Invites — up to four pending invitations. Each row shows the email, role, and a coloured chip with how much time is left ('6h', '2d', or red 'Expired'). A '+ N more' link jumps to the Pending Invitations tab.
+  - Last Seen — up to six recently active members with their relative last-sign-in time.
+  - Seat Usage — only appears if your plan has a seat limit. Shows 'X / Y seats' plus a fill bar that turns amber over 75% and red over 90%.
+- Try the two quick-link cards at the bottom.
+  - Team Members — opens /admin/users.
+  - Task Templates — opens /admin/task-templates (feature 30).
+
+**Expected Result**
+
+- The page is reachable for Team Lead and Admin roles only; lower roles are redirected to /unauthorized.
+- All four KPI tiles, the roster, the role coverage rows, and the three side-rail cards reflect real data from the workspace.
+- Clicking an avatar tile or 'Manage team' navigates without a full page reload.
+
+**Future Improvement Suggestions**
+
+- Let the user filter Team Members by clicking a role chip on the Role Coverage row.
+- Surface a 7-day-activity sparkline on the KPI tiles for at-a-glance trend.
+- Allow pinning a favourite member for quick contact from the side rail.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.2. Team Members admin — Active members tab
+
+**Route / Location**
+
+/admin/users (Team Lead and Admin only)
+
+**How To Test**
+
+- Reach the page.
+  - From /team click 'Manage team', or open /admin/users directly.
+  - Lower roles than Team Lead should be redirected to /unauthorized when they try this URL.
+- Confirm the page header.
+  - Breadcrumb 'Team › Members'.
+  - Title 'Team Members' plus a seat pill — '{used} / {limit} seats' on paid plans, '{N} members' otherwise.
+  - An orange 'Invite teammate' button on the right (visible to Agent and above).
+- Confirm the two tabs.
+  - 'Active members' tab with a count badge.
+  - 'Pending invitations' tab with a separate count badge that turns amber when invites are pending.
+  - Click each tab and confirm the body switches between the members list and the invitations list.
+- Use the filter toolbar on the Active members tab.
+  - Type in the search box — the list filters by name and email as you type.
+  - Open the role dropdown ('All roles' default) — pick a role and confirm only members with that role remain.
+  - Combine search + role filter; confirm both apply at once.
+- Inspect a member card in the collapsed view.
+  - Role-tinted avatar with white initials and a soft halo. The workspace owner has a small orange crown badge.
+  - Member name in serif type, with the email and last sign-in date shown alongside.
+  - A role chip on the right (Admin, Team Lead, TC, Agent, Attorney, Client, FSBO, Vendor).
+  - A round chevron control that flips the card open.
+  - A three-dot actions menu on the right (visible only to Admin / owner; see features 32.5 and 32.6).
+- Click a card to expand it.
+  - An orange accent stripe and a 'MEMBER PROFILE' kicker fade in.
+  - Four info tiles: Email (clickable mailto), Phone (clickable tel, or 'Not provided'), Joined date, Last sign-in.
+  - A footer with a 'View full profile' button. If you are the owner, a 'Transfer ownership' button appears here too. If you are Admin, a 'Deactivate' button appears on the right for everyone except yourself and the current owner.
+- Confirm the empty / filter-empty states.
+  - Apply a search term with no matches — the body shows a clean 'No members match this filter' card with a hint to try a different term.
+
+**Expected Result**
+
+- Members render as expandable cards with role-tinted styling, an owner crown on the right avatar, and a chevron indicator.
+- Search and role filter narrow the list in real time.
+- Action buttons only appear for users who have permission (Admin / owner) and never on your own card.
+
+**Future Improvement Suggestions**
+
+- Show a 'last active' relative timestamp directly on the collapsed card (today only the date shows).
+- Add bulk selection so an Admin can deactivate or change role for multiple members at once.
+- Add an inline 'Resend welcome email' action on members who never signed in.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.3. Team Members admin — Pending invitations tab
+
+**Route / Location**
+
+/admin/users → 'Pending invitations' tab
+
+**How To Test**
+
+- Switch to the Pending invitations tab on /admin/users.
+- Confirm the list rendering.
+  - If there are no pending invitations, the empty state reads 'No pending invitations' with a hint to use the 'Invite teammate' button.
+  - Each pending invitation row shows: a mail-icon avatar, the invited email (bold), the invited role chip ('Invited as Agent', etc.), and a clock chip on the right showing how much time is left ('6h left', '2d left', or red 'Expired').
+  - The time chip turns red when under 12 hours, amber under 48 hours, otherwise neutral grey.
+- Use the row actions.
+  - 'Copy link' button (desktop) or the same option inside the three-dot menu (mobile) — copies the invite URL to your clipboard and shows a 'Link copied' toast. The link uses your workspace's invite-base URL so white-labelled subdomains are honoured.
+  - Three-dot menu → 'Resend email' — re-sends the original invitation email and shows an 'Invite resent' toast.
+  - Three-dot menu → 'Extend by 72h' — pushes the expiry 72 hours into the future and shows an 'Expiry extended' toast.
+  - Three-dot menu → 'Revoke invitation' (red) — asks for confirmation, then disables that invite link entirely and shows an 'Invitation revoked' toast.
+- Try the failure paths.
+  - If the clipboard is blocked by the browser, the Copy-link toast switches to 'Could not copy — Clipboard access was blocked.'
+  - If an invite has no token attached (very rare — only happens on data created before this feature shipped), the Copy-link option is disabled with a tooltip explaining the issue.
+
+**Expected Result**
+
+- All four actions (Copy link, Resend, Extend, Revoke) work for invitations that are still pending and not yet accepted.
+- Accepted invitations do not appear in this tab.
+- Revoking an invitation immediately removes it from the list and prevents the invitee from accepting.
+
+**Future Improvement Suggestions**
+
+- Add a 'Bulk revoke expired' button so cleanup is one click instead of N.
+- Show who originally sent each invitation, so a Team Lead can see which Admin invited a particular email.
+- Add a tooltip on the Copy-link button that previews the full URL before copying.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.4. Invite teammate modal
+
+**Route / Location**
+
+/admin/users → 'Invite teammate' button
+
+**How To Test**
+
+- Click 'Invite teammate' on the /admin/users header.
+  - The modal opens with an orange accent stripe at the top and a 'SEND A ONE-TIME INVITATION' kicker.
+  - Body fields: Email address (required), Role dropdown (required), plus a one-line role hint that updates as you change the role.
+- Try the Role dropdown.
+  - Sign in as different inviter roles (Agent, Team Lead, Admin) and confirm the dropdown contents change. For example, only Admins can invite new Admins.
+  - Pick each role and read the helper line below the dropdown — for example 'Owns their deals end-to-end with AI assistance' for Agent.
+- Try valid and invalid emails.
+  - Empty email — Send is blocked with an inline 'Enter a valid email address' message.
+  - An email that already belongs to a member — Send fails with '{email} already has an account.'
+  - A brand-new email on a free plan above the seat cap — Send fails with the seat-limit copy, mentioning the current plan.
+  - A valid new email — click Send invite. The button label switches to 'Sending…'.
+- After a successful send.
+  - An 'Invite sent' toast appears with the recipient's email.
+  - The modal closes.
+  - The Pending invitations tab refreshes with the new row.
+
+**Expected Result**
+
+- Roles you cannot grant are filtered out of the dropdown automatically.
+- Each failure mode (existing user, seat limit, plan-too-low, generic) surfaces a clear inline error instead of breaking the modal.
+- A successful invite appears in the Pending invitations list immediately, ready for the invitee to accept.
+
+**Future Improvement Suggestions**
+
+- Allow inviting multiple emails at once (comma-separated) so an admin can bulk-onboard a team.
+- Show a 'view what the invitee will see' preview link before sending.
+- Let the admin pick a team or attach a transaction at invite time (planned for Phase 5).
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.5. Transfer workspace ownership
+
+**Route / Location**
+
+/admin/users → member three-dot menu (visible to the workspace owner only)
+
+**How To Test**
+
+- Sign in as the current workspace owner.
+  - Confirm only your row shows the small orange crown badge.
+- Find a different member's row.
+  - Open the three-dot menu (or expand the card) — a 'Transfer ownership' option with a crown icon should be visible. You should NOT see this option on your own row, or on a member who is already the owner.
+- Click Transfer ownership.
+  - A confirmation dialog appears with the target's name and current role.
+  - If the target is not already an Admin, the dialog explicitly says 'they will be promoted to Admin'.
+  - The dialog warns that you will stay as Admin but lose owner-only abilities (schedule deletion, transfer ownership again) and that the action is logged.
+- Confirm the transfer.
+  - On success, an 'Ownership transferred' toast appears.
+  - The crown badge moves from your avatar to the new owner's avatar.
+  - Refresh /admin/users — the new ownership state persists on the server.
+- Try as a non-owner.
+  - Sign in as a regular Admin (not the owner) and confirm the 'Transfer ownership' option is hidden from every member's menu.
+
+**Expected Result**
+
+- Only the current owner sees the Transfer ownership control.
+- The confirmation dialog clearly describes the side effects before you commit.
+- After transfer, the previous owner can no longer schedule deletion or transfer ownership again — those controls disappear from Settings.
+
+**Future Improvement Suggestions**
+
+- Send an automatic email to the new owner immediately so they know responsibility has moved.
+- Add an undo window (e.g. 30 minutes) on a recently-transferred ownership.
+- Show the full audit trail of past ownership transfers on the Team Overview page.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.6. Deactivate a member
+
+**Route / Location**
+
+/admin/users → member three-dot menu (Admin only)
+
+**How To Test**
+
+- Sign in as an Admin who is NOT the target.
+  - Open the member's three-dot menu (or expand the card) — a red 'Deactivate' option should be visible.
+  - The option should NOT appear on the workspace owner's row, nor on your own row.
+- Click Deactivate.
+  - A confirmation dialog appears: 'Deactivate {name}? They will no longer be able to sign in. Re-activate later from this page.'
+  - Cancel and confirm the member is still listed.
+  - Re-open and click 'Deactivate' to confirm. A 'Member deactivated' toast appears.
+- Re-fetch the list.
+  - The deactivated member disappears from the Active members tab (because the list only shows active members).
+  - Any pending invitations created by that user remain unaffected — they are still in the Pending invitations tab.
+
+**Expected Result**
+
+- Deactivation requires confirmation and updates the list immediately.
+- The owner cannot be deactivated — that option is hidden on their row.
+- Deactivating yourself is also blocked (the action is hidden on your own row).
+
+**Future Improvement Suggestions**
+
+- Add a paired 'Re-activate' control that surfaces deactivated members in a separate sub-list.
+- Capture a deactivation reason at confirmation time so the audit log records why.
+- Auto-revoke any active browser sessions for the deactivated member.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.7. Settings — Company Details (organization name)
+
+**Route / Location**
+
+/settings (Company section, at the top of the page)
+
+**How To Test**
+
+- Open /settings as different roles to see the difference.
+  - As an Admin: the 'Organization Name' field is editable and an orange 'Save changes' button appears under the field.
+  - As any non-Admin (Team Lead, Agent, TC, Attorney, Client, FSBO, Vendor): the field is read-only with a soft grey background and a helper line 'Only an Admin can change the organization name. Ask your workspace owner if this needs to be updated.'
+- As an Admin, edit the field.
+  - Type a new name. 'Save changes' becomes enabled.
+  - Click Save. The button shows 'Saving…' briefly, then the change is persisted.
+- Verify the change is shared across the brokerage.
+  - Sign in as another member of the same workspace and open /settings — the new organization name should already be visible.
+  - Outbound emails and the invitation email subject/body will use the updated name on the next send.
+- Try a problem case.
+  - Leave the name empty and click Save — the server should reject the change with an inline red banner explaining the failure.
+  - Disconnect your network mid-save — the page should show a clear error message rather than silently failing.
+
+**Expected Result**
+
+- Admins can edit the organization name; everyone else sees a read-only field with a clear explanation.
+- The new name persists for every member of the brokerage on the next page load.
+- Errors from the server appear in a red banner above the field, with no white-screen failure.
+
+**Future Improvement Suggestions**
+
+- Show a small preview of how the organization name will appear in the sidebar logo, the invitation email subject, and outbound transaction emails before saving.
+- Add a 'Tenant slug' field so admins can claim a unique subdomain (e.g. acme.velvetelves.com).
+- Surface the workspace owner's name and email on this card so members know who to ask for changes.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.8. Settings — Danger Zone (schedule / cancel deletion)
+
+**Route / Location**
+
+/settings (Danger Zone section, at the very bottom — visible only to the workspace owner or a platform admin)
+
+**How To Test**
+
+- Sign in as the workspace owner and scroll to the bottom of /settings.
+  - Confirm a red-bordered 'Danger Zone' card with a 'Delete organization' button.
+  - Sign in as any other role on the same workspace and confirm the Danger Zone section is hidden completely — neither the left-rail nav entry nor the card appears.
+- Click 'Delete organization' (owner only).
+  - The button reveals a confirmation field that reads 'Type {workspace name} to confirm.'
+  - The 'Schedule deletion' button stays disabled until you type the workspace name exactly.
+  - A 'Keep organization' button is available to back out.
+- Type the workspace name and click Schedule deletion.
+  - A 'Deletion scheduled' toast appears.
+  - The card switches to a filled-red panel saying 'Deletion scheduled' with the exact date / time deletion will run.
+  - A note explains that audit logs and a full snapshot are archived per the platform's 2-year retention policy.
+  - A 'Cancel deletion' button is available — clicking it restores the workspace and shows a 'Deletion cancelled' toast.
+- Try the legal-hold path.
+  - If a platform admin has placed legal hold on your workspace, the Delete button is disabled and an amber banner reads 'This organization is on legal hold and cannot be scheduled for deletion. Contact platform support.'
+- Try as a non-owner Admin.
+  - Confirm the Danger Zone section does not appear at all in Settings (it is hidden, not just disabled).
+
+**Expected Result**
+
+- Only the owner sees the Danger Zone section; everyone else sees no trace of it.
+- Scheduling deletion requires typing the workspace name exactly, which prevents accidental clicks, and the action is reversible during the grace period.
+- While deletion is scheduled, the workspace remains usable and members can still sign in to cancel it.
+- Legal hold disables the button with a clear, plain-language explanation.
+
+**Future Improvement Suggestions**
+
+- Show the exact UTC + local time the deletion will run, plus how many days are left, on a banner that follows the owner on every page.
+- Send a daily reminder email to the owner while deletion is scheduled.
+- Let the owner customise the grace-period length (current default is 30 days, set on the server).
+- Add a 'Download a full export before I leave' button next to the schedule-deletion CTA.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.9. Platform Admin — Tenants list (internal Velvet Elves staff only)
+
+**Route / Location**
+
+/platform/tenants (visible only to accounts flagged as platform admin)
+
+**How To Test**
+
+- Sign in as a platform admin and browse to /platform/tenants.
+  - Non-platform users hitting this URL directly get a clean 404 page — the route does not even hint that it exists.
+- Confirm the page header.
+  - Title 'Tenants' and a short subtitle: 'Cross-tenant operations. Visible to platform admins only.'
+  - Card title 'All tenants (N)' showing the total count.
+- Use the filter dropdown.
+  - Options: All, Active, Suspended, On legal hold.
+  - Confirm the table narrows correctly when each filter is chosen.
+- Inspect each tenant row.
+  - Columns: Name (bold), Slug (mono code), Status badge, Plan badge, Actions.
+  - Status badges: 'Active' (green), 'Suspended' (grey), red 'Legal hold' badge with a shield icon, or red 'Scheduled deletion' badge if deletion is pending.
+- Try each Actions button.
+  - 'Details' — opens the tenant detail page (feature 32.10).
+  - 'Suspend' — opens a confirmation 'Members will be unable to sign in. You can reactivate later'. On confirm, the row flips to Suspended and a toast appears. The Suspend button is disabled when the tenant is on legal hold.
+  - 'Reactivate' — appears in place of Suspend on suspended tenants. Confirms before reactivating.
+
+**Expected Result**
+
+- Non-platform users hitting /platform/tenants get a 404 (not a 403) — the route's existence is not leaked.
+- Filter narrows the list correctly; the count badge stays accurate.
+- Suspending / reactivating a tenant immediately updates the row and is logged in the platform audit log.
+
+**Future Improvement Suggestions**
+
+- Add a search box that matches name / slug / owner email.
+- Add a 'Schedule deletion' action on the row alongside Suspend (currently only available from inside the tenant's own Settings → Danger Zone).
+- Show owner email and member count as extra columns.
+- Add a 'Force re-verify domain' action for tenants on a custom domain.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.10. Platform Admin — Tenant detail (internal Velvet Elves staff only)
+
+**Route / Location**
+
+/platform/tenants/<tenantId> (platform admins only)
+
+**How To Test**
+
+- Open the page.
+  - Click 'Details' on a row in /platform/tenants, or paste the URL directly.
+- Confirm the page header.
+  - A 'All tenants' back button at the top.
+  - Tenant name in large serif, slug + created date below.
+  - Status badges on the right: 'Active' / 'Suspended', plus red 'Legal hold' and / or 'Deletion scheduled' badges when applicable.
+- Confirm the Identity card.
+  - ID, Slug, Domain (custom domain if any), Domain status (verified / unverified), Verified at timestamp, Owner user id, and the Invite base URL (the white-label URL that invitation links will use).
+- Confirm the Plan & lifecycle card.
+  - Plan name (Solo, Team, etc.), Seat limit (or 'unlimited'), Staff seats currently used, Trial-ends date if any, Deletion-scheduled timestamp if any, and Legal hold reason if the tenant is on hold.
+- Confirm the safety rails.
+  - Non-platform users hitting /platform/tenants/<id> directly get a clean 404 page.
+  - If the tenant id is invalid or deleted, the page shows 'Tenant not found.' with a 'Back to list' link.
+
+**Expected Result**
+
+- All read-only data renders without errors.
+- Non-platform users cannot reach this page even with a direct URL.
+- Deleted or invalid tenant ids show a clean fallback rather than a broken page.
+
+**Future Improvement Suggestions**
+
+- Add inline edit for tenant name and plan from this detail page.
+- Surface the tenant's recent audit-log events (last 50) directly on this page.
+- Add a 'Reset domain verification' control for tenants stuck on unverified.
+- Add a 'Set / clear legal hold' control directly on this page (currently only the field is visible, not editable).
 
 **Feedback**
 
