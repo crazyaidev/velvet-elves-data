@@ -583,33 +583,52 @@ Deliverables:
 Success Criteria: AI responds to routine emails, drafts flagged for review,
                   safeguards prevent unsupervised sending of uncertain content.
 
-MILESTONE 4.3 - Vendor Communication System (Week 16)
+MILESTONE 4.3 - Vendor Communication System (Week 16)        STATUS: COMPLETE
 -----------------------------------------------------------------------------
 Deliverables:
-  [ ] Build vendor email templates with constrained response format
+  [x] Build vendor email templates with constrained response format
       ("Reply with: Scheduled: YYYY-MM-DD")
-  [ ] Implement AI email reply parsing for vendor responses:
-      - Extract dates from replies
-      - Propose task date updates
-      - Handle vague replies (send clarification or route to human)
-  [ ] Build vendor contact card system:
-      - Email link/button for adding additional contacts
-      - Connected contacts persist for future transactions
-      - Primary opt-in selection per transaction
-  [ ] Implement saved vendor rep background search (offer updates to info)
-  [ ] Document and wire provider-agnostic hooks for future SMS and
+      → 5 system templates seeded per tenant via
+        20260622_seed_vendor_email_templates.sql + tenant provisioning hook.
+        Admin CRUD at /admin/vendor-templates.
+  [x] Implement AI email reply parsing for vendor responses:
+      - Extract dates from replies (regex, no extra LLM call)
+      - Propose task date updates (vendor_proposals table, human-approved)
+      - Handle vague replies (proposal status='needs_clarification')
+      → VendorProposalService.propose_from_vendor_reply invoked from the
+        AI engine immediately after the vendor_reply draft is persisted.
+  [x] Build vendor contact card system:
+      - Public colleague-invite tokens (single-use, SHA-256 hashed, TTL)
+      - transaction_vendor_assignments + assignment_contacts (one-primary)
+      - VendorContactCard component with explicit action buttons
+  [x] Implement saved vendor rep background search (offer updates to info)
+      → VendorBackgroundSearchService + vendor_background_refreshes table;
+        diff drawer with per-field accept/reject.
+  [x] Document and wire provider-agnostic hooks for future SMS and
       click-to-call / voice integrations:
-      - Communication log and data model support SMS/voice metadata fields
-      - Phone icons in contact cards support future call-bridge workflows
-      - Provider choice can be finalized later (e.g., Twilio)
-  [ ] Build communication log UI:
-      - Unified log view per transaction
-      - Search/filter controls
-      - Download button (single transaction)
-      - Admin multi-transaction request form
-  [ ] End-to-end vendor communication flow tests
+      - communication_logs.channel accepts 'sms'/'voice_call' today
+      - communication_providers.py defines SmsProvider/VoiceProvider protocols
+      - ChannelBadge renders SMS/Voice "soon" pills; tenant flag
+        vendor_comms.phone_action_enabled gates click-to-call
+  [x] Build communication log UI:
+      - Unified /communications page with filter row + date grouping
+      - Per-transaction drawer remains (CommunicationsPanel.tsx)
+      - Single-transaction CSV via existing /communication-logs/transaction
+      - Admin multi-tx export at /admin/communication-exports
+  [x] End-to-end vendor communication flow tests
+      → test_vendor_communications_api.py (11 tests passing; 549 backend
+        tests passing overall).
 Success Criteria: Vendor communication automated with structured responses,
                   contact card system operational, communication log complete.
+Routes added:
+  Backend  /api/v1/vendor-communications/{templates,preview,send,
+                                          proposals,settings}
+           /api/v1/transactions/{tx}/vendor-assignments[/{id}[/contacts]]
+           /api/v1/vendors/{id}/{colleague-invites,background-refresh,
+                                transactions}
+           /api/v1/public/vendor/colleague-invites/{token}[/accept]
+  Frontend /communications, /vendors, /vendors/:vendorId,
+           /vendor-proposals, /admin/vendor-templates, /v/:token
 
 
 ================================================================================

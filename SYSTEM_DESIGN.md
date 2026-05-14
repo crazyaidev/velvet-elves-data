@@ -963,6 +963,54 @@ POST   /api/v1/transactions/{id}/parties              # Add party to transaction
 GET    /api/v1/transactions/{id}/parties              # List parties
 PUT    /api/v1/transactions/{id}/parties/{partyId}    # Update party
 DELETE /api/v1/transactions/{id}/parties/{partyId}    # Remove party
+
+# Milestone 4.3 — per-transaction vendor assignments + opted-in contacts
+GET    /api/v1/transactions/{id}/vendor-assignments
+POST   /api/v1/transactions/{id}/vendor-assignments
+PUT    /api/v1/transactions/{id}/vendor-assignments/{assignId}
+PUT    /api/v1/transactions/{id}/vendor-assignments/{assignId}/contacts
+DELETE /api/v1/transactions/{id}/vendor-assignments/{assignId}
+```
+
+#### Vendor Communications (`/api/v1/vendor-communications`) — Milestone 4.3
+
+```
+GET    /api/v1/vendor-communications/templates             # List active templates
+POST   /api/v1/vendor-communications/templates             # Admin: create custom
+PUT    /api/v1/vendor-communications/templates/{id}        # Admin: edit
+DELETE /api/v1/vendor-communications/templates/{id}        # Admin: deactivate
+
+POST   /api/v1/vendor-communications/preview               # Render only (no send)
+POST   /api/v1/vendor-communications/send                  # Render + send via provider
+
+GET    /api/v1/vendor-communications/proposals             # List pending proposals
+GET    /api/v1/vendor-communications/proposals/{id}        # Proposal detail
+POST   /api/v1/vendor-communications/proposals/{id}/accept # Update task.due_date
+POST   /api/v1/vendor-communications/proposals/{id}/reject
+POST   /api/v1/vendor-communications/proposals/{id}/needs-clarification
+
+GET    /api/v1/vendor-communications/settings              # Tenant settings
+PUT    /api/v1/vendor-communications/settings
+```
+
+#### Vendor extensions (`/api/v1/vendors`) — Milestone 4.3
+
+```
+GET    /api/v1/vendors/{id}/transactions                   # Read-only portfolio
+POST   /api/v1/vendors/{id}/colleague-invites              # Create public invite
+GET    /api/v1/vendors/{id}/colleague-invites              # List active invites
+DELETE /api/v1/vendors/colleague-invites/{inviteId}        # Revoke by id
+
+POST   /api/v1/vendors/{id}/background-refresh             # Queue suggestion run
+GET    /api/v1/vendors/{id}/background-refresh             # Latest run + suggestions
+POST   /api/v1/vendors/{id}/background-refresh/apply       # Apply selected fields
+```
+
+#### Public vendor (`/api/v1/public/vendor`) — Milestone 4.3, no auth
+
+```
+GET    /api/v1/public/vendor/colleague-invites/{token}         # Validate
+POST   /api/v1/public/vendor/colleague-invites/{token}/accept  # Single-use accept
 ```
 
 #### Task Templates (`/api/v1/task-templates`)
