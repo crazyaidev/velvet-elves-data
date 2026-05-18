@@ -2,9 +2,29 @@
 
 **Milestone:** 4.3 (Phase 4, Week 16 — June 22–28, 2026)
 **Author:** Jan (sole developer)
-**Last updated:** 2026-05-14
+**Last updated:** 2026-05-14 (post-ship annotations 2026-05-18)
 **Predecessors:** Milestones 4.1 (Email Integration), 4.2 (AI Email Automation)
 **Successor:** Milestone 5.1 (Role-Specific Dashboards)
+
+> **POST-SHIP STATUS BANNER (2026-05-18):** This plan reflects the
+> intent at the time of authoring. Two implementation decisions
+> diverged from the plan after it shipped and are tracked in
+> [M4_3_DOC_REMEDIATION_PLAN.md](M4_3_DOC_REMEDIATION_PLAN.md):
+>
+> 1. The standalone `/communications` page (referenced in §3.1, §6.1,
+>    §7.1, §10, §11) was consolidated into `/admin/communications`
+>    (TeamLead/Admin gated). The legacy URL redirects. The
+>    vendor-traffic filter, channel chips, single-tx CSV, and
+>    multi-tx export request all live at the admin route.
+> 2. The "Email vendor" inline CTA on the Active Transactions task
+>    column (§6.4) has **not yet been wired** — `VendorRequestModal`
+>    and `useVendorAssignments` exist but are not imported by any
+>    page. Tracked as a Phase 5 follow-up. The vendor-detail page
+>    (`/vendors/:vendorId`) provides a working alternate entry until
+>    the task-card CTA ships.
+>
+> All other deliverables in §10 are shipped and tested (11/11
+> vendor-comm tests passing; full backend suite 549/549).
 
 ---
 
@@ -221,7 +241,7 @@ their own.
 
 ## 5. Backend Implementation
 
-### 5.1 Database migration — `supabase/migrations/20260622_milestone_4_3_vendor_comms.sql`
+### 5.1 Database migration — `supabase/migrations/20260622090000_milestone_4_3_vendor_comms.sql`
 
 ```sql
 BEGIN;
@@ -405,7 +425,7 @@ CREATE POLICY service_role_vendor_background_refreshes ON public.vendor_backgrou
 COMMIT;
 ```
 
-A second seed migration `20260622_seed_vendor_email_templates.sql` inserts five
+A second seed migration `20260622091000_seed_vendor_email_templates.sql` inserts five
 system templates per existing tenant. New tenants should receive the same
 templates from the tenant-provisioning path (`TenantRepository.create` and the
 self-registration provisioning flow), mirroring the existing task-template
@@ -502,6 +522,11 @@ Decision actions:
   marks proposal `accepted`, and optionally drafts a confirmation reply to
   the vendor. `proposed_due_time` remains proposal metadata unless/until the
   task model gains a time-of-day field.
+
+  **Shipped decision (2026-05-18):** confirmation drafting is deferred.
+  Agents send confirmations manually via `VendorRequestModal` so they
+  always control vendor-facing tone. Re-evaluate in Phase 5. See
+  [M4_3_DOC_REMEDIATION_PLAN.md §4](M4_3_DOC_REMEDIATION_PLAN.md).
 - `reject(proposal_id, user, reason)` → stamps `rejected`, audit log, no
   task mutation. UI may then offer "send vendor an alternative date" — that
   reopens the outbound template modal.
@@ -782,7 +807,10 @@ Target ≥ 80 % coverage on the new modules to stay aligned with §7.1.
   the coming-soon menu when the tenant flag is off.
 - **Active Transactions card → tasks column.** Each task with a vendor
   assignment gets an "Email vendor" inline button that opens
-  `VendorRequestModal` pre-bound to that task.
+  `VendorRequestModal` pre-bound to that task. **Status (2026-05-18):
+  not yet wired — `VendorRequestModal` and `useVendorAssignments` are
+  defined but not imported by any page. Tracked as a Phase 5 follow-up
+  in [M4_3_DOC_REMEDIATION_PLAN.md §4](M4_3_DOC_REMEDIATION_PLAN.md).**
 - **AI Email Review (`/ai-emails`).** `vendor_reply` drafts already render
   there. New: when a proposal exists for the draft, show a "Linked task
   update proposal" panel under the source-data rail with a primary
@@ -862,7 +890,7 @@ status and use the existing download route
 
 Single-tenant rollout via existing CI on `dev.velvetelves.com` first.
 
-1. Day 1: merge migration `20260622_milestone_4_3_vendor_comms.sql` +
+1. Day 1: merge migration `20260622090000_milestone_4_3_vendor_comms.sql` +
    seed migration. Verify on dev — empty proposal queue, template list
    shows seeded entries.
 2. Day 1–2: backend routers behind no flag (all behind auth + role checks
@@ -903,7 +931,7 @@ new tables is possible before production data accumulates, but
 
 A reasonable, single-developer-friendly checklist:
 
-- [ ] Migration `20260622_milestone_4_3_vendor_comms.sql` lands; seed
+- [x] Migration `20260622090000_milestone_4_3_vendor_comms.sql` lands; seed
       migration populates 5 system templates per tenant; dev verified.
 - [ ] Models, repositories, and services for templates, proposals, vendor
       assignments, assignment contacts, colleague tokens, and background

@@ -13,8 +13,8 @@
    (11 tests). Full suite: `pytest` → 549 passing.
 2. Frontend builds clean: `npx tsc --noEmit && npx vite build`.
 3. Both 4.3 migrations applied on dev:
-   - `20260622_milestone_4_3_vendor_comms.sql`
-   - `20260622_seed_vendor_email_templates.sql`
+   - `20260622090000_milestone_4_3_vendor_comms.sql`
+   - `20260622091000_seed_vendor_email_templates.sql`
 4. At least one connected email provider (Gmail or Outlook) on the test
    agent's account.
 5. At least one transaction with a task assigned to the test agent.
@@ -52,9 +52,15 @@ works, agents can use admin-created templates.
 Goal: send a real email through the user's provider and confirm the
 communication log captures all the threading metadata.
 
-1. Sign in as Agent. Open a transaction with at least one open task.
-2. Open the transaction drawer → Tasks column → click **Email vendor**
-   on a task (button only renders when a vendor assignment exists; see §3).
+1. Sign in as Agent.
+2. **Until the Active-Transactions "Email vendor" CTA ships (Phase 5
+   follow-up — see [M4_3_DOC_REMEDIATION_PLAN.md §4](M4_3_DOC_REMEDIATION_PLAN.md)),**
+   the modal cannot be reached from a task card. Use the alternate
+   entry instead: open `/vendors/:vendorId` and click the **Email**
+   button on an opted-in contact in `VendorContactCard`. (Or call
+   `POST /api/v1/vendor-communications/send` directly via the API
+   console with `template_id`, `transaction_id`, `task_id`,
+   `vendor_id`, `primary_contact_id`.)
 3. `VendorRequestModal` opens. Pick a template; the right pane shows
    the rendered subject and body with the constrained-format footer.
 4. Verify the **thread marker** chip looks like `VE-TASK-xxxxxxxx`
@@ -79,9 +85,10 @@ opt in/out, and the one-primary rule holds.
 
 1. Choose a vendor company (or create one under **Vendors**).
 2. Hit `POST /api/v1/transactions/{tx}/vendor-assignments` from the
-   API console (or the Transactions UI when the assignment manager
-   surfaces it) with `vendor_id`, `role=inspector`, two `contact_ids`,
-   and `primary_contact_id=<first>`.
+   API console. The assignment-manager UI panel is a Phase 5 follow-up
+   (see [M4_3_DOC_REMEDIATION_PLAN.md §4](M4_3_DOC_REMEDIATION_PLAN.md));
+   for now this step is API-only. Body: `vendor_id`, `role=inspector`,
+   two `contact_ids`, `primary_contact_id=<first>`.
 3. Confirm the response lists both contacts, exactly one with
    `is_primary=true`.
 4. Switch the primary to the second contact via
@@ -176,8 +183,9 @@ Goal: tenant-local suggestions surface and apply per field with audit.
 
 ## 8. Unified communication log UI
 
-1. Open `/communications`. Confirm date grouping (Today / Yesterday /
-   older).
+1. Open `/admin/communications` (the legacy `/communications` URL still
+   redirects there; TeamLead/Admin only). Confirm date grouping
+   (Today / Yesterday / older).
 2. Toggle **Vendor traffic only** — list filters to rows with
    `ai_kind` of `vendor_request` or `vendor_reply`.
 3. Toggle the channel chip to **SMS (soon)** — list goes empty and

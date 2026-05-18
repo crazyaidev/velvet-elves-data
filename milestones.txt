@@ -589,8 +589,8 @@ Deliverables:
   [x] Build vendor email templates with constrained response format
       ("Reply with: Scheduled: YYYY-MM-DD")
       → 5 system templates seeded per tenant via
-        20260622_seed_vendor_email_templates.sql + tenant provisioning hook.
-        Admin CRUD at /admin/vendor-templates.
+        20260622091000_seed_vendor_email_templates.sql + tenant
+        provisioning hook. Admin CRUD at /admin/vendor-templates.
   [x] Implement AI email reply parsing for vendor responses:
       - Extract dates from replies (regex, no extra LLM call)
       - Propose task date updates (vendor_proposals table, human-approved)
@@ -611,7 +611,8 @@ Deliverables:
       - ChannelBadge renders SMS/Voice "soon" pills; tenant flag
         vendor_comms.phone_action_enabled gates click-to-call
   [x] Build communication log UI:
-      - Unified /communications page with filter row + date grouping
+      - Unified comm-log surface at /admin/communications with filter
+        row + date grouping (legacy /communications redirects there)
       - Per-transaction drawer remains (CommunicationsPanel.tsx)
       - Single-transaction CSV via existing /communication-logs/transaction
       - Admin multi-tx export at /admin/communication-exports
@@ -627,8 +628,9 @@ Routes added:
            /api/v1/vendors/{id}/{colleague-invites,background-refresh,
                                 transactions}
            /api/v1/public/vendor/colleague-invites/{token}[/accept]
-  Frontend /communications, /vendors, /vendors/:vendorId,
-           /vendor-proposals, /admin/vendor-templates, /v/:token
+  Frontend /admin/communications (legacy /communications redirects),
+           /vendors, /vendors/:vendorId, /vendor-proposals,
+           /admin/vendor-templates, /v/:token
 
 
 ================================================================================
