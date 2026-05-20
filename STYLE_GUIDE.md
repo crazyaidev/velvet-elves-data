@@ -412,8 +412,13 @@ or replicate its structure:
 
 ### 9.3 Selects, datepickers, money inputs
 
-- Selects: use `<Select>` from `@/components/ui/select`.
+- Selects: use `<Select>` from `@/components/ui/select` (Radix-based).
   Canonical trigger styling is the same `brandedInputClass` as `<Input>`.
+  **Never use a native `<select>`.** Native selects look archaic, don't
+  match brand input styling, and break visual consistency with every
+  other dropdown in the project. For filter-chip style triggers (e.g.
+  the Audit Log filters), override the trigger with `h-9 rounded-full`
+  and a `min-w-[160px]` so it reads as a chip, not a boxy form input.
 - Date inputs: native `type="date"`. Use the `min`/`max` HTML
   attributes for constraints (e.g., contract acceptance has
   `max={todayIso}`).
@@ -466,6 +471,12 @@ Empty states are **explanatory, not apologetic**. One sentence, no
 ```
 
 Don't dramatize empty states with illustrations or emoji.
+
+**Charts always have an empty state.** A chart whose data is empty must
+render an explicit dashed empty-state card with explanatory copy ("No
+closed transactions yet — the chart will fill in as deals close"), *not*
+a blank or broken-looking SVG. A reader must be able to tell that the
+chart is intentionally empty, not broken. See § 16.6.
 
 ---
 
@@ -522,6 +533,32 @@ These have been explicitly rejected by the client. Don't reintroduce:
 12. **Forgetting "Capitalize Each Word" rules** on user-facing labels.
     Field titles use Title Case ("Contract Acceptance Date"), not
     sentence case.
+13. **`max-w-[N]` containers on internal pages.** Internal pages fill
+    the gutter (`px-3 md:px-6`, no inner `max-w`). The exceptions are
+    listed in § 15.3 (wizard right panel; narrow form columns). A
+    dashboard centered inside `max-w-[1400px]` is a wasted-margin
+    failure — the user sees empty space on both sides on wide displays.
+14. **Top bars on dashboards.** Dashboards open with data, not chrome
+    (§ 16.1). The breadcrumb / page-title bar is for list / settings /
+    admin sub-pages — not for `/dashboard/*` routes. No greeting, no
+    "Customize" button, no primary CTA that duplicates the sidebar.
+15. **Native `<select>` elements.** Always use `<Select>` from
+    `@/components/ui/select` (Radix-based). A native `<select>` looks
+    archaic and breaks visual consistency with every other dropdown in
+    the project. (See § 9.3.)
+16. **Multiple card shapes on one dashboard.** Every block — section
+    card, rail card, chart sub-card, KPI card — must share one card
+    vocabulary (§ 16.2). Variation in importance is expressed through
+    `tone`/`density` props, *never* through ad-hoc rounding, shadows,
+    gradient strips, or border weights. Bespoke "hero" cards next to
+    plain section cards next to differently-shaped rail cards read as a
+    hodgepodge.
+17. **Monotone dashboards.** A dashboard whose every card is the same
+    neutral grey provides no hierarchy and fails its at-a-glance job.
+    Mix at least one brand-toned hero, a tone-tinted KPI or two, and
+    severity-colored action-queue items (§ 16.3). The inverse failure
+    is drowning the page in champagne — reserve `ve-orange` for moments
+    that matter.
 
 ---
 
@@ -537,7 +574,254 @@ These have been explicitly rejected by the client. Don't reintroduce:
 
 ---
 
-## 15 · When in Doubt
+## 15 · Page Shells
+
+The product's pages must feel like surfaces of one app — same gutter,
+same header anatomy, same scroll behavior. These rules apply to *every*
+internal page; dashboards have an additional set in § 16.
+
+### 15.1 The canonical shell
+
+Every internal page uses the same shell. Don't invent variations.
+
+```jsx
+<div className="flex h-full min-h-0 flex-col overflow-hidden bg-ve-bg">
+  {/* Optional sticky header per § 15.2. Dashboards omit it — see § 16.1. */}
+  <header className="flex-shrink-0 border-b-[1.5px] border-ve-border bg-white px-3 md:px-6 pt-3 pb-0">
+    …
+  </header>
+  {/* Scroll body */}
+  <div className="flex-1 min-h-0 overflow-y-auto bg-ve-bg px-3 md:px-6 pt-4 pb-12">
+    …
+  </div>
+</div>
+```
+
+Side gutter is **`px-3 md:px-6` project-wide**. Communication Audit,
+Audit Log, AI Governance, the Admin Dashboard, the transaction lists,
+and the FSBO portal all use it. Never widen it without an explicit
+revision to this guide.
+
+### 15.2 Header / breadcrumb pattern
+
+Internal pages that have a header (list, settings, audit, governance,
+admin sub-pages) share one anatomy:
+
+| Slot | Style |
+| --- | --- |
+| Breadcrumb row (above the title) | `text-[11.5px]`: parent crumb + icon, `›` separator (`text-ve-charcoal-ghost`), current page in `text-ve-text-muted font-medium`. |
+| Title | `font-serif text-[16px] md:text-[20px] text-ve-text-primary`. |
+| Inline badge | A pill chip *next to the title* — counts, status, etc. (e.g. `342 entries`). |
+| Optional tab strip | Below the title row, with `border-t-[1.5px] border-ve-border -mx-3 md:-mx-6 px-3 md:px-6` so the rule bleeds to the page gutter (per `CommunicationAuditPage`). |
+
+Admin sub-pages use the shared `AdminPageHeader` component
+(`src/components/admin/AdminPageHeader.tsx`); other pages compose the
+same anatomy inline. **Every page in a group must share the same header
+style** so the group reads as one product surface — e.g. Communication
+Audit, Audit Log, and AI Governance all share the breadcrumb-and-serif
+header pattern, with the "Admin" crumb linking back to the admin
+dashboard.
+
+### 15.3 Container width — no `max-w` on internal pages
+
+Internal pages do **not** wrap content in `max-w-*` containers. Content
+fills the gutter; grids expand naturally. Exceptions:
+
+- Wizard right panel: `max-w-2xl` (per § 4.4).
+- Standard form / settings pages may use `max-w-3xl`–`max-w-5xl` *only*
+  when narrowing the reading column genuinely improves form
+  readability. Even then, the outer gutter is still `px-3 md:px-6`.
+
+When a settings page has *multiple* control rows (e.g. two sliders
+side-by-side), drop the `max-w` and lay the controls out in a
+`grid-cols-1 md:grid-cols-2` grid so the horizontal space is used
+intentionally — not absorbed by margins.
+
+The anti-pattern: a dashboard centered inside `max-w-[1400px]` on a
+wide display. The reader sees a strip of content with hundreds of
+pixels of dead space on each side. (See § 13, item 13.)
+
+---
+
+## 16 · Dashboard Design
+
+Dashboards are the surfaces where information density and visual
+hierarchy matter most. Their primary job is **at-a-glance
+comprehension**: the reader sees the most important numbers, the most
+important action, and the most important risks without scrolling or
+parsing labels. The brand voice is still calm (§ 1) and the palette is
+still restrained (§ 2), but a dashboard's *contrast* must be decisive.
+
+These rules govern the admin dashboard explicitly; role dashboards
+(Solo Agent, Team Leader, Attorney, FSBO) follow the same principles
+through the shared kit (`@/components/dashboard/shared`).
+
+### 16.1 What a dashboard is — and isn't
+
+A dashboard is **data**, not chrome. The page identity comes from the
+sidebar route + the data on the page, not from a sticky header.
+
+Dashboards **must not** have:
+
+- A sticky **top bar** with greeting, breadcrumb, or page descriptor
+  chrome. (Other internal pages do — dashboards do not.)
+- A **"Customize" / "Edit layout"** button on the page itself. Drawer-
+  style layout reordering belongs in user settings, not the dashboard.
+- A primary CTA that **duplicates the sidebar primary CTA**
+  ("Invite user", "+ New Transaction"). The shell already exposes one
+  primary action; the dashboard must not echo it.
+- A separate **page-title row** above the first row of content.
+
+Dashboards **do** have:
+
+- A KPI strip as the first row of content (§ 16.4).
+- A main column of section cards + a right rail of compact cards via
+  `MainRailGrid` from `@/components/dashboard/shared`.
+- A `FloatingAskAi` widget — floating bottom-right is not chrome.
+- The shell from § 15.1 (`px-3 md:px-6`, no `max-w`).
+
+### 16.2 One card vocabulary per dashboard
+
+A dashboard must use **one** card shell across every block — main-
+column sections, rail cards, chart sub-cards, KPI cards. Different
+card shapes for "this is a section card" vs. "this is a rail card"
+vs. "this is a chart card" is a hodgepodge and a documented anti-
+pattern (§ 13, item 16).
+
+For the admin dashboard, that vocabulary is:
+
+- **`AdminCard`** (`src/components/dashboard/admin/AdminCard.tsx`) —
+  every section block and every rail card. Standardises:
+  - Outer chrome: `rounded-xl border border-ve-border bg-white shadow-card`.
+  - Header anatomy: **icon tile → mono kicker → serif title → optional
+    description** on the left; `action` / `trailing` slots on the right.
+  - Two density modes: `default` (main column) and `compact` (rail /
+    chart sub-card).
+  - Tone via prop: `tone='brand'` colors the icon tile and eyebrow
+    champagne; `tone='neutral'` keeps them muted.
+  - Body tint via prop: `bodyTint='soft'` applies a `ve-surface-2/40`
+    overlay so list / grid contents lift off the card.
+- **`AdminStat`** (`src/components/dashboard/admin/AdminStat.tsx`) —
+  every "small number in a tinted container": same border, padding,
+  mono kicker, 22 px serif value. Tone varies; shape never does.
+- **`AdminKpiCard`** — KPI strip. Shares `AdminCard`'s outer chrome
+  *exactly*; differs only in the body (icon tile + serif headline
+  value).
+
+Role dashboards use the shared kit's `SectionCard` + `RailCard` for the
+same reason — pick one card type per dashboard and stick with it.
+
+**Variation is expressed through props (tone, density), not through
+ad-hoc styling.** When a hero block needs more visual presence, use
+`tone='brand'` + `bodyTint='soft'` + a trailing-slot badge strip — not
+a one-off `rounded-2xl` card with a custom gradient strip.
+
+### 16.3 Emphasis & color contrast
+
+A dashboard where every card is the same neutral grey has failed its
+primary job. A dashboard where every card screams champagne has also
+failed it. Aim for:
+
+- **~1 brand-toned section per page** (the priority / hero block) —
+  gets `tone='brand'`.
+- **1–2 tone-tinted KPI cards** (e.g. green for pipeline-volume money,
+  amber when something needs attention). Four neutral KPIs = monotone
+  failure.
+- **Tone variation on action-queue severities** — red rail for critical,
+  amber for high, blue for review, neutral for FYI (§ 16.5).
+- **Neutral for everything else** — most cards are `tone='neutral'`,
+  and that's correct.
+
+Within the `ve-*` palette:
+
+| Color | Where to use it on a dashboard |
+| --- | --- |
+| Champagne (`ve-orange*`) | AI surfaces, brand / priority emphasis, primary CTAs. Don't waste it on decoration. |
+| Status triads (red / amber / green / blue) | Paired bg + border + text only (§ 2.3). Severity rails, status pills, tone-tinted stats. Never in isolation. |
+| Neutral (`ve-surface-2`, `ve-text-ghost`) | The dashboard body. Most cards are neutral. |
+
+### 16.4 The KPI strip
+
+Most dashboards open with a 4-card KPI strip as the first row of
+content (above everything else — there is no header on a dashboard, per
+§ 16.1).
+
+- `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4`.
+- Each card: **tinted circular icon tile** (~40 px) on the left, then
+  mono kicker label + serif headline value (28–32 px) + optional muted
+  hint underneath.
+- Cards are **clickable** and deep-link to filtered views — KPIs are
+  the dashboard's primary navigation, not decoration.
+- **At least two different tones** across the four cards. Four neutral
+  KPIs = monotone failure (§ 16.3).
+- Outer chrome must match every other card on the page (§ 16.2) — the
+  KPI strip is part of the family, not a separate widget.
+
+### 16.5 Action queue / priority list
+
+The "Needs your attention" pattern carries the strongest hierarchy on
+a dashboard. Anatomy:
+
+- Parent card uses `bodyTint='soft'` so items pop off the card.
+- Each item is a card-shaped row with:
+  - **4 px severity rail** down the left edge — `ve-red` (critical),
+    `ve-amber` (high), `ve-blue` (review), `ve-neutral` (FYI).
+  - **Tinted icon tile** (~44 px rounded square, `ring-1 ring-inset`,
+    color matched to severity). The icon is chosen by category
+    (AI → `Sparkles`, Access → `Users`, Pipeline → `Briefcase`,
+    Security → `ShieldAlert`).
+  - **Severity pill + category badge** inline above the title, both
+    paired bg / border / text triads per § 2.3.
+  - **15–17 px serif title** + muted "why" line below.
+  - **Filled brand-orange primary button** for the action — never an
+    outline button for the primary action on an action item.
+  - Lift-on-hover (`-translate-y-[1px]` + `shadow-card-hover`).
+- **One explicit action button per item.** Never make the whole card
+  the click target — this is the alert-card clickability rule
+  (`feedback_alert_card_clickability`). If a card needs parallel
+  actions, render multiple explicit buttons. Clicking different
+  regions to produce different behaviors is forbidden.
+
+### 16.6 Trend / chart grid
+
+A "trends" section is a grid of N equal-height chart cards inside a
+parent `AdminCard`:
+
+- Parent: `AdminCard` with `bodyTint='soft'` so the inner white
+  sub-cards lift off the tint.
+- Sub-cards: **the same** `AdminCard compact` shell as rail cards
+  (icon tile + kicker + title + description, `trailing` slot for the
+  headline stat) — not a bespoke chart panel.
+- **Fixed-height chart frame** (e.g. 180 px) inside every sub-card so
+  the row stays aligned at every breakpoint.
+- **Explicit empty state** when data is empty — a dashed empty-state
+  card with explanatory copy. A chart must never render a blank or
+  broken-looking SVG (per § 11).
+
+### 16.7 Right rail composition
+
+The rail is a vertical stack of `AdminCard compact` cards. Each gets:
+
+- The same **icon-tile-in-header** pattern as main-column cards.
+- Compact density (`px-4 py-3` header, `p-4` body).
+- Smaller serif title (~14 px) so the rail reads as secondary.
+
+Rail cards must not look like a different visual species from main
+column cards — the only difference is density.
+
+### 16.8 Dashboard-adjacent admin pages
+
+Pages that the dashboard deep-links to (AI Governance, Audit Log,
+Communication Audit) are **not** dashboards — they get the standard
+page shell from § 15 with the breadcrumb header, and they share the
+same header anatomy across the whole admin group. AI configuration
+that admins reach from the dashboard's "Tune thresholds →" link lives
+on the AI Governance page, not in tenant Settings — keep AI admin
+decisions on one surface so the cognitive model stays intact.
+
+---
+
+## 17 · When in Doubt
 
 1. **Find the closest existing pattern** — the wizard, the
    `TransactionListPage`, the `HistoryPanel`. Copy it.
@@ -551,5 +835,8 @@ These have been explicitly rejected by the client. Don't reintroduce:
 
 ---
 
-*Last revised: 2026-04-28. Treat this document as the spec; if you
-disagree with a rule, propose a revision before you ship around it.*
+*Last revised: 2026-05-20 (rev 2 — added § 15 Page Shells and § 16
+Dashboard Design; extended § 13 Anti-Patterns with items 13–17;
+strengthened § 9.3 and § 11 with explicit rules on selects and chart
+empty states). Treat this document as the spec; if you disagree with
+a rule, propose a revision before you ship around it.*
