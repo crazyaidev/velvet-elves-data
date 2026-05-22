@@ -1199,20 +1199,37 @@ GET    /api/v1/dashboard/attorney/state-rules   # State rules data:
 
 # --- FSBO Customer Workspace ---
 GET    /api/v1/dashboard/fsbo/overview      # FSBO overview:
-                                            #   critical_next_steps, days_to_close,
-                                            #   share_links_live, missing_documents
-GET    /api/v1/dashboard/fsbo/properties    # Property portfolio:
-                                            #   property cards with status, closing_date,
-                                            #   missing_docs, new_messages, fsbo_state
-                                            #   (listing_prep | under_contract)
-GET    /api/v1/dashboard/fsbo/documents     # FSBO document view:
-                                            #   documents with status (missing, in_progress,
-                                            #   uploaded, verified, complete),
-                                            #   role-appropriate actions
+                                            #   properties[], critical_next_steps[] (derived
+                                            #   from missing docs / dates / tasks — never
+                                            #   hardcoded), days_to_close_nearest,
+                                            #   share_links_live, missing_documents_count,
+                                            #   recent_milestones[], ai_guidance,
+                                            #   support_contact, boundary_notice
+GET    /api/v1/dashboard/fsbo/properties/{transaction_id}
+                                            # Property detail (ownership-checked — cross-owner
+                                            #   returns 404, never confirms existence):
+                                            #   address (decrypted), fsbo_state, closing_date,
+                                            #   days_to_close, key_dates[], milestones[]
+                                            #   (timeline with done/active/upcoming), document_board
+                                            #   (Missing/InProgress/Uploaded/Verified/Complete),
+                                            #   documents[], share_links[], messages[]
+                                            #   (portal-visible coordinator messages only),
+                                            #   ai_guidance, support_contact, boundary_notice
+GET    /api/v1/dashboard/fsbo/documents     # FSBO document board projection:
+                                            #   per-property board where Missing = absence of a
+                                            #   required doc_type for the property's fsbo_state;
+                                            #   Verified vs Complete = signature-in-flight rule.
+                                            #   totals[] aggregates across all owned properties.
 GET    /api/v1/dashboard/fsbo/milestones    # Milestones & messages:
-                                            #   milestone_timeline, messages, ai_guidance
-GET    /api/v1/dashboard/fsbo/share-link    # Milestone sharing:
-POST   /api/v1/dashboard/fsbo/share-link    #   create/manage expirable read-only links
+                                            #   properties[] with per-property milestone timeline
+                                            #   and key dates; messages[] = portal-visible
+                                            #   coordinator messages (excludes internal notes,
+                                            #   AI-draft internals, document-action events).
+GET    /api/v1/dashboard/fsbo/share-link    # Milestone sharing (FSBO scoped to owned tx):
+POST   /api/v1/dashboard/fsbo/share-link    #   create/manage expirable read-only links;
+DELETE /api/v1/dashboard/fsbo/share-link/{link_id}
+                                            #   revoke — `assert_fsbo_transaction_access`
+                                            #   blocks cross-owner list/create/revoke.
 ```
 
 #### AI Suggestions (`/api/v1/ai/suggestions`)

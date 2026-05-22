@@ -2631,14 +2631,22 @@ This is a pure redirect route. No UI rendered.
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
-  - `GET /api/v1/fsbo/dashboard` — overview data:
-    - `properties[]` — FSBO-owned properties with status
-    - `critical_next_steps[]` — ranked action items
+  - `GET /api/v1/dashboard/fsbo/overview` — overview data:
+    - `properties[]` — FSBO-owned properties with status, missing-doc count, portal-visible message count
+    - `critical_next_steps[]` — ranked action items (real, derived from missing docs/dates/tasks). Each step carries `action_kind: "upload_documents" | "open_property"` so the frontend can render per-row inline actions without parsing strings.
+    - `upcoming_deadlines[]` — next ~21 days of key dates / task due dates with `consequence` text for the expandable detail.
+    - `closing_timeline` — rollup for the nearest-closing property: `{closing_date, days_to_close, current_stage_label, file_status_label, address}`. Drives the "Days to closing" KPI body.
     - `missing_documents_count`
-    - `active_share_links_count`
-    - `days_to_close` (nearest property)
-    - `recent_messages[]`
-  - `GET /api/v1/fsbo/notifications`
+    - `share_links_live`
+    - `days_to_close_nearest`
+    - `recent_milestones[]`
+    - `ai_guidance` — deterministic plain-English next-decision + glossary
+    - `support_contact` — coordinator name/email/phone. Resolved per-tenant via `fw.resolve_support_contact`: prefers the assigned TC/Admin on the transaction, then the tenant's primary admin, then the default constant.
+    - `boundary_notice`
+  - Property detail page reads `GET /api/v1/dashboard/fsbo/properties/{id}` (ownership-checked). Response includes `contacts[]` (buyer / buyers_agent / title / attorney etc. with decrypted PII + call/email actions) and per-message `seen: boolean`.
+  - Documents board reads `GET /api/v1/dashboard/fsbo/documents` (per-property projection).
+  - Milestones page reads `GET /api/v1/dashboard/fsbo/milestones` (timeline + portal-visible coordinator messages with `seen` flag).
+  - Property Detail and Milestones page mount fires `POST /api/v1/dashboard/fsbo/messages/seen` with the visible log_ids — idempotent, cross-owner-filtered, silences the unread dot on the next refetch.
 - **Loading state UI:** FSBO-styled skeleton with portfolio card placeholders
 - **Empty state UI:** "Welcome! Add your first property to get started." with "Add Property" CTA
 - **Error state UI:** Error banner with retry
@@ -2646,17 +2654,24 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** FSBO/Client shell (simplified sidebar)
 - **Sidebar:** KPI tiles: Critical Next Steps (count), Days to Close, Share Links Live, Missing Documents
-- **Sidebar navigation:** Dashboard | My Properties | Documents | Milestones & Messages | Ask Velvet Elves AI | Notifications | Sharing
-- **Topbar:** Brand lockup | "Share milestones" CTA | Notification bell | User chip
-- **Page header:** "Dashboard" title
-- **Portal tabs:** Overview | Properties | Documents | Support (with count badges)
+- **Sidebar navigation:** Standalone "Dashboard" link (top of sidebar, never inside a group) + **Workspace** group (My Properties, Documents, Milestones & Messages) + Settings. The Help group is intentionally absent — Ask Velvet Elves AI is the floating chat button on every page, Notifications live in the topbar bell, and Sharing is a modal opened from the sidebar-footer Share CTA, the Overview "Share links live" KPI, and the Property Detail "Manage" rail link.
+- **Sidebar footer CTA:** "Share milestones" — opens the FSBO share-management modal (`FsboShareManagementModal`, owned by `FsboShareContext`). There is no `/fsbo/share` route; managing share links is a focused, quick task that lives in a modal. (FSBO is the one role whose primary CTA lives in the sidebar footer, not the topbar, per `ROLE_DASHBOARDS_DESIGN_UPDATE_PLAN.md` pattern 11.)
+- **Topbar:** Brand lockup | **Portfolio status chip** (computed from `useFsboOverview`: red "Closing in Nd" when days_to_close ≤ 7, amber "Action needed · Nd missing" when missing_documents_count > 0, else green "On track" — clicks navigate to `/fsbo`) | Notification bell | User chip. No FSBO primary CTA in the topbar.
+- **Persistent action banner:** A second row below the topbar surfaces `critical_next_steps[0]` across every FSBO page (not just the Overview). Two buttons: a primary "Open" / "Upload" (action depends on `action_kind`) and a `×` dismiss. Dismissal is session-scoped (`sessionStorage` keyed on `transaction_id + title`) so a new top step still surfaces; the banner is implemented by `AppLayout` and gated on `shellVariant === 'fsbo'`.
+- **Page header:** The Overview is a dashboard surface and omits the page-title row per STYLE_GUIDE §16.1. Tool sub-pages (My Properties, Property Detail, Documents, Milestones & Messages, Sharing) use the canonical §15 breadcrumb-and-serif header from `FsboPortalShell`, with the breadcrumb in `[Workspace] › [Page Title]` form (Property Detail extends it: `Workspace › My Properties › {Address}`).
+- **Portal tabs:** None. The sidebar is the navigation; portal tabs would duplicate it (review-corrected 2026-05-21).
 - **Primary content area:**
 
   **Overview section:**
-  - Welcome card with next decision in plain English: "Your next step is to [action]. Here's why it matters: [explanation]. Deadline: [date]."
-  - Property portfolio strip: horizontal scroll of property cards (address, status pill, portfolio chips for closing date/missing docs/new messages, quick actions)
-  - Recent milestones activity (last 5 events)
-  - AI guidance card: plain-English summary of current status and recommendations
+  - KPI strip: My Properties, Missing Documents, Share Links Live, Days to Closing.
+  - Closing-timeline rollup strip directly under the KPIs: address + `Stage · {current_stage_label}` + `File · {file_status_label}` chips.
+  - Hero "Next step" card (real data, `critical_next_steps[0]`) — title, body, why-it-matters, deadline, primary action ("Upload missing documents" / "Open this property") + secondary "Share milestones".
+  - "Stay on track" card — secondary ranked steps from `critical_next_steps[1..5]` rendered as rows with per-row inline actions driven by each step's `action_kind`. Hidden when only one step exists.
+  - "Upcoming deadlines" card — up to five rows from `upcoming_deadlines[]`; each row is click-to-expand and reveals the row-specific `consequence` text.
+  - Property portfolio strip: `FsboPropertyTile` in select mode (the Overview never navigates; clicking only focuses).
+  - Recent milestones activity (last 5 events).
+  - AI guidance rail card: plain-English `ai_guidance.next_decision` + glossary chips.
+  - Concierge upsell rail strip — the "Learn about Concierge" button opens the AI chat with a concierge-themed initial prompt (no `/settings#concierge` route exists).
 
   **Properties section:** (also accessible at `/fsbo/properties`)
   - Property cards, each with: address, status (Listing Prep / Under Contract), key milestones, missing docs count, "Open timeline" and "Share link" actions
@@ -2686,7 +2701,7 @@ This is a pure redirect route. No UI rendered.
 - Trigger: Click
 - Immediate UI: Opens Share Milestone modal
 - Fields: Recipient name (optional), expiration (24h/48h/7d/30d/custom), share description
-- Submit: `POST /api/v1/fsbo/share-links` → returns shareable URL
+- Submit: `POST /api/v1/dashboard/fsbo/share-link` → returns shareable URL (the raw token is returned once at creation)
 - Success: Copy link to clipboard; toast "Share link created"
 - Side effects: Audit log; link appears in Sharing management page
 
@@ -2745,9 +2760,13 @@ This is a pure redirect route. No UI rendered.
 
 **`/fsbo/milestones`** — Milestones & Messages: timeline of all milestones across properties with status indicators. Messages from coordinators. Plain-English explanations of each milestone.
 
-**`/fsbo/share`** — Sharing management: view all active share links, create new ones, revoke existing ones. Shows viewer-open notifications (who viewed when).
+**Sharing management — modal, not a page.** There is no `/fsbo/share` route. Share-link management is `FsboShareManagementModal`, opened via `useFsboShare().open()` from the sidebar-footer "Share milestones" CTA, the Overview "Share links live" KPI tile, and the Property Detail "Manage" rail link (which seeds `defaultPropertyId`). The modal lists active links, supports revoke, and opens the nested `ShareMilestoneModal` for create. Frontend route attempts to `/sharing` for FSBO users are redirected back to `/fsbo` in `App.tsx`.
 
-**`/fsbo/ask-ai`** — Full-page AI chat interface: "Ask Velvet Elves AI" — plain-English questions about the process, document requirements, timelines. Simplified interface. Cannot execute workflow actions.
+**Ask Velvet Elves AI — floating widget, not a page.** There is no `/fsbo/ask-ai` route. The floating `FloatingAskAi` button sits on every FSBO page; clicking it opens the shared `AiChatContext` panel with an FSBO-friendly placeholder. The Property Detail and Overview "Plain-English guide" cards link to it via `aiChat.open(...)`.
+
+**Property Detail "People involved" panel.** `/fsbo/properties/:id` includes a "People involved" rail card sourced from `transaction_parties` (decrypted via `_safe_decrypt`). Each contact carries role label, name (or company), and inline Call / Email buttons. Empty rows (no name / email / phone / company) are dropped server-side.
+
+**Unread coordinator messages.** Property Detail and Milestones pages render a small orange dot for any message with `seen === false`. On mount, the page POSTs the visible log_ids to `/api/v1/dashboard/fsbo/messages/seen` so the dot is suppressed on the next refetch. The endpoint upserts `(log_id, user_id)` into `communication_log_views` and rejects ids that don't belong to the FSBO user's transactions.
 
 All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active state), and the same AI/notification/responsive patterns defined in §8.1.
 
