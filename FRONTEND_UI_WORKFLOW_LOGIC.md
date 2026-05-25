@@ -561,7 +561,8 @@ All internal pages share a common app shell. This section defines it once; indiv
   - Admin → `/dashboard/admin`
   - Client → `/client/transactions`
   - FSBO Customer → `/fsbo`
-  - Vendor → `/client/documents` (vendor-scoped view)
+  - Vendor → `/vendor` (the Vendor portal owns the vendor surface; the old
+    `/client/documents` vendor hijack was removed — that route is Client-only)
 - **Auth requirement:** Protected
 
 This is a pure redirect route. No UI rendered.
@@ -2787,25 +2788,45 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
-  - `GET /api/v1/client/transactions` — transactions where this user is a party
-  - Each: transaction summary (address, status, closing date, agent name)
+  - `GET /api/v1/dashboard/client` — the **canonical client read** that feeds all
+    four surfaces (transactions + per-transaction milestones/key-dates, document
+    status summary, agent card). There are **no** per-surface
+    `/api/v1/client/transactions` / `/client/documents` endpoints — the rebuild
+    standardized on the `/dashboard/client` namespace, mirroring FSBO's
+    `/dashboard/fsbo/...` decision (CLIENT_WORKSPACE_PLAN.md D3).
+  - Each transaction view: address (decrypted), status, closing date, key dates,
+    milestone timeline, next milestone.
 - **Loading state UI:** Transaction card skeletons
 - **Empty state UI:** "No transactions yet. Your agent will add you when your transaction begins."
 
 ### 3. Layout & Component Hierarchy
-- **Shell variant:** Client shell (simplified)
-- **Sidebar:** My Transactions | Documents | Milestones | Agent Info
+- **Shell variant:** Client shell (`ClientPortalShell`) — the same §15 tool shell
+  as the FSBO portal: `Your Workspace › [Page]` breadcrumb, standard
+  `px-3 md:px-6` gutters, boundary-notice footer.
+- **Navigation:** the AppLayout sidebar ONLY (My Transactions | Documents |
+  Milestones | Agent Info). There is **no** in-shell tab bar — the prior
+  `_shell` tab bar duplicated the sidebar 1:1 and was removed (D1/L1).
 - **Page header:** "My Transactions" title
 - **Primary content area:**
-  - Transaction cards: address, status pill (Active/Closed), closing date, agent name/avatar
-  - Milestone bar per transaction (simplified: major milestones only)
-  - Click card → expanded view showing key dates, next milestone, recent updates
-  - No task visibility, no internal notes
+  - Transaction cards: address, status pill (Active/Closed), closing date, a
+    compact milestone stepper, and the next milestone in plain English.
+  - Cards are **containers with explicit buttons** (View details / Documents /
+    Ask a question) — never a whole-card click target (L8).
+  - "View details" → an enriched inline panel: key dates, per-transaction
+    Documents/Milestones links, and the two-way "Ask a question" thread.
+  - No task visibility, no internal notes.
 
 ### 4. User Actions
-- **Card click:** Expand to see details (dates, milestones, documents link)
-- **"View Documents" link:** Navigate to `/client/documents?transaction=:id`
+- **"View details" button:** Expand the inline panel (dates, milestones/documents links, thread)
+- **"Documents" / "Open documents":** Navigate to `/client/documents?transaction=:id`
 - **"View Milestones" link:** Navigate to `/client/milestones?transaction=:id`
+- **"Ask a question":** Open the expand and focus the message composer. The topbar
+  "Ask your agent" CTA (`?ask=1`) opens this directly — pre-selecting the
+  transaction when the client has exactly one, prompting a choice when several.
+- **Messaging:** `POST /api/v1/client/messages` to ask; `GET /api/v1/client/messages?transaction_id=`
+  for the thread. The thread is gated server-side by `communication_logs.is_client_visible`
+  — the client's own questions plus any team reply explicitly surfaced to them;
+  internal notes / AI drafts / audit rows are never returned.
 
 ### 5. Conditional Rendering Logic
 - Client sees: transaction overview, key dates, milestones, documents (view/upload), agent info
@@ -2821,31 +2842,45 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ## 9.2 Client Documents — `/client/documents`
 
-- Document list for client's transactions (view, download, upload)
-- Status indicators: Missing, In Progress, Uploaded, Verified, Complete
-- Upload zone for new documents
-- "Flag for deletion" for documents client wants removed
-- Cannot delete documents directly
-- Cannot see full document center (only documents shared with client role)
+- Leads with the **real** `PortalDocumentList` (the role-scoped GET /documents,
+  which returns only the client's own uploads — never agent-internal files) with
+  per-row "Flag for deletion". This is the single document representation; the
+  old five-column hardcoded-zero status board was removed (CLIENT_WORKSPACE_PLAN.md D4).
+- A **slim, real status summary** driven by `documents_summary` shows only the
+  buckets that actually have documents: **In progress / Uploaded / Verified /
+  Complete**. "Missing" is **not** shown for a represented client — required-doc
+  tracking is the agent's responsibility on a represented deal, so a client-facing
+  Missing count would be fiction.
+- **Upload is a modal** (`ClientUploadModal`) launched from the page header CTA,
+  collecting **transaction + document type** (+ optional label) before submit —
+  not a bare on-page dropzone (L2/L3).
+- Cannot delete documents directly; "Flag for deletion" sends a request to the agent.
+- Cannot see the full document center (only the client's own documents).
 
 ---
 
 ## 9.3 Client Milestones — `/client/milestones`
 
-- Timeline view of transaction milestones
-- Plain-English descriptions of each milestone
-- Status indicators (completed/current/upcoming)
-- Key dates displayed
-- Share milestone link option (generates read-only shareable URL)
-- No task details visible
+- Per-transaction **vertical timeline** from the real milestone projection:
+  status (completed / current / upcoming), plain-English descriptions, and key
+  dates. Honors the `?transaction=:id` filter from the transaction cards.
+- No task details visible.
+- **Share milestone link:** the existing share system (`/dashboard/fsbo/share-link`)
+  is gated to FSBO + internal roles and is **not client-eligible**. Rather than
+  fork a parallel share path under this rebuild, the page surfaces an honest note
+  to ask the agent for a shareable link. Client self-serve sharing is a separate,
+  explicitly-scoped decision (CLIENT_WORKSPACE_PLAN.md §11.3).
 
 ---
 
 ## 9.4 Agent Info — `/client/agent`
 
 - Agent BIO section: "Learn About Your Agent"
-- Agent photo, name, company, bio text, contact info (phone, email)
+- Agent photo/avatar, name, company, bio text, contact info (phone, email)
 - One-click call/email actions
+- The backend resolves the **actual Agent** (by `users.role` priority:
+  Agent → TC → TeamLead → Attorney), never the first non-client assignee, so a
+  client never sees their TC/attorney under "Your agent" (CLIENT_WORKSPACE_PLAN.md §4.2 #8).
 - Read-only informational page
 
 ---

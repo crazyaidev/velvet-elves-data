@@ -1294,14 +1294,25 @@ GET    /api/v1/attorney/state-rules        # State rules reference: ?state=
 GET    /api/v1/attorney/recording-calendar # Recording calendar: ?start=&end=
 ```
 
-#### Client Portal (`/api/v1/client`)
+#### Client Portal
 
 ```
-GET    /api/v1/client/transactions         # List transactions where user is a party
-GET    /api/v1/client/documents            # Documents visible to client role
-                                           #   (view/download/upload, no delete)
-GET    /api/v1/client/milestones           # Milestone timeline for client's transactions
-POST   /api/v1/client/documents/{id}/flag-deletion  # Request document deletion review
+# Canonical aggregated read — feeds all four Client surfaces (transactions +
+# per-transaction milestone timeline/key-dates, document status summary, agent
+# card). There are no per-surface /client/{transactions,documents,milestones}
+# endpoints; the portal standardized on the /dashboard/client namespace
+# (mirrors FSBO's /dashboard/fsbo decision — CLIENT_WORKSPACE_PLAN.md D3).
+GET    /api/v1/dashboard/client            # Aggregated client dashboard read
+
+# Two-way "Ask a question" thread, gated by communication_logs.is_client_visible.
+POST   /api/v1/client/messages             # Client asks a question (persists + notifies assignee)
+GET    /api/v1/client/messages?transaction_id=...  # Client-visible thread (questions + surfaced replies)
+
+# Documents (view/download/upload, no delete) reuse the role-scoped document API,
+# which already returns only the client's own documents:
+GET    /api/v1/documents?transaction_id=...        # Client's own documents
+POST   /api/v1/documents/upload                    # Upload (transaction + doc_type)
+POST   /api/v1/documents/{id}/flag-deletion        # Request document deletion review
 ```
 
 #### Public Milestone Viewer (`/api/v1/milestones/shared`)
@@ -1566,7 +1577,7 @@ App
 |   `-- /client/agent — Agent BIO / "Learn About Your Agent"
 |
 |-- Vendor Portal (protected — minimal)
-|   `-- /client/documents (vendor-scoped: own uploads only)
+|   `-- /vendor (vendor-scoped: own uploads only; the prior /client/documents hijack was removed)
 |
 `-- Public
     `-- /milestones/:shareToken — read-only milestone viewer (no auth)
