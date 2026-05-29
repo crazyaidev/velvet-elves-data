@@ -215,6 +215,8 @@ The page moved Team → Admin, so its top-bar breadcrumb root changed to match:
 
 ### 8.4 Reconcile the Task Templates dual-home (follow-up)
 
+> **✅ Resolved (May 2026 — see `ACCOUNT_MODAL_REDESIGN_PLAN.md`).** The Settings → Task Templates stub was **deleted** (the whole Settings page was re-composed into the Account modal + Organization page, and the stub was not carried into either). The sole canonical home is now `/admin/task-templates` in the Team group, reachable from the Team Overview quick-links. No link-out was added — a third pointer would re-create the echo.
+
 Task Templates exists as both `/admin/task-templates` (nav) and a Settings tab (`SettingsPage.tsx:45`). Choose one canonical surface; if the nav page is canonical, replace the Settings tab with a link to it (or remove the tab). Out of strict scope for the Team/Admin split but the same root cause — recommend tracking together.
 
 ### 8.5 Documentation

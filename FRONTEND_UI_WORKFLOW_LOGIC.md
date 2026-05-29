@@ -2213,7 +2213,7 @@ This is a pure redirect route. No UI rendered.
 
 ## 6.3 Settings — `/settings`
 
-> **As-built (May 2026):** the page is a single scrolling document with seven sections, NOT a tabbed surface. Role-gating is not enforced at the section level today — every signed-in user sees every section. Most sections beyond Email Integrations / E-Signature / Help & Tour are visual placeholders and do not persist on refresh.
+> **⚠ Superseded (May 2026 redesign — see `ACCOUNT_MODAL_REDESIGN_PLAN.md`).** Settings is no longer a single page. Personal preferences (Profile/identity, Notifications, My Closing Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, Help & tour) now live in the shared **Account modal** opened from the avatar menu / footer gear. Tenant/workspace configuration (Company, Branding, AI configuration, Email integrations, E-signature, Danger Zone) lives on the new **Organization page** at `/organization`. The **Task Templates** stub was deleted (its sole home is `/admin/task-templates`). `/settings`, `/client/settings`, `/fsbo/settings` (+ `?section=`) are kept as routes that open the Account modal. The section descriptions below remain accurate per-section, but their *location* has moved.
 
 ### 1. Page Identity & Access
 - **Route:** `/settings`
@@ -3082,6 +3082,8 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 ---
 
 ## 11.1 Profile — `/profile`
+
+> **⚠ Superseded (May 2026 redesign — see `ACCOUNT_MODAL_REDESIGN_PLAN.md`).** There is no standalone Profile page or route. Identity now lives as the **Profile** section inside the shared **Account modal** (opened from each role's avatar menu / footer gear). Same fields and the same `PATCH /api/v1/users/me` save path described below; the surface is a modal section rather than a page. `/profile` still 301-redirects to `/analytics?scope=me` for legacy report links.
 
 ### 1. Page Identity & Access
 - **Route:** `/profile`
