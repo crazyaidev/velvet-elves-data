@@ -2777,6 +2777,21 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ---
 
+> **2026-05-30 redesign — the "closing concierge" Home.** The client landing is
+> now **`/client/home`** (`ClientHomePage`), a single warm, card-based concierge
+> screen reconstructed from Jake's design comp and implemented per
+> `CLIENT_WORKSPACE_REDESIGN_PLAN.md`. The client nav set is **Home · Timeline ·
+> Documents · Payments · Agent Info** (the comp's "Next Steps" and "Updates"
+> destinations are surfaced *on* Home as the Next Best Action and Recent Updates /
+> Ask Velvet cards — no separate pages, no duplicate nav). The Home is fed by an
+> **additive `home` block** on the same canonical `GET /api/v1/dashboard/client`
+> read (no new endpoint): hero (buy/sell verb + decrypted address + phase chip +
+> closing target + progress %), next best action, "what Velvet is handling",
+> upcoming dates, recent updates, documents-needing-attention, and key contacts
+> (agent + deal parties). "Ask Velvet" reuses the existing two-way
+> `is_client_visible` thread (`/api/v1/client/messages`) — no new LLM. The four
+> tool surfaces below (§9.1–§9.4) remain reachable from the new nav.
+
 ## 9.1 Client Transactions — `/client/transactions`
 
 ### 1. Page Identity & Access
