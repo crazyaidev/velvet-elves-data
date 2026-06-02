@@ -1,8 +1,39 @@
 # Milestone 6.1 — White-Label & Multi-Tenant: Implementation Plan
 
 **Milestone:** 6.1 — White-Label & Multi-Tenant (Phase 6, Week 20)
-**Status:** Draft for approval · **Drafted:** 2026-06-02
-**Scope discipline:** This document is a *plan only*. No source code is changed by it.
+**Status:** ✅ **IMPLEMENTED** (2026-06-02) · originally drafted 2026-06-02
+**Scope discipline:** This document began as a plan; §0.1 records the delivered state.
+
+---
+
+## 0.1 Implementation status (delivered)
+
+All eight deliverables are implemented, verified, and exercisable through the UI
+via the tester click-paths in §11. Backend grew from 700 → **726 passing tests**
+(+26 across calendar, webhooks, CRM sync, isolation, plan/seat, public branding);
+frontend `tsc` / ESLint / production `build` are clean.
+
+| # | Deliverable | Delivered |
+|---|---|---|
+| 1 | Multi-tenant data isolation | App-layer `tenant_id` enforcement is the documented guarantee (**OD-8 resolved: keep app-layer; RLS stays dormant**), proven by cross-tenant tests (`test_integration_isolation.py`). |
+| 2 | White-label config UI | Branding studio with logo upload (`POST /tenants/current/logo`), color picker, display name, **live preview**; subdomain workspace URL. Replaced the former static mockup + removed the fake AI-credits panel. |
+| 3 | Apply branding everywhere | Theme wired to tenant on session (`TenantThemeSync`); applied to app shell + all role dashboards; **login screen** (pre-auth, via `GET /public/tenant-branding`); invitation email (pre-existing); and **documents** (closing-checklist logo/name stamping). |
+| 4 | Tenant management panel | Platform fleet console (suspend/legal-hold/archive) + **plan/seat/trial editing** (`TenantAdminUpdateRequest`) + a guarded **Platform → Tenants** sidebar entry. |
+| 5 | CRM webhooks (two-way) | Generic signed (HMAC) outbound webhooks with SSRF guard + delivery log + admin UI ("Send test event"); **live events** fire `contact.*`/`task.*` via `BackgroundTasks`; **inbound** per-tenant API keys + `POST /integrations/crm/contacts` + in-product "Test inbound sync" (OD-7). |
+| 6 | MLO / title-company hooks | Same generic webhook/connection surface (subscribe to the relevant events). |
+| 7 | Calendar (Google + Outlook) | Closing Calendar workspace (real key dates, deep-links) + **both-provider** connect (scope-parameterized OAuth) and one-click push that updates rather than duplicates and honors deletes (**OD-6: push-authoritative**). |
+| 8 | Integration tests for isolation | Cross-tenant-denied tests for webhooks, API keys, inbound contacts, and branding. |
+
+**Resolved open decisions:** OD-1 (`settings_json.branding.display_name`), OD-2
+(dedicated `POST /tenants/current/logo` + shared `logo_storage`), OD-4 (AI-credit
+mock replaced with honest empty state), OD-5 (subdomain login branding shipped),
+OD-6 (push-authoritative calendar), OD-7 (in-product test-inbound helper), OD-8
+(app-layer isolation guarantee; RLS activation deferred as a hardening pass).
+
+**Remaining items are ops/config, not code:** (a) add calendar OAuth scopes +
+redirect URIs to the Google/Microsoft apps for live OAuth; (b) custom-domain DNS
+verification runbook (subdomain path works in code); (c) optional RLS activation
+(OD-8) once the service-role carveout sweep is scheduled.
 
 ---
 
