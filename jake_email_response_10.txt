@@ -1,0 +1,168 @@
+Subject: How Teams work, standalone agents, and the vendor-organization model
+
+Hi Jake,
+
+Answers to your Team questions, grounded in how the system works today.
+
+
+Q: A SINGLE ORGANIZATION CAN BE SPLIT INTO TEAMS. HOW DOES THIS WORK? WHAT OR
+   WHO TRIGGERS IT?
+
+Nothing triggers it automatically. Teams are opt-in and always set up by a
+person, specifically an Admin. An Admin creates a team, names it, and assigns a
+Team Lead. Until an Admin does that, the brokerage simply has no teams. From
+there, the Admin (for any team) or that Team Lead (for their own team) adds
+Agents and Coordinators to it, or an invitation can be aimed at a team so a new
+hire lands on it the moment they join. So the "trigger" is always an Admin
+deliberately building the structure, never something the system does on its own.
+
+
+Q: IS A "TEAM" CONSIDERED ITS OWN ORGANIZATION? CAN THERE BE STANDALONE AGENTS
+   INSIDE THE ORGANIZATION?
+
+No, a Team is not its own organization. There is exactly one organization (the
+brokerage), and Teams are just sub-groups inside it, like pods or branches under
+one roof. Every team shares that same organization: one bill, one shared set of
+data, and one Admin over all of them. A Team Lead only manages the people and
+deals in their own pod, not the whole company.
+
+And yes, standalone agents are fully supported. Being on a team is optional. An
+agent or coordinator can belong to no team at all and still work normally. So a
+brokerage can be completely flat with no teams, all pods, or a mix of pod
+members and standalone agents. The organization is the container; teams are just
+an optional way to group people inside it.
+
+
+ON VENDOR ORGANIZATIONS AND THE REFERRAL / FEE-SPLIT MODEL
+
+Yes, this makes sense, and no, I do not hate you. It is a clean, well-thought
+model, and the good news is that the hardest part already exists.
+
+Here is your idea in my own words, so we are sure I have it right: a vendor
+company (a mortgage or title shop) is its own organization with several
+individual vendors inside it (loan officers, sales reps). That vendor org can
+offer Velvet Elves to agents at a reduced fee when there is a written agreement
+in place. It hands an Agent, Team Lead, TC, FSBO, or Attorney a code that is
+unique to the vendor org. When a transaction is started, the system checks
+whether a vendor org is linked to it. If one is linked, that vendor org pays its
+share of the fee; if none is linked, the agent covers the full fee. The vendor
+org has to be attached to the transaction to owe anything, and each organization
+sets its own billing and sales limits. Multiple vendors, one organization,
+automatic link checks, and a paper trail for compliance.
+
+Why the foundation is already there: the core building block you are describing,
+an organization with multiple users, its own isolated data, its own roles and
+seats, and its own billing, is exactly what the system is already built on.
+Today that same primitive powers brokerages. A mortgage or title company would
+be the same kind of organization, just a different flavor. So we are not
+inventing "organizations" from scratch for this; we already have them.
+
+What is genuinely new, and what I will protect the foundation for: right now
+every organization is sealed off from every other one, on purpose. Your model
+needs a controlled, auditable bridge between one organization's transaction and
+another organization (the vendor), plus a fee-split that rides on that bridge.
+That bridge does not exist yet, and it is the one piece I want to design
+carefully so it is secure and compliant rather than bolted on later.
+
+To keep the door open without building the whole thing now, here is what I will
+bake into the foundation as we go:
+
+- Treat vendor companies as real organizations, not just the single
+  in-brokerage "Vendor" role we have today. That keeps the multi-user vendor org
+  possible.
+
+- Let a transaction record a first-class, auditable link to an outside vendor
+  organization, along with the code that created the link. This is the hook the
+  whole model hangs on.
+
+- Keep billing per organization (its own plan, its own limits, its own payment
+  account) so a fee can later be split or redirected based on that link. The
+  payment rails for this are already in place.
+
+- Log the written agreement and the code linkage as compliance evidence. The
+  system already keeps an audit trail, so this fits naturally.
+
+None of this has to be MVP. I just want the early decisions to point the right
+way, so that when we build it the model slots in instead of forcing a rewrite.
+Send me the monetization details whenever they are ready and I will line them up
+against this.
+
+Jan
+
+
+========================================================================
+FOLLOW-UP
+
+JAKE: An agent can partner with multiple vendors of each type (several title
+companies, several lenders, and so on), so an agent, brokerage, or team lead can
+hold multiple codes. The vendor is responsible for monitoring and revoking codes
+from agents/brokerages/team leads. This monitoring could be a function of "AI
+Coaching": track how many transactions each agent sends a vendor and let the
+vendor decide whether to keep or remove access.
+
+JAN:
+Got it, and it fits cleanly.
+
+The link between an agent and a vendor is many-to-many. One agent can hold many
+codes at once, one per vendor they partner with (two title companies, three
+lenders, and so on). Each code belongs to the vendor who issued it, so the
+vendor can hand it out and pull it back whenever they want. The agent's side
+just carries a list of their active codes.
+
+Per deal, the agent picks which vendor applies to that transaction, and that
+pick decides whose code and whose fee-split is in play. No vendor pays unless
+their code is attached to that specific deal.
+
+And yes, the monitoring you described is a natural job for AI Coaching later:
+count how many deals each agent actually sends a vendor, report it back to the
+vendor, and let them keep or revoke the code. I will model the data now so that
+reporting is easy to switch on once AI Coaching is in scope.
+
+This does not change the foundation. It just confirms the agent-to-vendor link
+must be many-to-many with vendor-owned codes, which I will plan for.
+
+Jan
+
+
+========================================================================
+FOLLOW-UP
+
+JAKE: Let's do this, not in the MVP. Great suggestion. All data/transactions
+stay with the agent account from their original role as admin.
+
+JAN:
+Sounds good, post-MVP it is. I'll build it so everything the agent created as
+admin comes with them, nothing lost.
+
+Jan
+
+
+========================================================================
+FOLLOW-UP — TC TREATED AS A VENDOR
+
+JAKE: A TC should be a Vendor role, not a User role. In the wizard, the user
+starting a deal gets a space to add a TC, the same way a title or mortgage
+vendor is added. In-house shops pick their own company and drill down to their
+TC; others pick a 3rd-party TC. Two flows: (1) agent adds a TC in the wizard
+like a title/mortgage vendor (welcome emails, etc.); (2) TC starts the deal the
+way an agent would, but selects an agent instead of a TC.
+
+JAN:
+Makes sense, and it actually simplifies things. A TC becomes just another vendor
+type: a TC company is a vendor org with its own people, so in-house shops like
+yours pick your company and drill down to your TC, while everyone else picks a
+3rd-party TC. Same wizard slot as a title or mortgage vendor.
+
+Both flows still fit:
+
+- Agent adds a TC: handled in the wizard like adding a title/mortgage vendor,
+  welcome email and all.
+
+- TC starts the deal: same as an agent starting it, except they pick an agent
+  instead of a TC.
+
+One knock-on I'll handle: as a vendor, a TC no longer uses a paid staff seat or
+sits on a team, they connect per transaction like any vendor. I'll fold it into
+the vendor-organization plan.
+
+Jan

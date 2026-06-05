@@ -1,0 +1,81 @@
+RESPONSE TO JAKE: NEW ACCOUNT CREATION
+======================================
+
+Good catches. Two of these are genuine bugs I'll fix quickly. The other two
+("Admin" default + locked role) are actually working the way the system was
+deliberately built, so I want to explain WHY, because there's one product
+decision hiding underneath that we should decide on together.
+
+
+THE TWO QUICK FIXES
+-------------------
+
+1. Phone number dropping a digit / adding the "1."
+   You're right, and it's a small bug. The field only keeps 10 digits. When a
+   "1" country code slips in (usually from your phone/browser autofill), the
+   system counts that "1" as the first digit and chops the last real digit off
+   the end. I'll strip the leading country-code "1" so it always keeps your
+   true 10-digit number, exactly as you asked.
+
+2. Company / Brokerage not carrying over.
+   Also a real gap. What you typed in "Company / Brokerage" at sign-up IS being
+   saved, but it's being used behind the scenes to NAME your new organization,
+   and it was never copied into the "Company / Brokerage" box on Step 2. So that
+   box looks empty even though the info wasn't lost. I'll pre-fill Step 2 with
+   what you entered.
+
+
+WHY IT SHOWS "ADMIN," AND WHY THE ROLE IS LOCKED ON STEP 2
+----------------------------------------------------------
+
+This part is by design, not a glitch. Today the system assumes that anyone who
+signs up on the public page is the owner of a brand-new workspace, so it
+automatically makes them the ADMIN of their own organization. The role is shown
+as read-only on Step 2 on purpose: if someone could change their own role during
+setup, they could accidentally demote themselves out of being the owner and lock
+themselves out of their own account. Role changes are meant to be made by an
+Admin from the team settings, not self-served during onboarding.
+
+So nothing is broken here, but it doesn't match what you want, which brings us
+to the real question below.
+
+
+VENDORS & CLIENTS VIA TRANSACTIONS: ALREADY WORKS THE WAY YOU DESCRIBED
+----------------------------------------------------------------------
+
+Your understanding is correct and already live: when an agent adds a vendor or
+client to a transaction, the system AUTOMATICALLY assigns them that role and
+sends them a welcome/invite email when the transaction is set up. Those users
+CANNOT change their own role, exactly the behavior you described. One note: the
+system uses a single "Vendor" role with a CATEGORY on top (Title, Mortgage,
+Inspection, etc.), so "Title Vendor" and "Mortgage Vendor" are captured as
+Vendor + category. That's already in place.
+
+
+THE ONE THING WE SHOULD ALIGN ON: LETTING PEOPLE PICK A ROLE AT SIGN-UP
+-----------------------------------------------------------------------
+
+What you're asking for, a dropdown at sign-up (Agent, Team Leader, Attorney,
+FSBO, Transaction Coordinator, Mortgage Vendor, Title Vendor) AND the ability to
+change it on Step 2, is a change to that "every sign-up owns a new workspace"
+assumption above. It's very doable, but it raises one question worth deciding
+before I build it:
+
+   If a brand-new person signs up and picks "Title Vendor" (or Agent, Attorney,
+   etc.), WHICH ORGANIZATION do they belong to? In the current design,
+   vendors/agents/clients live INSIDE an existing brokerage's workspace; they're
+   invited in or added to a deal. A self-signup with no organization yet has
+   nowhere to "be a Title Vendor."
+
+That's the same thread as your "we'll set up the Brokerage manually later, not
+for MVP" note. The cleanest MVP path is probably: keep self-signup creating the
+person's own workspace, but LET THEM SELF-LABEL their role (and make it editable
+on Step 2, with the founder/owner protected so they can't lock themselves out).
+That gets you the dropdown and the "people are stupid, let them fix it" safety
+net without having to solve brokerage hierarchy first.
+
+MY RECOMMENDATION: let me ship the two fixes now (phone + company carryover),
+and then we can decide together whether self-signups should (a) pick from your
+role list with editable role on Step 2, or (b) keep the current owner-by-default
+model and bring everyone else in by invitation. Once you pick, I can wire up the
+dropdown and unlock the Step 2 role field.

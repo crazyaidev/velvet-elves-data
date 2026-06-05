@@ -1,0 +1,36 @@
+Subject: Monetization, and how it ties to the role-at-signup question
+
+Hi Jake,
+
+On monetization, here's where the system sits today and the handful of decisions
+that drive it.
+
+HOW IT'S BILLED NOW
+
+It's a per-seat subscription. Only "staff" (Admin, Team Lead, Agent, Transaction
+Coordinator, Attorney) consume a paid seat. The Solo plan covers one seat (the
+founder); the Team plan adds teammates up to a seat limit. Clients, FSBO
+sellers, and vendors are free under this model because they're brought in by a
+paying customer and only see their own deal.
+
+WHY IT COUPLES WITH THE ROLE QUESTION
+
+Today the only person who pays is whoever creates the workspace. Everyone else is
+either a paid teammate (invited) or a free portal user. So a stranger
+self-signing up as "Title Vendor" has no workspace to live in and nobody paying
+for them, which is the same gap we hit on the role-at-signup question.
+
+THE DECISIONS I'D WANT FROM YOU
+
+- Who is the paying customer: the solo agent, or the brokerage? That sets
+  whether we lead with single seats or team plans.
+
+- Do vendors ever become a revenue line (paid directory or lead-gen), or stay
+  free forever?
+
+- Pricing shape: flat per-seat per month, or tied to transaction volume?
+
+Once we settle those, the signup and role flow basically designs itself. Send
+me your take on those three and I'll lock it down.
+
+Jan

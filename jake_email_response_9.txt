@@ -1,0 +1,80 @@
+Subject: Changing roles, joining teams, and connecting agents with a TC
+
+Hi Jake,
+
+Answers to your three questions, grounded in how the system works today.
+
+
+A. HOW DOES SOMEONE CHANGE THEIR ACCOUNT TYPE (e.g., Team Leader vs Admin)?
+
+An Admin in your brokerage changes it. In Team settings, the Admin opens the
+member and switches their role (Agent, Team Lead, Transaction Coordinator,
+Attorney, or Admin). People can't change their own role, which stops anyone from
+accidentally locking themselves out or promoting themselves. Two guardrails sit
+on top: the brokerage owner's role is locked (ownership has to be transferred
+before their role can change), and moving someone into a paid staff role checks
+that you have an open seat on your plan.
+
+So "become a Team Leader" means an Admin promotes that person to Team Lead. That
+is the only path today.
+
+
+B. HOW DOES SOMEONE JOIN A TEAM LEADER'S TEAM AFTER CREATING THEIR OWN ACCOUNT
+   FIRST?
+
+Honest answer: today they can't, not with the account they already made. Teams
+live inside one brokerage, so to be on a Team Lead's team a person first has to
+be a member of that same brokerage, and you join a brokerage by accepting an
+invitation. The invitation only works for a brand-new email. If the person
+already created their own account, that email is "taken" by their own
+one-person workspace, so the invite is refused.
+
+The clean path today is to be invited first, then create the account from that
+invite. The Admin or Team Lead sends the invitation and can point it straight at
+the team, so the person lands on the team automatically. After that, the Admin
+or the Team Lead can add or move them between teams (only Agents, Coordinators,
+and Team Leads can sit on a team).
+
+If someone already made their own account by mistake, the only options right now
+are to invite them under a different email, or for me to build a proper "leave
+my workspace and join this brokerage" flow. That flow does not exist yet, and it
+is the same gap as the self-signup role question. I am flagging it so we can
+decide whether to build it.
+
+
+C. CAN A TRANSACTION COORDINATOR JOIN A BROKERAGE, AND HOW DO THE AGENT AND TC
+   CONNECT?
+
+Yes. A TC joins a brokerage exactly like any staff member: an Admin or Team Lead
+invites them in. Once in, they are part of the brokerage and can work across its
+deals.
+
+On who owns and starts the deal: a transaction can be created by an Agent, Team
+Lead, Admin, or the TC, but every deal is "owned" by an agent. There is a
+"Whose transaction is it?" picker, so the owner can always be set to the correct
+agent even when someone else created it.
+
+There are two ways the agent and TC connect, and both happen inside the same
+brokerage:
+
+- If the agent starts the deal: the agent creates it (and owns it), then adds
+  the TC to that transaction as the coordinator. The TC gets a notification and
+  the deal appears in their queue.
+
+- If the TC starts the deal: the TC creates it and uses the "Whose transaction
+  is it?" picker to set the agent as the owner. The agent is now attached to
+  their own deal, and the TC keeps working it.
+
+The single requirement either way is that the agent and TC are in the same
+brokerage. The thing that links them is the transaction itself, assigning a
+person to a deal, rather than a permanent agent-to-TC pairing. So one in-house
+TC can be attached to many agents' deals across the brokerage.
+
+
+One thread runs through all three: today, membership in a brokerage is set when
+the account is created (by invitation), and roles are managed afterward by an
+Admin. The only real gap is letting somebody who already made their own separate
+account fold into an existing brokerage, which is the same decision we have open
+on self-signup roles.
+
+Jan

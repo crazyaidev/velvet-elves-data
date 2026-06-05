@@ -1,0 +1,77 @@
+Subject: How accounts, organizations, and teams work today
+
+Hi Jake,
+
+Here's a simple picture of how the system currently handles organizations and
+team management. I'll keep it in plain terms.
+
+
+1. EVERY ACCOUNT STARTS ITS OWN ORGANIZATION
+
+When someone signs up, the system creates a brand-new, private workspace (think
+of it as their own brokerage) and makes that person the Admin and owner of it.
+Each organization is sealed off from every other one, so no account can ever see
+another's deals, documents, or contacts. That's the core reason a fresh signup
+defaults to Admin: they're the first and only person in a workspace they own.
+
+
+2. TWO KINDS OF PEOPLE LIVE INSIDE AN ORGANIZATION
+
+- Staff (the people who work the deals): Admin, Team Lead, Agent, Transaction
+  Coordinator, and Attorney. Staff take up a paid seat.
+
+- Portal users (limited, deal-specific access): Clients, For Sale By Owner
+  sellers, and Vendors (title, mortgage, inspection, and so on). They are always
+  free and never use a paid seat.
+
+
+3. TWO WAYS TO BRING SOMEONE INTO YOUR ORGANIZATION
+
+- Invite them: an existing member sends a one-time email invitation. The person
+  clicks it, sets their own password, and lands in your workspace with the role
+  you chose.
+
+- Add them to a deal: when an agent adds a client or vendor to a transaction,
+  the system automatically assigns that person the right role and emails them a
+  welcome and login link. They do not pick or change their own role.
+
+
+4. YOU CAN ONLY INVITE AT OR BELOW YOUR OWN LEVEL
+
+This keeps the chain of authority clean:
+
+- Admin can invite anyone.
+- Team Lead can invite Team Leads, Coordinators, Agents, Attorneys, and any
+  portal user.
+- Transaction Coordinator can invite Agents, Attorneys, and portal users.
+- Agent can invite other Agents and portal users.
+
+Nobody can create someone above themselves, and nobody can change their own
+role. Role changes are made by an Admin in the team settings, and the owner is
+protected so they can't be accidentally demoted or locked out.
+
+
+5. TEAMS ARE SUB-GROUPS INSIDE ONE ORGANIZATION
+
+A single organization can be split into Teams, each with its own Team Lead.
+Agents and Coordinators can be assigned to a team so leads manage their own
+people and deals. The Admin oversees all teams; a Team Lead manages just theirs.
+
+
+6. PLANS AND SEATS
+
+- Solo plan: just the founder, no extra staff.
+- Team plan: invite teammates up to your seat limit.
+- Clients and vendors are always free, no matter the plan.
+
+
+THE SHORT VERSION
+
+Each signup owns a private brokerage. Staff are paid seats and work the deals;
+clients and vendors are free and only see their own transaction. People join
+either by invitation or by being added to a deal, always at a role their inviter
+is allowed to grant, and only an Admin can change someone's role afterward.
+
+Happy to walk through any of this or adjust how it should work for MVP.
+
+Jan

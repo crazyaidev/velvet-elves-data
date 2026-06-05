@@ -859,7 +859,7 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("")
     lines.append("## Features Currently Complete — Client Feedback Requested")
     lines.append("")
-    lines.append("**Last Updated:** May 13, 2026  ")
+    lines.append("**Last Updated:** June 4, 2026  ")
     lines.append("**Test Environment:** http://dev.velvetelves.com/  ")
     lines.append("**Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  ")
     lines.append("**Reviewer:** Client — please fill in the Feedback block under each feature")
@@ -872,7 +872,7 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("")
     lines.append("- This document lists every frontend feature that is currently complete and needs your review.")
     lines.append("- Each feature includes the page address, the exact steps to test, the expected result, our ideas for future improvements, and a blank Feedback area for your notes.")
-    lines.append("- Features that are still being built (for example placeholder 'Coming Soon' pages) are intentionally left out of this review.")
+    lines.append("- Features that are still being built (for example placeholder 'Coming Soon' pages) are intentionally left out of this review. They are listed separately in the companion `todo_list.md` so you know what is still on the way.")
     lines.append("")
     lines.append("### How to fill in the Feedback area")
     lines.append("")
@@ -884,25 +884,29 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("")
     lines.append("- **Agent or Elf** — covers the main day-to-day workflow.")
     lines.append("- **Team Lead or Admin** — needed to see the Delete button on transactions, the admin-only Task Templates pages, the Deletion Queue on the Documents page, and the full Team Members admin page.")
-    lines.append("- **Workspace Owner** — the very first person who registered the brokerage. Required for the Transfer ownership flow and the Settings → Danger Zone (schedule deletion).")
+    lines.append("- **Workspace Owner** — the very first person who registered the brokerage. Required for the Transfer ownership flow and the Organization page → Delete organization (schedule deletion).")
     lines.append("- **Invited member** — sign up by clicking an invite-email link (instead of /register). Required for the invite-accept flow and the invitee branch of the onboarding wizard.")
-    lines.append("- **Attorney** — loads the attorney-specific workspace at /transactions.")
-    lines.append("- **FSBO Customer** — verifies the FSBO sidebar layout.")
-    lines.append("- **Platform admin** (internal Velvet Elves staff only) — required for the /platform/tenants pages.")
+    lines.append("- **Attorney** — loads the attorney workspace (Matters, Releases Queue, State Rules, Recording Calendar).")
+    lines.append("- **Client** — a buyer or seller invited to a transaction; loads the 'closing concierge' client workspace at /client/home.")
+    lines.append("- **FSBO Customer** — loads the for-sale-by-owner seller workspace at /fsbo.")
+    lines.append("- **Vendor** — loads the vendor document portal at /portal/vendor.")
+    lines.append("- **Platform admin** (internal Velvet Elves staff only) — required for the /platform/tenants and /platform/advertising pages.")
     lines.append("")
     lines.append("### Suggested order of testing")
     lines.append("")
     lines.append("1. Public pages and sign-in / sign-up (including the new Organization field on /register)")
     lines.append("2. Invite-accept flow (open an invite link as a brand-new user)")
     lines.append("3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay")
-    lines.append("4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)")
-    lines.append("5. Settings and Email Integrations (needed before AI Email Review can send)")
-    lines.append("6. AI Email Review queue at /ai-emails")
-    lines.append("7. Team Lead or Admin extras — Team Overview, Team Members admin, invite teammate, ownership transfer, deactivate, Company Details, Danger Zone, plus task templates and deletion queue")
-    lines.append("8. Attorney workspace")
-    lines.append("9. FSBO-customer sidebar")
-    lines.append("10. Platform admin pages (internal Velvet Elves staff only)")
-    lines.append("11. Direct links and error pages")
+    lines.append("4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)")
+    lines.append("5. The Organization page (Company, Branding, Email & E-signature integrations — needed before AI Email Review can send) and your Account window")
+    lines.append("6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors")
+    lines.append("7. Payments — invoices and commission payouts")
+    lines.append("8. Team Lead or Admin extras — Team Overview, Teams, Team Members admin, invite / ownership / deactivate, Team Settings, plus the Admin pages (Integrations, AI Governance, Payment Access, Advertising, Audit Log)")
+    lines.append("9. Attorney workspace (Matters, Matter detail, Releases Queue, State Rules, Recording Calendar)")
+    lines.append("10. Client, FSBO, and Vendor portals")
+    lines.append("11. Public links (milestone viewer, invoice payment, advertise storefront) — no sign-in")
+    lines.append("12. Platform admin pages (internal Velvet Elves staff only)")
+    lines.append("13. Direct links and error pages")
     lines.append("")
     lines.append("---")
     lines.append("")
@@ -1015,7 +1019,7 @@ def create_testing_review_doc():
                          alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(13))
     doc.add_paragraph()
 
-    _add_plain_paragraph(doc, "Last Updated: May 13, 2026",
+    _add_plain_paragraph(doc, "Last Updated: June 4, 2026",
                          bold=True, space_after=Pt(3))
     _add_plain_paragraph(doc, "Test Environment: http://dev.velvetelves.com/",
                          space_after=Pt(3))
@@ -1034,7 +1038,7 @@ def create_testing_review_doc():
     _render_bullet_group(doc, [
         "This document lists every frontend feature that is currently complete and needs your review.",
         "Each feature includes the page address, the exact steps to test, the expected result, our ideas for future improvements, and a blank Feedback area for your notes.",
-        "Features that are still being built (for example placeholder 'Coming Soon' pages) are intentionally left out of this review.",
+        "Features that are still being built (for example placeholder 'Coming Soon' pages) are intentionally left out of this review. They are listed separately in the companion todo_list.md so you know what is still on the way.",
     ])
 
     _add_section_label(doc, "How to fill in the Feedback area")
@@ -1048,11 +1052,13 @@ def create_testing_review_doc():
     _render_bullet_group(doc, [
         ("Agent or Elf — covers the main day-to-day workflow.", []),
         ("Team Lead or Admin — needed to see the Delete button on transactions, the admin-only Task Templates pages, the Deletion Queue on the Documents page, and the full Team Members admin page.", []),
-        ("Workspace Owner — the very first person who registered the brokerage. Required for the Transfer ownership flow and the Settings → Danger Zone (schedule deletion).", []),
+        ("Workspace Owner — the very first person who registered the brokerage. Required for the Transfer ownership flow and the Organization page → Delete organization (schedule deletion).", []),
         ("Invited member — sign up by clicking an invite-email link (instead of /register). Required for the invite-accept flow and the invitee branch of the onboarding wizard.", []),
-        ("Attorney — loads the attorney-specific workspace at /transactions.", []),
-        ("FSBO Customer — verifies the FSBO sidebar layout.", []),
-        ("Platform admin (internal Velvet Elves staff only) — required for the /platform/tenants pages.", []),
+        ("Attorney — loads the attorney workspace (Matters, Releases Queue, State Rules, Recording Calendar).", []),
+        ("Client — a buyer or seller invited to a transaction; loads the 'closing concierge' client workspace at /client/home.", []),
+        ("FSBO Customer — loads the for-sale-by-owner seller workspace at /fsbo.", []),
+        ("Vendor — loads the vendor document portal at /portal/vendor.", []),
+        ("Platform admin (internal Velvet Elves staff only) — required for the /platform/tenants and /platform/advertising pages.", []),
     ])
 
     _add_section_label(doc, "Suggested order of testing")
@@ -1060,14 +1066,16 @@ def create_testing_review_doc():
         "1. Public pages and sign-in / sign-up (including the new Organization field on /register)",
         "2. Invite-accept flow (open an invite link as a brand-new user)",
         "3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay",
-        "4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, documents)",
-        "5. Settings and Email Integrations (needed before AI Email Review can send)",
-        "6. AI Email Review queue at /ai-emails",
-        "7. Team Lead or Admin extras — Team Overview, Team Members admin, invite teammate, ownership transfer, deactivate, Company Details, Danger Zone, plus task templates and deletion queue",
-        "8. Attorney workspace",
-        "9. FSBO-customer sidebar",
-        "10. Platform admin pages (internal Velvet Elves staff only)",
-        "11. Direct links and error pages",
+        "4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)",
+        "5. The Organization page (Company, Branding, Email & E-signature integrations — needed before AI Email Review can send) and your Account window",
+        "6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors",
+        "7. Payments — invoices and commission payouts",
+        "8. Team Lead or Admin extras — Team Overview, Teams, Team Members admin, invite / ownership / deactivate, Team Settings, plus the Admin pages (Integrations, AI Governance, Payment Access, Advertising, Audit Log)",
+        "9. Attorney workspace (Matters, Matter detail, Releases Queue, State Rules, Recording Calendar)",
+        "10. Client, FSBO, and Vendor portals",
+        "11. Public links (milestone viewer, invoice payment, advertise storefront) — no sign-in",
+        "12. Platform admin pages (internal Velvet Elves staff only)",
+        "13. Direct links and error pages",
     ])
 
     doc.add_page_break()
@@ -1404,7 +1412,7 @@ TESTING_REVIEW_FEATURES = [
         "expected_result": [
             "Each step shows only the fields that match your role.",
             "Internal roles see 4–5 steps; external roles see 3.",
-            "Gmail / Outlook / DocuSign connections persist into Settings → Integrations after onboarding.",
+            "Gmail / Outlook / DocuSign connections persist into the Organization page (Email and E-signature sections) after onboarding.",
             "Logo files outside the allowed types or larger than 2 MB are rejected with a clear message.",
             "Either final-step button marks onboarding complete on the server and triggers the product tour the next time the dashboard loads.",
         ],
@@ -1423,19 +1431,19 @@ TESTING_REVIEW_FEATURES = [
         "route": "/dashboard (and any other signed-in page once the tour is started)",
         "how_to_test": [
             "Finish onboarding with a fresh test account, then land on the dashboard. The product tour should start automatically.",
-            "If you already finished the tour, open Settings → Help & Tour → Start tour to replay it.",
+            "If you already finished the tour, open the avatar menu → Account → Help & tour → Start tour to replay it.",
             "Step through the whole tour using Next / Back / Skip. Internal roles (Agent, Transaction Coordinator, Team Lead, Admin) see a 9-step tour covering sidebar KPIs, Active Transactions, My Task Queue, All Documents, AI Briefing, search, notifications, and the New Transaction button.",
             "Sign in as an Attorney and replay the tour — it should be a 5-step tour focused on the matter queue, documents, and AI briefing.",
             "Sign in as a Client, FSBO Customer, or Vendor and replay the tour — it should be a 5-step tour focused on My Properties, Documents, and Ask Velvet Elves AI.",
             "Use the keyboard: → or Enter to advance, ← to go back, Esc to skip. Confirm Cmd+K / Ctrl+K still opens global search mid-tour.",
-            "Skip the tour mid-way and confirm it does not mark complete (Settings → Help & Tour → Start tour starts it again from the beginning).",
+            "Skip the tour mid-way and confirm it does not mark complete (Account → Help & tour → Start tour starts it again from the beginning).",
             "Finish the tour on the final step and confirm it does not auto-start the next time you log in.",
         ],
         "expected_result": [
             "The tour highlights the right element for each step and the tooltip stays on screen.",
             "Internal roles see a 9-step tour; Attorney and external roles see 5-step role-appropriate tours.",
             "Skipping does not lock the tour; only Finish marks it complete.",
-            "Settings → Help & Tour always replays the tour for the role you are signed in as.",
+            "Account → Help & tour always replays the tour for the role you are signed in as.",
         ],
         "future_ideas": [
             "Add per-feature mini-tours (e.g. 'tour just the Documents page') reachable from inline 'New here?' badges.",
@@ -1451,26 +1459,30 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 14,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Dashboard home",
+        "feature": "Dashboard home (role-aware)",
         "route": "/dashboard",
         "how_to_test": [
-            ("Open the dashboard and check each card.", [
-                "A personalized greeting is visible.",
-                "'My week' pills show tasks, overdue, completed, and active counts.",
-                "'My Tasks' card has Upcoming and Overdue tabs.",
-                "'My Deadlines' card has Upcoming and Overdue tabs.",
-                "'Upcoming Closings' shows cards or a clean empty state.",
+            "Open /dashboard. You are automatically sent to the dashboard built for your role — a solo Agent / Transaction Coordinator, a Team Lead, an Admin, and an Attorney each see a different layout.",
+            ("On the Agent / Team Lead dashboard, check the main areas.", [
+                "A row of KPI tiles at the top (for example Pending commission, Pipeline volume, Closings this year, Active deals).",
+                "An 'Action queue' card listing the most urgent things to do.",
+                "A 'Priority transactions' area showing your most important deals as cards.",
+                "A 'Portfolio health' and a 'Portfolio intelligence' (AI) card.",
+                "A payments snapshot card.",
             ]),
-            ("Click the New Transaction button.", []),
+            "Confirm every card either shows real numbers or a clean 'all clear' / empty message — nothing should be blank or broken.",
+            "Click the '+ New Transaction' button (top bar and sidebar).",
+            "Sign in as a Team Lead and confirm the dashboard shows team-wide numbers; sign in as an Admin and confirm the Admin console layout.",
         ],
         "expected_result": [
-            "Every card shows real data or a clean empty state — nothing blank or broken.",
+            "Each role lands on its own dashboard automatically — you never see another role's layout.",
+            "Every card shows real data or a clean empty state.",
             "The New Transaction button opens the transaction wizard.",
         ],
         "future_ideas": [
             "Let the user reorder or hide cards to personalize their landing page.",
-            "Add an 'AI summary of my day' card at the top.",
-            "Show a small comparison like 'this week vs last week' on the My Week pills.",
+            "Add a single 'AI summary of my day' headline card at the top.",
+            "Show a small 'this week vs last week' comparison on the KPI tiles.",
         ],
     },
     {
@@ -1480,30 +1492,29 @@ TESTING_REVIEW_FEATURES = [
         "route": "Every signed-in page",
         "how_to_test": [
             ("Check the sidebar.", [
-                "Navigation items change depending on the signed-in role.",
-                "KPI tiles in the sidebar show numbers such as overdue tasks, closings this week, etc.",
+                "Navigation items change depending on the signed-in role (for example an Agent sees Deals, Workflow, Payments, Vendors, and Intelligence groups; an Admin also sees Team and Admin groups).",
+                "KPI tiles in the sidebar show numbers such as overdue tasks, closings this week, active deals, and pipeline value.",
             ]),
             ("Check the top bar.", [
-                "Click 'Today's AI Briefing' — a side panel should open.",
+                "Click 'Today's AI Briefing' — a side panel should open (internal roles only).",
                 "Click any status chip (Critical / Needs Attention / On Track) — it should filter the transactions list.",
-                "Open the avatar menu — confirm My Profile, Settings, and Log Out.",
+                "Click the search box (or press Ctrl+K / Cmd+K) — a search panel should open and find deals, tasks, documents, and people as you type. Press Enter on a result to jump to it.",
+                "Click the bell icon — a notifications panel should open. If you have overdue or upcoming task reminders, a small number badge shows the unread count.",
+                "Open the avatar menu — confirm Account, Organization (internal roles only), and Log Out.",
                 "On a narrow browser window, click the mobile menu icon.",
-            ]),
-            ("Please note the current state of two items:", [
-                "The search field in the top bar is visual only right now and does not run a real search.",
-                "The bell icon in the top bar is visual only right now and does not open notifications.",
             ]),
         ],
         "expected_result": [
             "Sidebar navigation and KPIs adjust correctly to the user's role.",
             "The AI Briefing panel opens and closes cleanly.",
             "Status chips take you to the correct filtered transaction view.",
-            "The user menu and mobile menu both behave correctly.",
+            "Search returns real results and the bell opens a real notifications list with an accurate unread count.",
+            "The avatar menu opens the Account window (Account), the Organization page (Organization), or signs you out (Log Out). The mobile menu behaves correctly.",
         ],
         "future_ideas": [
-            "Turn the top-bar search into a live global search across deals, tasks, and documents.",
-            "Wire the bell icon to real notifications with unread counts.",
             "Add a sidebar collapse toggle for users on smaller laptops.",
+            "Let the user mark all notifications as read in one click from the panel.",
+            "Add recent-searches and saved-search shortcuts to the search panel.",
         ],
     },
     {
@@ -1779,6 +1790,193 @@ TESTING_REVIEW_FEATURES = [
             "Save past conversations so users can come back later.",
             "Let users 'pin' a transaction so the AI always uses it as context.",
             "Stream answers word-by-word instead of waiting for the full response.",
+        ],
+    },
+    {
+        "no": "26.1",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "My Task Queue",
+        "route": "/tasks/queue (sidebar → Workflow → My Task Queue)",
+        "how_to_test": [
+            "Open My Task Queue from the sidebar. Confirm a 'Today's AI briefing' strip at the top and a 'Today's progress' summary.",
+            "Use the type tabs (All / Documents / Communication / Milestones / Admin) and the Sort menu (Priority / Due date / Transaction / Task type). Confirm the list updates.",
+            "Type in the search box ('Search tasks, deals, contacts…') and confirm the list filters.",
+            "Tick a task's checkbox to complete it and confirm it moves to 'Completed today'; untick to bring it back.",
+            "Click Add task, fill in the task, and confirm it appears in the list.",
+            "Click the floating Ask AI button and confirm the AI panel opens.",
+        ],
+        "expected_result": [
+            "The queue gathers your tasks across every deal in one place.",
+            "Tabs, sort, and search all narrow or reorder the list correctly.",
+            "Completing, adding, and AI assist all work.",
+        ],
+        "future_ideas": [
+            "Add a 'snooze until' option to hide a task for a day.",
+            "Allow drag-to-reorder within a priority group.",
+            "Add bulk-complete for several tasks at once.",
+        ],
+    },
+    {
+        "no": "26.2",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Closing Calendar",
+        "route": "/calendar (sidebar → Workflow → Closing Calendar)",
+        "how_to_test": [
+            "Open Closing Calendar. Confirm a month view of your transaction key dates and closings, with a way to switch to an agenda (list) view.",
+            "Move between months and confirm events land on the right dates.",
+            "Click an event and confirm it takes you to the matching transaction with that card opened.",
+            "Use the 'Connect calendar' / sync controls to connect Google or Outlook (a sign-in popup opens), then use Sync to push your closings. Disconnect and confirm it stops syncing.",
+        ],
+        "expected_result": [
+            "The calendar is built from your real transaction dates — nothing made up.",
+            "Events deep-link into the right transaction.",
+            "Google / Outlook calendar connect, sync, and disconnect all work.",
+        ],
+        "future_ideas": [
+            "Add a week view alongside month and agenda.",
+            "Color-code events by deal health.",
+            "Add an .ics download for a single closing.",
+        ],
+    },
+    {
+        "no": "26.3",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Clients hub",
+        "route": "/clients (sidebar → Deals → Clients)",
+        "how_to_test": [
+            "Open Clients from the sidebar. Confirm one row per represented client showing their deals and two 'needs me' signals: an unanswered client question and uploads awaiting review.",
+            "Click a client's action (for example the unanswered-question signal) and confirm it takes you to the right transaction with the client Q&A drawer or client-access modal open.",
+            "Use the phone / email shortcuts on a client row.",
+        ],
+        "expected_result": [
+            "Every represented client is listed once with their deals and what needs your attention.",
+            "Actions deep-link to the matching transaction and open the right drawer.",
+        ],
+        "future_ideas": [
+            "Add a search box and a filter for 'only clients who need me'.",
+            "Show the last time you contacted each client.",
+        ],
+    },
+    {
+        "no": "26.4",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Contacts directory",
+        "route": "/contacts (sidebar / global search)",
+        "how_to_test": [
+            "Open Contacts. Confirm a searchable list of people (co-agents, loan officers, title reps, and other contacts) with their type, email, and phone.",
+            "Type in the search box and confirm the list filters by name, email, or company.",
+            "Use the type filter to narrow to one kind of contact.",
+            "Confirm preferred contacts are marked (star) and vendor contacts are indicated.",
+        ],
+        "expected_result": [
+            "Contacts are searchable and filterable by type.",
+            "Email and phone shortcuts work; preferred and vendor contacts are clearly marked.",
+        ],
+        "future_ideas": [
+            "Add an 'add contact' button directly on this page.",
+            "Show which transactions each contact is attached to.",
+        ],
+    },
+    {
+        "no": "26.5",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Notifications center",
+        "route": "/notifications (and the top-bar bell)",
+        "how_to_test": [
+            "Open the bell in the top bar, then open the full Notifications page.",
+            "Confirm filter tabs (All / Overdue / Today / Tomorrow / Upcoming) and that each notification shows its urgency.",
+            "Click a notification and confirm it takes you to the related task or transaction.",
+            "Confirm reading notifications updates the unread count on the bell.",
+        ],
+        "expected_result": [
+            "Notifications are real task reminders grouped by urgency.",
+            "Opening one navigates to the right place and the unread count stays accurate.",
+        ],
+        "future_ideas": [
+            "Add a 'mark all as read' button.",
+            "Add notification types beyond task reminders (new client message, signature completed).",
+        ],
+    },
+    {
+        "no": "26.6",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "AI Suggestions (intelligence inbox)",
+        "route": "/ai-suggestions (sidebar → Intelligence → AI Suggestions)",
+        "how_to_test": [
+            "Open AI Suggestions. Confirm a briefing hero, activity stats, and a row of category filter pills.",
+            "Expand a suggestion card and confirm it shows the reason, the AI recommendation, an editable draft where relevant, and an action row.",
+            "Apply an action on a card (for example send a draft, add a task, or dismiss) and confirm it does something real and the card updates.",
+            "Use the category pills to filter the suggestions.",
+        ],
+        "expected_result": [
+            "Every suggestion is based on real data about your deals — no generic tips.",
+            "Each action runs a real, role-appropriate operation.",
+        ],
+        "future_ideas": [
+            "Add a 'snooze this suggestion' option.",
+            "Let the user thumbs-down a suggestion to tune what appears.",
+        ],
+    },
+    {
+        "no": "26.7",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Analytics (Reports)",
+        "route": "/reports (sidebar → Intelligence → Analytics)",
+        "how_to_test": [
+            "Open Analytics. Confirm a row of KPI tiles (for example commission, transaction volume, on-time close rate) followed by charts (GCI by month, transaction volume, active pipeline, days-to-close, task completion, and so on).",
+            "Confirm every chart shows your real numbers or a clean 'not enough data yet' message.",
+            "Open the goals editor, set a goal, save it, and confirm the relevant tile reflects progress toward it.",
+            "Click Export / Download and confirm a file downloads.",
+        ],
+        "expected_result": [
+            "All tiles and charts are driven by your real transactions.",
+            "Goals save and show progress; export downloads a file.",
+        ],
+        "future_ideas": [
+            "Let the user pick the date range / compare two periods.",
+            "Add a team-vs-me toggle for Team Leads.",
+        ],
+    },
+    {
+        "no": "26.8",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Invoices & Payments",
+        "route": "/payments (sidebar → Payments → Invoices & Payments)",
+        "how_to_test": [
+            "Open Invoices & Payments. Confirm tabs: All Invoices, Open, Paid, Drafts, Void, and Payments.",
+            "Switch tabs and confirm the list narrows; use the search box to find an invoice.",
+            "Click New invoice, fill it in (transaction, amount, line items), and save a draft, then open it.",
+            "Open an invoice to view its detail window; if you have permission, send it and confirm the client receives a pay link.",
+            "Open the Payments tab and confirm recorded payments are listed.",
+            "Sign in as a role without invoice permission and confirm the create / refund actions are not offered (read-only history is still visible).",
+        ],
+        "expected_result": [
+            "Invoices and payments are real and filterable by status.",
+            "Creating, sending, and viewing invoices works; permission gating hides actions a role cannot perform.",
+        ],
+        "future_ideas": [
+            "Add recurring invoices.",
+            "Add a one-click reminder for overdue invoices.",
+        ],
+    },
+    {
+        "no": "26.9",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Commission Payouts",
+        "route": "/payments/payouts (sidebar → Payments → Commission Payouts)",
+        "how_to_test": [
+            "Open Commission Payouts (shown when your role / plan allows payouts).",
+            "Confirm a list of payouts with amount and status; use the search box to find one.",
+            "Click New payout, pick a transaction with the typeahead, enter the amount, and create it.",
+            "Open a payout to view its detail window.",
+        ],
+        "expected_result": [
+            "Payouts are listed with accurate amounts and statuses.",
+            "Creating and viewing a payout works; the action is gated by payment permission.",
+        ],
+        "future_ideas": [
+            "Add a split-commission helper for co-brokered deals.",
+            "Export payouts to CSV for accounting.",
         ],
     },
     {
@@ -2180,171 +2378,145 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 28,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "My Profile page",
-        "route": "/profile",
+        "feature": "Account window — Profile (your identity)",
+        "route": "Avatar menu (top-right) → Account → Profile. The old /profile and /settings links still open it.",
         "how_to_test": [
-            ("Open /profile from the user menu.", [
-                "Confirm the summary card (initials, role, status, email, created date).",
-            ]),
-            ("Edit your name or phone number, then click Save Changes.", []),
+            "Open the avatar menu in the top-right corner and click Account. A large Account window opens with a section list down the left side.",
+            "On the Profile section, confirm your photo, Full name, Email (read-only), Phone, and a short Bio.",
+            "Upload a photo: drag an image onto the photo box or click Upload photo (PNG or JPG, up to 5 MB). Confirm the preview updates, then remove it and confirm it clears.",
+            "Edit your name, phone, or bio. Confirm 'Save changes' only becomes active once you change something.",
+            "Click Save changes and confirm a success toast.",
+            "Close the window with the X or the Escape key, reopen it, and confirm your edits stuck.",
         ],
         "expected_result": [
-            "A success toast appears and the profile card reflects the update.",
+            "The Account window opens over whatever page you are on — you do not navigate away.",
+            "Email is read-only (a note explains email changes are coming soon); everything else saves.",
+            "Your photo and name update across the app after saving.",
         ],
         "future_ideas": [
-            "Allow avatar photo upload.",
-            "Add a change-password form on this page.",
-            "Add a notification-preferences section (email, in-app, daily digest).",
+            "Add a change-password / account-security area for email and password changes.",
+            "Store the photo in cloud storage so very large images are supported.",
+            "Show which workspaces you belong to on the Profile section.",
         ],
     },
     {
         "no": 29,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings page — overview and layout",
-        "route": "/settings",
+        "feature": "Account window — personal preferences",
+        "route": "Avatar menu (top-right) → Account (sections other than Profile)",
         "how_to_test": [
-            "Open /settings and confirm it is a single scrolling page divided into seven sections: Company, Email Integrations, E-Signature, Branding, AI Configuration, Task Templates, Help & Tour.",
-            "Confirm four Snapshot tiles at the top (Inbox, E-Sign, Credits, Templates) and a 'Sections' nav on the side.",
-            "Click each Snapshot tile in turn — the page should jump to the matching section.",
-            "Click each item in the Sections nav and confirm the page jumps to that section.",
-            "Scroll slowly and confirm the Sections nav highlight follows the active section.",
-            "Confirm the Inbox tile's 'connected/total' number matches what the Email Integrations section shows below.",
-            "Each individual section is tested in 29.1–29.6.",
+            "Open the avatar menu → Account. Besides Profile, internal users (Agent, Transaction Coordinator, Team Lead, Admin) see these sections down the left side: Notifications, My Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, and Help & tour.",
+            ("Open Notifications.", [
+                "Confirm a grid of notification categories with Email / Push / In-app switches. Flip a few and click Save — confirm a success toast, then reopen and confirm they stuck.",
+            ]),
+            ("Open My Checklist Templates, My Tagged Notes, My Preferred Vendors, and My Internal Resources in turn.", [
+                "Each is your own personal list — add, edit, and remove an entry, then save. These are the 'My …' personal copies; the team-wide versions live under Team → Team Settings (feature 32.14).",
+            ]),
+            ("Open Help & tour and click Start tour.", [
+                "Confirm the product tour starts for whatever role you are signed in as (see feature 13).",
+            ]),
+            "Sign in as a Client or Vendor and confirm the Account window shows Profile only. Sign in as an FSBO Customer and confirm it shows Profile plus a Preferences section.",
         ],
         "expected_result": [
-            "Snapshot tiles and the Sections nav both jump to the right section.",
-            "Every signed-in role can open /settings (individual sections have their own gating).",
+            "Every section saves its own changes with a clear success toast and the changes persist after reopening.",
+            "Internal roles see all personal sections; Client and Vendor see Profile only; FSBO sees Profile plus Preferences.",
+            "Help & tour replays the role-appropriate product tour at any time.",
         ],
         "future_ideas": [
-            "Role-gate Branding, Task Templates, and AI Configuration so non-admin users cannot see them.",
-            "Persist the last-visited section so that returning to /settings scrolls to where the user left off.",
-            "Add a 'What's new in Settings' callout when major sections change between releases.",
+            "Add a one-click 'copy my checklist template to the team' shortcut.",
+            "Add a daily-digest email option in Notifications.",
+            "Add a per-feature mini-tour launcher in Help & tour.",
         ],
     },
     {
         "no": "29.1",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — Email Integrations (Gmail and Outlook)",
-        "route": "/settings (Email Integrations section)",
+        "feature": "Organization page — Company details",
+        "route": "/organization (Company section). Open it from the avatar menu → Organization (internal roles).",
         "how_to_test": [
-            "Open Settings and scroll to Email Integrations. Confirm a Gmail row and an Outlook row are visible (iCloud is intentionally not shown yet).",
-            "Click Connect on the Gmail row. Complete sign-in in the Google popup that opens. After approval the row should switch to Connected with your email and the date.",
-            "Repeat on the Outlook row using a Microsoft 365 account.",
-            "Cancel the popup mid-way and confirm the row stays in the 'Connect' state without an error.",
-            "Click Disconnect on a connected row. Confirm a warning appears explaining inbound sync and AI email automation will stop.",
-            "Cancel the warning — the row should remain connected. Confirm it — the row should return to Connect.",
-            "Click Refresh on the section to re-fetch the integration list.",
+            "Open the avatar menu → Organization. Confirm a page with a section rail on the left: Company, Branding, Email, E-signature, AI configuration (and, for the workspace owner only, Delete organization).",
+            "On the Company section, as an Admin, confirm the Organization name field is editable with a Save changes button.",
+            "Sign in as any non-Admin (Team Lead, Agent, Transaction Coordinator) and confirm the field is read-only with a note that only an Admin can change it.",
+            "As an Admin, type a new name and click Save changes — confirm a success toast.",
+            "Sign in as another member of the same workspace and confirm they see the new name.",
         ],
         "expected_result": [
-            "Both providers connect through their official sign-in popup — no password is typed into Velvet Elves.",
-            "Disconnect always asks for confirmation first.",
-            "At least one provider must be connected for AI Email Review (29.7+) to send replies.",
+            "Admins can rename the workspace; everyone else sees a read-only field with a clear explanation.",
+            "The new name shows up for every member of the brokerage.",
+            "The Organization page replaces the old Settings page — personal preferences now live in the Account window (feature 29).",
         ],
         "future_ideas": [
-            "Show a 'Last synced' timestamp and a manual 'Sync now' button per provider.",
-            "Re-enable the iCloud row once the Apple app-specific-password flow is reviewed.",
-            "Show a small indicator on the row when the linked mailbox has unread AI drafts waiting in /ai-emails.",
-            "Detect popup-blocked browsers and offer a redirect-based fallback path.",
+            "Show a preview of how the name appears in the sidebar, invitation email, and outbound transaction emails.",
+            "Add a 'workspace web address' (subdomain) field.",
+            "Show the workspace owner's name and email on this section.",
         ],
     },
     {
         "no": "29.2",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — E-Signature (DocuSign)",
-        "route": "/settings (E-Signature section)",
+        "feature": "Organization page — Email integrations (Gmail and Outlook)",
+        "route": "/organization (Email section)",
         "how_to_test": [
-            "Open Settings → E-Signature.",
-            "If DocuSign is not yet connected, click Connect. Complete the 3-step wizard (Intro → DocuSign popup → Done).",
-            "After connecting, confirm the section shows your DocuSign account email and the date you connected.",
-            "Click Disconnect, read the warning that future Send-for-Signature attempts will fail, and confirm.",
+            "Open Organization → Email. Confirm a Gmail row and an Outlook row (iCloud is intentionally hidden for now).",
+            "Click Connect on the Gmail row and complete sign-in in the Google popup. After approval the row should switch to Connected with your email and the date.",
+            "Repeat on the Outlook row using a Microsoft 365 account.",
+            "Cancel the popup mid-way and confirm the row stays on 'Connect' without an error.",
+            "Click Disconnect on a connected row, read the warning that inbound sync and AI email automation will stop, then cancel (row stays connected) and try again to confirm (row returns to Connect).",
+            "Click Refresh to re-fetch the list.",
         ],
         "expected_result": [
-            "Connect and Disconnect both work without leaving the Settings page.",
-            "Once connected, the same account is also shown inside the Send for Signature modal on /documents.",
+            "Both providers connect through their official sign-in popup — no password is typed into Velvet Elves.",
+            "Disconnect always asks for confirmation first.",
+            "At least one provider must be connected for AI Email Review (features 29.7+) to send replies.",
         ],
         "future_ideas": [
-            "Add support for additional providers (DotLoop, Authentisign, Adobe Sign) alongside DocuSign in this section.",
-            "Show the monthly envelope count remaining so users do not hit their DocuSign quota by surprise.",
+            "Show a 'Last synced' time and a manual 'Sync now' button per provider.",
+            "Re-enable the iCloud row once the Apple app-specific-password flow is reviewed.",
+            "Show an indicator when the linked mailbox has unread AI drafts waiting.",
         ],
     },
     {
         "no": "29.3",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — Branding (placeholder — not wired yet)",
-        "route": "/settings (Branding section)",
+        "feature": "Organization page — E-signature (DocuSign)",
+        "route": "/organization (E-signature section)",
         "how_to_test": [
-            "Open Settings → Branding. Confirm a logo upload, a primary colour field, and a display name field are visible.",
-            "Try changing each field and click Save branding.",
-            "Refresh the page — the fields should reset to the defaults.",
+            "Open Organization → E-signature.",
+            "If DocuSign is not yet connected, click Connect and complete the wizard (Intro → DocuSign popup → Done).",
+            "After connecting, confirm the section shows your DocuSign account email and the date you connected.",
+            "Click Disconnect, read the warning that future Send-for-Signature attempts will fail, and confirm.",
         ],
         "expected_result": [
-            "The Branding section is currently a placeholder; nothing persists after refresh.",
-            "Please flag clearly if any client expects this section to be live so we can prioritise wiring it up.",
+            "Connect and Disconnect both work without leaving the Organization page.",
+            "Once connected, the same account is also used inside the Send for Signature modal on the Documents page.",
         ],
         "future_ideas": [
-            "Wire all three Branding fields to the tenant settings backend.",
-            "Show a live preview of the sidebar and a sample email so the user can see the changes before saving.",
-            "Add a tenant-wide 'Reset to Velvet Elves defaults' button.",
+            "Add support for other providers (DotLoop, Adobe Sign) alongside DocuSign.",
+            "Show the monthly envelope count remaining so users do not hit their DocuSign quota by surprise.",
         ],
     },
     {
         "no": "29.4",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — AI Configuration (placeholder toggles)",
-        "route": "/settings (AI Configuration section)",
+        "feature": "Organization page — Branding (white-label)",
+        "route": "/organization (Branding section — Admin only)",
         "how_to_test": [
-            "Open Settings → AI Configuration.",
-            "Confirm an 'AI Credits' line and three toggles: Auto-parse uploaded documents, Task recommendations, and Smart email drafts.",
-            "Flip each toggle and refresh — the toggle should reset (settings do not persist yet).",
-            "Click Upgrade plan and confirm nothing happens (placeholder button).",
+            "Open Organization → Branding as an Admin. Confirm a logo upload, a brand-color field, and a display-name field.",
+            "Upload a logo (PNG, JPEG, WEBP, SVG, or GIF, up to 2 MB). Try a wrong file type or an oversized file and confirm a clear error.",
+            "Pick a brand color and a display name, watch the live preview update, then click Save branding.",
+            "Refresh the page and confirm your logo, color, and display name are still there.",
+            "Confirm the saved logo and color now show in the sidebar and on the sign-in page; check that they also appear on outbound/printed documents.",
+            "Sign in as a non-Admin and confirm Branding is read-only or hidden.",
         ],
         "expected_result": [
-            "Toggles flip on screen but do not persist on refresh.",
-            "The AI Credits numbers shown today are placeholders and do not reflect real usage — please flag if a stakeholder expects them to.",
+            "Branding now fully saves — logo, brand color, and display name persist and apply across the app immediately (this was a placeholder before and is now live).",
+            "Invalid logo files are rejected with a clear message.",
+            "Only Admins can change branding.",
         ],
         "future_ideas": [
-            "Wire each toggle to the tenant AI settings (tone, disclaimer, escalation hours, auto-send threshold) so admins can actually configure AI behaviour.",
-            "Replace the placeholder credit count with a real meter pulled from the AI usage backend.",
-            "Add a 'Smart email drafts' explainer link that opens a preview of the AI Email Review queue.",
-        ],
-    },
-    {
-        "no": "29.5",
-        "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — Task Templates (placeholder list)",
-        "route": "/settings (Task Templates section)",
-        "how_to_test": [
-            "Open Settings → Task Templates. Confirm a placeholder list of five templates: Buyer Standard, Seller Standard, Dual Agency, Lease, and Commercial.",
-            "Click Edit on any row — nothing should happen (placeholder).",
-            "Click Import in the section header — nothing should happen (placeholder).",
-        ],
-        "expected_result": [
-            "Neither Edit nor Import is wired on this section.",
-            "Real template management lives at /admin/task-templates (features 30 and 31).",
-        ],
-        "future_ideas": [
-            "Replace this placeholder with a live mini-list pulled from the Task Templates backend.",
-            "Or remove this section from Settings and link directly to /admin/task-templates instead.",
-        ],
-    },
-    {
-        "no": "29.6",
-        "category": "Daily Agent / Elf Workflow",
-        "feature": "Settings — Help & Tour (replay the product tour)",
-        "route": "/settings (Help & Tour section)",
-        "how_to_test": [
-            "Open Settings → Help & Tour and click Start tour.",
-            "Confirm the product tour starts immediately for whatever role you are signed in as.",
-            "Try it for each role (Agent, Transaction Coordinator, Team Lead, Admin, Attorney, Client, FSBO Customer, Vendor) — the tour content should match the role (see feature 13 for what is expected).",
-        ],
-        "expected_result": [
-            "Start tour always launches the product tour for the signed-in role, even if you have already finished it.",
-            "This is the only fully-wired control among AI Configuration, Branding, Templates, and Help — please test it for every role.",
-        ],
-        "future_ideas": [
-            "Add a 'What's new in this release' card next to Replay tour so users can re-run a tour focused on recent changes only.",
-            "Add a per-feature mini-tour launcher (e.g. 'Replay Documents tour only').",
-            "Show a small completion timestamp ('Last completed Apr 28, 2026') so users know whether they've already seen the latest version.",
+            "Add a 'Reset to Velvet Elves defaults' button.",
+            "Show a sample invitation email and a sample printed document in the preview.",
+            "Let an Admin preview dark-mode branding before saving.",
         ],
     },
     {
@@ -2426,7 +2598,7 @@ TESTING_REVIEW_FEATURES = [
             "Open another draft and click Edit. The subject and body should become editable. Make a change and click Send Edit — confirm the edited version is sent.",
             "Click Regenerate on a draft. Confirm the AI redraws a fresh reply from the original inbound email.",
             "Click Discard. Confirm a warning explains the draft will be removed but the original inbound message stays in the communication log. Confirm Discard removes the draft.",
-            "Disconnect your email provider in Settings, then click Approve & Send on a draft. Confirm a clear error explains that no email provider is connected.",
+            "Disconnect your email provider on the Organization page (Email section), then click Approve & Send on a draft. Confirm a clear error explains that no email provider is connected.",
             "Confirm the actions that are NOT here yet: no Reassign, no 'Mark Reviewed', no attachment uploader, no scheduled-send.",
         ],
         "expected_result": [
@@ -2805,35 +2977,12 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "32.7",
         "category": "Admin / Team Lead Extras",
-        "feature": "Settings — Company Details (organization name)",
-        "route": "/settings (Company section, at the top of the page)",
+        "feature": "Organization page — Delete organization (Danger Zone)",
+        "route": "/organization (Delete organization section — workspace owner only)",
         "how_to_test": [
-            "As an Admin, open /settings and confirm the Organization Name field is editable with a Save button.",
-            "Sign in as any non-Admin (Team Lead, Agent, Transaction Coordinator, Attorney, Client, FSBO Customer, Vendor) and confirm the field is read-only with a note that only an Admin can change it.",
-            "As an Admin, type a new name and click Save. Confirm the change is persisted.",
-            "Sign in as another member of the same workspace and confirm they see the new name without needing to refresh again.",
-            "As an Admin, leave the field empty and click Save — confirm the page shows a clear error rather than saving an empty name.",
-        ],
-        "expected_result": [
-            "Admins can change the organization name; everyone else sees a read-only field with a clear explanation.",
-            "The new name shows up for every member of the brokerage on the next page load.",
-            "Errors appear inline; the page never breaks silently.",
-        ],
-        "future_ideas": [
-            "Show a small preview of how the organization name will appear in the sidebar, the invitation email, and outbound transaction emails before saving.",
-            "Add a 'Tenant slug' field so admins can claim a unique subdomain (for example acme.velvetelves.com).",
-            "Show the workspace owner's name and email on this card so members know who to ask for changes.",
-        ],
-    },
-    {
-        "no": "32.8",
-        "category": "Admin / Team Lead Extras",
-        "feature": "Settings — Danger Zone (schedule / cancel deletion)",
-        "route": "/settings (Danger Zone section at the bottom — workspace owner only)",
-        "how_to_test": [
-            "Sign in as the workspace owner and scroll to the bottom of /settings. Confirm a Danger Zone section is visible.",
-            "Sign in as any other role on the same workspace and confirm the section is not visible at all.",
-            "As the owner, click Delete organization. Confirm the page asks you to type the workspace name exactly before Schedule deletion becomes available.",
+            "Sign in as the workspace owner, open the avatar menu → Organization, and confirm a 'Delete organization' entry appears at the bottom of the section rail.",
+            "Sign in as any other role on the same workspace and confirm the Delete organization entry is not shown at all.",
+            "As the owner, open Delete organization. Confirm the page asks you to type the workspace name exactly before Schedule deletion becomes available.",
             "Schedule deletion and confirm a clear message reports the exact date and time it will run, plus a note that audit logs and a full snapshot are archived under the 2-year retention policy.",
             "Click Cancel deletion and confirm the workspace returns to normal.",
             "If your workspace is on legal hold, confirm the Delete button is disabled with a clear explanation pointing the owner at platform support.",
@@ -2873,7 +3022,7 @@ TESTING_REVIEW_FEATURES = [
         ],
         "future_ideas": [
             "Add a search box that matches name / slug / owner email.",
-            "Add a Schedule deletion action on the row alongside Suspend (currently only available inside the tenant's own Settings → Danger Zone).",
+            "Add a Schedule deletion action on the row alongside Suspend (currently only available inside the tenant's own Organization page → Delete organization).",
             "Show owner email and member count as extra columns.",
             "Add a 'Force re-verify domain' action for tenants on a custom domain.",
         ],
@@ -2950,64 +3099,540 @@ TESTING_REVIEW_FEATURES = [
             "Email the requester automatically when a multi-transaction export is ready.",
         ],
     },
-
-    # ============================================================
-    # SECTION 5 — ROLE-SPECIFIC WORKSPACES
-    # ============================================================
     {
-        "no": 33,
-        "category": "Role-Specific Workspaces",
-        "feature": "Attorney workspace",
-        "route": "/transactions (as Attorney)",
+        "no": "32.13",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Teams",
+        "route": "/admin/teams (Admin only; sidebar → Team → Teams)",
         "how_to_test": [
-            ("Sign in as an Attorney and open /transactions.", [
-                "The page should automatically switch to the attorney layout.",
-            ]),
-            ("Check the header.", [
-                "The attorney-specific title and KPI row are visible.",
-            ]),
-            ("Use the filter tabs.", [
-                "All, Needs Review, Missing Docs, Ready To Release, Clean Files.",
-            ]),
-            ("Confirm the matter cards render.", []),
-            ("Click the floating Ask AI button.", []),
-            ("Please note the current state of three header buttons:", [
-                "Open review queue — visual only right now.",
-                "State rules — visual only right now.",
-                "Upload legal packet — visual only right now.",
-            ]),
+            "Sign in as an Admin and open Teams from the sidebar.",
+            "Confirm a list of the teams in your workspace, each showing its lead and member count.",
+            "Click New team, fill in the setup dialog (name and lead), and save — confirm the new team appears.",
+            "Edit a team and change its name or lead, then save.",
+            "Delete a team and confirm a confirmation step appears before it is removed.",
         ],
         "expected_result": [
-            "The attorney layout loads with the correct tabs and matter cards.",
-            "The Ask AI panel opens correctly.",
+            "Admins can create, rename, and delete teams.",
+            "Every change requires the expected confirmation and updates the list immediately.",
         ],
         "future_ideas": [
-            "Wire the three header buttons (Open review queue, State rules, Upload legal packet).",
-            "Add a quick-reference modal for state recording rules.",
-            "Add a 'Sign off all in this packet' bulk action.",
+            "Show each team's active-deal count and pipeline value.",
+            "Allow moving several members between teams at once.",
         ],
     },
     {
-        "no": 34,
-        "category": "Role-Specific Workspaces",
-        "feature": "FSBO customer sidebar",
-        "route": "Sidebar (as FSBO Customer)",
+        "no": "32.14",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Team Settings (team-wide playbook)",
+        "route": "/admin/team-settings (Team Lead and Admin; sidebar → Team → Team Settings)",
         "how_to_test": [
-            ("Sign in as an FSBO Customer.", [
-                "Confirm the sidebar shows: My Properties, Documents, Milestones & Messages, Ask Velvet Elves AI, Notifications, Sharing.",
-            ]),
-            ("Confirm Dashboard, Transactions, and Documents pages still load cleanly.", []),
-            ("Please note which sidebar items are intentional placeholders today:", [
-                "Milestones & Messages, Notifications, and Sharing are 'Coming Soon' pages for now.",
-            ]),
+            "Open Team Settings from the sidebar. Confirm a section rail like the Organization page, with: Checklist Templates, Tagged Notes, Preferred Vendors, and Internal Resources.",
+            "As an Admin, use the team picker at the top to choose which team you are editing. (A Team Lead is automatically locked to their own team.)",
+            "In each section, add or edit an entry and save. Confirm it persists.",
+            "Confirm these are the team-wide versions; the personal 'My …' copies live in your Account window (feature 29).",
         ],
         "expected_result": [
-            "FSBO sidebar items render correctly.",
-            "Dashboard, Transactions, and Documents are reachable and working.",
+            "One place to edit a team's whole playbook (checklists, notes, vendors, resources).",
+            "Admins choose a team; Team Leads are scoped to their own team automatically.",
+            "Saved changes apply to everyone on that team.",
         ],
         "future_ideas": [
-            "Replace the placeholder pages with the FSBO milestone viewer and sharing-link manager planned for Phase 5.",
-            "Simplify the home screen for FSBO customers who are less technical.",
+            "Add a 'copy from another team' shortcut to clone a playbook.",
+            "Show which agents are using each checklist template.",
+        ],
+    },
+    {
+        "no": "32.15",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Admin — Integrations (CRM / webhooks)",
+        "route": "/admin/integrations (Admin only; sidebar → Admin → Integrations)",
+        "how_to_test": [
+            "Sign in as an Admin and open Integrations.",
+            "Click to register a new webhook endpoint, pick the events it should receive, and save.",
+            "Copy the signing secret with the copy button.",
+            "Fire a test event and confirm a delivery attempt is recorded with its result.",
+            "Review the delivery history for an endpoint.",
+        ],
+        "expected_result": [
+            "An Admin can set up a CRM / integration webhook end-to-end without an engineer.",
+            "Test events and delivery history both work.",
+        ],
+        "future_ideas": [
+            "Add ready-made templates for popular CRMs.",
+            "Add automatic retry with backoff for failed deliveries.",
+        ],
+    },
+    {
+        "no": "32.16",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Admin — AI Governance",
+        "route": "/admin/confidence (Admin only; sidebar → Admin → AI Governance)",
+        "how_to_test": [
+            "Sign in as an Admin and open AI Governance.",
+            "Confirm plain-English 'what AI can do' and 'what AI cannot do' lists.",
+            "Adjust the confidence thresholds (for example the review threshold and the auto-send threshold) and save.",
+            "Confirm the change affects how AI Email Review classifies and auto-sends drafts (feature 29.7+).",
+        ],
+        "expected_result": [
+            "Admins control the AI confidence thresholds for the whole workspace.",
+            "AI never sends below the review threshold without a human; the page states this clearly.",
+        ],
+        "future_ideas": [
+            "Show a recent history of auto-sent vs held drafts at each threshold.",
+            "Allow per-team thresholds, not just per-workspace.",
+        ],
+    },
+    {
+        "no": "32.17",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Admin — Payment Access",
+        "route": "/admin/payment-access (Admin only; sidebar → Admin → Payment Access)",
+        "how_to_test": [
+            "Sign in as an Admin and open Payment Access.",
+            "Confirm a grid of roles (Agent, Elf / Transaction Coordinator, Team Lead) against capabilities (create invoice, refund, trigger payout).",
+            "Turn a capability on or off for a role and save.",
+            "Sign in as that role and confirm the matching action appears or disappears on the Payments pages (features 26.8–26.9).",
+        ],
+        "expected_result": [
+            "Admins decide which roles can create invoices, issue refunds, and trigger payouts.",
+            "Changes take effect on the Payments pages for that role.",
+        ],
+        "future_ideas": [
+            "Allow per-person overrides, not only per-role.",
+            "Show an audit trail of who changed which capability.",
+        ],
+    },
+    {
+        "no": "32.18",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Admin — Advertising",
+        "route": "/admin/advertising (Admin only; sidebar → Admin → Advertising)",
+        "how_to_test": [
+            "Sign in as an Admin and open Advertising. Confirm three cards: Workspace ads (a single on/off toggle, OFF by default), Your house ads, and Performance.",
+            "Turn Workspace ads on and confirm sponsored placements may then appear in the workspace; turn it off and confirm they stop.",
+            "Create a house ad: add the details, upload an image, and approve it. Confirm each ad shows a plain-English 'why it is / isn't showing' chip.",
+            "Pause a house ad and confirm it stops showing.",
+            "Check the Performance card for impressions, clicks, and click-through rate.",
+        ],
+        "expected_result": [
+            "Ads are OFF until an Admin explicitly turns them on.",
+            "House ads can be created, approved, and paused, each with a clear status reason.",
+            "Performance numbers reflect this workspace's ads.",
+        ],
+        "future_ideas": [
+            "Add scheduling (start / end dates) for a house ad.",
+            "Add simple A/B testing for two creatives.",
+        ],
+    },
+    {
+        "no": "32.19",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Admin — Audit Log",
+        "route": "/admin/audit-logs (Admin only; sidebar → Admin → Audit Log)",
+        "how_to_test": [
+            "Sign in as an Admin and open Audit Log.",
+            "Confirm a list of recorded actions across the workspace (documents, transactions, tasks, users, invitations, vendors, AI emails, and so on).",
+            "Filter by entity type and confirm the list narrows.",
+            "Expand an entry and confirm it shows who did what and when.",
+            "Scroll to load more entries.",
+        ],
+        "expected_result": [
+            "Every meaningful action is recorded and filterable.",
+            "Each entry clearly shows the actor, the action, and the time.",
+        ],
+        "future_ideas": [
+            "Add a date-range filter and free-text search.",
+            "Add CSV export for a filtered view.",
+        ],
+    },
+    {
+        "no": "32.20",
+        "category": "Admin / Team Lead Extras",
+        "feature": "Platform Admin — Advertising (internal Velvet Elves staff only)",
+        "route": "/platform/advertising (platform admins only)",
+        "how_to_test": [
+            "Sign in as a platform admin and open Platform → Advertising.",
+            "Sign in as any non-platform user and try /platform/advertising directly — confirm you get a 404 (the route's existence is not leaked).",
+            "Review and manage the platform-wide / partner ad inventory shown here.",
+        ],
+        "expected_result": [
+            "Only platform admins can reach the page; everyone else gets a 404.",
+            "Platform-level ad management renders without errors.",
+        ],
+        "future_ideas": [
+            "Add per-tenant targeting controls for partner ads.",
+            "Show platform-wide ad performance roll-ups.",
+        ],
+    },
+
+    # ============================================================
+    # SECTION 5 — ATTORNEY WORKSPACE
+    # ============================================================
+    {
+        "no": 33,
+        "category": "Attorney Workspace",
+        "feature": "Attorney workspace — Matters list",
+        "route": "/transactions (as Attorney); the sidebar entry is 'Matters'",
+        "how_to_test": [
+            "Sign in as an Attorney and open Matters from the sidebar (or /transactions). The page should automatically load the attorney layout, not the agent transactions list.",
+            "Confirm the attorney KPI row at the top (for example Hard Stops, Release Ready, Active Matters, Needs Review).",
+            "Use the filter tabs: All, Needs Review, Missing Docs, Ready To Release, Clean Files. Confirm the matter cards narrow as you switch.",
+            "On a matter card, click Review to open that matter's full workspace (feature 33.1).",
+            "Click the floating Ask AI button and confirm the AI panel opens.",
+            "Click the '+ Upload Legal Packet' button (sidebar footer / top bar) and confirm the legal-packet upload flow opens.",
+        ],
+        "expected_result": [
+            "The attorney layout loads with the correct KPI row, tabs, and matter cards.",
+            "Review opens the matter workspace; Upload Legal Packet opens the intake flow; Ask AI opens the AI panel.",
+            "Releases, State Rules, and Recording Calendar are now their own sidebar pages (features 33.2–33.4) — they are no longer header buttons.",
+        ],
+        "future_ideas": [
+            "Add a 'Sign off all in this packet' bulk action from the card.",
+            "Let the attorney save a custom matter filter (for example 'closing this week, needs review').",
+            "Show the responsible agent on each matter card.",
+        ],
+    },
+    {
+        "no": "33.1",
+        "category": "Attorney Workspace",
+        "feature": "Attorney matter workspace (one matter in depth)",
+        "route": "/transactions/<id> (as Attorney) — opens from Review on a matter card",
+        "how_to_test": [
+            "Open a matter from the Matters list. Confirm a full-screen workspace with a header (property address, status, and a matter switcher to jump between matters) rather than a simple scrolling page.",
+            "Use the left section rail to move between Overview, Review, Brief, Timeline, People, Activity, and Releases. Confirm each section loads its own content.",
+            "On the Review section, work through the document review items. On the Releases section, confirm you can start a packet release.",
+            "Use the matter switcher in the header to jump to a different matter without going back to the list.",
+        ],
+        "expected_result": [
+            "The matter opens as a focused workspace; each rail section shows real data for that matter.",
+            "The matter switcher moves you between matters in place.",
+        ],
+        "future_ideas": [
+            "Add keyboard shortcuts to move between rail sections.",
+            "Add a one-click 'export this matter file as PDF' for the closing binder.",
+        ],
+    },
+    {
+        "no": "33.2",
+        "category": "Attorney Workspace",
+        "feature": "Attorney Releases Queue",
+        "route": "/attorney/releases (sidebar → Releases Queue)",
+        "how_to_test": [
+            "Open Releases Queue from the sidebar. Confirm a list of matters that are ready to release and a history of recently released packets.",
+            "On a ready matter, click the release action and confirm the Send Packet window opens with the recipients and documents pre-filled.",
+            "Send a packet and confirm it moves into the released history with the date and recipients.",
+        ],
+        "expected_result": [
+            "Only matters that are actually ready to release appear in the ready list.",
+            "Sending a packet records who it went to and when.",
+        ],
+        "future_ideas": [
+            "Add a one-click 'release all ready matters' for a quiet end-of-day sweep.",
+            "Let the attorney attach a short cover note to the released packet.",
+        ],
+    },
+    {
+        "no": "33.3",
+        "category": "Attorney Workspace",
+        "feature": "Attorney State Rules",
+        "route": "/attorney/state-rules (sidebar → State Rules)",
+        "how_to_test": [
+            "Open State Rules from the sidebar.",
+            "Confirm a clean reference document listing, per state, the closing type (attorney / title / escrow), the recording window, and whether same-day disbursement is allowed.",
+            "Scroll through and confirm it reads as a reference page, not a dashboard.",
+        ],
+        "expected_result": [
+            "The page is a read-only reference of state recording / closing rules.",
+            "Every state your matters touch is listed.",
+        ],
+        "future_ideas": [
+            "Add a search box to jump to a state quickly.",
+            "Link each state to the matters currently in that state.",
+        ],
+    },
+    {
+        "no": "33.4",
+        "category": "Attorney Workspace",
+        "feature": "Attorney Recording Calendar",
+        "route": "/attorney/recording-calendar (sidebar → Recording Calendar)",
+        "how_to_test": [
+            "Open Recording Calendar from the sidebar.",
+            "Confirm a month grid with recording deadlines / closings marked on their dates.",
+            "Move between months with the arrows.",
+            "Click Print and confirm a printable calendar opens.",
+        ],
+        "expected_result": [
+            "The calendar shows the matters' recording deadlines on the right dates.",
+            "Month navigation and Print both work.",
+        ],
+        "future_ideas": [
+            "Let the attorney click a day to see every matter due that day.",
+            "Add an agenda (list) view alongside the month grid.",
+        ],
+    },
+
+    # ============================================================
+    # SECTION 6 — CLIENT, FSBO & VENDOR PORTALS
+    # ============================================================
+    {
+        "no": 34,
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "Client workspace — Home (closing concierge)",
+        "route": "/client/home (Client sign-in lands here)",
+        "how_to_test": [
+            "Sign in as a Client (a buyer or seller invited to a transaction). You should land on a warm 'closing concierge' Home with its own navy sidebar — not the staff app layout.",
+            "Confirm the Home shows where your deal stands, what is coming next, your key dates, and a short list of documents and your agent.",
+            "Use the 'Ask Velvet' / 'Ask your agent' box to send a message, and confirm it posts to a real two-way thread.",
+            "Confirm the left sidebar shows: Home, Next Steps, Timeline, Documents, Updates. (Your Payments and Agent Info pages are reachable from links on the Home cards.)",
+            "Open Next Steps (your action items and key dates) and Updates (recent updates plus the message thread with your agent) and confirm each loads with real content.",
+            "If you are a brand-new client with no transaction yet, confirm a friendly empty Home appears instead of fake sample data.",
+        ],
+        "expected_result": [
+            "Clients get their own concierge workspace, not the internal staff layout.",
+            "Every number and date is real; an empty account shows an honest empty state.",
+            "The Ask box reaches the agent and shows replies.",
+        ],
+        "future_ideas": [
+            "Add a single 'what should I do next' banner at the very top.",
+            "Let the client switch between several of their transactions from the Home header.",
+        ],
+    },
+    {
+        "no": "34.1",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "Client workspace — Timeline",
+        "route": "/client/milestones (sidebar → Timeline)",
+        "how_to_test": [
+            "Open Timeline from the client sidebar. Confirm one card per transaction summarising where the deal stands and the closing date.",
+            "Tap a transaction card and confirm it opens that deal's full step-by-step timeline.",
+        ],
+        "expected_result": [
+            "Clients with more than one deal see a calm card per deal; each opens its own detailed timeline.",
+            "Every step and date is driven by the real transaction, not a template.",
+        ],
+        "future_ideas": [
+            "Add an estimated date next to upcoming steps.",
+            "Let the client turn on email alerts when a step completes.",
+        ],
+    },
+    {
+        "no": "34.2",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "Client workspace — Documents",
+        "route": "/client/documents (sidebar → Documents)",
+        "how_to_test": [
+            "Open Documents from the client sidebar. Confirm it leads with anything waiting on you, then a real status summary, then your document list.",
+            "Click the upload action, pick the transaction and document type, and upload a file. Confirm it appears in the list.",
+            "On a document, use Flag for deletion, give a reason, and confirm a 'Flagged' badge appears (this routes to the agent's Deletion Queue — feature 27.11).",
+        ],
+        "expected_result": [
+            "The client sees a real document list and status summary, never a hardcoded zero board.",
+            "Upload and flag-for-deletion both work and the agent is notified of flags.",
+        ],
+        "future_ideas": [
+            "Add an inline preview so the client can re-read a document before flagging.",
+            "Show which transaction each document belongs to when the client has several deals.",
+        ],
+    },
+    {
+        "no": "34.3",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "Client / FSBO workspace — Payments (invoices)",
+        "route": "/client/invoices (Client and FSBO sidebar → Payments)",
+        "how_to_test": [
+            "Sign in as a Client or FSBO Customer and open Payments from the sidebar.",
+            "Confirm a list of invoices on your transactions with their amount, status, and due date.",
+            "Open an invoice and confirm you can pay it securely (Stripe). After paying in test mode, confirm the status updates to Paid.",
+        ],
+        "expected_result": [
+            "Clients and FSBO customers see only their own invoices.",
+            "Paying an invoice updates its status and records the payment.",
+        ],
+        "future_ideas": [
+            "Email a receipt automatically after payment.",
+            "Let the payer save a card for future invoices.",
+        ],
+    },
+    {
+        "no": "34.4",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "Client workspace — Agent Info (your team)",
+        "route": "/client/agent (sidebar → Agent Info)",
+        "how_to_test": [
+            "Open Agent Info from the client sidebar.",
+            "Confirm your agent's details and the deal's key contacts (loan officer, title, etc.) with one-tap call and email.",
+            "Confirm the agent's short bio appears (this is the bio the agent set in their Account → Profile).",
+        ],
+        "expected_result": [
+            "The page shows the real agent and key contacts for the deal, read-only.",
+            "Call and email shortcuts work on a phone.",
+        ],
+        "future_ideas": [
+            "Add the agent's photo and office hours.",
+            "Add a one-tap 'message my agent' that opens the Ask thread.",
+        ],
+    },
+    {
+        "no": 35,
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "FSBO workspace — Overview & sidebar",
+        "route": "/fsbo (FSBO Customer sign-in lands here)",
+        "how_to_test": [
+            "Sign in as an FSBO Customer. Confirm you land on an Overview dashboard with KPI tiles (for example My Properties, Missing Docs, Share Links Live, Days To Close) and a floating Ask AI button.",
+            "Confirm the sidebar shows: Dashboard, My Properties, Documents, Payments, Messages.",
+            "Confirm the sidebar footer has a 'Share milestones' button.",
+            "Click through each sidebar item and confirm every page loads (none should be a 'Coming Soon' placeholder).",
+        ],
+        "expected_result": [
+            "The FSBO Overview shows real numbers or clean empty states.",
+            "Every FSBO sidebar destination is a working page.",
+            "Share milestones opens the share-link manager.",
+        ],
+        "future_ideas": [
+            "Simplify the home screen further for less technical sellers.",
+            "Add a guided 'first week as a FSBO seller' checklist.",
+        ],
+    },
+    {
+        "no": "35.1",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "FSBO workspace — My Properties (and property detail)",
+        "route": "/fsbo/properties (sidebar → My Properties)",
+        "how_to_test": [
+            "Open My Properties. Confirm one card per home with its status, closing date, outstanding-document count, and unread-message count.",
+            "Open a property card and confirm its workspace opens (milestones, documents, and messages for that one home).",
+            "From a property, use the 'Manage' / share action and confirm the share-link manager opens.",
+        ],
+        "expected_result": [
+            "Every property the seller owns appears as a scannable card.",
+            "Opening a property shows that home's full workspace.",
+        ],
+        "future_ideas": [
+            "Add a filter strip (active / closing soon / closed) above the property cards.",
+            "Show the next action needed on each property card.",
+        ],
+    },
+    {
+        "no": "35.2",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "FSBO workspace — Documents",
+        "route": "/fsbo/documents (sidebar → Documents)",
+        "how_to_test": [
+            "Open Documents. Confirm a count badge and a filter-tab strip (All / Missing / In progress / Uploaded / Verified / Complete) over one combined list across all your properties.",
+            "Each row should show the document, its status, and a tag for which property it belongs to.",
+            "On a missing requirement, click Upload — confirm the upload window opens with that property pre-selected.",
+            "On a document, use Flag for deletion and confirm a reason is required and the row updates.",
+        ],
+        "expected_result": [
+            "All documents across every property show in one place, filterable by status.",
+            "Upload and flag-for-deletion both work.",
+        ],
+        "future_ideas": [
+            "Add a 'download everything for this property' button.",
+            "Auto-detect the document type from the uploaded file.",
+        ],
+    },
+    {
+        "no": "35.3",
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "FSBO workspace — Messages",
+        "route": "/fsbo/milestones (sidebar → Messages)",
+        "how_to_test": [
+            "Open Messages. Confirm a single inbox of everything your coordinator has sent you, across all properties.",
+            "Confirm each message is tagged with the property it belongs to.",
+            "Use the filter-tab strip to narrow the list.",
+        ],
+        "expected_result": [
+            "One unified message inbox across every property.",
+            "Each message clearly shows which property it relates to.",
+        ],
+        "future_ideas": [
+            "Let the seller reply to a coordinator message directly from this inbox.",
+            "Add unread / read filters.",
+        ],
+    },
+    {
+        "no": 36,
+        "category": "Client, FSBO & Vendor Portals",
+        "feature": "Vendor portal — Document requests and uploads",
+        "route": "/portal/vendor (Vendor sign-in lands here)",
+        "how_to_test": [
+            "Sign in as a Vendor. Confirm a focused portal showing the documents requested from you and an upload area — not the staff app.",
+            "Upload a requested document and confirm it is accepted and shows in your uploads.",
+            "Switch to the My Uploads view (sidebar) and confirm your previously uploaded files are listed.",
+            "Confirm the portal only ever shows your own requests and uploads — no transaction details you should not see.",
+        ],
+        "expected_result": [
+            "Vendors see only their own document requests and uploads.",
+            "Upload works and the file reaches the right transaction for the agent.",
+        ],
+        "future_ideas": [
+            "Let a vendor reply to a request with a short note alongside the file.",
+            "Show the due date for each requested document.",
+        ],
+    },
+
+    # ============================================================
+    # SECTION 7 — PUBLIC LINKS (NO SIGN-IN)
+    # ============================================================
+    {
+        "no": 37,
+        "category": "Public Links (No Sign-In)",
+        "feature": "Public milestone viewer",
+        "route": "/milestones/<share token> (opened from a share link an agent or seller sent)",
+        "how_to_test": [
+            "Open a milestone share link in a browser where you are signed out (or a private window).",
+            "Confirm a clean, read-only progress page showing the property address and the milestone steps with their status — branded with the sharing brokerage's name and color.",
+            "Confirm there is no sign-in prompt and no private contact or financial detail.",
+            "Open a made-up / expired token and confirm a clear 'link not available' message rather than a broken page.",
+        ],
+        "expected_result": [
+            "Anyone with the link sees the milestone progress without signing in.",
+            "The page is read-only and never leaks private details.",
+            "An invalid or expired link shows a clean message.",
+        ],
+        "future_ideas": [
+            "Show an estimated closing date on the viewer.",
+            "Let the viewer subscribe to email updates when a step completes.",
+        ],
+    },
+    {
+        "no": 38,
+        "category": "Public Links (No Sign-In)",
+        "feature": "Public invoice payment link",
+        "route": "/pay/invoices/<invoice id> (opened from an invoice email)",
+        "how_to_test": [
+            "Open a public invoice pay link while signed out.",
+            "Confirm the page shows the amount, who it is for, the property, and the due date, with a secure 'Pay' button (Stripe).",
+            "Pay in test mode and confirm you are taken to a 'payment complete' confirmation page.",
+            "Open the link again after paying and confirm it shows the invoice is already paid rather than charging twice.",
+        ],
+        "expected_result": [
+            "A payer with no account can pay an invoice securely from the link.",
+            "After payment a clear confirmation page appears and the invoice is marked paid.",
+        ],
+        "future_ideas": [
+            "Offer a downloadable PDF receipt on the confirmation page.",
+            "Support partial / installment payments.",
+        ],
+    },
+    {
+        "no": 39,
+        "category": "Public Links (No Sign-In)",
+        "feature": "Advertise storefront",
+        "route": "/advertise (public marketing + checkout)",
+        "how_to_test": [
+            "Open /advertise while signed out. Confirm a marketing landing page explaining advertising on Velvet Elves with a clear call to action.",
+            "Start the checkout flow and confirm it walks you through choosing a placement and paying.",
+            "Complete a test checkout and confirm a completion / confirmation page appears.",
+        ],
+        "expected_result": [
+            "The storefront is reachable with no sign-in and explains the offer clearly.",
+            "Checkout and completion both work end to end in test mode.",
+        ],
+        "future_ideas": [
+            "Show live example placements so advertisers see what they are buying.",
+            "Add package tiers (week / month / quarter) with clear pricing.",
         ],
     },
 
@@ -3015,7 +3640,7 @@ TESTING_REVIEW_FEATURES = [
     # SECTION 6 — DIRECT LINKS AND ERROR PAGES
     # ============================================================
     {
-        "no": 35,
+        "no": 40,
         "category": "Direct Links and Error Pages",
         "feature": "Unauthorized page",
         "route": "/unauthorized (or any blocked page)",
@@ -3036,7 +3661,7 @@ TESTING_REVIEW_FEATURES = [
         ],
     },
     {
-        "no": 36,
+        "no": 41,
         "category": "Direct Links and Error Pages",
         "feature": "Not Found (404) page",
         "route": "Any unknown URL, for example /this-does-not-exist",
