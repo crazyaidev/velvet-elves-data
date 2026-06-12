@@ -11,6 +11,74 @@ sources; this document explains **how to compose them**.
 
 ---
 
+## v2 — The Comfort Scale (2026-06-11; wizard-first, app-wide pending D13)
+
+Jan's direction (AI_WIZARD_SUPERIORITY_COMPLETION_PLAN Part II §19): the v1
+scale below strained eyes — meaning was carried by 9 to 11px text, and small
+muted ink compounded it. v2 supersedes the affected v1 values. It is applied
+to the New Transaction wizard NOW (as component-level sizes, not edits to the
+global tokens, per correction P8) and rolls out app-wide after Jake approves
+the side-by-side screenshots (Decision D13). Where v2 conflicts with anything
+below, **v2 wins**.
+
+### v2.1 Type scale
+
+| Role | v1 | v2 |
+| --- | --- | --- |
+| Body / inputs | 13–14px | **15px**, line-height 1.6 |
+| Secondary / card body | 12.5px | **13.5px** |
+| Field labels | 11.5px | **12.5px** |
+| Mono kickers | 9px / 1.8px tracking | **12px / 1.5px tracking** |
+| Chips, badges, status pills | 9.5–10.5px | **minimum 12px** |
+| Section titles | 15–17px sans semibold | **serif 20px semibold** |
+| Hero serif | 22–26px | **24–28px** |
+| Table money/dates | 13.5px | **15px tabular-nums** |
+
+**Hard rules:** no text below **12px** anywhere, no exceptions; no MEANING
+(status, confidence, dates) carried by the smallest size on a surface; mono
+stays reserved for short labels and numerics.
+
+### v2.2 Contrast
+
+`#7A7A7A` muted ink is reserved for text at **14px and larger**. Below 14px,
+muted text uses `#5C5F62`. Every text/background pair passes WCAG AA at its
+actual rendered size.
+
+### v2.3 Space and shape
+
+Card padding 20/24; section rhythm 32; list rows minimum height 52px; the
+48px interactive minimum (requirements §9.1) is enforced — icon buttons in
+dense rows are at least 40px with padding reaching 48px hit area. Cards use
+**12px radius** (modals 16px); one soft elevated shadow token; fewer
+hairlines — whitespace separates, borders only group.
+
+### v2.4 Motion
+
+150ms ease-out for state changes, 250ms for enter/exit, skeletons for every
+async surface, a single shimmer for AI work in progress. No bounce.
+
+### v2.5 AI surfaces (extends §10)
+
+The champagne system gains four standard elements, used everywhere the AI
+acts: the **confidence chip** (`AI · 93%`), the **citation chip** (page +
+leading words, always clickable, always jumps the source viewer), the
+**pre-confirmed check** (ship-it-tier items arrive confirmed, subtly marked,
+one click to revisit), and the **Autopilot banner** (when the whole intake
+cleared the tier). The brand promise: the AI shows its work.
+
+### v2.6 Comfort and convenience (new, normative)
+
+- Every flow is completable mouse-only; typing is only ever for naming
+  things.
+- A default is always proposed; the user confirms rather than constructs.
+- Destructive actions are undoable inline (the Undo chip pattern), never
+  silently destructive.
+- The user confirms ONCE per intent, not per screen (Autopilot collapses
+  per-step confirmations into one decisive approval).
+- Nothing meaningful below 12px; nothing low-contrast below 14px.
+
+---
+
 ## 1 · Brand Voice
 
 Velvet Elves is a **calm, premium, AI-assisted real-estate workspace**.

@@ -551,17 +551,319 @@ dirty), then click the X close button or hit Escape.
 
 ---
 
-## 10 · Regression Smoke
+## 10 · Step 7 — Review Your Timeline
+
+> New step between Confirm and the Compliance checklist
+> (AI_WIZARD_SUPERIORITY_COMPLETION_PLAN §4). Everything here is
+> mouse-only: steppers, dropdowns, and date pickers.
+
+### 10.1 Anchor gate
+**How to test.** Walk a document flow through Confirm Details. You land
+on "Review Your Timeline".
+
+**Expected result.**
+- ✅ A champagne card asks "Does this Date of Acceptance look right?"
+  with the extracted date in large numerals.
+- ✅ If the date came from the document, a "View in document" link jumps
+  the right-hand PDF viewer to the cited page.
+- ✅ The deadline list below is dimmed with the hint "Confirm the anchor
+  first; every deadline below is calculated from it".
+- ✅ The "Confirm Timeline" button is disabled until you click
+  "Looks good".
+- ✅ "Edit date" opens an inline date picker; no navigation.
+- ✅ With a document that has no acceptance date (or manual mode), the
+  card honestly says "I couldn't find a Date of Acceptance in the
+  documents" and offers only a date picker — no made-up date.
+
+### 10.2 Deadline list and basis chips
+**How to test.** Click "Looks good" and read the list.
+
+**Expected result.**
+- ✅ Every row shows a name, a date, and HOW it was calculated (e.g.
+  "5 days after Date of Acceptance", "From the contract").
+- ✅ Only dated rows appear. Operational tracking dates (EM Delivered,
+  CD Delivered, Cleared to Close) are NOT here — they live in the
+  Active Transactions drawer.
+- ✅ Core dates (Closing, Possession) have no Remove button.
+
+### 10.3 Editing and the cascade
+**How to test.** Click "Edit date" on the anchor card and pick the next
+day.
+
+**Expected result.**
+- ✅ An amber summary appears: "N deadlines and M task dates moved".
+- ✅ "Review changes" expands an old → new diff (old date struck
+  through).
+- ✅ Editing a derived row (e.g. Home Inspection Deadline) offers a Days
+  stepper ("[7] days after Date of Acceptance") or a specific date —
+  picking a date converts it to the day count; weekends/holidays roll
+  forward automatically (the shown date may shift to the next business
+  day — that is correct, not a bug).
+
+### 10.4 Custom deadlines
+**How to test.** Click "+ Add deadline", type a name (e.g. "Septic
+inspection"), keep the relative rule (3 days after Date of Acceptance),
+click "Save deadline".
+
+**Expected result.**
+- ✅ The new row appears with the server-computed date and the rule text.
+- ✅ Remove shows a "Removed … Undo" chip; Undo restores it.
+- ✅ After Approve & Create, the deadline exists as a task (milestone
+  "Deadline") in My Task Queue and on the Closing Calendar, dated by
+  the rule.
+
+---
+
+## 11 · Step 8 — Confirm Your Compliance Checklist
+
+> New step between Timeline and Review Tasks (plan §5). The list is
+> deterministic: same use case + same contract terms = same rows, every
+> time. No spinner theater.
+
+### 11.1 Generated rows
+**How to test.** Confirm the timeline and read the checklist.
+
+**Expected result.**
+- ✅ Document rows match the transaction type (e.g. Closing Disclosure
+  only on financed deals; Proof of Funds only on cash deals).
+- ✅ Rows gated by contract terms (HOA Documents Package, Home Warranty
+  Order Confirmation) appear ONLY when those terms are true, with a
+  "From contract terms" chip.
+- ✅ Each row shows a due date and its basis ("3 days after acceptance").
+- ✅ With exactly ONE uploaded document, the Purchase Agreement row is
+  checked green "Uploaded · <your file name>". With several uploads,
+  nothing auto-matches; each row offers "Mark as uploaded" with a
+  one-click picker.
+- ✅ The search box filters rows as you type (optional typing).
+
+### 11.2 Add, edit, remove
+**How to test.** Use "+ Add document", the pencil, and the trash on a row.
+
+**Expected result.**
+- ✅ Add/Edit use the same editor as deadlines: name, optional
+  description, Specific date OR a relative rule via stepper + dropdowns.
+- ✅ Remove shows the Undo chip. Removed rows are NOT deleted at create:
+  they are saved as "waived" and can be un-waived later from the
+  Documents view.
+
+### 11.3 Use your own checklist
+**How to test.** Click "Use your own checklist" → Paste text tab → paste
+two lines ("Septic Certificate", "Well Test") → "Read checklist".
+
+**Expected result.**
+- ✅ A review list appears with both rows CHECKED but NOT yet added.
+- ✅ Unchecking one and clicking "Add 1 document" adds only the checked
+  row to the checklist. Nothing was added without that click.
+- ✅ The Upload tab accepts PDF/TXT/CSV; a scanned image-only PDF says
+  honestly that no items were found and suggests the paste tab.
+- ✅ "Add as tasks instead" adds the rows as Manual tasks on the Review
+  Tasks step (the older paste behavior).
+
+### 11.4 Life after the wizard
+**How to test.** Create the transaction, open its Documents view (the
+Transaction Documents modal from the Active Transactions card).
+
+**Expected result.**
+- ✅ A "Missing documents" group lists the same open rows you confirmed,
+  each with a due chip (red when overdue).
+- ✅ "Mark uploaded" opens a picker of the transaction's documents; one
+  click flips the row to uploaded.
+- ✅ "Waive" hides the row into a collapsible "Waived" group with
+  Un-waive.
+- ✅ The mail icon ("Request … by email") lets you pick a party; it files
+  a DRAFT into AI Email Review. Verify nothing was sent: the draft sits
+  in /ai-emails awaiting approval.
+- ✅ Uploading a document whose detected type matches an open row shows a
+  confirm chip ("Is <file> the <document>?"); nothing links without
+  your Yes.
+- ✅ A quick-create (modal) transaction ALSO has a default checklist on
+  its Documents view — wizard and quick-create files behave the same.
+
+---
+
+## 12 · Step 9 — Review Tasks upgrades
+
+### 12.1 Relative due rules
+**How to test.** On Review Tasks, click "Rule…" beside a task's date.
+Set "3 days before Closing Date", Save rule.
+
+**Expected result.**
+- ✅ The date updates to the server-computed value (weekend rolls
+  forward) and the basis line shows "3 days before Closing Date" with a
+  "rule" chip.
+- ✅ Typing a date directly instead clears the rule (they are mutually
+  exclusive; the "edited" chip shows).
+- ✅ After create, the task on the Tasks view carries the rule-derived
+  date.
+
+### 12.2 Related compliance item
+**How to test.** Open the "Related document" dropdown on a task.
+
+**Expected result.**
+- ✅ It lists exactly the checklist rows from the previous step plus
+  "None". Selecting one links the task to that document at create.
+
+### 12.3 Auto-Email toggle
+**How to test.** Find a task targeted at a person whose email you
+captured (e.g. a Buyer task when the buyer has an email), and one
+targeted at "Agent".
+
+**Expected result.**
+- ✅ The "Auto-Email off" chip appears ONLY on tasks whose target
+  resolves to a real captured email. The Agent task shows no toggle at
+  all (no disabled mystery controls).
+- ✅ Turning it on shows: "When this task comes due, I draft the email
+  to <name> (<email>) for your review. Nothing sends without approval."
+- ✅ After create, when the task is due and the admin reminders run
+  fires (POST /ai-emails/reminders/run or the daily cron), exactly ONE
+  draft appears in /ai-emails per task per due date — re-running the
+  sweep adds nothing. Nothing is ever sent automatically.
+
+### 12.4 Search and descriptions
+**Expected result.**
+- ✅ A "Search tasks…" box filters the list as you type.
+- ✅ Tasks show their one-line description under the name.
+
+---
+
+## 13 · Top stepper (public phases)
+
+**Expected result.**
+- ✅ The top bar shows "Step X of 5 · <phase>" over five dots: Upload,
+  Review details, Timeline, Compliance, Tasks & create.
+- ✅ Back still walks every internal screen one at a time.
+- ✅ Resuming an older saved draft restores it at its saved screen; the
+  new Timeline and Compliance steps simply start fresh when reached.
+
+---
+
+## 14 · Regression Smoke
 
 After any change touching the wizard, also re-verify:
 
 - ✅ A full happy-path flow: upload one PDF → AI parses → land on
   Step 3 → fill any flagged field → Step 4 fill price + dates → Step
-  5 (skip if all captured) → Step 6 review → Create.
+  5 (skip if all captured) → Confirm → "Looks good" + Confirm Timeline
+  → Confirm Checklist → review tasks → Create.
 - ✅ The created transaction appears at the top of the active
   transactions list with the highlight ring.
 - ✅ Tasks were generated (see toast and the History panel).
+- ✅ The Documents view shows the Missing documents group matching the
+  confirmed checklist.
 - ✅ No console errors or warnings.
+
+---
+
+## 15 · The AI plan: suggestions, Autopilot, and the command bar
+
+> Part II of the plan (§16–§22): after parsing, the AI now READS the deal
+> and proposes deal-specific deadlines, documents, tasks, and watch-outs.
+> Everything it proposes carries a citation back into the document and a
+> confidence score; nothing applies without your click (or one Autopilot
+> approval). All mouse-only.
+
+### 15.1 AI suggestions on the Timeline step
+**How to test.** Upload a packet that contains a deal-specific
+contingency the standard timeline does not cover (e.g. a septic
+evaluation addendum). Walk to "Review Your Timeline".
+
+**Expected result.**
+- ✅ Below the deadline list, an "AI suggestions" group shows a card per
+  proposal: name, the RULE it proposes (e.g. "14 days after Date of
+  Acceptance"), a confidence chip ("AI · 93%"), and a citation line
+  (page + the contract's own words).
+- ✅ Clicking the citation jumps the right-hand viewer to that page with
+  the snippet highlighted. Every suggestion has a working citation — if
+  the AI can't show where it read something, the suggestion never
+  appears.
+- ✅ "Add" turns the card into a normal deadline row (champagne "AI"
+  chip on the row); "Skip" dismisses it. Nothing was added before the
+  click.
+- ✅ High-confidence suggestions (at or above the admin threshold,
+  Settings → Confidence) arrive PRE-ACCEPTED with a subtle check — one
+  click reverses them.
+- ✅ The dates obey the same cascade as every other row: change the
+  anchor date and the AI rows move too.
+- ✅ A mini timeline strip at the top shows the whole deal as dots
+  (navy core dates, orange AI additions, a dashed "today" marker).
+
+### 15.2 AI suggestions on the Checklist step
+**How to test.** Continue to "Confirm Your Compliance Checklist".
+
+**Expected result.**
+- ✅ Deal-specific document suggestions appear the same way (card,
+  confidence, citation, Add/Skip).
+- ✅ A WAIVE suggestion (e.g. "Buyer waived inspection — waive the
+  Inspection Report row?") is NEVER pre-accepted, no matter the
+  confidence. It always waits for your click.
+- ✅ If the AI found nothing beyond the standard list, there is no empty
+  "suggestions" box — a quiet line says the standard checklist covers
+  this deal.
+
+### 15.3 The deal brief
+**How to test.** Look above the timeline (and again on the final
+confirm screen).
+
+**Expected result.**
+- ✅ A short brief in plain sentences: price, financing, the two or
+  three dates that matter, and "watch out" lines.
+- ✅ Every watch-out has a citation link into the document. The factual
+  sentences (price, dates) exactly match the confirmed fields — the
+  brief never contradicts the form.
+
+### 15.4 Autopilot — the 3-click intake
+**How to test.** Upload a clean, complete packet (all core fields
+present, every party with name + email + phone, both AI passes
+agreeing). Click "Start Intake".
+
+**Expected result.**
+- ✅ After parsing, a single Autopilot banner says everything checked
+  out: N fields verified, M deadlines, K documents, all suggestions
+  verified. One "Looks good" click, then one "Approve & Create" click.
+  Three clicks total, start to finished transaction.
+- ✅ The banner lists what will be created BEFORE you approve — nothing
+  is hidden behind the shortcut.
+- ✅ "Review step by step" is always offered next to the shortcut and
+  walks the normal steps.
+
+### 15.5 Autopilot interrupts honestly
+**How to test.** Upload a packet where a party has no phone number (or
+remove one on the parties screen).
+
+**Expected result.**
+- ✅ Autopilot does NOT offer the shortcut. It says exactly what is
+  missing ("The buyer has no phone number") and drops you on that step
+  with the field focused.
+- ✅ Fixing the field brings the shortcut back.
+
+### 15.6 The command bar
+**How to test.** On the Timeline, Checklist, Confirm, or Review Tasks
+step, click the "Tell me what to change" bar and type:
+`add a septic inspection deadline 14 days after acceptance`.
+
+**Expected result.**
+- ✅ The bar answers with a PREVIEW of what it understood ("Add deadline
+  'Septic inspection' · 14 days after Date of Acceptance — computed
+  date <date>") and Apply / Cancel buttons. Nothing changed yet.
+- ✅ Apply adds the row exactly like the manual editor would (same
+  server-computed date, same cascade behavior) and shows an Undo chip;
+  Undo restores the previous state completely.
+- ✅ Try `waive the home warranty row` and `turn on auto-email for the
+  earnest money task` — same preview-then-apply pattern.
+- ✅ Type nonsense (`make it rain`). The bar says it can't map that to
+  an action and lists the kinds of things it CAN do. It never guesses.
+
+### 15.7 Comfort check (the v2 scale)
+**How to test.** Walk any wizard flow at 100% browser zoom.
+
+**Expected result.**
+- ✅ No squinting: body text reads at 15px, labels at 12.5px, and no
+  text anywhere in the wizard is smaller than 12px.
+- ✅ Section titles are serif 20px; the anchor date is large serif.
+- ✅ Status chips and confidence chips are legible at arm's length.
+- ✅ Compare against any non-wizard page (e.g. the dashboard): the
+  wizard should feel noticeably easier on the eyes. (The app-wide
+  rollout is a separate decision — D13.)
 
 ---
 
@@ -580,4 +882,4 @@ Screenshot: <attach>
 
 ---
 
-*Last revised: 2026-04-28.*
+*Last revised: 2026-06-11 (Part II: AI suggestions, Autopilot, command bar, deal brief, v2 comfort scale).*

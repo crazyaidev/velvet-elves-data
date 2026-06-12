@@ -1,6 +1,6 @@
 # Velvet Elves Revenue Generation System Plan
 
-**Last updated:** 2026-06-05  
+**Last updated:** 2026-06-08 (source-verification corrections added; see Section 1.5)  
 **Audience:** Jan, the solo developer building Velvet Elves, and Jake, the client/product stakeholder.  
 **Context:** This rewrite incorporates Jake's testing notes about signup roles, organization structure, vendor organizations, partner codes, Transaction Coordinators as vendor-style service providers, and post-MVP monetization paths.
 
@@ -31,6 +31,48 @@ This solves Jake's signup concern without weakening the owner/admin safety guard
 
 ---
 
+## 1.5 Source-Verification Corrections (2026-06-08)
+
+This section was added after re-reviewing the plan against the live frontend and backend source, the requirements, and the shipped migrations. It is **authoritative**: where the body of this plan (Sections 2 onward) conflicts with a correction below, the correction wins. Each item names the file that was verified so the plan stops drifting from the code.
+
+### C1. The phone-masking bug is already fixed (remove from the build queue)
+
+The plan says (Section 2.1, Section 5.4, Section 10 Phase 0, Section 13) that phone masking adds a leading `1` and drops the final digit, and lists fixing it as immediate work. **This is stale.** `toNationalPhoneDigits` in `velvet-elves-frontend/src/utils/formatters.ts` already strips a leading country-code `1` from an 11-digit input *before* capping at 10 digits, with a comment describing exactly this bug. `formatPhoneNumber` (same file) and `RegisterPage.tsx` already use it.
+
+- **Correction:** Do not schedule this as new work. Convert it to a one-line regression test (paste `+1 (317) 555-1234`, confirm `(317) 555-1234` with no lost digit). If a tester still saw the old behavior, they were on a stale build; reproduce on `main` before filing.
+
+### C2. Company/Brokerage carry-over: fix the exact field mapping, not a vague pre-fill
+
+The carry-over gap is real but the plan's description is imprecise. At registration, `RegisterPage.tsx` sends `organization_name`, which seeds the **tenant** display name (`tenants.name`). The onboarding company field in `OnboardingWizard.tsx` initializes its `companyName` state from `user?.company_name` (lines ~191 and ~255), **not** from the tenant name, so a fresh self-signup sees a blank company field even though they typed an organization at signup.
+
+- **Correction:** The fix is specifically to seed the onboarding company field from `tenant.name` (already fetched via `useCurrentTenant` in the wizard) when `user.company_name` is empty: `companyName = user?.company_name || tenant?.name || ''`. Do not invent a new carry-over channel; the value already exists on the tenant.
+
+### C3. Do not create `transaction_vendor_links` — extend the shipped `transaction_vendor_assignments`
+
+This is the most important correction. The plan (Section 3.4, Section 7.2, Section 7.4, Section 9.5, Section 12.2, Section 13) proposes a new first-class table `transaction_vendor_links`. **That table already exists under a different name.** Milestone 4.3 shipped `public.transaction_vendor_assignments` (migration `20260622090000_milestone_4_3_vendor_comms.sql`): `id, tenant_id, transaction_id, vendor_id, role, notes, is_active, created_by, created_at, updated_at, UNIQUE(transaction_id, vendor_id, role)`, plus a companion `transaction_vendor_assignment_contacts` for the per-transaction primary/opt-in contact (the "vendor user" the plan wants). Repositories, API routes, and the wizard already read and write it.
+
+Creating a parallel `transaction_vendor_links` would split "which vendor is on this deal" across two tables and produce two sources of truth, which is exactly the workflow break this review exists to prevent.
+
+- **Correction:** Add the monetization fields to `transaction_vendor_assignments` rather than create a new table. New columns to add when Phase 4/5 lands: `partner_code_id`, `agreement_id`, `vendor_user_id` (or reuse the assignment-contact as the vendor user), `link_source`, `linked_by_user_id` (intent rename of `created_by`), `fee_split_snapshot_json`, `compliance_snapshot_json`. Everywhere the plan says "transaction vendor links," read it as "extend `transaction_vendor_assignments`." Also note `user_preferred_vendors` (migration `20260802090000_milestone_5_3_personalization.sql`) already exists and should feed the AI Coach relationship reporting in Section 6.7 rather than being rebuilt.
+
+### C4. New plan keys require migrating the existing CHECK constraint
+
+The plan introduces a `Brokerage` plan and a `Vendor Organization` plan (Section 6.1) and lists `plan_key` values "Trial, Solo, Team, Brokerage, Vendor, Enterprise" (Section 8.3). But the live column constraint, set in `20260512094000_tenant_plan_seats_and_grandfather.sql`, is `CHECK (plan IN ('trial','solo','team','enterprise'))`. Inserting a `brokerage` or `vendor` plan today would be rejected at the database.
+
+- **Correction:** Any phase that introduces new plan tiers must include a migration that drops and re-adds `tenants_plan_check` with the expanded value set, and the Section 6.1 plan names must be reconciled with the lowercase keys the column actually stores. Until then, "Brokerage" maps to the existing `team`/`enterprise` tiers and is a pricing label, not a new DB value.
+
+### C5. Vendor organizations and partner codes need a cross-tenant model that does not exist yet
+
+Today a vendor is a **tenant-scoped row** in `public.vendors` (migration `202603110000_new_vendors_and_ad_hooks.sql`), and the entire M4.3 vendor system, plus RLS, is strictly tenant-scoped (every table carries `tenant_id`, policies are service-role). The plan's vision of a `vendor_organization` as its **own tenant** that issues partner codes to **other** tenants (Section 4.3, 6.4), and the "TC starts the transaction and selects the Agent" flow that writes into the agent's tenant (Section 4.4, 9.5), both require cross-tenant linkage and membership that the current architecture does not support and that tenant isolation actively prevents.
+
+- **Correction:** Keep these explicitly behind the post-MVP cross-organization foundation (the plan already defers the join/merge flow in Section 10 Phase 7; partner codes and vendor-org-as-tenant belong on that same dependency). The MVP/near-term foundation (account_type, organization_type, vendor_category) is safe to add now because it does not cross tenants. Add one line to Phases 3 to 5 acceptance: "no cross-tenant read or write is introduced; vendor-org-to-other-tenant linkage waits for the Phase 7 cross-org model." Also flag in Section 11.2 that partner-code attribution spanning tenants is a tenant-isolation change requiring its own security review.
+
+### C6. Confirmed-accurate claims (no change needed)
+
+For the record, these plan claims were checked and are correct: the `UserRole` enum values (Section 5.1) match `app/models/enums.py` exactly; self-registration does default the registrant to Admin/owner and exposes no role picker (`RegisterPage.tsx` confirms, by design); `account_type`, `organization_type`, `vendor_category`, and `company_display_name` do not exist yet, so adding them is genuinely new; the seat model already excludes Client/ForSaleByOwner/Vendor portal accounts (`20260512094000`), so the billable-vs-portal split in Section 6.2 is consistent with the code; and all three migrations cited in Section 16 exist. One minor internal inconsistency: `transaction_fee_splits` is listed in both Section 7.2 and Section 7.5; keep it only under the sponsored-fee tables (7.5).
+
+---
+
 ## 2. What The Testing Notes Changed
 
 ### 2.1 Signup and onboarding feedback
@@ -41,7 +83,7 @@ Jake observed:
 - The user cannot pick a visible account type at signup.
 - The user cannot change role/account type on Step 2.
 - Company/Brokerage entered at signup did not carry into Step 2.
-- Phone masking added a leading `1` and dropped the final digit.
+- Phone masking added a leading `1` and dropped the final digit. **[Corrected 2026-06-08 — already fixed in source (`toNationalPhoneDigits`, `src/utils/formatters.ts`); see Section 1.5 C1. Treat as a regression test, not new work.]**
 - Vendor/client roles created from a transaction should remain system-assigned and locked.
 
 Jan's explanation remains correct:
@@ -380,7 +422,7 @@ These are not monetization features, but they affect revenue because signup fric
 
 | Fix | Required behavior |
 | --- | --- |
-| Phone mask | Strip a leading US country code `1` before applying 10-digit display mask. Do not drop the final digit. |
+| Phone mask | **Already fixed in source (Section 1.5 C1).** Keep only a regression test: a leading US country code `1` is stripped before the 10-digit mask and no digit is dropped. |
 | Company/Brokerage carry-over | Pre-fill Step 2 Company/Brokerage from the signup organization name. |
 | Account type dropdown | Add public signup choice and store it. |
 | Step 2 account correction | Let self-signups correct account type without demoting owner/admin. |
@@ -661,7 +703,7 @@ Proposed tables:
 | `vendor_partner_agreements` | Written agreement between vendor organization and agent/team/brokerage/FSBO/attorney recipient. |
 | `vendor_partner_codes` | Vendor-owned codes with status, limits, budget, share, start/end date, and agreement ID. |
 | `vendor_code_assignments` | Which person/team/brokerage has access to which vendor code. |
-| `transaction_vendor_links` | First-class transaction-to-vendor-org link, including vendor user, category, code, and agreement snapshot. |
+| `transaction_vendor_assignments` (extend; do **not** create `transaction_vendor_links`) | **[Corrected 2026-06-08 — Section 1.5 C3.]** This first-class transaction-to-vendor link already exists from M4.3 (`20260622090000`). Add monetization columns to it (vendor user via the existing assignment-contact, category, partner code, agreement, snapshots) instead of creating a parallel table. |
 | `transaction_fee_splits` | Calculated sponsor obligations for a transaction. |
 | `vendor_code_audit_events` | Code issued, accepted, used, revoked, expired, limit changed. |
 
@@ -690,7 +732,7 @@ Proposed tables:
 
 ### 7.4 Transaction vendor link fields
 
-`transaction_vendor_links` should support:
+The shipped `transaction_vendor_assignments` table (extended per Section 1.5 C3, not a new `transaction_vendor_links` table) should gain support for:
 
 | Field | Purpose |
 | --- | --- |
@@ -777,7 +819,7 @@ Entitlement examples:
 
 | Entitlement | Purpose |
 | --- | --- |
-| `plan_key` | Trial, Solo, Team, Brokerage, Vendor, Enterprise. |
+| `plan_key` | Trial, Solo, Team, Brokerage, Vendor, Enterprise. **[Corrected 2026-06-08 — the DB column today only allows `trial/solo/team/enterprise`; adding `brokerage`/`vendor` requires migrating `tenants_plan_check`. See Section 1.5 C4.]** |
 | `staff_seat_limit` | Paid internal staff cap. |
 | `vendor_user_limit` | Vendor org user cap. |
 | `partner_code_limit` | Active code cap for vendor orgs. |
@@ -945,7 +987,7 @@ Goal: remove testing friction and make signup language match Jake's expectations
 
 Work:
 
-1. Fix phone masking:
+1. Fix phone masking: **[Corrected 2026-06-08 — already shipped in `toNationalPhoneDigits` (`src/utils/formatters.ts`); see Section 1.5 C1. Replace this item with a regression test only.]**
    - Strip leading `1` before 10-digit mask.
    - Preserve all real digits.
 
