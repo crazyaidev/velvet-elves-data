@@ -396,6 +396,22 @@ primitive directly with explicit `z-[650]` overlay and `z-[660]` content
 — see `NewTransactionModal.tsx` and `DocumentSplitDialog.tsx` for the
 canonical pattern.
 
+**Modal vs inline — the decision rule** (wizard/workspace refinement plan
+§2.4):
+
+- **Create something new** → modal (`<Dialog>` form variant, `max-w-lg`,
+  16 px radius): Add Document, Attach Document, Add Deadline, Add Task.
+- **Edit a thing in place** → inline expansion under the row (rule editor,
+  term stepper) — the row is the context.
+- **Pick-one-from-few with no fields** → popover/dropdown (status menus,
+  date popovers).
+
+`AddDocumentModal.tsx` (`@/components/documents/`) is the canonical
+upload-dialog reference: mono kicker › serif 20 px title › 13.5 px muted
+description, dashed champagne dropzone, branded `VeSelect` type picker,
+resumable upload-then-write failure handling, and the over-modal z pattern
+built in.
+
 **Never use `window.confirm()`, `window.alert()`, or `window.prompt()`.**
 They render Chrome's native dialog and break the brand.
 

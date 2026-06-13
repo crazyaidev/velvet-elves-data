@@ -632,18 +632,32 @@ click "Save deadline".
 - ✅ Each row shows a due date and its basis ("3 days after acceptance").
 - ✅ With exactly ONE uploaded document, the Purchase Agreement row is
   checked green "Uploaded · <your file name>". With several uploads,
-  nothing auto-matches; each row offers "Mark as uploaded" with a
-  one-click picker.
+  nothing auto-matches; each row offers "Attach document", which opens a
+  modal: pick one of the uploaded files by radio, or switch to "Upload a
+  new file" and drop the document right there.
 - ✅ The search box filters rows as you type (optional typing).
 
 ### 11.2 Add, edit, remove
 **How to test.** Use "+ Add document", the pencil, and the trash on a row.
 
 **Expected result.**
-- ✅ Add/Edit use the same editor as deadlines: name, optional
-  description, Specific date OR a relative rule via stepper + dropdowns.
-- ✅ Remove shows the Undo chip. Removed rows are NOT deleted at create:
-  they are saved as "waived" and can be un-waived later from the
+- ✅ "+ Add document" opens a MODAL (not a card expansion): drag the file
+  in or click to browse (the file is optional), the name auto-fills from
+  the file name, and the due date is None / a relative rule via stepper +
+  branded dropdowns / a specific date.
+- ✅ Adding WITH a file shows the row already green ("Uploaded · <name>")
+  — the file is real, uploads immediately, and lands on the transaction
+  at Approve & Create. Saving a draft also keeps it.
+- ✅ After an upload, a champagne "AI is checking this document…" chip
+  appears on the row, then settles into a verdict ("AI read this as …").
+  Attaching a deliberately WRONG file to a library row (e.g. a purchase
+  agreement onto Earnest Money Deposit Receipt) shows the amber warning
+  "AI read this as … - expected …" with "Keep my type" and "Remove file"
+  — it warns, it never blocks.
+- ✅ Edit (pencil) stays inline under the row, same editor fields.
+- ✅ Remove shows the Undo chip (hover the trash: "Removed library items
+  are recorded as waived"). Removed rows are NOT deleted at create: they
+  are saved as "waived" and can be un-waived later from the
   Documents view.
 
 ### 11.3 Use your own checklist
@@ -666,8 +680,9 @@ Transaction Documents modal from the Active Transactions card).
 **Expected result.**
 - ✅ A "Missing documents" group lists the same open rows you confirmed,
   each with a due chip (red when overdue).
-- ✅ "Mark uploaded" opens a picker of the transaction's documents; one
-  click flips the row to uploaded.
+- ✅ "Attach document" opens the shared modal: pick one of the
+  transaction's documents by radio (filter box when there are many), or
+  upload a new file right there; Attach flips the row to uploaded.
 - ✅ "Waive" hides the row into a collapsible "Waived" group with
   Un-waive.
 - ✅ The mail icon ("Request … by email") lets you pick a party; it files

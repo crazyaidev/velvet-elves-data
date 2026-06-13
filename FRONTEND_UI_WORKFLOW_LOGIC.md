@@ -1511,15 +1511,14 @@ This is a pure redirect route. No UI rendered.
 - **Error state UI:** Error toast + retry
 
 ### 3. Layout & Component Hierarchy
-- **Shell variant:** Standalone wizard (minimal shell — logo + step indicator only, no sidebar)
+- **Shell variant:** Standalone wizard (minimal shell — logo + top stepper, no sidebar)
 - **Primary content area:** Multi-step wizard — see Cross-Cutting Workflow A for complete specification
-- **Steps:**
-  1. Document Upload — drag/drop or browse
-  2. AI Parsing Progress — show what AI is extracting with animated progress
-  3. Address Confirmation — AI-normalized address with edit capability
-  4. Purchase Information Validation — dates, price, fees, party data with discrepancy flags
-  5. Missing Information Handling — prompts for missing data with AI search option
-  6. Confirmation Page — full summary with edit/accept
+- **Phases (public 5-phase stepper; internal steps in parentheses):**
+  1. Upload (Document Upload → AI Parsing Progress)
+  2. Review details (Address & Contacts → Purchase Info → Missing Info → Confirm)
+  3. Timeline — anchor gate, server-resolved deadline rules, cascade preview, Add Deadline modal
+  4. Compliance — the document checklist: per-row Attach Document modal (pick an intake/supporting file OR upload a new one mid-wizard), Add Document modal (real upload before the transaction exists; the file links at commit), AI verification chip on every fresh upload (checking → confirmed / mismatch warning, advisory only)
+  5. Tasks & create — Review Tasks (rule editor, related compliance item, Auto-Email toggle) → Approve & Create
 
 ### 4. User Actions & State Transitions
 - See Cross-Cutting Workflow A for complete action specification per step
@@ -1570,57 +1569,55 @@ This is a pure redirect route. No UI rendered.
 - **Error state UI:** 404 "Transaction not found" or 403 "You don't have access"
 
 ### 3. Layout & Component Hierarchy
-- **Shell variant:** Internal shell (or Client/FSBO shell for those roles)
-- **Sidebar state:** Parent "Active Transactions" or "All Transactions" highlighted
-- **Page header:**
-  - Breadcrumb: Deals > Active Transactions > [Client Name]
-  - Title: Client name + address
-  - Status pill + "why" badges
-  - Milestone bar
-  - Action buttons: Edit Transaction | Print Checklist | Export
-- **Tab bar:** Overview | Tasks | Documents | Parties | Communications
-- **Primary content area (per tab):**
+- **Shell variant:** Internal shell (Attorney keeps the Matter Workspace on the same route)
+- **Sidebar state:** DEALS group, "Transactions" highlighted
+- **Page header (sticky white bar; the page owns its scroll):**
+  - Breadcrumb: Deals › Transactions › [street address]
+  - Serif identity row: client names + stage pill + inline address
+  - Status pill dropdown (status change with confirm; Closed asks for post-closing feedback)
+  - Champagne "AI next step" strip (from the plan aggregate)
+  - Tab pills (active = bg-ve-orange) + quick-action pills: Add Task | Upload Document (classified-upload dialog) | Sync Deadlines | More ▾ (Compose, Print closing checklist, Ask the AI)
+- **Deal Overview card (above the tabs):** stat band (purchase price, days to close, open tasks, missing documents — honest sparklines only), tracking-date chip rail (closing/possession route through the cascade), embedded deal brief
+- **Tab bar:** Timeline | Compliance | Documents | Tasks | People | Activity
+- **Primary content area (per tab; ONE card per tab):**
 
-  **Overview Tab:**
-  - Transaction summary card: type, purchase price, financing, closing date/time, possession date/time, closing mode, status, notes
-  - Key dates card (editable, same as Active Transactions drawer)
-  - Recent activity timeline (last 10 events)
-  - AI suggestions card
+  **Timeline Tab:**
+  - The plan, alive: core dates, term-derived deadlines, deadline tasks, optional document due dates (pill toggle)
+  - Command bar ("Tell me what to change" — closed intents, preview-then-apply, undo)
+  - Mini-map; core-date/term edits run the cascade preview → Apply → Undo
+  - Add Deadline modal (shared rule editor; server-resolved); remove = Skipped + Undo chip
 
-  **Tasks Tab:**
-  - Full task list grouped by status: Overdue | Upcoming | Completed | Blocked | Skipped
-  - Each task: name, description, due date, assigned to, completion method, status, AI confidence (if AI-recommended)
-  - Actions: Complete (checkbox), Edit (pencil), Delete (trash, soft-delete), Add Task
-  - Task dependency visualization (optional Gantt or tree view)
-  - "Sleeping" tasks section (soft-deleted, can restore)
+  **Compliance Tab:**
+  - The living checklist: Open / Uploaded / Waived groups with due chips and AI evidence chips
+  - Add Document modal (real upload + classification + optional due rule; no-file path is the explicit secondary choice)
+  - Per-row actions: Attach Document modal (pick an existing file OR upload right here) | Request by email (drafts into AI Email Review) | Waive + Undo | inline Edit (rule re-resolves server-side)
+  - Uploaded rows: "Matched: <file>" + Detach; AI verification chip on every upload (checking → confirmed / "AI read this as X - expected Y" with Use AI type / Keep my type / Detach & re-attach)
+  - Empty state: one-click "Generate the standard checklist" or "Add a document"
 
   **Documents Tab:**
-  - Document list with: name, type, upload date, uploaded by, version, status (pending/processed/signed), signature status
-  - Actions: Upload, Download, Email, Send for E-Signature, Rename, View Version History, Delete (soft)
-  - Drag-drop upload zone
-  - AI document search within this transaction
+  - Document list (name, type, date, size, version) with download; AI verification chip per row
+  - Upload button + header quick action → classified-upload dialog (file + name + type); drag-drop anywhere on the page stays instant-upload; every upload path is AI-verified
+  - "Open documents manager" → the full manager modal (rename/classify, versions, email, delete, parse-confirm, missing-documents panel with the same Attach modal)
 
-  **Parties Tab:**
-  - Grouped contact cards by role: Buyer(s), Seller(s), Agents, Lender, Title, Attorney, Inspector, Appraiser, Home Warranty, Other
-  - Each card: name, company, email, phone with one-click actions
-  - Add/edit/remove contacts
-  - Vendor contact card feature: outbound emails include link for vendors to add additional contacts
+  **Tasks Tab:**
+  - Grouped sections (Overdue / Due Today / Upcoming / Completed) with status menu, basis chips, related-compliance links, Auto-Email toggle (eligible targets only), AI evidence chips
+  - Add Task modal (shared Dialog; completion method + assignee via branded selects; AI-suggested approaches)
 
-  **Communications Tab:**
-  - Immutable communication log: all emails, system messages, document actions, AI sends
-  - Each entry: timestamp, sender, direction, subject, preview
-  - Search bar for filtering by keyword
-  - Filter by: date range, party, channel (email/system/AI)
-  - "Resend" icon on email entries (one-click resend)
-  - AI draft review entries with "Approve / Edit & Send" buttons (if pending)
+  **People Tab:**
+  - Representation-aware groups (Buyer, Seller, Agents, Lender, Title + Other contacts); add/edit via AddContactModal; Assign team; Manage client access; client thread; compose
+
+  **Activity Tab:**
+  - History feed (audit + task events) with search; Communications panel mounts from page context
+  - NOTE: compliance/document audit events do not surface here yet (optional backend item O2 in the refinement plan)
 
 - **Overlay/modal inventory:**
-  - Edit Transaction modal
-  - Add Task modal
-  - Add Contact modal
-  - Document upload/email/e-sign modals
-  - AI Chat panel
-  - Print Checklist
+  - Add Document modal (Compliance: add | attach modes; Documents: upload mode) — the canonical upload dialog
+  - Add Deadline modal
+  - Add Task modal (shared Dialog shell)
+  - Add Contact / Assign Team / Manage Client Access modals
+  - Compose Email modal; Post-closing feedback modal
+  - Documents manager modal (with Missing-documents panel)
+  - AI Chat panel; Print Checklist
 
 ### 4. User Actions & State Transitions
 
