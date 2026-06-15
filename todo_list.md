@@ -1,6 +1,6 @@
 # Velvet Elves — Still Being Built (Not Yet Ready for Client Feedback)
 
-**Last Updated:** June 4, 2026
+**Last Updated:** June 15, 2026
 
 This is the companion list to **FRONTEND_CLIENT_TESTING_REVIEW**. The testing review
 only covers features that are **fully complete** and ready for your feedback. The items
@@ -87,8 +87,48 @@ sign-in and needs an "app-specific password" flow we still want to review.
 
 ---
 
+## 6. AI deal workspace — parts still on the way
+
+**Where:** The AI deal workspace that opens when you click a single transaction
+(`/transactions/<deal>`).
+
+**Current state:** The deal workspace is **complete and in the testing review** (items 17.1–17.8):
+the AI assistant, the suggestions and one-click fixes, the safe date moves, document analysis on
+upload, the deal tabs, and the Email tab are all ready for your feedback. A few **extras around it
+are still being built**, so we are not asking for feedback on these specific pieces yet:
+
+- **Voice input.** A microphone button is shown in the assistant's message box but is switched off
+  for now ("coming soon"). Typing works fully today.
+- **A built-in document viewer.** Today the assistant points you to the Documents tab to open a file;
+  opening the document inside the assistant window itself is still being built.
+- **Re-filing an email to the right deal.** The Email tab's Outbox and Inbox are complete; the tool to
+  move an email that landed on the wrong deal is not built yet.
+- **A full activity feed of the assistant's actions.** The Activity tab already shows date changes,
+  status updates, and checklist edits. A complete, single feed of every AI action is still being
+  expanded — for now, each applied action points you to the tab where you can see its result.
+- **Team-lead oversight, "always approve" rules, and merging documents.** These are planned for a later
+  stage. Today every AI action requires your explicit approval, one at a time, which is by design.
+
+**What is still needed:** Finish and switch on the items above as their later phases are completed.
+
+---
+
+## 7. New Transaction wizard — address type-ahead is switched off for now
+
+**Where:** New Transaction wizard → Step 3 (Address & Contacts), the Street Address field.
+
+**Current state:** The Street Address field still suggests addresses you have used before, and AI
+parsing fills the address from an uploaded contract. The **live address type-ahead** (Google-powered
+"start typing and pick a real address" suggestions) is **temporarily switched off** because the map
+service key is not configured in this environment — so we are not asking for feedback on it yet. Every
+other part of Step 3 is complete and is in the testing review.
+
+**What is still needed:** Add the address-service key and switch the live type-ahead back on.
+
+---
+
 ## How this list is kept honest
 
-Everything above was checked against the live frontend source code on June 4, 2026. As each
+Everything above was checked against the live frontend source code on June 15, 2026. As each
 item is finished, it will move out of this list and into the main **FRONTEND_CLIENT_TESTING_REVIEW**
 with full step-by-step testing instructions.

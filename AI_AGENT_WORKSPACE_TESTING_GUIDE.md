@@ -25,12 +25,15 @@ on and no script to run.
   band, or deal-brief card.
 - On a narrow screen there is no split — the deal opens straight into the
   **Agent** conversation (the first tab); the other tabs are one tap away.
-- The header is slim: breadcrumb, a **"X% of tasks complete"** progress bar
-  (centered, ListedKit-style), the deal name + status, and an **"Agent pane"**
-  toggle (wide screens) that hides the conversation so the workbench fills
-  the width. There are no Add Task / Upload / Compose / Print / Sync buttons
-  up top — each lives inside its tab (Add Task in Tasks, Upload & Print in
-  Documents, Compose in Email, Sync in Timeline).
+- The header is slim and reads left to right: breadcrumb + deal name, then on
+  the right a **"X% complete"** progress bar, a colored **status** chip (a
+  dot + the deal status, click to change), and a small icon-only **agent-pane
+  toggle** (wide screens) that hides the conversation so the workbench fills
+  the width. When the system is saving anything you clicked, a **"Saving…"**
+  pill with a spinner appears in this same row and disappears when it is done.
+  There are no Add Task / Upload / Compose / Print / Sync buttons up top — each
+  lives inside its tab (Add Task in Tasks, Upload & Print in Documents, Compose
+  in Email, Sync in Timeline).
 
 The left pane opens on **AI suggestions**: one compact block listing what
 needs you (the top few items, with a "Show all" link if there are more) and
@@ -57,12 +60,47 @@ feature is still uncommitted. Normal testing never needs this.)
 
 1. In the composer (bottom of the agent pane), type **"When is the closing
    date?"** and press Enter.
-2. Your message appears, then the agent answers with the exact closing-date
-   format.
+2. **Your message appears instantly** as a dark right-aligned bubble the moment
+   you send — you never wait for the answer to see what you typed. A small
+   **thinking** indicator (three bouncing dots under the ✦ mark) shows while
+   the agent works, then the reply lands as clean formatted text.
 3. **Reload the page.** The conversation is still there — it is the deal's
    work log, not a throwaway chat.
 
-Pass: the answer is correct and survives a reload.
+Pass: your bubble shows immediately, the reply is correct, and it survives a
+reload.
+
+---
+
+## 1a. The look of the pane (quick visual check)
+
+No clicks needed — just confirm the pane reads as a modern assistant:
+
+- The pane is one **white card** with a header (✦ gradient mark + "Velvet
+  Elves AI" / "Your deal assistant") and a clean background — no muddy tint.
+- **Your** messages are dark right-aligned pills; the **agent's** replies are
+  bubble-less formatted text next to a small orange ✦ mark. The two are easy
+  to tell apart at a glance.
+- The composer sits in its own footer with the send button and the one-line
+  honesty note under it.
+
+Pass: it looks like a clean, current chat — not a dated bubble list.
+
+---
+
+## 1b. Clear chat history
+
+1. After a few questions, click **Clear chat** in the top-right of the pane
+   header (the eraser button — greyed out when there is nothing to clear).
+2. A confirm box explains it permanently removes the conversation and any
+   proposal cards, but **keeps** already-applied changes (tasks, drafts, dates)
+   and the audit trail. Click **Clear history**.
+3. The conversation empties to a fresh start. **Reload the page** — it stays
+   empty (the wipe is durable, not just on-screen).
+4. Open the **Tasks**/**Timeline**/**Email** tabs: anything the agent already
+   applied is still there — clearing the chat does not undo real work.
+
+Pass: the conversation is gone for good, but no real change was reversed.
 
 ---
 
@@ -85,9 +123,11 @@ chip — it *looks* satisfied, which is the danger.
 4. The card flips to **Applied** with the result and an **Undo** chip.
 5. Open the **Compliance** tab: the receipt requirement is back in **Missing**
    (the wrong file was detached — never silently accepted).
-6. Open the **Email** tab: the request draft is listed as **Pending review**.
-   The banner says *"Nothing sends without your approval."* No "Sent" row
-   exists.
+6. Open the **Email** tab. It opens on the **Outbox** folder (the Email tab has
+   an **Outbox / Inbox** segmented switch at the top, each with a count, so a
+   busy deal never mixes the two). The request draft is listed as **Pending
+   review** and the banner says *"Nothing sends without your approval."* No
+   "Sent" row exists. Click **Inbox** to confirm it is a separate, clean list.
 7. Back in the agent pane, click **Undo** on the applied card: the wrong file
    re-attaches (the draft remains, discardable from AI Email Review).
 
@@ -143,7 +183,7 @@ Pass: a date never changes without showing the cascade first; undo restores it.
 
 ## 6. Hide the conversation (focus the workbench)
 
-1. Click the header **"Agent pane"** toggle to collapse it.
+1. Click the header icon-only **agent-pane** toggle to collapse it.
 2. The workbench fills the width — the same tab bar and tabs, just wider.
 3. Re-open the pane: your earlier conversation is still there.
 
@@ -151,13 +191,35 @@ Pass: the full-width workbench is one click away and nothing was lost.
 
 ---
 
+## 7. The tab controls (buttons, status, feedback)
+
+1. Open the **Tasks** tab. Each task's status is a **colored pill** (grey =
+   Pending, blue = In progress, green = Completed). Click it: the only choices
+   are **Pending, In progress, Completed, Skipped** — the real statuses, with
+   no leftover values that never applied.
+2. Click a status. The pill **changes color immediately** (no waiting), and a
+   **"Saving…"** pill appears in the page header while it records, then clears.
+3. Look at each tab's top-right: the main action (**Add Task**, **Add
+   deadline**, **Add document**, **Manage**) is a filled **orange** button, not
+   a plain grey one. Secondary actions are clean outline buttons with icons.
+   Per-row extras live behind a **three-dot** menu so the cards stay calm.
+4. In **Documents**, click **Upload**: the button shows a spinner while the
+   file uploads, so you always know it is working.
+
+Pass: status choices match reality, every click gives instant or "Saving…"
+feedback, and the buttons look modern and colored — never plain defaults.
+
+---
+
 ## What is NOT in this build (later phases, by design)
 
 - A document **viewer drawer** for citation jumps (Phase 3). Today a
   citation chip shows the page + snippet and opens the Documents tab.
-- The full Email tab **Inbox with refile** and the **test-inbound** button
-  (Phase 4); the E1 subset here shows this deal's pending drafts and sent
-  outbound mail, and links to the full AI Email Review surface.
+- Email **refile** and the **test-inbound** button (Phase 4). The E1 subset
+  here has an **Outbox** folder (this deal's pending drafts + sent outbound
+  mail) and a read-only **Inbox** folder, switched by the segmented control,
+  and links to the full AI Email Review surface; refiling a misfiled message
+  and generating a test inbound are still later phases.
 - The **Activity** tab does not yet show agent/compliance/document events
   (Phase 4 history expansion). Until then, the proof surface for every action
   is the owning tab (Compliance, Tasks, Timeline) and the Email tab — each

@@ -859,7 +859,7 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("")
     lines.append("## Features Currently Complete — Client Feedback Requested")
     lines.append("")
-    lines.append("**Last Updated:** June 4, 2026  ")
+    lines.append("**Last Updated:** June 15, 2026  ")
     lines.append("**Test Environment:** http://dev.velvetelves.com/  ")
     lines.append("**Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  ")
     lines.append("**Reviewer:** Client — please fill in the Feedback block under each feature")
@@ -897,7 +897,7 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("1. Public pages and sign-in / sign-up (including the new Organization field on /register)")
     lines.append("2. Invite-accept flow (open an invite link as a brand-new user)")
     lines.append("3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay")
-    lines.append("4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)")
+    lines.append("4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, opening a single deal in the AI deal workspace, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)")
     lines.append("5. The Organization page (Company, Branding, Email & E-signature integrations — needed before AI Email Review can send) and your Account window")
     lines.append("6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors")
     lines.append("7. Payments — invoices and commission payouts")
@@ -1019,7 +1019,7 @@ def create_testing_review_doc():
                          alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(13))
     doc.add_paragraph()
 
-    _add_plain_paragraph(doc, "Last Updated: June 4, 2026",
+    _add_plain_paragraph(doc, "Last Updated: June 15, 2026",
                          bold=True, space_after=Pt(3))
     _add_plain_paragraph(doc, "Test Environment: http://dev.velvetelves.com/",
                          space_after=Pt(3))
@@ -1066,7 +1066,7 @@ def create_testing_review_doc():
         "1. Public pages and sign-in / sign-up (including the new Organization field on /register)",
         "2. Invite-accept flow (open an invite link as a brand-new user)",
         "3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay",
-        "4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)",
+        "4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, opening a single deal in the AI deal workspace, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)",
         "5. The Organization page (Company, Branding, Email & E-signature integrations — needed before AI Email Review can send) and your Account window",
         "6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors",
         "7. Payments — invoices and commission payouts",
@@ -1520,50 +1520,146 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": 16,
         "category": "Daily Agent / Elf Workflow",
-        "feature": "New Transaction wizard",
+        "feature": "New Transaction wizard — upload, AI parsing, details, and confirm",
         "route": "Opens from the top bar, the sidebar, and the dashboard 'New Transaction' button",
         "how_to_test": [
-            ("Start the wizard.", []),
+            "Start the wizard. At the top, confirm a 'Step X of 5' progress strip with five phases: Upload, Review details, Timeline, Compliance, and Tasks & create.",
             ("Step 1 — Documents.", [
-                "Upload one PDF, then upload several files at once.",
-                "Remove a file and confirm the count updates.",
-                "Click Split on a PDF to try the page-range selector.",
-                "Also try 'Skip upload — enter details manually'.",
+                "First pick 'Who are you representing?' (Buyer / Seller / Buyer & Seller). Until you pick, the upload area is dimmed and Continue stays off.",
+                "Upload one PDF, then upload several at once. Remove a file and confirm the count updates.",
+                "On a PDF with more than one page, confirm a 'Split' button (it is hidden for single-page PDFs); use it to pick page ranges.",
+                "Or click 'Skip upload — enter details manually' to fill everything in by hand.",
             ]),
             ("Step 2 — AI Parsing.", [
-                "If you uploaded a document, let AI parsing run.",
-                "If it cannot finish, check that you can still continue manually.",
+                "If you uploaded a document, let AI parsing run; each document shows a confidence bar and the wizard moves on by itself.",
+                "If parsing cannot finish, confirm a clear warning and a 'Continue Manually' button.",
             ]),
-            ("Step 3 — Address.", [
-                "Fill in Street, City, State, and ZIP.",
-                "Leave the 'I confirm this address is correct' box unchecked — Continue should stay disabled.",
-                "Check the box and confirm Continue becomes active.",
+            ("Step 3 — Address & Contacts.", [
+                "Fill in Street, City, State, ZIP (County is optional). The Street field suggests addresses you have used before.",
+                "Add each party with 'Add Party'. Name, Email, and Phone are required on every party (marked with a red *).",
+                "Confirm empty required fields are gently highlighted, and the highlight clears once you fill them in.",
             ]),
-            ("Step 4 — Purchase Info.", [
-                "Enter purchase price, closing date, inspection days, financing, title ordered by, and notes.",
-                "Toggle Home Warranty and HOA — extra fields should appear.",
-                "Click Add Party and add a party.",
+            ("Step 4 — Purchase Information.", [
+                "Enter Purchase Price and Earnest Money (both show a $ and add commas as you type), Contract Acceptance Date (cannot be in the future), Closing Date (cannot be in the past), and Possession Date.",
+                "Answer 'Is the buyer getting a mortgage?' — choosing Yes reveals a Mortgage Type dropdown.",
+                "Answer the Yes/No questions for home inspection, home warranty, and HOA — choosing Yes reveals the matching days / ordered-by field.",
+                "Pick who orders title (Buyer or Seller), add any custom contingencies, and add a note (you can pin it to the top of the transaction log).",
+                "If you are a Transaction Coordinator, Team Lead, or Admin, confirm a 'Whose transaction is it?' owner picker (an Agent does not see this).",
             ]),
-            ("Step 5 — Missing Info (appears only if something is missing).", [
-                "Leave one required field empty to trigger this step on purpose.",
-                "Fill it in manually, then try AI Search.",
+            ("Step 5 — Missing Information (only appears if a required field is still empty).", [
+                "Leave one required field empty on purpose to trigger this step; confirm it shows the friendly field name, not a code.",
+                "Fill it in by hand, or click 'AI Search' to have the AI look for the value.",
             ]),
             ("Step 6 — Confirm.", [
-                "Review every section.",
-                "Click an Edit button to jump back.",
-                "Finally click Accept & Create Transaction.",
+                "Review the summary: the property, price, key dates, parties, purchase info, and documents (each with an AI confidence pill).",
+                "Click any Edit pencil to jump back, make a change, and confirm Continue brings you straight back to this summary.",
             ]),
-            ("Close the wizard mid-way and confirm the discard warning appears.", []),
+            "Close the wizard mid-way and confirm a branded 'Discard this transaction?' warning appears (not a plain browser pop-up), with Keep editing / Discard.",
         ],
         "expected_result": [
-            "Each step shows only the fields described above.",
-            "Continue is blocked until required information is present.",
-            "At the end, the transaction is created and the list page shows it.",
+            "You must choose who you are representing before you can upload.",
+            "Continue is blocked until every required field (address, and each party's name + email + phone, and the core purchase fields) is filled.",
+            "Required dates are limited sensibly (acceptance not in the future, closing not in the past), and money fields format as you type.",
+            "After Confirm, the wizard continues to the Timeline, Compliance, and Review Tasks steps (covered next) before the transaction is created.",
         ],
         "future_ideas": [
-            "Add a 'Save draft and continue later' button.",
-            "Show the uploaded document side-by-side with the AI-parsed fields.",
-            "Show a confidence badge next to each AI-filled field (High / Medium / Low).",
+            "Let the user start a new deal by duplicating a recent transaction.",
+            "Remember a partly-filled wizard across devices, not just in this browser.",
+            "Offer a short tips panel for first-time users.",
+        ],
+    },
+    {
+        "no": "16.1",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "New Transaction wizard — Review Your Timeline",
+        "route": "New Transaction wizard, the Timeline phase (after Confirm)",
+        "how_to_test": [
+            "After Confirm, land on 'Review Your Timeline'. Confirm a card asking 'Does this Date of Acceptance look right?' with the date shown large.",
+            "If the date came from a document, click 'View in document' and confirm the document viewer jumps to the page it was read from.",
+            "If no acceptance date was found (or you are in manual mode), confirm the card says so honestly and offers a date picker — it never makes up a date.",
+            "Confirm the deadline list below is dimmed until you confirm the date. Click 'Looks good' to unlock it.",
+            "Confirm every deadline row shows a name, a date, and how it was worked out (for example '5 days after Date of Acceptance'). Core dates like Closing and Possession have no Remove button.",
+            "Click 'Edit date' on the acceptance card and pick a different day. Confirm a summary appears ('N deadlines and M task dates moved') with a 'Review changes' list showing old → new dates.",
+            "Click '+ Add deadline', give it a name (for example 'Septic inspection'), keep the suggested rule, and save. Confirm the new row appears with the calculated date. Remove it and use the Undo chip.",
+            "If your document contained a deal-specific item, confirm an 'AI suggestions' group with cards — each showing the rule, a confidence chip, and a citation link that jumps to the page. Click 'Add' to keep one or 'Skip' to dismiss it.",
+            "Click 'Confirm Timeline' to continue.",
+        ],
+        "expected_result": [
+            "The deadline list stays locked until you confirm the acceptance date.",
+            "Every deadline shows how its date was calculated; changing the acceptance date moves the others and shows you the change before it sticks.",
+            "AI suggestions only appear when the AI can show where it read them, and none are added without your click.",
+        ],
+        "future_ideas": [
+            "Let the user print or share the timeline before creating the deal.",
+            "Offer common deadline presets (for example a standard inspection period) for one-click add.",
+        ],
+    },
+    {
+        "no": "16.2",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "New Transaction wizard — Confirm Your Compliance Checklist",
+        "route": "New Transaction wizard, the Compliance phase (after Timeline)",
+        "how_to_test": [
+            "Confirm a checklist of documents that matches this deal — for example a Closing Disclosure on financed deals, Proof of Funds on cash deals, and HOA or Home Warranty rows only when those terms are true. Each row shows a due date and how it was set.",
+            "If you uploaded exactly one document, confirm the Purchase Agreement row already shows green 'Uploaded · <your file>'. With several uploads, click 'Attach document' on a row and pick one of your files (or upload a new one) in the pop-up.",
+            "After you attach or upload, confirm an 'AI is checking this document…' chip appears, then settles into a result. Attach a deliberately WRONG file to a row and confirm an amber warning ('AI read this as … — expected …') with 'Keep my type' and 'Remove file' — it warns you but never blocks you.",
+            "Click '+ Add document' and confirm a pop-up opens: drop a file or browse (the file is optional), the name fills in from the file, and you can set a due date (none, a relative rule, or a specific date).",
+            "Use the pencil to edit a row in place, and the trash to remove one (it shows an Undo chip; removed rows are kept as 'waived', not deleted).",
+            "Try 'Use your own checklist' — paste two lines, click 'Read checklist', and confirm both appear checked but not yet added. Uncheck one and click 'Add 1 document' to add only the checked row.",
+        ],
+        "expected_result": [
+            "The checklist matches the transaction type and the contract terms — no rows that do not apply.",
+            "Attaching or uploading runs an AI check that warns on a wrong file but never stops you continuing.",
+            "Items from your own pasted checklist are only added when you click Add.",
+        ],
+        "future_ideas": [
+            "Let a brokerage save its own standard checklist as the default.",
+            "Suggest the most likely document type for each uploaded file automatically.",
+        ],
+    },
+    {
+        "no": "16.3",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "New Transaction wizard — Review Tasks and create",
+        "route": "New Transaction wizard, the Tasks & create phase (the final step)",
+        "how_to_test": [
+            "Confirm the list of tasks the wizard generated, each with a one-line description, and a 'Search tasks…' box that filters the list as you type.",
+            "Click 'Rule…' next to a task's date, set something like '3 days before Closing Date', and save. Confirm the date updates to the worked-out value with a 'rule' chip. Typing a date directly instead clears the rule.",
+            "Open a task's 'Related document' dropdown and confirm it lists the checklist rows from the previous step plus 'None'.",
+            "Find a task aimed at someone whose email you captured (for example a Buyer task) and confirm an 'Auto-Email off' toggle. Turn it on and confirm the note: 'When this task comes due, I draft the email … for your review. Nothing sends without approval.' A task aimed at 'Agent' shows no toggle at all.",
+            "Click 'Create Transaction'. Confirm a spinner and 'Creating…', then a success message with the number of tasks, and that you land on the transactions list with the new deal highlighted.",
+        ],
+        "expected_result": [
+            "A task's date can be set by a relative rule or a specific date, but not both at once.",
+            "The Auto-Email toggle only appears on tasks with a real captured email, and it only ever prepares a draft for your review — it never sends on its own.",
+            "Creating the transaction generates its tasks and opens the list with the new deal highlighted.",
+        ],
+        "future_ideas": [
+            "Let the user bulk-assign several tasks to a teammate at create time.",
+            "Offer task bundles for common deal types.",
+        ],
+    },
+    {
+        "no": "16.4",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "New Transaction wizard — the AI plan: deal brief, Autopilot, and the command bar",
+        "route": "New Transaction wizard (the Timeline, Compliance, Confirm, and Review Tasks steps)",
+        "how_to_test": [
+            "Above the timeline (and again on the final confirm), read the short deal brief: the price, the financing, the dates that matter, and any 'watch out' lines. Confirm every watch-out has a link into the document, and the facts match what is on the form.",
+            "Autopilot — upload a clean, complete packet (all core fields present, every party with a name, email, and phone). After parsing, confirm a single 'Autopilot' banner that lists exactly what will be created and offers 'Looks good' and then 'Approve & Create' — about three clicks in total. Confirm 'Review step by step' is always offered next to it.",
+            "Autopilot honesty — upload (or edit to create) a packet where a party has no phone number. Confirm Autopilot does NOT offer the shortcut: it says exactly what is missing and drops you on that step with the field highlighted. Filling it in brings the shortcut back.",
+            "The command bar — on the Timeline, Compliance, Confirm, or Review Tasks step, find the 'Tell me what to change' bar and type 'add a septic inspection deadline 14 days after acceptance'. Confirm it shows a preview of what it understood with Apply / Cancel — nothing changes yet. Click Apply, then use Undo.",
+            "Type something it cannot do (for example 'make it rain') and confirm it honestly says it cannot map that and lists the kinds of things it can do.",
+        ],
+        "expected_result": [
+            "The deal brief's facts match the confirmed fields, and every watch-out links to the document it came from.",
+            "Autopilot only offers the 3-click shortcut when the packet is genuinely complete; otherwise it tells you exactly what is missing.",
+            "The command bar always previews a change before applying it, and every change it makes can be undone.",
+        ],
+        "future_ideas": [
+            "Let the command bar handle more than one instruction at once.",
+            "Add voice input to the command bar.",
+            "Let the user set how complete a packet must be before Autopilot offers the shortcut.",
         ],
     },
     {
@@ -1597,6 +1693,205 @@ TESTING_REVIEW_FEATURES = [
             "Let the user pick which columns to include in the CSV / Excel export.",
         ],
     },
+
+    # ------------------------------------------------------------
+    # Transaction Workspace — opening one deal with the AI agent.
+    # The agent-centric detail page is the default for Agent / TC /
+    # Team Lead / Admin at /transactions/<deal>. These sit right
+    # after the Active Transactions list (item 17) because that is
+    # where you open a single deal.
+    # ------------------------------------------------------------
+    {
+        "no": "17.1",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Open one deal — the AI deal workspace and its layout",
+        "route": "/transactions/<a deal> (click any deal on the Active Transactions list)",
+        "how_to_test": [
+            "From the Active Transactions list, open any deal. It opens as its own full page with its own web address — not just an expanded card.",
+            ("On a normal computer screen, confirm the page has two sides.", [
+                "On the left: the Velvet Elves AI assistant for this deal.",
+                "On the right: a panel with tabs across the top — Timeline, Compliance, Documents, Tasks, People, Activity, and Email.",
+            ]),
+            ("Look at the top of the page.", [
+                "A 'X% complete' progress bar (shown once the deal has tasks).",
+                "A colored status chip — click it to change the deal's status (Active, Incomplete, Paused, Completed, Closed).",
+                "A small button (computer screens) that hides or shows the AI assistant so the panel can fill the width.",
+            ]),
+            "Do something that saves — for example change the status or tick a task — and watch for a short 'Saving…' note at the top while it records.",
+            "Open the same deal on a phone or a narrow window. Confirm there is no left/right split: the deal opens straight into the AI assistant, and the tabs are one tap away.",
+            "Refresh the page and confirm you stay on the same deal and the same tab.",
+        ],
+        "expected_result": [
+            "Every deal has its own page; a refresh keeps you on the same deal and tab.",
+            "The top of the page shows progress, the status (which you can change), and the show/hide assistant button.",
+            "A 'Saving…' note confirms the app is recording whatever you clicked.",
+            "On a narrow screen the deal opens on the assistant, with the tabs available.",
+        ],
+        "future_ideas": [
+            "Remember which tab you last used on each deal.",
+            "Add a quick way to jump to the next or previous deal without going back to the list.",
+            "Let the user choose whether the assistant starts open or closed by default.",
+        ],
+    },
+    {
+        "no": "17.2",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Talk to the deal's AI assistant (a saved conversation)",
+        "route": "The AI assistant (left side on a computer; the 'Agent' tab on a phone)",
+        "how_to_test": [
+            "In the message box at the bottom, type 'When is the closing date?' and press Enter.",
+            "Confirm your message appears immediately as a dark bubble on the right, a short 'thinking' animation shows while the assistant works, then a tidy, well-formatted answer appears.",
+            "Reload the page and confirm the whole conversation is still there — it is saved with the deal, not a throwaway chat.",
+            "Click 'Clear chat' (the eraser button at the top of the assistant). Confirm a warning explains it removes the conversation but keeps any changes the assistant already made.",
+            "Confirm the clear, then reload: the conversation stays empty, but any tasks, dates, or drafts the assistant already applied are still in place on their tabs.",
+        ],
+        "expected_result": [
+            "Your message shows instantly; the reply is correct and easy to read.",
+            "The conversation is still there after a page reload.",
+            "Clear chat empties the conversation for good but never undoes real work.",
+        ],
+        "future_ideas": [
+            "Let the user search past messages in a long conversation.",
+            "Add a voice option to dictate a question (a microphone button is shown but not active yet).",
+            "Show suggested follow-up questions after an answer.",
+        ],
+    },
+    {
+        "no": "17.3",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "AI suggestions — fix a document mismatch in one click",
+        "route": "The 'AI suggestions' block at the top of the assistant",
+        "how_to_test": [
+            "At the top of the assistant, read the 'AI suggestions' block: a one-line summary of what needs you (for example blockers, drafts waiting, items due this week) and a 'Scan' button. Click 'Show all' if there are more than three.",
+            "Click 'Scan' to re-check the deal and confirm the suggestion list refreshes.",
+            "Set up the test: on the Compliance tab, attach a file to a requirement that is really a different document. The row will show as Uploaded but with a 'mismatch' warning — it looks satisfied, which is the danger.",
+            "Back in the assistant, find the suggestion card about the document-type mismatch and click its recommended fix (for example 'Detach and draft a request for the correct document').",
+            "Confirm a 'Proposed action' card appears, showing exactly what it will do, with Approve and Dismiss buttons — and that nothing has changed yet.",
+            "Click Approve. Confirm the card flips to 'Applied' with a result line and an Undo option.",
+            "Open the Compliance tab and confirm the requirement is back to Missing. Open the Email tab and confirm a draft was created as 'Pending review' — nothing was sent.",
+            "Back in the assistant, click Undo on the applied card and confirm the change reverses.",
+        ],
+        "expected_result": [
+            "The suggestions are about this specific deal — not generic tips.",
+            "The assistant never changes anything without first showing a preview and waiting for your Approve.",
+            "Approving applies the change (you can see it on the matching tab); Undo reverses it.",
+            "Email actions only ever create a draft for your review — the assistant can never send on its own.",
+        ],
+        "future_ideas": [
+            "Let the user snooze a suggestion for a day.",
+            "Add a short 'why this matters' note under each suggestion.",
+            "Let the user approve a batch of low-risk suggestions at once.",
+        ],
+    },
+    {
+        "no": "17.4",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Point the assistant at any item, and quick commands",
+        "route": "Any tab row + the assistant's message box",
+        "how_to_test": [
+            "On any tab (Tasks, Compliance, Documents, Timeline, People), open a row's three-dot menu (or hover the row) and choose 'Ask AI about this'.",
+            "Confirm the item appears as a small tag in the message box and the assistant comes into focus. Type a question and send it — the answer should be about that item.",
+            "Click the '+' in the message box to open a picker with tabs (Documents, Tasks, Deadlines, Requirements, People, Emails). Pick one to add it as a tag.",
+            "Type '/' in the message box to open the command menu (for example /scan, /readiness, /summarize, /draft-email, /request-document, /add-deadline, /move-date).",
+            "Click '/readiness' and confirm the assistant reports whether the deal is ready to close and what is still in the way.",
+        ],
+        "expected_result": [
+            "Any row can be handed to the assistant with the mouse; the tag's name matches the row you picked.",
+            "Typing '/' lists the commands, and each one produces a visible result.",
+        ],
+        "future_ideas": [
+            "Let the user tag more than one item at once from the picker.",
+            "Add a command to draft a full status update for the client.",
+        ],
+    },
+    {
+        "no": "17.5",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Move a key date safely (see what else moves first)",
+        "route": "The AI assistant message box",
+        "how_to_test": [
+            "In the message box, type 'Move the closing date to' and a date about a week later, then send.",
+            "Confirm the assistant proposes the change and lists exactly which deadlines and tasks will move — and which will not, with the reason — before anything happens.",
+            "Click Approve, open the Timeline tab, and confirm the dates moved.",
+            "Back in the assistant, click Undo and confirm the dates go back to what they were.",
+        ],
+        "expected_result": [
+            "A core date never changes without first showing the full list of what else will move.",
+            "Undo restores the original dates.",
+        ],
+        "future_ideas": [
+            "Offer a one-click 'Tell the client about the new date' after a move.",
+            "Let the user move several dates in one proposal.",
+        ],
+    },
+    {
+        "no": "17.6",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "Upload a document for instant AI analysis",
+        "route": "The paperclip in the assistant message box, or the Upload button on the Documents / Compliance tab",
+        "how_to_test": [
+            "Click the paperclip in the message box and pick a PDF. Confirm it uploads (a spinner shows), then the assistant posts a short summary of the document and flags anything worth noting.",
+            "Try the same from the Documents tab and from the Compliance tab — uploading there should also make the assistant post its analysis in the conversation.",
+            "Upload a file that is the wrong type for a requirement and confirm the assistant raises it as a mismatch you can resolve (see item 17.3).",
+        ],
+        "expected_result": [
+            "Uploading a document anywhere on the deal makes the assistant read it and post a plain-language summary in the conversation.",
+            "A wrong-type document is caught and offered as something to fix, not silently accepted.",
+        ],
+        "future_ideas": [
+            "Show the document side-by-side with the assistant's summary.",
+            "Let the user ask a follow-up question about the document right after it is analyzed.",
+        ],
+    },
+    {
+        "no": "17.7",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "The deal tabs (Timeline, Compliance, Documents, Tasks, People, Activity)",
+        "route": "The tab bar across the top of the right-hand panel",
+        "how_to_test": [
+            ("Click each tab in turn and confirm it shows this deal's information.", [
+                "Timeline — the key dates and deadlines, with 'Add deadline' and a 'Sync' control to push dates to your calendar.",
+                "Compliance — the document checklist; attach or upload a document to a requirement, and the AI flags mismatches.",
+                "Documents — every document on the deal, with Upload, Manage, Print, and download.",
+                "Tasks — the deal's tasks; each task's status is a colored pill (Pending, In progress, Completed, Skipped), with 'Add Task' and a three-dot menu on each task.",
+                "People — the buyers, sellers, and other contacts, with 'Manage client access' where your role allows it.",
+                "Activity — the deal's history (date changes, status updates, checklist edits) and a Communications button.",
+            ]),
+            "On the Tasks tab, change a task's status and confirm the pill changes color right away and a 'Saving…' note appears at the top while it records.",
+            "Confirm the main button on each tab (Add Task, Add deadline, Upload, Manage) is a colored (orange) button so it is easy to find.",
+        ],
+        "expected_result": [
+            "Every tab shows real information for the open deal — nothing blank or made up.",
+            "Changing a status or other field gives instant on-screen feedback, backed by the 'Saving…' note.",
+        ],
+        "future_ideas": [
+            "Show a small count on each tab (for example how many tasks are open).",
+            "Let the user reorder the tabs to match how they work.",
+        ],
+    },
+    {
+        "no": "17.8",
+        "category": "Daily Agent / Elf Workflow",
+        "feature": "The Email tab (Outbox / Inbox for this deal)",
+        "route": "The Email tab on the right-hand panel",
+        "how_to_test": [
+            "Open the Email tab and confirm an Outbox / Inbox switch at the top, each showing a count.",
+            "On Outbox, confirm any AI drafts for this deal are listed as 'Pending review', with a banner saying nothing sends without your approval. Sent and discarded emails appear below them.",
+            "Click Inbox and confirm incoming emails matched to this deal are listed separately.",
+            "Click a draft row and confirm it opens the full AI Email Review screen, where you can review, edit, approve, or discard it.",
+            "Click Compose to start a new email for this deal.",
+        ],
+        "expected_result": [
+            "Outbox and Inbox are kept separate, each with its own count.",
+            "Drafts are clearly marked 'Pending review' — the assistant never sends on its own.",
+            "Opening a draft takes you to the AI Email Review screen to finish it.",
+        ],
+        "future_ideas": [
+            "Let the user re-file an email that was matched to the wrong deal.",
+            "Show the most recent email at a glance without leaving the tab.",
+        ],
+    },
+
     {
         "no": 18,
         "category": "Daily Agent / Elf Workflow",
