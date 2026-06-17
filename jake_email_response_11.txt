@@ -1,0 +1,34 @@
+Subject: 3 quick decisions before the next test round
+
+Hi Jake,
+
+Quick context: the phone-number and Company/Brokerage bugs from your last notes are already fixed. Before I build the next test round, I need your call on three things. Each has my recommendation, so you can reply with just a letter or a yes.
+
+1) Account types in the signup list
+
+You asked for 7 account types at signup. Four of them, Mortgage Vendor, Title Vendor, For Sale By Owner, and Attorney, are built to be added to a deal by an agent, not to start their own account cold. If someone signs up directly as one of those today, they land on a real but empty page, because the full vendor tools we discussed are a later phase.
+
+- A) Keep all 7 now. The four "added by an agent" types get a clean "an agent will connect you" page.
+- B) For the test, the signup list is only the three that fully work on their own: Agent, Team Leader, Transaction Coordinator. Vendors, FSBO sellers, and attorneys still join by being added to a transaction, exactly like today. I add the rest to the signup list once the vendor system is built.
+
+My recommendation: B, so every tester lands on a page where they can actually do something.
+
+2) Paying during the test
+
+For the test, I'll set each account's plan by hand (Trial, Solo, Team). There won't be an online "upgrade and pay" page in the app yet, so testers can't buy a plan online during the test.
+
+My recommendation: fine for now; I add online payment once pricing is locked. OK?
+
+3) Pricing
+
+Before I can build online payment at all, I need your final plan names and prices. Draft to react to:
+
+- Solo: $99/month
+- Team: $299/month (includes 3 seats, then $59 per extra seat)
+- Brokerage: $899/month (includes 10 seats)
+- Vendor company: $199 to $499/month (later phase)
+
+Please confirm or change these. Not urgent for the test, but I can't build checkout without it.
+
+Thanks,
+Jan

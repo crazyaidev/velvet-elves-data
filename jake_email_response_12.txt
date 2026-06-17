@@ -1,0 +1,42 @@
+Subject: Re: The 3 decisions: aligned, plus the AI cost plan
+
+Hi Audri,
+
+We are aligned. Here is where each item lands.
+
+1) Account types at signup
+
+Yes, Option B is what I am proposing for this test round, and your fuller list fits on top of it in sequence:
+
+- Now: Agent, Team Leader, and Transaction Coordinator can create their own account, get their own dashboard, and start and manage transactions today.
+- Right after: I add a "start your own transaction/listing" step for Attorney and FSBO, then turn on their signup. That makes them fully self-operating, as you described.
+- Mortgage and Title Vendors: invited for now. I agree they should also be able to sign up, buy seats, and manage transactions for their agents. The foundation keeps that open, so "invited for now" does not block it. We switch it on in the vendor phase.
+
+Nothing in your vision is lost. We just turn it on in the order that keeps every tester on a working screen.
+
+2) Paying during the test
+
+Great. I set plans by hand for now and add online payment once pricing is set.
+
+3) Pricing and AI cost
+
+I agree with you, let us not set pricing yet. Testing first so we know the real AI cost is the right call. Here is the direction I am leaning, and I would like your opinion.
+
+A simple way to picture it: the AI charges us by how much it reads and writes, a bit like paying by the word. So the cost depends on how much work we hand it.
+
+A couple of things that already help:
+- Most of the app does not use AI at all. Task lists, dates, and reminders run on regular code, which is free. The AI is only used for the heavy thinking, like reading a contract or writing an email.
+- During testing I would turn on cost tracking, so after a batch of test deals we have a real "AI cost per deal." Then we set pricing with room for profit. This matches what you suggested.
+
+To keep the cost down without hurting quality, what I am thinking is:
+- Use a smaller, cheaper AI for the simple jobs (like sorting an incoming email), and the best AI only for the important jobs (reading a contract, writing a client email).
+- Avoid paying twice by saving the AI's work and reusing it, instead of asking again.
+
+On your question about our own servers versus an AI service: I would keep using the two AI services we already use, OpenAI and Claude. They give the best quality, and the steps above keep the cost reasonable. Running our own AI would only be cheaper at very large scale, and the quality drops on hard jobs like reading contracts, so I would not go that way now.
+
+Text and voice are separate. The phone and text provider bills those per message and per minute, not the AI.
+
+That is my thinking. Does it sound right to you, or would you like to talk it through?
+
+Thanks,
+Jan
