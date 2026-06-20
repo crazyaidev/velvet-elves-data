@@ -34,16 +34,23 @@ All internal pages share a common app shell. This section defines it once; indiv
 
 ### Internal Shell
 
-- **Topbar (58px):** Brand lockup + AI indicator | "Today's AI Briefing" chip (Critical / Needs Attention / On Track counts — clickable as filter shortcuts) | Global search input | Notification bell | User avatar chip (click opens menu: Settings, Profile, Sign Out) | Contextual CTA (e.g., "+ New Transaction")
-- **Left Sidebar (220px, dark navy `#1E3356`):**
+- **Topbar (58px):** Brand lockup + AI indicator | "Today's AI Briefing" chip (Critical / Needs Attention / On Track counts — clickable as filter shortcuts) | Global search input | Notification bell | User avatar chip (click opens menu: Settings, Log out) | Contextual CTA (e.g., "+ New Transaction")
+- **Left Sidebar (220px, dark navy `#1E3356`):** work + record-review only. All configuration lives in the Settings hub (NAVIGATION_AND_SETTINGS_CONSOLIDATION_SUPERIOR_PLAN.md).
   - 2×2 KPI tiles (role-specific; default for Agent: Overdue Tasks, Closing This Week, Active Deals, Pipeline Value)
   - Navigation groups:
     - **Dashboard** — role-specific landing
-    - **Deals** — Active Transactions (badge), Pending (badge), Closed, All Transactions
+    - **Deals** — Active Transactions (badge), Pending (badge), Closed, All Transactions, Clients
     - **Workflow** — My Task Queue (badge), All Documents, Closing Calendar
-    - **Intelligence** — AI Suggestions (badge), Analytics
-    - **Team** (Team Lead only) — Agents, Task Templates
-  - Footer: Pinned "+ New Transaction" CTA button | User profile card (avatar, name, role; click opens menu: Settings, Profile, Sign Out)
+    - **Payments** — Invoices & Payments, Commission Payouts (when permitted)
+    - **Vendors** — Vendor Directory
+    - **Intelligence** — AI Suggestions (badge), AI Email Review (badge), Vendor Proposals (badge), Analytics
+    - **Team** (Team Lead + Admin) — Team Overview
+    - **Oversight** (Admin) — Communication Audit, Audit Log
+  - Footer: Pinned "+ New Transaction" CTA button | User profile card (avatar, name, role; click opens menu: **Settings**, Log out)
+- **Settings hub (`/settings`):** opened from the avatar-menu Settings entry. One card-grid surface, role-filtered, in two scope groups:
+  - **Personal Settings** (every internal role): Account, Notifications, Email & E-signature (per-user inbox + DocuSign), Email Templates, My Playbook, Help & Tour.
+  - **Workspace Settings** (Admin / Owner; team library shared with Team Lead): Company, Branding, Billing & Credits, Users & Invites, Teams, Task Templates, Vendor Templates, Team Playbook, Integrations & Webhooks, AI & Automation, Payment Access, Advertising, Delete Organization.
+  - Portal roles (Client / FSBO / Vendor) keep the lightweight Account modal instead of the hub.
 - **Page Header:** Title + count pill | Action buttons (Export CSV, Print Report) | Tab bar (page-level filter tabs with live counts) | Sort control + inline search
 - **Content Area:** Scrollable, padded, receives primary page content
 
