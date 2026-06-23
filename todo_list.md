@@ -1,6 +1,6 @@
 # Velvet Elves — Still Being Built (Not Yet Ready for Client Feedback)
 
-**Last Updated:** June 15, 2026
+**Last Updated:** June 23, 2026
 
 This is the companion list to **FRONTEND_CLIENT_TESTING_REVIEW**. The testing review
 only covers features that are **fully complete** and ready for your feedback. The items
@@ -29,36 +29,36 @@ a link) for internal staff.
 
 ---
 
-## 2. Organization page → AI configuration — placeholder
+## 2. In-app password change — not built yet
 
-**Where:** Organization page → **AI configuration** section (`/organization`)
+**Where:** Settings → Profile.
 
-**Current state:** The section shows three switches (Auto-parse uploaded documents, Task
-recommendations, Smart email drafts) and an AI-usage area, but:
+**Current state:** You can now edit your name, photo, phone, bio, email signature, and even
+your sign-in **email address** from Settings → Profile (this is complete and covered in the
+review, feature 28.1). The one piece still missing is changing your **password** from inside
+the app — there is no password field on the Profile page yet.
 
-- The switches are display-only right now — flipping them does not change anything and the
-  setting does not save.
-- The AI-usage area honestly says metering "will appear here once billing is connected" —
-  there is no real credit balance or usage meter yet.
+**What is still needed:** An account-security control to change your password while signed in.
+For now, use the "Forgot password?" link on the sign-in page to reset it.
 
-**What is still needed:** Wire the switches to real per-workspace AI settings, and connect a
-real AI-usage / credits meter once billing is in place.
-
-> The other Organization sections — **Company, Branding, Email, and E-signature** — are
-> complete and **are** in the testing review. Only AI configuration is a placeholder.
+> This replaces the earlier "change email / change password" item — changing your email
+> address inside the app is now done.
 
 ---
 
-## 3. Account Security (change email / change password) — not built yet
+## 3. Credit wallet & billing — switched off for now
 
-**Where:** Avatar menu → Account → Profile
+**Where:** Settings → **Billing & Credits** (workspace Admins / owners) and
+Platform → **Platform Billing** (internal Velvet Elves staff).
 
-**Current state:** You can edit your name, photo, phone, and bio today (this is complete and
-covered in the review). Your email address is shown read-only, with a note that email and
-password changes are "coming soon."
+**Current state:** The credit-wallet billing system — buying credits, per-transaction
+pricing, the Stripe checkout flow, credit history, and the platform-side credit-pack pricing
+and billing-health screens — is built but **switched off behind a feature flag** while
+pricing is being finalised. With the flag off, the **Billing & Credits** card does not appear
+in the Settings hub and creating a transaction is free.
 
-**What is still needed:** An Account Security area to change your email address and password
-from inside the app.
+**What is still needed:** Final pricing sign-off, then switch the flag on. Until then we are
+not asking for feedback on the billing screens.
 
 ---
 
@@ -77,7 +77,7 @@ feedback.
 
 ## 5. iCloud email integration — hidden for now
 
-**Where:** Organization page → Email section.
+**Where:** Settings → Email & E-signature.
 
 **Current state:** Only **Gmail** and **Outlook** are offered today (both complete and in the
 review). iCloud is intentionally hidden because Apple does not offer a standard one-click
@@ -127,8 +127,21 @@ other part of Step 3 is complete and is in the testing review.
 
 ---
 
+## 8. Belonging to more than one workspace — switched off for now
+
+**Where:** A workspace switcher near the top of the sidebar, and the "guest" invite flow (being
+invited into another brokerage with an email you already use).
+
+**Current state:** The ability for one person to belong to several workspaces and switch between
+them is built but **switched off behind a feature flag**. With the flag off, each person belongs to
+a single workspace exactly as today and no switcher appears.
+
+**What is still needed:** Finish the host-billing rules for guest members, then switch the flag on.
+
+---
+
 ## How this list is kept honest
 
-Everything above was checked against the live frontend source code on June 15, 2026. As each
+Everything above was checked against the live frontend source code on June 23, 2026. As each
 item is finished, it will move out of this list and into the main **FRONTEND_CLIENT_TESTING_REVIEW**
 with full step-by-step testing instructions.

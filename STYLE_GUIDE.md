@@ -369,6 +369,13 @@ Two flavors:
 </div>
 ```
 
+> **The `h-[3px]` champagne strip is reserved — not a default.** It belongs
+> on celebratory / confirm hero surfaces only (a "ready to create" confirm
+> screen, a success card). It does **not** go on routine form, detail, or
+> CRUD modals — those use the flat header pattern (§ 6.5). A gradient strip
+> on an everyday editor reads as website decoration, not a tool. (Direction
+> from Jan, 2026-06-23.)
+
 ### 6.4 Pills / chips
 
 ```jsx
@@ -390,6 +397,34 @@ Two dialog primitives in this app:
 - **`<AlertDialog>`** (`@/components/ui/alert-dialog.tsx`) — for
   confirm/destructive prompts. *Yes/No* style.
 
+**Flat modal anatomy — the default for form, detail, and CRUD modals.**
+A modal is a tool surface, not a landing page. Build it flat:
+
+- **No decorative gradient strip** (`h-[3px] bg-gradient-to-r …`) and **no
+  `✦` mono-kicker** inside the modal. Both read as "generic website".
+- **Header:** one flat row separated by a hairline `border-b
+  border-ve-border` (`px-6 py-4`) — serif title (~18 px) + a single muted
+  subtitle line + a plain ghost close `X` (`h-8 w-8 rounded-lg
+  hover:bg-ve-surface-2`). Hide the Radix default close with
+  `[&>button]:hidden` and render your own; set `gap-0` on `DialogContent`.
+- **Body:** scrolls between header and footer (`flex-1 overflow-y-auto px-6
+  py-5`). Group fields under **understated sentence-case section labels**
+  (`text-[12.5px] font-semibold text-ve-text-primary`) preceded by a
+  hairline divider — **not** mono kickers, **not** nested bordered
+  "kicker cards".
+- **Footer:** pinned, hairline `border-t border-ve-border` (`px-6 py-4`),
+  right-aligned: ghost Cancel + filled brand primary.
+- **Controls:** `<SegmentedControl>` for binary state (Active / Inactive),
+  `<Textarea>` for prose, `<Select>` (never native), consistent `h-10`
+  inputs. Field label is `text-[12px] font-medium text-ve-text-secondary`.
+- **Width:** `max-w-md` (simple create) to `max-w-xl` (multi-section
+  editor); radius `rounded-2xl`; `max-h-[88vh]`.
+
+Canonical references: `TaskTemplateEditModal.tsx` and
+`TaskTemplateDetailModal.tsx` (`@/components/admin/`). The **confirm-dialog
+tone strip is the one allowed top strip** — it is a *severity signal*
+(red / amber / blue), not decoration.
+
 Both default to `z-50`. **When a dialog must appear over another modal**
 (e.g. discard-confirm over the wizard at `z-[600]`), use the radix
 primitive directly with explicit `z-[650]` overlay and `z-[660]` content
@@ -401,16 +436,22 @@ canonical pattern.
 
 - **Create something new** → modal (`<Dialog>` form variant, `max-w-lg`,
   16 px radius): Add Document, Attach Document, Add Deadline, Add Task.
-- **Edit a thing in place** → inline expansion under the row (rule editor,
-  term stepper) — the row is the context.
+- **Edit a full record (many fields)** → flat modal (§ 6.5 above), opened
+  *directly* from an inline row action — edit a task template, a user, an
+  invoice. The detour "open the record, then click Edit" is friction;
+  surface Edit on the row.
+- **Edit one small thing in place (a single rule / field / stepper)** →
+  inline expansion under the row — the row is the context. Inline editing
+  is for one thing, not a ten-field form.
 - **Pick-one-from-few with no fields** → popover/dropdown (status menus,
   date popovers).
 
 `AddDocumentModal.tsx` (`@/components/documents/`) is the canonical
-upload-dialog reference: mono kicker › serif 20 px title › 13.5 px muted
-description, dashed champagne dropzone, branded `VeSelect` type picker,
-resumable upload-then-write failure handling, and the over-modal z pattern
-built in.
+upload-dialog reference for its *mechanics*: dashed champagne dropzone,
+branded `VeSelect` type picker, resumable upload-then-write failure
+handling, and the over-modal z pattern. Adopt those — but give it the
+**flat header** (§ 6.5), not the mono-kicker/gradient header it shipped
+with; that chrome predates the flat direction and is being phased out.
 
 **Never use `window.confirm()`, `window.alert()`, or `window.prompt()`.**
 They render Chrome's native dialog and break the brand.
@@ -509,6 +550,14 @@ or replicate its structure:
 - Money inputs: use the `<MoneyInput>` helper in
   `NewTransactionWizard.tsx` — `$` prefix + comma formatting + numeric
   internal value.
+- Filter bars: a list page's **search and its filters share one line** —
+  the search box left at a fixed width, filter chips filling the rest;
+  stack only on narrow screens. Filters are **chips / segmented pills**
+  (active = `bg-ve-orange text-white`), not a second toolbar row and never
+  a native dropdown. See § 15.4.
+- Binary on/off (Active / Inactive, On / Off): use the `<SegmentedControl>`
+  pill pair, not a bespoke toggle button. There is no `Switch` primitive —
+  the segmented pair is the brand's on/off voice.
 
 ### 9.4 Repeater patterns (lists you can grow)
 
@@ -643,6 +692,22 @@ These have been explicitly rejected by the client. Don't reintroduce:
     severity-colored action-queue items (§ 16.3). The inverse failure
     is drowning the page in champagne — reserve `ve-orange` for moments
     that matter.
+18. **Decorative gradient strips on functional modals.** The `h-[3px]`
+    champagne strip atop a form / detail / CRUD modal reads as a generic
+    website. Use the flat header pattern (§ 6.5). The confirm-dialog
+    severity strip is the only allowed modal top strip.
+19. **`✦` kicker + serif-subtitle nested cards inside a modal.** Don't wrap
+    each modal section in its own bordered "kicker card". Use flat sections
+    under a sentence-case label + hairline divider (§ 6.5).
+20. **Forcing a detail view to edit or delete a row.** Collection-table
+    rows expose **inline** edit / delete actions directly (destructive via
+    `useConfirm()` + a toast); never make the user open a record just to
+    act on it (§ 15.4).
+21. **Centering a collection / CRUD page in a narrow column.** A table of
+    records reached from Settings still uses the full-width admin shell
+    (`AdminPageHeader` + `px-3 md:px-6`, no `max-w`), not the centered
+    `SettingsPageShell`. The centered single-column shell is for personal
+    *config* settings, not tables of records (§ 15.4).
 
 ---
 
@@ -724,6 +789,32 @@ intentionally — not absorbed by margins.
 The anti-pattern: a dashboard centered inside `max-w-[1400px]` on a
 wide display. The reader sees a strip of content with hundreds of
 pixels of dead space on each side. (See § 13, item 13.)
+
+### 15.4 Collection / list (CRUD) pages
+
+A page that lists records you create, edit, and delete (Task Templates,
+Team Members, Audit Log) is a **collection page**. It is neither a
+dashboard (§ 16) nor a centered settings document (§ 15.3) — *even when it
+is reached from the Settings hub*. Anatomy, top to bottom:
+
+1. **Shell:** the full-width admin shell (§ 15.1) — `AdminPageHeader`
+   (breadcrumb + serif title + a count badge, and the primary "New …"
+   action in the `trailing` slot) over a `px-3 md:px-6` scroll body.
+   **No `max-w`.**
+2. **Stat strip (optional):** a `grid grid-cols-2 lg:grid-cols-4` of small
+   KPI cards (tinted icon tile + mono label + serif value) for at-a-glance
+   counts. Vary tone across them (§ 16.3) — don't ship four grey cards.
+3. **Toolbar:** search + filter chips on **one line** (§ 9.3).
+4. **Table:** `overflow-x-auto rounded-xl border border-ve-border bg-white
+   shadow-card`, mono uppercase `<th>`, `divide-y` rows, optional category
+   sub-header rows. Each row exposes **inline edit / delete actions**
+   (icon buttons, ≥ 32 px hit area); destructive uses `useConfirm()` + a
+   toast. Clicking the row opens a read-only detail modal — the action
+   buttons `stopPropagation`.
+5. **States:** skeleton rows while loading; an honest, explanatory empty
+   state with an inline "New …" CTA (§ 11) — never a bare empty table.
+
+Canonical references: `TaskTemplateListPage.tsx`, `TeamMembersTable.tsx`.
 
 ---
 
@@ -919,8 +1010,13 @@ decisions on one surface so the cognitive model stays intact.
 
 ---
 
-*Last revised: 2026-05-20 (rev 2 — added § 15 Page Shells and § 16
-Dashboard Design; extended § 13 Anti-Patterns with items 13–17;
-strengthened § 9.3 and § 11 with explicit rules on selects and chart
-empty states). Treat this document as the spec; if you disagree with
-a rule, propose a revision before you ship around it.*
+*Last revised: 2026-06-23 (rev 3 — flat-modal direction from Jan's
+Task-Templates review: § 6.5 gains the flat header/footer anatomy and a
+clarified edit decision rule, § 6.3 reserves the champagne strip; § 9.3
+adds one-line filter bars + the `SegmentedControl` on/off voice; § 15.4
+adds Collection / list (CRUD) pages; § 13 Anti-Patterns extended with
+items 18–21; canonical refs `TaskTemplateEditModal` /
+`TaskTemplateDetailModal` / `TaskTemplateListPage`). Rev 2 (2026-05-20)
+added § 15 Page Shells and § 16 Dashboard Design. Treat this document as
+the spec; if you disagree with a rule, propose a revision before you ship
+around it.*

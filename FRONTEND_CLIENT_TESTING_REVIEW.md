@@ -2,7 +2,7 @@
 
 ## Features Currently Complete — Client Feedback Requested
 
-**Last Updated:** June 15, 2026  
+**Last Updated:** June 23, 2026  
 **Test Environment:** http://dev.velvetelves.com/  
 **Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  
 **Reviewer:** Client — please fill in the Feedback block under each feature
@@ -27,13 +27,13 @@
 
 - **Agent or Elf** — covers the main day-to-day workflow.
 - **Team Lead or Admin** — needed to see the Delete button on transactions, the admin-only Task Templates pages, the Deletion Queue on the Documents page, and the full Team Members admin page.
-- **Workspace Owner** — the very first person who registered the brokerage. Required for the Transfer ownership flow and the Organization page → Delete organization (schedule deletion).
+- **Workspace Owner** — the very first person who registered the brokerage. Required for the Transfer ownership flow and Settings → Delete Organization (schedule deletion).
 - **Invited member** — sign up by clicking an invite-email link (instead of /register). Required for the invite-accept flow and the invitee branch of the onboarding wizard.
 - **Attorney** — loads the attorney workspace (Matters, Releases Queue, State Rules, Recording Calendar).
 - **Client** — a buyer or seller invited to a transaction; loads the 'closing concierge' client workspace at /client/home.
 - **FSBO Customer** — loads the for-sale-by-owner seller workspace at /fsbo.
 - **Vendor** — loads the vendor document portal at /portal/vendor.
-- **Platform admin** (internal Velvet Elves staff only) — required for the /platform/tenants and /platform/advertising pages.
+- **Platform admin** (internal Velvet Elves staff only) — required for the /platform/tenants, /platform/advertising, /platform/billing, and /platform/ai-usage pages.
 
 ### Suggested order of testing
 
@@ -41,7 +41,7 @@
 2. Invite-accept flow (open an invite link as a brand-new user)
 3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay
 4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, opening a single deal in the AI deal workspace, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)
-5. The Organization page (Company, Branding, Email & E-signature integrations — needed before AI Email Review can send) and your Account window
+5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before AI Email Review can send), My Playbook, and the Workspace settings (Company, Branding, Document Templates)
 6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors
 7. Payments — invoices and commission payouts
 8. Team Lead or Admin extras — Team Overview, Teams, Team Members admin, invite / ownership / deactivate, Team Settings, plus the Admin pages (Integrations, AI Governance, Payment Access, Advertising, Audit Log)
@@ -483,7 +483,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 - Each step shows only the fields that match your role.
 - Internal roles see 4–5 steps; external roles see 3.
-- Gmail / Outlook / DocuSign connections persist into the Organization page (Email and E-signature sections) after onboarding.
+- Gmail / Outlook / DocuSign connections persist into Settings → Email & E-signature after onboarding.
 - Logo files outside the allowed types or larger than 2 MB are rejected with a clear message.
 - Either final-step button marks onboarding complete on the server and triggers the product tour the next time the dashboard loads.
 
@@ -516,7 +516,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 **How To Test**
 
 - Finish onboarding with a fresh test account, then land on the dashboard. The product tour should start automatically.
-- If you already finished the tour, open the avatar menu → Account → Help & tour → Start tour to replay it.
+- If you already finished the tour, replay it from Settings → Help & Tour → Start tour (internal roles); portal roles open it from the avatar menu → Settings → Help & tour.
 - Step through the whole tour using Next / Back / Skip. Internal roles (Agent, Transaction Coordinator, Team Lead, Admin) see a 9-step tour covering sidebar KPIs, Active Transactions, My Task Queue, All Documents, AI Briefing, search, notifications, and the New Transaction button.
 - Sign in as an Attorney and replay the tour — it should be a 5-step tour focused on the matter queue, documents, and AI briefing.
 - Sign in as a Client, FSBO Customer, or Vendor and replay the tour — it should be a 5-step tour focused on My Properties, Documents, and Ask Velvet Elves AI.
@@ -611,7 +611,7 @@ Every signed-in page
   - Click any status chip (Critical / Needs Attention / On Track) — it should filter the transactions list.
   - Click the search box (or press Ctrl+K / Cmd+K) — a search panel should open and find deals, tasks, documents, and people as you type. Press Enter on a result to jump to it.
   - Click the bell icon — a notifications panel should open. If you have overdue or upcoming task reminders, a small number badge shows the unread count.
-  - Open the avatar menu — confirm Account, Organization (internal roles only), and Log Out.
+  - Open the avatar menu — confirm just Settings and Log Out (Settings opens the Settings hub for internal roles).
   - On a narrow browser window, click the mobile menu icon.
 
 **Expected Result**
@@ -620,7 +620,7 @@ Every signed-in page
 - The AI Briefing panel opens and closes cleanly.
 - Status chips take you to the correct filtered transaction view.
 - Search returns real results and the bell opens a real notifications list with an accurate unread count.
-- The avatar menu opens the Account window (Account), the Organization page (Organization), or signs you out (Log Out). The mobile menu behaves correctly.
+- The avatar menu opens the Settings hub (Settings) or signs you out (Log Out). The mobile menu behaves correctly.
 
 **Future Improvement Suggestions**
 
@@ -2490,32 +2490,32 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 28. Account window — Profile (your identity)
+### 28. Settings hub — find any setting in one place
 
 **Route / Location**
 
-Avatar menu (top-right) → Account → Profile. The old /profile and /settings links still open it.
+Avatar menu (top-right) → Settings (internal roles). Web address: /settings.
 
 **How To Test**
 
-- Open the avatar menu in the top-right corner and click Account. A large Account window opens with a section list down the left side.
-- On the Profile section, confirm your photo, Full name, Email (read-only), Phone, and a short Bio.
-- Upload a photo: drag an image onto the photo box or click Upload photo (PNG or JPG, up to 5 MB). Confirm the preview updates, then remove it and confirm it clears.
-- Edit your name, phone, or bio. Confirm 'Save changes' only becomes active once you change something.
-- Click Save changes and confirm a success toast.
-- Close the window with the X or the Escape key, reopen it, and confirm your edits stuck.
+- Open the avatar menu in the top-right corner and click Settings. Confirm a Settings page with a search box on top and cards grouped under 'Personal Settings' and 'Workspace Settings' (a platform admin also sees a 'Platform' group).
+- Confirm the Personal cards include Profile, Notifications, Email & E-signature, Email Templates, My Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, and Help & Tour.
+- As an Admin or workspace owner, confirm the Workspace cards include Company, Branding, Users & Invites, Teams, Task Templates, Document Templates, Vendor Templates, the four Team library cards, Integrations & Webhooks, AI & Automation, Payment Access, Advertising, and Delete Organization.
+- Sign in as an Agent or Transaction Coordinator and confirm you only see the Personal cards (no Workspace cards) — you should never see a card that leads to a 'not allowed' page.
+- Type into the search box (for example 'docusign', 'logo', or 'credits') and confirm the cards filter as you type; clear it to see them all again.
+- Click any card and confirm it opens that setting, with a breadcrumb or back link to return to the hub.
 
 **Expected Result**
 
-- The Account window opens over whatever page you are on — you do not navigate away.
-- Email is read-only (a note explains email changes are coming soon); everything else saves.
-- Your photo and name update across the app after saving.
+- Every setting is reachable from this one hub — you no longer hunt through separate Account and Organization menus.
+- You only see the cards your role can actually use.
+- Search narrows the cards by title, description, or keyword.
 
 **Future Improvement Suggestions**
 
-- Add a change-password / account-security area for email and password changes.
-- Store the photo in cloud storage so very large images are supported.
-- Show which workspaces you belong to on the Profile section.
+- Show a 'recently used' settings row at the top.
+- Add a keyboard shortcut to jump straight into settings search.
+- Let an Admin pin the cards their team uses most.
 
 **Feedback**
 
@@ -2529,34 +2529,73 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 29. Account window — personal preferences
+### 28.1. Settings — Profile (your identity)
 
 **Route / Location**
 
-Avatar menu (top-right) → Account (sections other than Profile)
+Settings → Profile card (/settings/account). Portal roles (Client / FSBO / Vendor) open the same Profile from the avatar menu → Settings.
 
 **How To Test**
 
-- Open the avatar menu → Account. Besides Profile, internal users (Agent, Transaction Coordinator, Team Lead, Admin) see these sections down the left side: Notifications, My Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, and Help & tour.
-- Open Notifications.
-  - Confirm a grid of notification categories with Email / Push / In-app switches. Flip a few and click Save — confirm a success toast, then reopen and confirm they stuck.
-- Open My Checklist Templates, My Tagged Notes, My Preferred Vendors, and My Internal Resources in turn.
-  - Each is your own personal list — add, edit, and remove an entry, then save. These are the 'My …' personal copies; the team-wide versions live under Team → Team Settings (feature 32.14).
-- Open Help & tour and click Start tour.
-  - Confirm the product tour starts for whatever role you are signed in as (see feature 13).
-- Sign in as a Client or Vendor and confirm the Account window shows Profile only. Sign in as an FSBO Customer and confirm it shows Profile plus a Preferences section.
+- Open the avatar menu → Settings, then open the Profile card.
+- Confirm your photo, Full name, Email, Phone, a short Bio, and (internal roles) an Email signature box.
+- Upload a photo: drag an image onto the photo box or click Upload photo (PNG or JPG, up to 5 MB). Confirm the preview updates, then remove it and confirm it clears.
+- Edit your name, phone, or bio. Confirm 'Save changes' only becomes active once you change something.
+- Change your Email to a different valid address. Confirm a badly-formed email is blocked with a clear message, and a valid one saves (this becomes your new sign-in address).
+- Internal roles: type an Email signature. It signs the AI email replies sent from your mailbox; leave it blank to fall back to your name, company, and phone.
+- Click Save changes and confirm a success toast, then reload the page and confirm your edits stuck.
 
 **Expected Result**
 
-- Every section saves its own changes with a clear success toast and the changes persist after reopening.
-- Internal roles see all personal sections; Client and Vendor see Profile only; FSBO sees Profile plus Preferences.
-- Help & tour replays the role-appropriate product tour at any time.
+- Your photo, name, phone, bio, email, and signature all save.
+- Your email address is now editable in the app (it used to be read-only) and is checked for a valid format before saving.
+- Your photo and name update across the app — and across every workspace you belong to — after saving.
+
+**Future Improvement Suggestions**
+
+- Add an account-security area to change your password from inside the app (today use 'Forgot password').
+- Confirm an email change with a verification link before it takes effect.
+- List the workspaces you belong to on the Profile section.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 28.2. Settings — Notifications, My Playbook, and Help
+
+**Route / Location**
+
+Settings → the Personal cards: Notifications, My Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, and Help & Tour.
+
+**How To Test**
+
+- Open the Notifications card.
+  - Confirm a list of notification categories with Email / Push / In-app switches. Flip a few and click Save — confirm a success toast, then reload and confirm they stuck.
+- Open My Checklist Templates, My Tagged Notes, My Preferred Vendors, and My Internal Resources in turn.
+  - Each is your own personal list — add, edit, and remove an entry, then save. These are the 'My …' personal copies; the team-wide versions live under the Settings hub's Team library cards (feature 32.14).
+- Open the Help & Tour card and click Start tour.
+  - Confirm the product tour starts for whatever role you are signed in as (see feature 13).
+- Portal roles get these as a lightweight Account window from the avatar menu → Settings: sign in as a Client or Vendor and confirm it shows Profile only; sign in as an FSBO Customer and confirm it shows Profile plus a Preferences section.
+
+**Expected Result**
+
+- Every section saves its own changes with a clear success toast and the changes persist after reloading.
+- Internal roles see all personal cards; Client and Vendor see Profile only; FSBO sees Profile plus Preferences.
+- Help & Tour replays the role-appropriate product tour at any time.
 
 **Future Improvement Suggestions**
 
 - Add a one-click 'copy my checklist template to the team' shortcut.
 - Add a daily-digest email option in Notifications.
-- Add a per-feature mini-tour launcher in Help & tour.
+- Add a per-feature mini-tour launcher in Help & Tour.
 
 **Feedback**
 
@@ -2570,31 +2609,31 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 29.1. Organization page — Company details
+### 29.1. Workspace settings — Company details
 
 **Route / Location**
 
-/organization (Company section). Open it from the avatar menu → Organization (internal roles).
+Settings → Company card (/organization?section=company). Admin or workspace owner only.
 
 **How To Test**
 
-- Open the avatar menu → Organization. Confirm a page with a section rail on the left: Company, Branding, Email, E-signature, AI configuration (and, for the workspace owner only, Delete organization).
-- On the Company section, as an Admin, confirm the Organization name field is editable with a Save changes button.
-- Sign in as any non-Admin (Team Lead, Agent, Transaction Coordinator) and confirm the field is read-only with a note that only an Admin can change it.
-- As an Admin, type a new name and click Save changes — confirm a success toast.
+- From the Settings hub, open the Company card.
+- As an Admin, confirm an editable Organization name field with a Save changes button, plus a read-only Plan badge and a seats summary.
+- Type a new name and click Save changes — confirm a success toast.
 - Sign in as another member of the same workspace and confirm they see the new name.
+- Note: Company, Branding, Billing & Credits, and Delete Organization are the Workspace cards; per-user Email & E-signature connections now live under the Personal 'Email & E-signature' card (feature 29.2).
 
 **Expected Result**
 
-- Admins can rename the workspace; everyone else sees a read-only field with a clear explanation.
+- Admins / owners can rename the workspace and see the current plan and seat usage.
 - The new name shows up for every member of the brokerage.
-- The Organization page replaces the old Settings page — personal preferences now live in the Account window (feature 29).
+- Non-admins do not see the Company card at all (it is a Workspace setting).
 
 **Future Improvement Suggestions**
 
 - Show a preview of how the name appears in the sidebar, invitation email, and outbound transaction emails.
 - Add a 'workspace web address' (subdomain) field.
-- Show the workspace owner's name and email on this section.
+- Show the workspace owner's name and email on this card.
 
 **Feedback**
 
@@ -2608,32 +2647,36 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 29.2. Organization page — Email integrations (Gmail and Outlook)
+### 29.2. Settings — Email & E-signature connections (Gmail, Outlook, DocuSign)
 
 **Route / Location**
 
-/organization (Email section)
+Settings → Email & E-signature card (/settings/connections). These connections are per-user — every internal user connects their own accounts.
 
 **How To Test**
 
-- Open Organization → Email. Confirm a Gmail row and an Outlook row (iCloud is intentionally hidden for now).
-- Click Connect on the Gmail row and complete sign-in in the Google popup. After approval the row should switch to Connected with your email and the date.
-- Repeat on the Outlook row using a Microsoft 365 account.
-- Cancel the popup mid-way and confirm the row stays on 'Connect' without an error.
-- Click Disconnect on a connected row, read the warning that inbound sync and AI email automation will stop, then cancel (row stays connected) and try again to confirm (row returns to Connect).
-- Click Refresh to re-fetch the list.
+- Email integrations.
+  - Confirm a Gmail row and an Outlook row (iCloud is intentionally hidden for now).
+  - Click Connect on the Gmail row and complete sign-in in the Google popup. After approval the row switches to Connected with your email and the date.
+  - Repeat on the Outlook row using a Microsoft 365 account.
+  - Cancel a popup mid-way and confirm the row stays on 'Connect' without an error.
+  - Click Disconnect on a connected row, read the warning that inbound sync and AI email automation will stop, then cancel (row stays connected) and try again to confirm (row returns to Connect).
+  - Click Refresh to re-fetch the list.
+- E-signature (DocuSign).
+  - If DocuSign is not connected, click Connect and complete the wizard (Intro → DocuSign popup → Done). Confirm the row then shows your DocuSign account email and the date.
+  - Click Disconnect, read the warning that Send for Signature will be disabled across the app, and confirm.
 
 **Expected Result**
 
-- Both providers connect through their official sign-in popup — no password is typed into Velvet Elves.
+- Every provider connects through its official sign-in popup — no password is typed into Velvet Elves.
 - Disconnect always asks for confirmation first.
-- At least one provider must be connected for AI Email Review (features 29.7+) to send replies.
+- At least one inbox must be connected for AI Email Review (features 29.7+) to send replies, and DocuSign must be connected for Send for Signature on the Documents center.
 
 **Future Improvement Suggestions**
 
-- Show a 'Last synced' time and a manual 'Sync now' button per provider.
+- Show a 'Last synced' time and a manual 'Sync now' button per inbox.
 - Re-enable the iCloud row once the Apple app-specific-password flow is reviewed.
-- Show an indicator when the linked mailbox has unread AI drafts waiting.
+- Show the monthly DocuSign envelope count remaining so users do not hit their quota by surprise.
 
 **Feedback**
 
@@ -2647,28 +2690,32 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 29.3. Organization page — E-signature (DocuSign)
+### 29.3. Workspace settings — Document Templates (your own fillable forms)
 
 **Route / Location**
 
-/organization (E-signature section)
+Settings → Document Templates card (/settings/document-templates). Admin or workspace owner only.
 
 **How To Test**
 
-- Open Organization → E-signature.
-- If DocuSign is not yet connected, click Connect and complete the wizard (Intro → DocuSign popup → Done).
-- After connecting, confirm the section shows your DocuSign account email and the date you connected.
-- Click Disconnect, read the warning that future Send-for-Signature attempts will fail, and confirm.
+- From the Settings hub, open the Document Templates card (Admins / owners only).
+- Click Upload template and pick one of your brokerage's PDF forms. Confirm it uploads and an editor opens on the new draft.
+- In the editor, set a Document type, then map each detected field to a deal value (for example a 'Buyer' field maps to the buyer's name). Click Save & activate.
+- Back on the list, confirm the template now shows an Active badge and how many fields are mapped. A form that already has data typed into it shows a 'Contains data' warning.
+- Click Edit to change a mapping, and the trash icon to delete a template (confirm it disappears).
+- Note: once a template is Active, the app fills your own form in place with the deal's data (keeping its exact layout) and flattens it whenever you generate that document — your form takes precedence over the built-in one.
 
 **Expected Result**
 
-- Connect and Disconnect both work without leaving the Organization page.
-- Once connected, the same account is also used inside the Send for Signature modal on the Documents page.
+- You can upload, map, activate, edit, and delete your own PDF forms.
+- An active template is used to generate that document type, in your form's exact layout.
+- Only Admins / owners see this card; the editor warns when an uploaded form already contains data.
 
 **Future Improvement Suggestions**
 
-- Add support for other providers (DotLoop, Adobe Sign) alongside DocuSign.
-- Show the monthly envelope count remaining so users do not hit their DocuSign quota by surprise.
+- Map checkbox and signature fields, not just text fields.
+- Let the AI suggest the field mapping automatically from the form's labels.
+- Support Word (DOCX) templates alongside fillable PDFs.
 
 **Feedback**
 
@@ -2682,20 +2729,20 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 29.4. Organization page — Branding (white-label)
+### 29.4. Workspace settings — Branding (white-label)
 
 **Route / Location**
 
-/organization (Branding section — Admin only)
+Settings → Branding card (/organization?section=branding). Admin or workspace owner only.
 
 **How To Test**
 
-- Open Organization → Branding as an Admin. Confirm a logo upload, a brand-color field, and a display-name field.
+- From the Settings hub, open the Branding card as an Admin. Confirm a logo upload, a brand-color field, a display-name field, and a live preview.
 - Upload a logo (PNG, JPEG, WEBP, SVG, or GIF, up to 2 MB). Try a wrong file type or an oversized file and confirm a clear error.
 - Pick a brand color and a display name, watch the live preview update, then click Save branding.
 - Refresh the page and confirm your logo, color, and display name are still there.
 - Confirm the saved logo and color now show in the sidebar and on the sign-in page; check that they also appear on outbound/printed documents.
-- Sign in as a non-Admin and confirm Branding is read-only or hidden.
+- Sign in as a non-Admin and confirm the Branding card does not appear in the Settings hub.
 
 **Expected Result**
 
@@ -2847,7 +2894,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 - Open another draft and click Edit. The subject and body should become editable. Make a change and click Send Edit — confirm the edited version is sent.
 - Click Regenerate on a draft. Confirm the AI redraws a fresh reply from the original inbound email.
 - Click Discard. Confirm a warning explains the draft will be removed but the original inbound message stays in the communication log. Confirm Discard removes the draft.
-- Disconnect your email provider on the Organization page (Email section), then click Approve & Send on a draft. Confirm a clear error explains that no email provider is connected.
+- Disconnect your email provider in Settings → Email & E-signature, then click Approve & Send on a draft. Confirm a clear error explains that no email provider is connected.
 - Confirm the actions that are NOT here yet: no Reassign, no 'Mark Reviewed', no attachment uploader, no scheduled-send.
 
 **Expected Result**
@@ -3456,16 +3503,16 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32.7. Organization page — Delete organization (Danger Zone)
+### 32.7. Workspace settings — Delete Organization (Danger Zone)
 
 **Route / Location**
 
-/organization (Delete organization section — workspace owner only)
+Settings → Delete Organization card (/organization?section=danger). Workspace owner only.
 
 **How To Test**
 
-- Sign in as the workspace owner, open the avatar menu → Organization, and confirm a 'Delete organization' entry appears at the bottom of the section rail.
-- Sign in as any other role on the same workspace and confirm the Delete organization entry is not shown at all.
+- Sign in as the workspace owner, open the Settings hub, and confirm a red 'Delete Organization' card appears under Workspace Settings.
+- Sign in as any other role on the same workspace and confirm the Delete Organization card is not shown at all.
 - As the owner, open Delete organization. Confirm the page asks you to type the workspace name exactly before Schedule deletion becomes available.
 - Schedule deletion and confirm a clear message reports the exact date and time it will run, plus a note that audit logs and a full snapshot are archived under the 2-year retention policy.
 - Click Cancel deletion and confirm the workspace returns to normal.
@@ -3523,7 +3570,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 **Future Improvement Suggestions**
 
 - Add a search box that matches name / slug / owner email.
-- Add a Schedule deletion action on the row alongside Suspend (currently only available inside the tenant's own Organization page → Delete organization).
+- Add a Schedule deletion action on the row alongside Suspend (currently only available inside the tenant's own Settings → Delete Organization).
 - Show owner email and member count as extra columns.
 - Add a 'Force re-verify domain' action for tenants on a custom domain.
 
@@ -3696,14 +3743,14 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/team-settings (Team Lead and Admin; sidebar → Team → Team Settings)
+Settings → Team Checklist Templates / Team Tagged Notes / Team Preferred Vendors / Team Internal Resources cards (/admin/team-settings). Team Lead and Admin.
 
 **How To Test**
 
-- Open Team Settings from the sidebar. Confirm a section rail like the Organization page, with: Checklist Templates, Tagged Notes, Preferred Vendors, and Internal Resources.
+- From the Settings hub, open any of the four Team library cards (Team Checklist Templates, Team Tagged Notes, Team Preferred Vendors, Team Internal Resources). Each opens that one team tool in a centered page with a team picker in the header.
 - As an Admin, use the team picker at the top to choose which team you are editing. (A Team Lead is automatically locked to their own team.)
-- In each section, add or edit an entry and save. Confirm it persists.
-- Confirm these are the team-wide versions; the personal 'My …' copies live in your Account window (feature 29).
+- In each tool, add or edit an entry and save. Confirm it persists.
+- Confirm these are the team-wide versions; the personal 'My …' copies live in Settings → My Playbook (feature 28.2).
 
 **Expected Result**
 
@@ -3928,6 +3975,41 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 - Add per-tenant targeting controls for partner ads.
 - Show platform-wide ad performance roll-ups.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.21. Platform Admin — AI Usage & cost (internal Velvet Elves staff only)
+
+**Route / Location**
+
+/platform/ai-usage (platform admins only)
+
+**How To Test**
+
+- Sign in as a platform admin and open Platform → AI Usage.
+- Sign in as any non-platform user and try /platform/ai-usage directly — confirm you get a 404 (the route's existence is not leaked).
+- Confirm summary totals (total AI cost, calls, and tokens) and read-only breakdown tables by tenant, by transaction, and by feature.
+
+**Expected Result**
+
+- Only platform admins can reach the page; everyone else gets a 404.
+- The cost and usage figures render as read-only totals and tables — this is a measurement tool, with no pricing or checkout.
+
+**Future Improvement Suggestions**
+
+- Add a date-range filter to compare periods.
+- Let staff export the usage breakdown as a CSV.
+- Add a per-tenant cost-per-deal average column.
 
 **Feedback**
 
