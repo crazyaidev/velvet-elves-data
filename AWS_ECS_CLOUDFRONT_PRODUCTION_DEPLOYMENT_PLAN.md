@@ -1,6 +1,6 @@
-# Velvet Elves - AWS ECS and CloudFront Production Deployment Plan
+# Velvet Elves - AWS ECS and CloudFront Stage/Production Deployment Plan
 
-Date: 2026-06-24
+Date: 2026-06-25
 
 Status: Planning document only. No source code changes are required by this document.
 
@@ -8,6 +8,10 @@ Target outcome:
 
 - Move the FastAPI backend from EC2-hosted Docker to Amazon ECS on Fargate.
 - Move the Vite/React frontend from EC2-hosted nginx Docker to S3 plus CloudFront.
+- Adopt this branch-to-environment promotion model:
+  - `develop`: local development branch. No automatic AWS deploy.
+  - `main`: staging branch. Successful pushes deploy to the staging AWS stack.
+  - `prod`: production branch. Successful pushes deploy to the production AWS stack.
 - Keep Supabase as the database, auth, storage, and RLS authority.
 - Use AWS CLI for AWS resource creation and deployment rather than the AWS Console.
 - Preserve the current ability to deploy safely, verify health, and roll back.
@@ -26,6 +30,7 @@ These facts come from the current project docs and app manifests.
   - Readiness endpoint exists at `/api/v1/health/ready` and checks Supabase connectivity.
   - The backend depends on Supabase, OpenAI/Anthropic, AWS Textract/S3, SendGrid, DocuSign, Google/Microsoft email/calendar OAuth, Gmail Pub/Sub, Microsoft Graph webhooks, and Stripe.
   - The current production workflow builds a Docker image, pushes it to GHCR, runs Supabase migrations, configures the Textract bucket, SSHes into EC2, writes `.env`, and restarts Docker Compose.
+  - The current workflow is triggered by `main`; this plan changes the intended target state so `main` becomes staging and `prod` becomes production.
 
 - Frontend: `velvet-elves-frontend`
   - Vite, React 18, TypeScript.
@@ -37,9 +42,408 @@ These facts come from the current project docs and app manifests.
 
 - Current public dev references in docs:
   - Current shared dev frontend/backend origin: `https://dev.velvetelves.com`.
-  - Production domains are not confirmed in the repo. This plan uses placeholders:
-    - `APP_DOMAIN`: frontend domain, for example `app.velvetelves.com` or `velvetelves.com`.
-    - `API_DOMAIN`: backend domain, for example `api.velvetelves.com`.
+  - Keep `dev.velvetelves.com` unchanged during this migration.
+  - `velvet-elves-frontend` and `velvet-elves-backend` are the core product app repositories.
+  - The marketing website and help center are separate web surfaces. Their domains must be reserved and protected during this migration, but their application deployment is outside the backend/frontend ECS and CloudFront cutover unless explicitly added later.
+  - Final domain model:
+    - `STAGE_MARKETING_DOMAIN`: `stage.velvetelves.com`.
+    - `STAGE_APP_DOMAIN`: `app.stage.velvetelves.com`.
+    - `STAGE_API_DOMAIN`: `api.stage.velvetelves.com`.
+    - `STAGE_HELP_DOMAIN`: `help.stage.velvetelves.com`.
+    - `PROD_MARKETING_DOMAIN`: `velvetelves.com`.
+    - `PROD_APP_DOMAIN`: `app.velvetelves.com`.
+    - `PROD_API_DOMAIN`: `api.velvetelves.com`.
+    - `PROD_HELP_DOMAIN`: `help.velvetelves.com`.
+  - DNS is currently managed in GoDaddy. Use GoDaddy for production and staging DNS records for now. Route 53 DNS hosting and domain registrar transfer are future follow-up items after the AWS migration is stable.
+
+---
+
+## 1.1 Branch and Environment Strategy
+
+This plan uses three branches with explicit promotion semantics.
+
+| Branch | Purpose | AWS deploy? | GitHub environment | Data/provider targets |
+| --- | --- | --- | --- | --- |
+| `develop` | Local development and integration work | No automatic AWS deploy | none | local `.env`, local/dev Supabase as needed |
+| `main` | Staging | Yes, to staging ECS/CloudFront | `staging` | staging Supabase and staging/test provider credentials |
+| `prod` | Production | Yes, to production ECS/CloudFront | `production` | production Supabase and production provider credentials |
+
+Promotion flow:
+
+1. Developers work locally from `develop` or short-lived feature branches based on `develop`.
+2. Merge `develop` into `main` only when the build is ready for staging.
+3. Push to `main` deploys the staging backend and frontend.
+4. Run the staging validation checklist against `STAGE_APP_DOMAIN` and `STAGE_API_DOMAIN`.
+5. Promote the exact staged commit from `main` to `prod`.
+6. Push to `prod` deploys the production backend and frontend.
+
+Production should be promoted from a known-good `main` commit. Do not merge unvalidated feature work directly into `prod`.
+
+---
+
+## 1.2 Stage-by-Stage Execution Plan
+
+Proceed in stages. Each stage has a clear output, verification gate, stop rule, and next-stage unlock condition. Do not advance to the next stage until the current stage's verification gate is complete.
+
+### Stage 0 - Baseline, Branch, and Access Readiness
+
+Goal: prepare the release structure without changing live traffic.
+
+Actions:
+
+1. Confirm the current EC2 deployment is healthy and represents the current production baseline.
+2. Confirm `main` is the branch currently matching production.
+3. Create `prod` from `main` if it does not already exist.
+4. Keep `develop` as the local/integration branch.
+5. Inventory current GitHub Actions secrets, EC2 `.env` values, DNS records, provider callbacks, Supabase project settings, and Textract bucket settings.
+6. Confirm final values for marketing, app, API, and help center domains:
+   - `STAGE_MARKETING_DOMAIN=stage.velvetelves.com`
+   - `STAGE_APP_DOMAIN=app.stage.velvetelves.com`
+   - `STAGE_API_DOMAIN=api.stage.velvetelves.com`
+   - `STAGE_HELP_DOMAIN=help.stage.velvetelves.com`
+   - `PROD_MARKETING_DOMAIN=velvetelves.com`
+   - `PROD_APP_DOMAIN=app.velvetelves.com`
+   - `PROD_API_DOMAIN=api.velvetelves.com`
+   - `PROD_HELP_DOMAIN=help.velvetelves.com`
+7. Confirm AWS CLI access, Docker access, Supabase CLI access, and GoDaddy DNS change access.
+8. Do not change CI/CD triggers yet unless there is already a safe staging target.
+
+Verification gate:
+
+- `prod` exists and points to the same commit as `main` at creation time.
+- Current EC2 frontend and backend health checks pass.
+- Current rollback path is understood and documented.
+- All required secrets are inventoried, but no secrets are committed.
+- GoDaddy DNS access and certificate validation ownership are confirmed.
+- Existing email-related DNS records are inventoried before any DNS change.
+
+Stop rule:
+
+- Stop if `main` does not match current production or if current production is unstable.
+- Stop if provider callback ownership is unclear.
+- Stop if company email DNS records are not fully inventoried.
+
+Unlocks:
+
+- Stage 1 can begin when the current production baseline is known and the `prod` branch exists.
+
+### Stage 1 - Staging AWS Foundation
+
+Goal: create the staging AWS foundation without touching production traffic.
+
+Actions:
+
+1. Set `$ENV_NAME = "stage"`.
+2. Create or select VPC, public subnets, private subnets, routing, NAT, and optional VPC endpoints.
+3. Create staging ALB and ECS security groups.
+4. Request staging ACM certificates for `STAGE_API_DOMAIN` in `$REGION` and `STAGE_APP_DOMAIN` in `us-east-1`.
+   - If the staging marketing or help center surfaces are hosted on AWS, also request/validate certificates for `STAGE_MARKETING_DOMAIN` and `STAGE_HELP_DOMAIN` in the region required by their hosting service.
+5. Create or reuse the ECR repository.
+6. Create the staging CloudWatch log group.
+7. Create the staging Secrets Manager secret at `/velvet-elves/stage/backend`.
+8. Create staging IAM roles and policies for ECS execution and backend task runtime.
+9. Create or configure the staging Textract S3 bucket.
+
+Verification gate:
+
+- Staging ACM certificates are `ISSUED`.
+- Staging security groups allow public `80/443` only to ALB and `8000` only from ALB to ECS tasks.
+- Staging secret exists and contains only staging values.
+- Staging log group exists and retention is set.
+- Staging Textract bucket is private, encrypted, and has cleanup lifecycle.
+- No production AWS resources were changed.
+
+Stop rule:
+
+- Stop if any staging secret points to a production Supabase project or production provider credential.
+- Stop if certificates are not issued.
+
+Unlocks:
+
+- Stage 2 can begin when the staging foundation is provisioned and isolated.
+
+### Stage 2 - Staging Backend on ECS
+
+Goal: deploy the backend from `main` to the staging ECS stack.
+
+Actions:
+
+1. Merge or push the intended commit to `main`.
+2. Build the backend Docker image.
+3. Push to ECR with `main-<sha>` and optionally `stage-latest`.
+4. Apply migrations to the staging Supabase project only.
+5. Register the staging backend task definition.
+6. Create or update the `velvet-elves-stage-backend` ECS service.
+7. Attach the service to the staging ALB target group.
+8. Create `STAGE_API_DOMAIN` DNS in GoDaddy as a CNAME to the staging ALB DNS name.
+
+Verification gate:
+
+- ECS desired count equals running count.
+- ALB target group shows healthy targets.
+- CloudWatch receives staging backend logs.
+- `GET https://STAGE_API_DOMAIN/api/health` returns `200`.
+- `GET https://STAGE_API_DOMAIN/api/v1/health/ready` returns `200`.
+- Staging backend can reach staging Supabase.
+- Staging backend can call Textract/S3 using task-role credentials.
+
+Stop rule:
+
+- Stop if migrations accidentally target production.
+- Stop if readiness fails or logs show missing required environment variables.
+
+Unlocks:
+
+- Stage 3 can begin when the staging API is healthy behind the staging ALB.
+
+### Stage 3 - Staging Frontend on S3 and CloudFront
+
+Goal: deploy the frontend from `main` to the staging S3/CloudFront stack.
+
+Actions:
+
+1. Build with `VITE_API_BASE_URL=https://STAGE_API_DOMAIN` and `VITE_APP_ENV=staging`.
+2. Create the staging frontend S3 bucket if it does not exist.
+3. Upload hashed assets with long cache headers.
+4. Upload `.mjs` assets with `text/javascript`.
+5. Upload `index.html` with no-cache headers.
+6. Create staging CloudFront OAC, cache policy, SPA rewrite function, distribution, and bucket policy.
+7. Create `STAGE_APP_DOMAIN` DNS in GoDaddy as a CNAME to staging CloudFront.
+8. Invalidate `/` and `/index.html`.
+
+Verification gate:
+
+- `https://STAGE_APP_DOMAIN/` loads.
+- Hard refresh works on `/login`, `/dashboard`, `/transactions/active`, and `/settings`.
+- Browser network calls go to `https://STAGE_API_DOMAIN`.
+- No CORS or mixed-content errors appear.
+- PDF worker `.mjs` loads with JavaScript MIME type.
+- A deliberately missing asset returns real `403` or `404`, not `200 text/html`.
+
+Stop rule:
+
+- Stop if the staging frontend calls the production API.
+- Stop if `.mjs` files are served as HTML or `application/octet-stream`.
+
+Unlocks:
+
+- Stage 4 can begin when the staging frontend and backend work together end-to-end.
+
+### Stage 4 - Staging Provider and Workflow Validation
+
+Goal: prove application workflows in staging before production promotion.
+
+Actions:
+
+1. Configure staging Supabase Auth URLs.
+2. Configure staging or sandbox OAuth callback URLs for Google, Microsoft, and DocuSign.
+3. Configure the staging or test Stripe webhook endpoint.
+4. Configure staging email/calendar webhook endpoints where safe.
+5. Run the full environment validation checklist against staging.
+6. Record the validated `main` commit SHA.
+
+Verification gate:
+
+- Login, logout, password reset, and invite acceptance work on staging.
+- Authenticated API calls succeed.
+- Document upload and Textract-backed parsing work.
+- AI parsing or suggestions can reach the configured staging AI provider.
+- Stripe webhook validation works in test mode.
+- DocuSign sandbox callback/webhook works if sandbox credentials are available.
+- Gmail/Outlook OAuth callback works with staging redirect URIs if test credentials are available.
+
+Stop rule:
+
+- Stop if any staging callback or webhook points to production domains by mistake.
+- Stop if staging cannot complete core auth, transaction, upload, and document parsing flows.
+
+Unlocks:
+
+- Stage 5 can begin when the exact `main` commit is approved for production promotion.
+
+### Stage 5 - CI/CD Branch Split
+
+Goal: make branch behavior match the target promotion model.
+
+Actions:
+
+1. Update backend workflow triggers for PRs and pushes to `main` and `prod`.
+2. Update frontend workflow triggers the same way.
+3. Configure `github.ref_name == 'main'` to use `ENV_NAME=stage`, GitHub environment `staging`, and staging secrets/domains.
+4. Configure `github.ref_name == 'prod'` to use `ENV_NAME=prod`, GitHub environment `production`, and production secrets/domains.
+5. Add or confirm branch protections:
+   - `main`: PR and CI required.
+   - `prod`: PR, CI, approval, and restricted direct pushes.
+6. Ensure `develop` has no automatic AWS deployment.
+
+Verification gate:
+
+- A test push or merge to `main` deploys only staging.
+- No production deployment runs from `main`.
+- A dry run or controlled test confirms `prod` is the only production deploy branch.
+- GitHub environment secrets are separated between `staging` and `production`.
+
+Stop rule:
+
+- Stop if `main` can still deploy production.
+- Stop if staging and production workflows share the same secret values accidentally.
+
+Unlocks:
+
+- Stage 6 can begin when CI/CD branch behavior is correct and staging deploys automatically from `main`.
+
+### Stage 6 - Production AWS Foundation
+
+Goal: create the production ECS/CloudFront foundation without moving live traffic yet.
+
+Actions:
+
+1. Set `$ENV_NAME = "prod"`.
+2. Create production security groups, certificates, log group, Secrets Manager secret, IAM roles, and Textract bucket configuration.
+3. Confirm production secrets are production values only.
+4. Create production ALB, target group, ECS cluster, and frontend S3/CloudFront resources.
+5. Keep existing EC2 production DNS serving users until cutover.
+6. Do not change `dev.velvetelves.com`, `PROD_MARKETING_DOMAIN`, or `PROD_HELP_DOMAIN` while provisioning the production app/API stack.
+
+Verification gate:
+
+- Production ACM certificates are `ISSUED`.
+- Production secret exists and contains production values only.
+- Production ECS and CloudFront resources exist.
+- Production ALB and CloudFront are reachable on AWS-generated domains before public DNS cutover where possible.
+- Existing EC2 production remains healthy.
+- `dev.velvetelves.com`, the marketing site, the help center, and company email DNS records remain unchanged.
+
+Stop rule:
+
+- Stop if production secrets are incomplete or provider credentials are not confirmed.
+- Stop if creating production resources disrupts EC2 production.
+
+Unlocks:
+
+- Stage 7 can begin when production infrastructure exists and EC2 remains the live serving path.
+
+### Stage 7 - Production Deployment From `prod`
+
+Goal: deploy the validated staged commit to the production ECS/CloudFront stack.
+
+Actions:
+
+1. Promote the exact validated `main` commit to `prod`.
+2. Let `prod` deploy the production backend image to ECS.
+3. Apply production Supabase migrations only after confirming they are backward-compatible or inside the maintenance window.
+4. Let `prod` deploy the production frontend build to S3/CloudFront.
+5. Keep DNS pointing at EC2 until ECS/CloudFront production smoke tests pass.
+
+Verification gate:
+
+- Production ECS service is stable.
+- Production ALB target group has healthy targets.
+- Production backend health and readiness checks pass.
+- Production frontend build points to `https://PROD_API_DOMAIN`.
+- CloudFront distribution is deployed.
+
+Stop rule:
+
+- Stop if production backend readiness fails.
+- Stop if frontend was built with staging API URL.
+- Stop if production migrations fail.
+
+Unlocks:
+
+- Stage 8 can begin when production ECS/CloudFront are healthy and ready for DNS/provider cutover.
+
+### Stage 8 - Production DNS and Provider Cutover
+
+Goal: move real production traffic from EC2 to ECS/CloudFront.
+
+Actions:
+
+1. Lower DNS TTLs at least 24 hours before cutover where possible.
+2. Announce maintenance window if needed.
+3. Pause old EC2 deploy workflows.
+4. Update production provider callback URLs for Supabase Auth, Google/Microsoft OAuth, Google Pub/Sub, Microsoft Graph, DocuSign, and Stripe.
+5. Update GoDaddy DNS:
+   - `PROD_API_DOMAIN` as a CNAME to the production ALB DNS name.
+   - `PROD_APP_DOMAIN` as a CNAME to the production CloudFront domain name.
+   - Do not change `PROD_MARKETING_DOMAIN`, `PROD_HELP_DOMAIN`, company email records, or `dev.velvetelves.com` in this cutover unless a separate marketing/help change is explicitly scheduled.
+6. Force a new ECS deployment if only secret values changed; otherwise update ECS to the latest task definition revision.
+7. Run smoke tests from a clean browser session.
+
+Verification gate:
+
+- `PROD_APP_DOMAIN` loads the SPA.
+- `PROD_API_DOMAIN` health and readiness return `200`.
+- `PROD_MARKETING_DOMAIN`, `PROD_HELP_DOMAIN`, and `dev.velvetelves.com` still resolve to their intended existing targets.
+- Company email continues to receive and send normally.
+- Login and authenticated API call work.
+- No CORS or mixed-content errors appear.
+- Stripe webhook mode is confirmed as intended.
+- DocuSign Connect delivery succeeds or is queued/retryable.
+- CloudWatch logs show normal traffic and no secret leakage.
+
+Stop rule:
+
+- Roll back DNS if core login, API readiness, or frontend boot fails and cannot be fixed quickly.
+- Keep EC2 warm until the confidence window is complete.
+
+Unlocks:
+
+- Stage 9 begins immediately after DNS/provider cutover.
+
+### Stage 9 - Post-Cutover Monitoring and Stabilization
+
+Goal: observe production, handle regressions, and delay decommissioning until confidence is earned.
+
+Actions:
+
+1. Monitor ALB, ECS, CloudFront, backend logs, Stripe, DocuSign, Gmail/Outlook webhooks, and Supabase.
+2. Run the production validation checklist at cutover, after 30 minutes, after 2 hours, and the next business day.
+3. Keep EC2 warm for at least 7 days.
+4. Disable old EC2 deploys after ECS is confirmed as the production path.
+5. Document issues, mitigations, and follow-up work.
+
+Verification gate:
+
+- Error rates remain within expected thresholds.
+- ECS desired count equals running count.
+- No repeated task crashes occur.
+- User flows remain healthy.
+- Provider webhooks continue delivering to production ECS endpoints.
+
+Stop rule:
+
+- If production instability persists, roll back through the rollback plan and do not decommission EC2.
+
+Unlocks:
+
+- Stage 10 can begin after the agreed confidence window.
+
+### Stage 10 - EC2 Decommission and Cleanup
+
+Goal: remove the old EC2 serving path only after the new architecture is proven.
+
+Actions:
+
+1. Confirm production has served successfully from ECS/CloudFront for the agreed confidence window.
+2. Export or archive EC2 logs if required.
+3. Remove old provider callback URLs that are no longer needed.
+4. Stop EC2 instances before terminating them.
+5. Delete old EC2-only security groups, load balancers, volumes, and DNS records only after final approval.
+6. Rotate any secrets that were broadly copied during migration.
+7. Update documentation to show `develop -> main(stage) -> prod(production)` as the active operating model.
+
+Verification gate:
+
+- No production app/API DNS records point to EC2.
+- `dev.velvetelves.com` remains available until its separate retirement plan exists.
+- No provider webhooks point to EC2.
+- GitHub Actions no longer SSH to EC2 for deploys.
+- Cost and resource inventory no longer show unused EC2 deployment resources.
+
+Stop rule:
+
+- Do not terminate EC2 if any rollback dependency still points to it.
 
 ---
 
@@ -77,46 +481,101 @@ ECS Fargate task role
 Textract + private Textract input S3 bucket
 ```
 
+Separate public web surfaces:
+
+- Marketing website:
+  - Staging: `stage.velvetelves.com`
+  - Production: `velvetelves.com`
+- Product frontend:
+  - Staging: `app.stage.velvetelves.com`
+  - Production: `app.velvetelves.com`
+- Backend API:
+  - Staging: `api.stage.velvetelves.com`
+  - Production: `api.velvetelves.com`
+- Help center:
+  - Staging: `help.stage.velvetelves.com`
+  - Production: `help.velvetelves.com`
+- Existing dev server:
+  - `dev.velvetelves.com` remains unchanged until a separate dev-environment retirement or replacement plan exists.
+
+This ECS/CloudFront migration covers the product frontend and backend API. Marketing and help center deployment details should be handled in separate plans unless they are deliberately folded into this infrastructure work.
+
 Recommended resource names:
 
-| Resource | Name |
-| --- | --- |
-| AWS region | `us-east-2` unless the current AWS account standard says otherwise |
-| ECS cluster | `velvet-elves-prod` |
-| ECS service | `velvet-elves-prod-backend` |
-| ECR repository | `velvet-elves/backend` |
-| ALB | `velvet-elves-prod-api-alb` |
-| ALB target group | `velvet-elves-prod-api-tg` |
-| Backend log group | `/ecs/velvet-elves/prod/backend` |
-| Backend secret | `/velvet-elves/prod/backend` |
-| Frontend S3 bucket | `velvet-elves-prod-frontend-<account-id>` |
-| Frontend CloudFront OAC | `velvet-elves-prod-frontend-oac` |
-| Textract S3 bucket | keep current production bucket name from `TEXTRACT_S3_BUCKET` |
+| Resource | Staging from `main` | Production from `prod` |
+| --- | --- | --- |
+| AWS region | `us-east-2` unless the current AWS account standard says otherwise | same region unless there is a deliberate DR strategy |
+| ECS cluster | `velvet-elves-stage` | `velvet-elves-prod` |
+| ECS service | `velvet-elves-stage-backend` | `velvet-elves-prod-backend` |
+| ECR repository | `velvet-elves/backend` | `velvet-elves/backend` |
+| Backend image tag | `main-<sha>` and `stage-latest` | `prod-<sha>` and `prod-latest` |
+| ALB | `velvet-elves-stage-api-alb` | `velvet-elves-prod-api-alb` |
+| ALB target group | `velvet-elves-stage-api-tg` | `velvet-elves-prod-api-tg` |
+| Backend log group | `/ecs/velvet-elves/stage/backend` | `/ecs/velvet-elves/prod/backend` |
+| Backend secret | `/velvet-elves/stage/backend` | `/velvet-elves/prod/backend` |
+| Frontend S3 bucket | `velvet-elves-stage-frontend-<account-id>` | `velvet-elves-prod-frontend-<account-id>` |
+| Frontend CloudFront OAC | `velvet-elves-stage-frontend-oac` | `velvet-elves-prod-frontend-oac` |
+| Textract S3 bucket | staging bucket from staging `TEXTRACT_S3_BUCKET` | production bucket from production `TEXTRACT_S3_BUCKET` |
 
-Use two environments if possible:
+Staging and production must be separate AWS/runtime environments:
 
-- `staging`: ECS/CloudFront stack using staging Supabase and staging provider credentials.
-- `production`: ECS/CloudFront stack using production Supabase and production provider credentials.
+- Staging uses staging Supabase, staging/test provider credentials, staging callback URLs, and staging CloudFront/ALB domains.
+- Production uses production Supabase, production provider credentials, production callback URLs, and production CloudFront/ALB domains.
 
-If only one Supabase project exists today, do not use production ECS as a test bed for destructive migration checks. Run backend and frontend smoke tests against staging first or against a cloned Supabase project.
+If only one Supabase project exists today, create a staging Supabase project or use a clone before treating `main` as staging. Do not use production ECS as the first test bed for destructive migration checks.
 
 ---
 
-## 3. Production Domain and Certificate Decisions
+## 3. Environment Domain and Certificate Decisions
 
 Make these decisions before provisioning.
 
 | Decision | Recommendation |
 | --- | --- |
-| Frontend domain | `APP_DOMAIN`, for example `app.velvetelves.com` or apex `velvetelves.com` |
-| API domain | `API_DOMAIN`, for example `api.velvetelves.com` |
-| Backend certificate | ACM certificate in the same region as the ALB, likely `us-east-2` |
-| CloudFront certificate | ACM certificate in `us-east-1` |
-| DNS | Route 53 aliases if the domain is hosted in Route 53; otherwise create provider-side CNAME/ALIAS records |
+| Existing dev domain | Keep `dev.velvetelves.com` unchanged |
+| Staging marketing domain | `STAGE_MARKETING_DOMAIN=stage.velvetelves.com` |
+| Staging frontend domain | `STAGE_APP_DOMAIN=app.stage.velvetelves.com` |
+| Staging API domain | `STAGE_API_DOMAIN=api.stage.velvetelves.com` |
+| Staging help center domain | `STAGE_HELP_DOMAIN=help.stage.velvetelves.com` |
+| Production marketing domain | `PROD_MARKETING_DOMAIN=velvetelves.com` |
+| Production frontend domain | `PROD_APP_DOMAIN=app.velvetelves.com` |
+| Production API domain | `PROD_API_DOMAIN=api.velvetelves.com` |
+| Production help center domain | `PROD_HELP_DOMAIN=help.velvetelves.com` |
+| Backend certificate | ACM certificate in the same region as each environment's ALB, likely `us-east-2` |
+| CloudFront certificate | ACM certificate for each CloudFront-hosted frontend, marketing, or help center domain in `us-east-1` |
+| DNS | Use GoDaddy DNS for now. Use CNAME records for app/API/help subdomains. Move DNS hosting to Route 53 later in a separate controlled migration. |
 | API TLS termination | ALB terminates HTTPS on port `443`, forwards HTTP to ECS target port `8000` |
 | Frontend TLS termination | CloudFront terminates HTTPS |
 
 Important CloudFront certificate rule: CloudFront viewer certificates from ACM must be requested or imported in `us-east-1`.
+
+Important GoDaddy DNS notes:
+
+- Preserve all company email DNS records before any change: `MX`, SPF `TXT`, DKIM records, DMARC, provider verification records, `autodiscover`, and any mail-related `CNAME` or `SRV` records.
+- Subdomains such as `app.velvetelves.com`, `api.velvetelves.com`, `help.velvetelves.com`, `app.stage.velvetelves.com`, and `api.stage.velvetelves.com` can be pointed with CNAME records.
+- The apex `velvetelves.com` cannot use a normal DNS CNAME. If the production marketing site is hosted on CloudFront while DNS remains in GoDaddy, confirm GoDaddy's supported apex record/forwarding option or move DNS hosting to Route 53 before apex CloudFront cutover.
+- Do not transfer the domain registrar from GoDaddy to Route 53 during the ECS/CloudFront app cutover. If Route 53 is desired later, first migrate DNS hosting safely, verify website/app/API/help/email behavior, then transfer registration.
+
+In the command sections below, set `APP_DOMAIN` and `API_DOMAIN` to the domain pair for the environment being provisioned:
+
+- For staging: `APP_DOMAIN=$STAGE_APP_DOMAIN`, `API_DOMAIN=$STAGE_API_DOMAIN`, `ENV_NAME=stage`.
+- For production: `APP_DOMAIN=$PROD_APP_DOMAIN`, `API_DOMAIN=$PROD_API_DOMAIN`, `ENV_NAME=prod`.
+
+### 3.1 Future Route 53 DNS and Registrar Migration
+
+Route 53 is a good later target, but it should not be bundled into the ECS/CloudFront app/API cutover.
+
+Recommended future sequence:
+
+1. Keep GoDaddy as registrar and DNS provider during the initial AWS migration.
+2. After ECS/CloudFront production is stable, create a Route 53 public hosted zone for `velvetelves.com`.
+3. Copy every GoDaddy DNS record into Route 53, including all website, app, API, help center, email, verification, and provider records.
+4. Lower relevant GoDaddy TTLs before changing nameservers.
+5. Change GoDaddy nameservers to the four Route 53 hosted-zone nameservers.
+6. Monitor marketing, app, API, help center, company email, and provider callbacks.
+7. Only after Route 53 DNS hosting is stable, optionally transfer domain registration from GoDaddy to Route 53.
+
+Do not transfer DNS hosting and registrar ownership at the same time. If anything goes wrong during DNS migration, revert the nameservers in GoDaddy to the previous GoDaddy nameservers.
 
 ---
 
@@ -127,9 +586,36 @@ All AWS commands should be run from an authenticated shell. Examples are PowerSh
 ```powershell
 $REGION = "us-east-2"
 $CF_CERT_REGION = "us-east-1"
-$APP_DOMAIN = "app.velvetelves.com"
-$API_DOMAIN = "api.velvetelves.com"
+$ENV_NAME = "stage" # stage for main, prod for prod
+$STAGE_MARKETING_DOMAIN = "stage.velvetelves.com"
+$STAGE_APP_DOMAIN = "app.stage.velvetelves.com"
+$STAGE_API_DOMAIN = "api.stage.velvetelves.com"
+$STAGE_HELP_DOMAIN = "help.stage.velvetelves.com"
+$PROD_MARKETING_DOMAIN = "velvetelves.com"
+$PROD_APP_DOMAIN = "app.velvetelves.com"
+$PROD_API_DOMAIN = "api.velvetelves.com"
+$PROD_HELP_DOMAIN = "help.velvetelves.com"
+
+if ($ENV_NAME -eq "stage") {
+  $MARKETING_DOMAIN = $STAGE_MARKETING_DOMAIN
+  $APP_DOMAIN = $STAGE_APP_DOMAIN
+  $API_DOMAIN = $STAGE_API_DOMAIN
+  $HELP_DOMAIN = $STAGE_HELP_DOMAIN
+} elseif ($ENV_NAME -eq "prod") {
+  $MARKETING_DOMAIN = $PROD_MARKETING_DOMAIN
+  $APP_DOMAIN = $PROD_APP_DOMAIN
+  $API_DOMAIN = $PROD_API_DOMAIN
+  $HELP_DOMAIN = $PROD_HELP_DOMAIN
+} else {
+  throw "ENV_NAME must be stage or prod"
+}
+
 $ACCOUNT_ID = aws sts get-caller-identity --query Account --output text
+$NAME_PREFIX = "velvet-elves-$ENV_NAME"
+$BACKEND_SECRET_NAME = "/velvet-elves/$ENV_NAME/backend"
+$BACKEND_LOG_GROUP = "/ecs/velvet-elves/$ENV_NAME/backend"
+$FRONTEND_BUCKET = "velvet-elves-$ENV_NAME-frontend-$ACCOUNT_ID"
+$ECR_REPOSITORY = "velvet-elves/backend"
 
 aws sts get-caller-identity
 aws configure get region
@@ -158,6 +644,14 @@ Record these values from the current EC2 deployment before creating AWS replacem
 - Existing frontend public URL.
 - Existing backend public URL.
 - Existing DNS records and TTLs.
+- Current GoDaddy account owner/admins, 2FA status, domain lock status, auto-renewal status, and recovery email.
+- Current company email DNS records:
+  - `MX`.
+  - SPF `TXT`.
+  - DKIM `TXT` or `CNAME`.
+  - DMARC.
+  - Microsoft/Google/provider verification records.
+  - `autodiscover`, `autoconfig`, and any mail-related `CNAME` or `SRV` records.
 - Existing EC2 security groups.
 - Existing `.env` values, but store them in a password manager or AWS Secrets Manager, not in this markdown file.
 - Current `TEXTRACT_S3_BUCKET`, `TEXTRACT_S3_PREFIX`, and AWS region.
@@ -235,8 +729,8 @@ Create an ALB security group:
 
 ```powershell
 $ALB_SG = aws ec2 create-security-group `
-  --group-name velvet-elves-prod-api-alb-sg `
-  --description "Velvet Elves production API ALB" `
+  --group-name "$NAME_PREFIX-api-alb-sg" `
+  --description "Velvet Elves $ENV_NAME API ALB" `
   --vpc-id $VPC_ID `
   --region $REGION `
   --query GroupId --output text
@@ -249,8 +743,8 @@ Create an ECS task security group:
 
 ```powershell
 $ECS_SG = aws ec2 create-security-group `
-  --group-name velvet-elves-prod-backend-task-sg `
-  --description "Velvet Elves production backend ECS tasks" `
+  --group-name "$NAME_PREFIX-backend-task-sg" `
+  --description "Velvet Elves $ENV_NAME backend ECS tasks" `
   --vpc-id $VPC_ID `
   --region $REGION `
   --query GroupId --output text
@@ -295,6 +789,13 @@ aws acm describe-certificate --region $CF_CERT_REGION --certificate-arn $APP_CER
 ```
 
 If DNS is hosted in Route 53, create the validation CNAMEs via `aws route53 change-resource-record-sets`. If DNS is not hosted in Route 53, add the CNAMEs at the DNS provider.
+
+Current DNS provider decision:
+
+- `velvetelves.com` is currently managed in GoDaddy.
+- Add ACM validation CNAMEs in GoDaddy for this migration.
+- Do not change the domain's authoritative nameservers during the ECS/CloudFront cutover.
+- Preserve all email records while adding validation, app, API, and later help/marketing records.
 
 ### 6.4 ECR Repository
 
@@ -352,8 +853,8 @@ aws ecr put-lifecycle-policy `
 ### 6.5 CloudWatch Logs
 
 ```powershell
-aws logs create-log-group --log-group-name /ecs/velvet-elves/prod/backend --region $REGION
-aws logs put-retention-policy --log-group-name /ecs/velvet-elves/prod/backend --retention-in-days 30 --region $REGION
+aws logs create-log-group --log-group-name $BACKEND_LOG_GROUP --region $REGION
+aws logs put-retention-policy --log-group-name $BACKEND_LOG_GROUP --retention-in-days 30 --region $REGION
 ```
 
 Use a longer retention period if legal/compliance requires API logs to be retained. Avoid logging PII and secrets.
@@ -372,7 +873,7 @@ The current backend expects environment variables. In ECS, use:
 Recommended non-secret environment values:
 
 ```text
-APP_ENV=production
+APP_ENV=<staging-or-production>
 APP_DEBUG=false
 FRONTEND_URL=https://APP_DOMAIN
 CORS_ORIGINS=https://APP_DOMAIN
@@ -442,14 +943,14 @@ Use one JSON secret for the backend:
 
 ```powershell
 $BACKEND_SECRET_ARN = aws secretsmanager create-secret `
-  --name /velvet-elves/prod/backend `
-  --description "Velvet Elves production backend runtime secrets" `
-  --secret-string file://aws-deploy-work/backend-prod-secrets.json `
+  --name $BACKEND_SECRET_NAME `
+  --description "Velvet Elves $ENV_NAME backend runtime secrets" `
+  --secret-string file://aws-deploy-work/backend-$ENV_NAME-secrets.json `
   --region $REGION `
   --query ARN --output text
 ```
 
-`backend-prod-secrets.json` should be created locally from the current production `.env` and never committed.
+`backend-$ENV_NAME-secrets.json` should be created locally from the matching environment `.env` and never committed.
 
 Example shape:
 
@@ -473,13 +974,13 @@ If the secret already exists, update it instead of creating a second secret:
 
 ```powershell
 $BACKEND_SECRET_ARN = aws secretsmanager describe-secret `
-  --secret-id /velvet-elves/prod/backend `
+  --secret-id $BACKEND_SECRET_NAME `
   --region $REGION `
   --query ARN --output text
 
 aws secretsmanager put-secret-value `
   --secret-id $BACKEND_SECRET_ARN `
-  --secret-string file://aws-deploy-work/backend-prod-secrets.json `
+  --secret-string file://aws-deploy-work/backend-$ENV_NAME-secrets.json `
   --region $REGION
 ```
 
@@ -596,15 +1097,15 @@ Create roles:
 
 ```powershell
 aws iam create-role `
-  --role-name velvet-elves-prod-ecs-execution-role `
+  --role-name "$NAME_PREFIX-ecs-execution-role" `
   --assume-role-policy-document file://aws-deploy-work/ecs-task-trust-policy.json
 
 aws iam attach-role-policy `
-  --role-name velvet-elves-prod-ecs-execution-role `
+  --role-name "$NAME_PREFIX-ecs-execution-role" `
   --policy-arn arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
 
 aws iam create-role `
-  --role-name velvet-elves-prod-backend-task-role `
+  --role-name "$NAME_PREFIX-backend-task-role" `
   --assume-role-policy-document file://aws-deploy-work/ecs-task-trust-policy.json
 ```
 
@@ -612,13 +1113,13 @@ Create and attach inline policies:
 
 ```powershell
 aws iam put-role-policy `
-  --role-name velvet-elves-prod-ecs-execution-role `
-  --policy-name velvet-elves-prod-read-backend-secrets `
+  --role-name "$NAME_PREFIX-ecs-execution-role" `
+  --policy-name "$NAME_PREFIX-read-backend-secrets" `
   --policy-document file://aws-deploy-work/ecs-execution-secrets-policy.json
 
 aws iam put-role-policy `
-  --role-name velvet-elves-prod-backend-task-role `
-  --policy-name velvet-elves-prod-textract-s3-policy `
+  --role-name "$NAME_PREFIX-backend-task-role" `
+  --policy-name "$NAME_PREFIX-textract-s3-policy" `
   --policy-document file://aws-deploy-work/backend-textract-s3-policy.json
 ```
 
@@ -642,7 +1143,7 @@ aws ecr get-login-password --region $REGION |
   docker login --username AWS --password-stdin "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com"
 
 $IMAGE_TAG = "manual-$(Get-Date -Format yyyyMMddHHmmss)"
-$IMAGE_URI = "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/velvet-elves/backend:$IMAGE_TAG"
+$IMAGE_URI = "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$ENV_NAME-$IMAGE_TAG"
 
 docker build -t velvet-elves-backend:$IMAGE_TAG .
 docker tag velvet-elves-backend:$IMAGE_TAG $IMAGE_URI
@@ -652,8 +1153,8 @@ docker push $IMAGE_URI
 Also tag a deployment alias only after the image passes ECS smoke tests:
 
 ```powershell
-docker tag velvet-elves-backend:$IMAGE_TAG "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/velvet-elves/backend:prod-latest"
-docker push "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/velvet-elves/backend:prod-latest"
+docker tag velvet-elves-backend:$IMAGE_TAG "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$ENV_NAME-latest"
+docker push "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$ENV_NAME-latest"
 ```
 
 ### 7.4 Create ALB Target Group and Listeners
@@ -662,7 +1163,7 @@ Create target group:
 
 ```powershell
 $TG_ARN = aws elbv2 create-target-group `
-  --name velvet-elves-prod-api-tg `
+  --name "$NAME_PREFIX-api-tg" `
   --protocol HTTP `
   --port 8000 `
   --vpc-id $VPC_ID `
@@ -683,7 +1184,7 @@ Create ALB:
 
 ```powershell
 $ALB_ARN = aws elbv2 create-load-balancer `
-  --name velvet-elves-prod-api-alb `
+  --name "$NAME_PREFIX-api-alb" `
   --subnets $PUBLIC_SUBNET_1 $PUBLIC_SUBNET_2 `
   --security-groups $ALB_SG `
   --scheme internet-facing `
@@ -754,17 +1255,17 @@ Skeleton:
 
 ```json
 {
-  "family": "velvet-elves-prod-backend",
+  "family": "velvet-elves-<env>-backend",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "1024",
   "memory": "2048",
-  "executionRoleArn": "arn:aws:iam::<account-id>:role/velvet-elves-prod-ecs-execution-role",
-  "taskRoleArn": "arn:aws:iam::<account-id>:role/velvet-elves-prod-backend-task-role",
+  "executionRoleArn": "arn:aws:iam::<account-id>:role/velvet-elves-<env>-ecs-execution-role",
+  "taskRoleArn": "arn:aws:iam::<account-id>:role/velvet-elves-<env>-backend-task-role",
   "containerDefinitions": [
     {
       "name": "api",
-      "image": "<account-id>.dkr.ecr.<region>.amazonaws.com/velvet-elves/backend:<image-tag>",
+      "image": "<account-id>.dkr.ecr.<region>.amazonaws.com/velvet-elves/backend:<env>-<image-tag>",
       "essential": true,
       "portMappings": [
         {
@@ -773,7 +1274,7 @@ Skeleton:
         }
       ],
       "environment": [
-        { "name": "APP_ENV", "value": "production" },
+        { "name": "APP_ENV", "value": "<staging-or-production>" },
         { "name": "APP_DEBUG", "value": "false" },
         { "name": "FRONTEND_URL", "value": "https://APP_DOMAIN" },
         { "name": "CORS_ORIGINS", "value": "https://APP_DOMAIN" },
@@ -819,7 +1320,7 @@ Skeleton:
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
-          "awslogs-group": "/ecs/velvet-elves/prod/backend",
+          "awslogs-group": "/ecs/velvet-elves/<env>/backend",
           "awslogs-region": "us-east-2",
           "awslogs-stream-prefix": "api"
         }
@@ -841,7 +1342,7 @@ Notes:
 - Include every secret required by `.env.example`, not only the abbreviated sample above.
 - `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET`, provider keys, webhook secrets, and Stripe secrets must also be mapped.
 - Use the exact `APP_DOMAIN` and `API_DOMAIN` values when creating the real JSON.
-- Replace `<backend-secret-arn>` with the full ARN returned by `aws secretsmanager describe-secret --secret-id /velvet-elves/prod/backend --query ARN --output text`.
+- Replace `<backend-secret-arn>` with the full ARN returned by `aws secretsmanager describe-secret --secret-id $BACKEND_SECRET_NAME --query ARN --output text --region $REGION`.
 
 Register:
 
@@ -856,15 +1357,15 @@ $TASK_DEF_ARN = aws ecs register-task-definition `
 ### 7.6 Create ECS Cluster and Service
 
 ```powershell
-aws ecs create-cluster --cluster-name velvet-elves-prod --region $REGION
+aws ecs create-cluster --cluster-name $NAME_PREFIX --region $REGION
 ```
 
 Create service:
 
 ```powershell
 aws ecs create-service `
-  --cluster velvet-elves-prod `
-  --service-name velvet-elves-prod-backend `
+  --cluster $NAME_PREFIX `
+  --service-name "$NAME_PREFIX-backend" `
   --task-definition $TASK_DEF_ARN `
   --desired-count 2 `
   --launch-type FARGATE `
@@ -882,8 +1383,8 @@ Wait for stability:
 
 ```powershell
 aws ecs wait services-stable `
-  --cluster velvet-elves-prod `
-  --services velvet-elves-prod-backend `
+  --cluster $NAME_PREFIX `
+  --services "$NAME_PREFIX-backend" `
   --region $REGION
 ```
 
@@ -891,8 +1392,8 @@ Check task health:
 
 ```powershell
 aws ecs describe-services `
-  --cluster velvet-elves-prod `
-  --services velvet-elves-prod-backend `
+  --cluster $NAME_PREFIX `
+  --services "$NAME_PREFIX-backend" `
   --region $REGION `
   --query "services[0].{Running:runningCount,Desired:desiredCount,Deployments:deployments[*].{Status:status,Rollout:rolloutState,TaskDef:taskDefinition}}"
 ```
@@ -901,7 +1402,17 @@ aws ecs describe-services `
 
 After the ALB is healthy, create `API_DOMAIN` DNS.
 
-Route 53 alias example:
+Current GoDaddy DNS procedure:
+
+1. In GoDaddy DNS for `velvetelves.com`, create or update a CNAME record:
+   - Staging name: `api.stage`
+   - Production name: `api`
+   - Value: the ALB DNS name from `$ALB_DNS`.
+2. Keep TTL low during cutover, for example `300` seconds.
+3. Do not edit any mail records.
+4. Do not edit `dev.velvetelves.com`.
+
+Route 53 future example, after DNS hosting is migrated to Route 53:
 
 ```powershell
 $HOSTED_ZONE_ID = "Zxxxxxxxx"
@@ -915,12 +1426,12 @@ Create `aws-deploy-work\route53-api-alias.json`:
 
 ```json
 {
-  "Comment": "Point API domain to production ALB",
+  "Comment": "Point API domain to environment ALB",
   "Changes": [
     {
       "Action": "UPSERT",
       "ResourceRecordSet": {
-        "Name": "api.velvetelves.com",
+        "Name": "<api-domain>",
         "Type": "A",
         "AliasTarget": {
           "HostedZoneId": "<alb-canonical-hosted-zone-id>",
@@ -964,8 +1475,6 @@ Expected:
 ### 8.1 Create Private S3 Bucket
 
 ```powershell
-$FRONTEND_BUCKET = "velvet-elves-prod-frontend-$ACCOUNT_ID"
-
 aws s3api create-bucket `
   --bucket $FRONTEND_BUCKET `
   --region $REGION `
@@ -986,15 +1495,15 @@ aws s3api put-bucket-versioning `
 
 If `$REGION` is `us-east-1`, omit `--create-bucket-configuration LocationConstraint=$REGION`; S3 rejects a location constraint for the classic `us-east-1` create-bucket call.
 
-Do not enable S3 static website hosting for the production frontend bucket. Use the S3 REST origin with CloudFront Origin Access Control so the bucket stays private.
+Do not enable S3 static website hosting for the frontend bucket. Use the S3 REST origin with CloudFront Origin Access Control so the bucket stays private.
 
-### 8.2 Build Frontend for Production
+### 8.2 Build Frontend for the Selected Environment
 
 ```powershell
 cd C:\Projects\velvet-elves-frontend
 
 $env:VITE_API_BASE_URL = "https://$API_DOMAIN"
-$env:VITE_APP_ENV = "production"
+$env:VITE_APP_ENV = if ($ENV_NAME -eq "prod") { "production" } else { "staging" }
 $env:VITE_GOOGLE_MAPS_API_KEY = "<restricted-browser-key-if-used>"
 
 npm ci
@@ -1066,8 +1575,8 @@ Create `aws-deploy-work\frontend-oac.json`:
 
 ```json
 {
-  "Name": "velvet-elves-prod-frontend-oac",
-  "Description": "OAC for Velvet Elves production frontend S3 origin",
+  "Name": "velvet-elves-<env>-frontend-oac",
+  "Description": "OAC for Velvet Elves <env> frontend S3 origin",
   "SigningProtocol": "sigv4",
   "SigningBehavior": "always",
   "OriginAccessControlOriginType": "s3"
@@ -1091,7 +1600,7 @@ Create `aws-deploy-work\frontend-cache-policy-config.json`:
 
 ```json
 {
-  "Name": "velvet-elves-prod-frontend-cache",
+  "Name": "velvet-elves-<env>-frontend-cache",
   "Comment": "Honor S3 Cache-Control for Vite assets and index.html",
   "DefaultTTL": 86400,
   "MaxTTL": 31536000,
@@ -1126,7 +1635,7 @@ If the policy already exists, look it up instead of creating a duplicate:
 ```powershell
 $FRONTEND_CACHE_POLICY_ID = aws cloudfront list-cache-policies `
   --type custom `
-  --query "CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name=='velvet-elves-prod-frontend-cache'].CachePolicy.Id | [0]" `
+  --query "CachePolicyList.Items[?CachePolicy.CachePolicyConfig.Name=='velvet-elves-$ENV_NAME-frontend-cache'].CachePolicy.Id | [0]" `
   --output text
 ```
 
@@ -1162,22 +1671,22 @@ Create and publish the function:
 
 ```powershell
 aws cloudfront create-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --function-config Comment="Velvet Elves SPA route rewrite",Runtime=cloudfront-js-2.0 `
   --function-code fileb://aws-deploy-work/spa-rewrite.js
 
 $SPA_FUNCTION_ETAG = aws cloudfront describe-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --stage DEVELOPMENT `
   --query ETag `
   --output text
 
 aws cloudfront publish-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --if-match $SPA_FUNCTION_ETAG
 
 $SPA_FUNCTION_ARN = aws cloudfront describe-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --stage LIVE `
   --query "FunctionSummary.FunctionMetadata.FunctionARN" `
   --output text
@@ -1187,29 +1696,29 @@ If the function already exists, update the DEVELOPMENT stage, publish it, and th
 
 ```powershell
 $SPA_FUNCTION_ETAG = aws cloudfront describe-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --stage DEVELOPMENT `
   --query ETag `
   --output text
 
 aws cloudfront update-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --if-match $SPA_FUNCTION_ETAG `
   --function-config Comment="Velvet Elves SPA route rewrite",Runtime=cloudfront-js-2.0 `
   --function-code fileb://aws-deploy-work/spa-rewrite.js
 
 $SPA_FUNCTION_ETAG = aws cloudfront describe-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --stage DEVELOPMENT `
   --query ETag `
   --output text
 
 aws cloudfront publish-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --if-match $SPA_FUNCTION_ETAG
 
 $SPA_FUNCTION_ARN = aws cloudfront describe-function `
-  --name velvet-elves-prod-spa-rewrite `
+  --name "$NAME_PREFIX-spa-rewrite" `
   --stage LIVE `
   --query "FunctionSummary.FunctionMetadata.FunctionARN" `
   --output text
@@ -1237,18 +1746,18 @@ Create `aws-deploy-work\cloudfront-frontend-distribution.json`:
 
 ```json
 {
-  "CallerReference": "velvet-elves-prod-frontend-20260624",
+  "CallerReference": "velvet-elves-<env>-frontend-<unique-timestamp>",
   "Aliases": {
     "Quantity": 1,
-    "Items": ["app.velvetelves.com"]
+    "Items": ["<app-domain>"]
   },
   "DefaultRootObject": "index.html",
   "Origins": {
     "Quantity": 1,
     "Items": [
       {
-        "Id": "velvet-elves-prod-frontend-s3",
-        "DomainName": "velvet-elves-prod-frontend-<account-id>.s3.us-east-2.amazonaws.com",
+        "Id": "velvet-elves-<env>-frontend-s3",
+        "DomainName": "velvet-elves-<env>-frontend-<account-id>.s3.us-east-2.amazonaws.com",
         "S3OriginConfig": {
           "OriginAccessIdentity": ""
         },
@@ -1257,7 +1766,7 @@ Create `aws-deploy-work\cloudfront-frontend-distribution.json`:
     ]
   },
   "DefaultCacheBehavior": {
-    "TargetOriginId": "velvet-elves-prod-frontend-s3",
+    "TargetOriginId": "velvet-elves-<env>-frontend-s3",
     "TrustedSigners": {
       "Enabled": false,
       "Quantity": 0
@@ -1291,7 +1800,7 @@ Create `aws-deploy-work\cloudfront-frontend-distribution.json`:
   "CustomErrorResponses": {
     "Quantity": 0
   },
-  "Comment": "Velvet Elves production frontend",
+  "Comment": "Velvet Elves <env> frontend",
   "Enabled": true,
   "ViewerCertificate": {
     "ACMCertificateArn": "<us-east-1-acm-cert-arn>",
@@ -1341,7 +1850,7 @@ Create `aws-deploy-work\frontend-bucket-policy.json`:
         "Service": "cloudfront.amazonaws.com"
       },
       "Action": "s3:GetObject",
-      "Resource": "arn:aws:s3:::velvet-elves-prod-frontend-<account-id>/*",
+      "Resource": "arn:aws:s3:::velvet-elves-<env>-frontend-<account-id>/*",
       "Condition": {
         "StringEquals": {
           "AWS:SourceArn": "arn:aws:cloudfront::<account-id>:distribution/<distribution-id>"
@@ -1363,7 +1872,17 @@ aws s3api put-bucket-policy `
 
 ### 8.9 Frontend DNS
 
-Route 53 alias example:
+Current GoDaddy DNS procedure:
+
+1. In GoDaddy DNS for `velvetelves.com`, create or update a CNAME record:
+   - Staging name: `app.stage`
+   - Production name: `app`
+   - Value: the CloudFront distribution domain name from `$CF_DOMAIN`.
+2. Keep TTL low during cutover, for example `300` seconds.
+3. Do not edit `velvetelves.com`, `help.velvetelves.com`, `help.stage.velvetelves.com`, company email records, or `dev.velvetelves.com` as part of the product frontend cutover.
+4. If the marketing site later moves to CloudFront while DNS remains in GoDaddy, handle the apex `velvetelves.com` separately because a normal DNS CNAME cannot be used at the zone apex.
+
+Route 53 future example, after DNS hosting is migrated to Route 53:
 
 ```powershell
 aws route53 change-resource-record-sets `
@@ -1382,7 +1901,7 @@ CloudFront hosted zone ID is globally `Z2FDTNDATAQYW2` for Route 53 alias record
     {
       "Action": "UPSERT",
       "ResourceRecordSet": {
-        "Name": "app.velvetelves.com",
+        "Name": "<app-domain>",
         "Type": "A",
         "AliasTarget": {
           "HostedZoneId": "Z2FDTNDATAQYW2",
@@ -1427,13 +1946,18 @@ Manual browser checks:
 
 ---
 
-## 9. Phase 4 - Production Callback and Webhook Mapping
+## 9. Phase 4 - Environment Callback and Webhook Mapping
 
 When moving domains, callbacks and webhooks are the easiest place to lose production behavior. Use this checklist.
 
+Run this checklist twice:
+
+- Staging after `main` deploys, using `STAGE_APP_DOMAIN`, `STAGE_API_DOMAIN`, staging Supabase, and sandbox/test provider credentials where available.
+- Production after `prod` deploys, using `PROD_APP_DOMAIN`, `PROD_API_DOMAIN`, production Supabase, and production provider credentials.
+
 ### 9.1 Backend Environment Values
 
-Set these backend values for production ECS:
+Set these backend values for the ECS environment being deployed:
 
 ```text
 FRONTEND_URL=https://APP_DOMAIN
@@ -1451,7 +1975,7 @@ If tenant subdomains are used later, add each allowed frontend origin to `CORS_O
 
 ### 9.2 Supabase Auth
 
-Update the production Supabase project:
+Update the matching Supabase project:
 
 - Site URL: `https://APP_DOMAIN`.
 - Redirect URLs:
@@ -1459,7 +1983,7 @@ Update the production Supabase project:
   - `https://APP_DOMAIN/login`
   - Any tenant/custom-domain URLs already supported by the app.
 
-This is not an AWS CLI action, but it is mandatory for production auth links, password reset links, and invite flows.
+This is not an AWS CLI action, but it is mandatory for auth links, password reset links, and invite flows.
 
 ### 9.3 Google Gmail OAuth
 
@@ -1588,24 +2112,48 @@ Keep existing PR gates:
 - `pytest -q`.
 - Docker build check.
 
-Change production deploy from GHCR plus SSH plus Docker Compose to:
+Change deploy from GHCR plus SSH plus Docker Compose to two branch-specific ECS deploy lanes:
+
+| Branch | GitHub environment | ECS target | Image aliases | Smoke-test domains |
+| --- | --- | --- | --- | --- |
+| `main` | `staging` | `velvet-elves-stage` / `velvet-elves-stage-backend` | `main-<sha>`, `stage-latest` | `STAGE_API_DOMAIN` |
+| `prod` | `production` | `velvet-elves-prod` / `velvet-elves-prod-backend` | `prod-<sha>`, `prod-latest` | `PROD_API_DOMAIN` |
+
+Each branch-specific deploy should:
 
 1. Build Docker image.
 2. Login to ECR.
-3. Push image to ECR with immutable tag `${GITHUB_SHA}` and alias tag `main-latest`.
-4. Run Supabase migrations exactly as the current backend workflow does.
-5. Ensure the Textract S3 bucket exists and has private/encrypted/lifecycle settings.
-6. Render or patch ECS task definition with the new image URI.
+3. Push image to ECR with immutable tag `<branch>-${GITHUB_SHA}` and an environment alias (`stage-latest` or `prod-latest`).
+4. Run Supabase migrations against the matching environment database.
+5. Ensure the matching Textract S3 bucket exists and has private/encrypted/lifecycle settings.
+6. Render or patch ECS task definition with the new image URI and environment-specific variables.
 7. Register new task definition revision.
-8. `aws ecs update-service --cluster velvet-elves-prod --service velvet-elves-prod-backend --task-definition <new-task-def>`.
+8. `aws ecs update-service --cluster <env-cluster> --service <env-service> --task-definition <new-task-def>`.
 9. `aws ecs wait services-stable`.
 10. Smoke test:
-    - `https://API_DOMAIN/api/health`
-    - `https://API_DOMAIN/api/v1/health/ready`
+    - `https://<env-api-domain>/api/health`
+    - `https://<env-api-domain>/api/v1/health/ready`
 
 GitHub Actions should use AWS OIDC, not long-lived AWS access keys.
 
-Keep the migration database URL as a deployment secret, not an ECS runtime environment variable. The existing workflow uses the secret name `SUPABASE_DB_URL`; if you introduce a clearer `SUPABASE_MIGRATION_DB_URL`, update the workflow and manual runbooks together so operators do not accidentally run migrations against the application's runtime pooler URL.
+Keep the migration database URL as a deployment secret, not an ECS runtime environment variable. Use separate GitHub environment secrets for staging and production, even if the secret key has the same name in each environment. If you introduce a clearer `SUPABASE_MIGRATION_DB_URL`, update the workflow and manual runbooks together so operators do not accidentally run migrations against the application's runtime pooler URL.
+
+Required workflow trigger change:
+
+```yaml
+on:
+  pull_request:
+    branches: [main, prod]
+  push:
+    branches: [main, prod]
+```
+
+The deploy jobs must select environment-specific values from `github.ref_name`:
+
+```text
+main -> ENV_NAME=stage, GitHub environment=staging, APP_DOMAIN=STAGE_APP_DOMAIN, API_DOMAIN=STAGE_API_DOMAIN
+prod -> ENV_NAME=prod, GitHub environment=production, APP_DOMAIN=PROD_APP_DOMAIN, API_DOMAIN=PROD_API_DOMAIN
+```
 
 ### 10.2 Backend Manual Deploy Command Sequence
 
@@ -1615,14 +2163,14 @@ Manual release sequence until CI/CD is updated:
 # 1. Build and push image
 cd C:\Projects\velvet-elves-backend
 $IMAGE_TAG = "$(git rev-parse --short HEAD)-$(Get-Date -Format yyyyMMddHHmmss)"
-$IMAGE_URI = "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/velvet-elves/backend:$IMAGE_TAG"
+$IMAGE_URI = "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ECR_REPOSITORY:$ENV_NAME-$IMAGE_TAG"
 docker build -t velvet-elves-backend:$IMAGE_TAG .
 docker tag velvet-elves-backend:$IMAGE_TAG $IMAGE_URI
 docker push $IMAGE_URI
 
 # 2. Apply Supabase migrations before shifting traffic.
 # Stop here if migrations fail.
-$env:SUPABASE_MIGRATION_DB_URL = "<production-supabase-migration-db-url>"
+$env:SUPABASE_MIGRATION_DB_URL = "<matching-environment-supabase-migration-db-url>"
 supabase db push --include-all --yes --db-url "$env:SUPABASE_MIGRATION_DB_URL"
 
 # 3. Confirm the Textract S3 bucket is private, encrypted, and has cleanup lifecycle.
@@ -1633,8 +2181,8 @@ supabase db push --include-all --yes --db-url "$env:SUPABASE_MIGRATION_DB_URL"
 $TASK_DEF_ARN = aws ecs register-task-definition --cli-input-json file://aws-deploy-work/backend-task-definition.json --query "taskDefinition.taskDefinitionArn" --output text --region $REGION
 
 # 6. Update service.
-aws ecs update-service --cluster velvet-elves-prod --service velvet-elves-prod-backend --task-definition $TASK_DEF_ARN --region $REGION
-aws ecs wait services-stable --cluster velvet-elves-prod --services velvet-elves-prod-backend --region $REGION
+aws ecs update-service --cluster $NAME_PREFIX --service "$NAME_PREFIX-backend" --task-definition $TASK_DEF_ARN --region $REGION
+aws ecs wait services-stable --cluster $NAME_PREFIX --services "$NAME_PREFIX-backend" --region $REGION
 
 # 7. Smoke test.
 curl.exe -fsS "https://$API_DOMAIN/api/health"
@@ -1650,16 +2198,16 @@ Keep existing PR gates:
 - `npx tsc --noEmit`.
 - `npm run build`.
 
-Change production deploy from GHCR plus SSH plus Docker Compose to:
+Change frontend deploy from GHCR plus SSH plus Docker Compose to S3/CloudFront per branch:
 
-1. Build with production Vite variables:
-   - `VITE_API_BASE_URL=https://API_DOMAIN`
-   - `VITE_APP_ENV=production`
+1. Build with environment-specific Vite variables:
+   - `main`: `VITE_API_BASE_URL=https://STAGE_API_DOMAIN`, `VITE_APP_ENV=staging`
+   - `prod`: `VITE_API_BASE_URL=https://PROD_API_DOMAIN`, `VITE_APP_ENV=production`
    - `VITE_GOOGLE_MAPS_API_KEY=<restricted key if used>`
-2. Sync `dist` to S3 with cache-control rules.
+2. Sync `dist` to the matching environment S3 bucket with cache-control rules.
 3. Ensure `.mjs` assets have JavaScript content type.
-4. Invalidate `/` and `/index.html` in CloudFront.
-5. Smoke test `https://APP_DOMAIN/` and one deep link.
+4. Invalidate `/` and `/index.html` in the matching CloudFront distribution.
+5. Smoke test the matching `APP_DOMAIN` and one deep link.
 
 ### 10.4 Frontend Manual Deploy Command Sequence
 
@@ -1667,7 +2215,7 @@ Change production deploy from GHCR plus SSH plus Docker Compose to:
 cd C:\Projects\velvet-elves-frontend
 
 $env:VITE_API_BASE_URL = "https://$API_DOMAIN"
-$env:VITE_APP_ENV = "production"
+$env:VITE_APP_ENV = if ($ENV_NAME -eq "prod") { "production" } else { "staging" }
 $env:VITE_GOOGLE_MAPS_API_KEY = "<restricted-browser-key-if-used>"
 
 npm ci
@@ -1703,51 +2251,93 @@ aws s3 cp .\dist\index.html "s3://$FRONTEND_BUCKET/index.html" `
 aws cloudfront create-invalidation --distribution-id $CF_DIST_ID --paths "/" "/index.html"
 ```
 
+### 10.5 Branch Protection and Promotion Rules
+
+Configure GitHub branch protection before turning on the new deploy workflows:
+
+| Branch | Protection rule |
+| --- | --- |
+| `develop` | Optional but recommended: require PRs for shared integration work and require backend/frontend CI where practical |
+| `main` | Require PR, require backend/frontend CI, allow merge from `develop` and feature branches, deploy only to `staging` |
+| `prod` | Require PR, require backend/frontend CI, require at least one approval, restrict direct pushes, promote only from `main`, deploy only to `production` |
+
+Recommended production promotion:
+
+First-time `prod` branch creation, after `main` is validated in staging:
+
+```powershell
+git checkout main
+git pull --ff-only
+git checkout -b prod
+git push -u origin prod
+```
+
+Normal promotion:
+
+```powershell
+git checkout main
+git pull --ff-only
+git checkout prod
+git pull --ff-only
+git merge --ff-only main
+git push origin prod
+```
+
+If `prod` cannot fast-forward from `main`, stop and reconcile with a PR. Do not create a unique production-only commit unless it is an emergency hotfix that will be merged back to `main` and `develop` immediately after production is stable.
+
 ---
 
-## 11. Phase 6 - Production Cutover Plan
+## 11. Phase 6 - Staging Validation and Production Cutover Plan
 
-### 11.1 Parallel Environment First
+### 11.1 Staging First From `main`
 
 Before moving real users:
 
-1. Deploy ECS backend behind the new ALB.
-2. Deploy frontend to S3/CloudFront.
-3. Use temporary validation hostnames if possible:
-   - `api-next.velvetelves.com`
-   - `app-next.velvetelves.com`
-4. Set backend `CORS_ORIGINS` to include both old and new frontend hostnames during validation.
-5. Build frontend with the new API hostname.
-6. Verify end-to-end.
+1. Merge `develop` into `main`.
+2. Let the `main` branch deploy staging backend to `velvet-elves-stage`.
+3. Let the `main` branch deploy staging frontend to the staging S3/CloudFront distribution.
+4. Use `STAGE_API_DOMAIN` and `STAGE_APP_DOMAIN` for all staging checks.
+5. Set staging backend `CORS_ORIGINS` to `https://STAGE_APP_DOMAIN`.
+6. Configure staging callbacks/webhooks to staging or sandbox provider endpoints.
+7. Keep `dev.velvetelves.com` unchanged.
+8. Confirm staging marketing and help center DNS names are either unconfigured or intentionally pointed at their staging hosts.
+9. Verify end-to-end on staging.
+10. Record the exact commit SHA validated on `main`.
 
 ### 11.2 DNS TTL
 
 At least 24 hours before cutover:
 
 - Lower old frontend and API DNS TTLs to `300` seconds.
-- Confirm Route 53 or external DNS changes are ready.
+- In GoDaddy, lower only records involved in cutover.
+- Confirm company email DNS records are unchanged and exported/screenshot before cutover.
+- Confirm Route 53 is not the authoritative DNS provider yet unless a separate DNS migration has already been completed.
 
-### 11.3 Cutover Steps
+### 11.3 Production Promotion To `prod`
 
 1. Announce maintenance window if needed.
-2. Pause EC2 production deploy workflow.
+2. Pause the old EC2 production deploy workflow.
 3. Confirm no Supabase migration is currently running.
-4. Deploy latest backend image to ECS.
-5. Deploy latest frontend build to S3/CloudFront.
-6. Update production backend secret/config:
-   - `FRONTEND_URL=https://APP_DOMAIN`
-   - `CORS_ORIGINS=https://APP_DOMAIN`
-   - all production callback URLs using `API_DOMAIN`.
-7. Apply the backend configuration update using the correct ECS mechanism:
+4. Promote the exact validated `main` commit to `prod`. Prefer a PR from `main` to `prod` or a fast-forward merge so production receives the same commit tested in staging.
+5. Let the `prod` branch deploy production backend to `velvet-elves-prod`.
+6. Let the `prod` branch deploy production frontend to the production S3/CloudFront distribution.
+7. Update production backend secret/config:
+   - `FRONTEND_URL=https://PROD_APP_DOMAIN`
+   - `CORS_ORIGINS=https://PROD_APP_DOMAIN`
+   - all production callback URLs using `PROD_API_DOMAIN`.
+8. Apply the backend configuration update using the correct ECS mechanism:
    - If only Secrets Manager values changed, force a new deployment so the running tasks fetch the latest secret values.
    - If task-definition `environment` values, the image URI, log settings, or resource sizing changed, register a new task definition revision and update the service to that revision.
 
    Secret-only refresh:
 
    ```powershell
+   $ENV_NAME = "prod"
+   $NAME_PREFIX = "velvet-elves-prod"
+
    aws ecs update-service `
-     --cluster velvet-elves-prod `
-     --service velvet-elves-prod-backend `
+     --cluster $NAME_PREFIX `
+     --service "$NAME_PREFIX-backend" `
      --force-new-deployment `
      --region $REGION
    ```
@@ -1762,25 +2352,26 @@ At least 24 hours before cutover:
      --region $REGION
 
    aws ecs update-service `
-     --cluster velvet-elves-prod `
-     --service velvet-elves-prod-backend `
+     --cluster $NAME_PREFIX `
+     --service "$NAME_PREFIX-backend" `
      --task-definition $TASK_DEF_ARN `
      --region $REGION
    ```
 
-8. Wait for service stability.
-9. Update DNS:
-   - `API_DOMAIN` -> ALB alias.
-   - `APP_DOMAIN` -> CloudFront alias.
-10. Update external providers if not already done:
+9. Wait for service stability.
+10. Update DNS:
+   - In GoDaddy, point `PROD_API_DOMAIN` CNAME to the production ALB DNS name.
+   - In GoDaddy, point `PROD_APP_DOMAIN` CNAME to the production CloudFront domain name.
+   - Do not change `PROD_MARKETING_DOMAIN`, `PROD_HELP_DOMAIN`, `dev.velvetelves.com`, or company email records during the app/API cutover.
+11. Update external providers if not already done:
    - Supabase Auth.
    - Google/Microsoft OAuth.
    - Google Pub/Sub push subscription.
    - Microsoft Graph subscriptions.
    - DocuSign OAuth and Connect.
    - Stripe webhook.
-11. Smoke test from a clean browser session.
-12. Monitor logs and alarms for at least 2 hours after cutover.
+12. Smoke test from a clean browser session.
+13. Monitor logs and alarms for at least 2 hours after cutover.
 
 ### 11.4 Keep EC2 as Warm Rollback
 
@@ -1790,6 +2381,7 @@ Keep current EC2 infrastructure available for at least 7 days after cutover.
 - Do not delete old DNS records immediately.
 - Disable automatic EC2 deploys once ECS is serving production.
 - After confidence window, stop EC2 instances before terminating them.
+- Keep `dev.velvetelves.com` running until a separate replacement plan exists.
 
 ---
 
@@ -1801,20 +2393,20 @@ Preferred rollback if ECS is healthy but latest image is bad:
 
 ```powershell
 aws ecs update-service `
-  --cluster velvet-elves-prod `
-  --service velvet-elves-prod-backend `
+  --cluster $NAME_PREFIX `
+  --service "$NAME_PREFIX-backend" `
   --task-definition <previous-working-task-definition-arn> `
   --region $REGION
 
 aws ecs wait services-stable `
-  --cluster velvet-elves-prod `
-  --services velvet-elves-prod-backend `
+  --cluster $NAME_PREFIX `
+  --services "$NAME_PREFIX-backend" `
   --region $REGION
 ```
 
 Fallback rollback if ECS/ALB stack is bad:
 
-- Point `API_DOMAIN` DNS back to the existing EC2 backend.
+- Point `API_DOMAIN` DNS in GoDaddy back to the existing EC2 backend.
 - Restore provider webhook URLs to the EC2 domain if the rollback will last more than a few minutes.
 - Keep CORS compatible with the frontend domain during rollback.
 
@@ -1832,7 +2424,7 @@ Preferred rollback:
 
 Fallback rollback:
 
-- Point `APP_DOMAIN` DNS back to the EC2 frontend.
+- Point `APP_DOMAIN` DNS in GoDaddy back to the EC2 frontend.
 
 Important:
 
@@ -1846,12 +2438,13 @@ If rolling back domains:
 - DocuSign Connect may need old URL restored.
 - Google/Microsoft OAuth redirect URLs can usually contain both old and new URLs.
 - Gmail Pub/Sub and Microsoft Graph subscriptions may need old push endpoints restored or recreated.
+- Do not modify company email records during rollback unless the incident is specifically email-related.
 
 ---
 
-## 13. Production Validation Checklist
+## 13. Environment Validation Checklist
 
-Run these checks before and after DNS cutover.
+Run these checks on staging after every `main` deploy. Run the same checks on production after every `prod` deploy and before/after DNS cutover.
 
 ### 13.1 Infrastructure
 
@@ -1867,6 +2460,9 @@ Run these checks before and after DNS cutover.
 - S3 frontend bucket policy only allows CloudFront OAC.
 - CloudFront Function rewrites route-like URLs to `/index.html`.
 - Missing asset URLs return real `403`/`404` responses instead of `index.html`.
+- GoDaddy DNS records for app/API point to the intended staging or production AWS targets.
+- Company email DNS records are unchanged and email delivery still works.
+- `dev.velvetelves.com` remains unchanged.
 
 ### 13.2 Backend
 
@@ -1896,6 +2492,7 @@ Run these checks before and after DNS cutover.
 - PDF worker `.mjs` loads with JavaScript MIME type.
 - Static assets have long cache headers.
 - `index.html` is not aggressively cached.
+- Marketing and help center domains resolve to their intended separate targets, if they are active for that environment.
 
 ### 13.4 User Flows
 
@@ -1921,7 +2518,7 @@ Run these checks before and after DNS cutover.
 
 ## 14. Monitoring and Alerts
 
-Minimum production alarms:
+Minimum production alarms. Create staging versions for lower-threshold smoke/early-warning coverage where cost is acceptable:
 
 | Area | Alarm |
 | --- | --- |
@@ -1941,9 +2538,9 @@ Minimum production alarms:
 Useful AWS CLI checks:
 
 ```powershell
-aws ecs describe-services --cluster velvet-elves-prod --services velvet-elves-prod-backend --region $REGION
+aws ecs describe-services --cluster $NAME_PREFIX --services "$NAME_PREFIX-backend" --region $REGION
 aws elbv2 describe-target-health --target-group-arn $TG_ARN --region $REGION
-aws logs tail /ecs/velvet-elves/prod/backend --follow --region $REGION
+aws logs tail $BACKEND_LOG_GROUP --follow --region $REGION
 aws cloudfront get-distribution --id $CF_DIST_ID
 ```
 
@@ -1962,7 +2559,7 @@ Target tracking:
 ```powershell
 aws application-autoscaling register-scalable-target `
   --service-namespace ecs `
-  --resource-id service/velvet-elves-prod/velvet-elves-prod-backend `
+  --resource-id "service/$NAME_PREFIX/$NAME_PREFIX-backend" `
   --scalable-dimension ecs:service:DesiredCount `
   --min-capacity 2 `
   --max-capacity 6 `
@@ -1989,9 +2586,9 @@ Apply:
 ```powershell
 aws application-autoscaling put-scaling-policy `
   --service-namespace ecs `
-  --resource-id service/velvet-elves-prod/velvet-elves-prod-backend `
+  --resource-id "service/$NAME_PREFIX/$NAME_PREFIX-backend" `
   --scalable-dimension ecs:service:DesiredCount `
-  --policy-name velvet-elves-prod-backend-cpu60 `
+  --policy-name "$NAME_PREFIX-backend-cpu60" `
   --policy-type TargetTrackingScaling `
   --target-tracking-scaling-policy-configuration file://aws-deploy-work/ecs-cpu-scaling-policy.json `
   --region $REGION
@@ -2029,6 +2626,16 @@ Frontend:
 - CloudFront certificate covers `APP_DOMAIN`.
 - `VITE_GOOGLE_MAPS_API_KEY`, if used, is restricted by HTTP referrer to production frontend domains.
 
+DNS and domain:
+
+- GoDaddy account uses strong 2FA.
+- Domain lock is enabled except during an intentional registrar transfer.
+- Domain auto-renewal is enabled and payment method is current.
+- GoDaddy account recovery email is secure and monitored.
+- DNS changes are performed from an exported/screenshot baseline.
+- Email records are protected from accidental edits during app/API changes.
+- Route 53 migration is handled later as a separate project: migrate DNS hosting first, verify app/API/marketing/help/email, then transfer registrar only after DNS stability is proven.
+
 Operational:
 
 - Do not store production `.env` files on EC2 after migration unless retained for rollback.
@@ -2065,12 +2672,19 @@ Only change source or workflows in a later implementation task if needed for:
 
 The migration is complete when:
 
+- `develop` is local-only and does not automatically deploy to AWS.
+- `main` deploys to the staging ECS/CloudFront stack only.
+- `prod` deploys to the production ECS/CloudFront stack only.
+- The production deployment is promoted from a staging-validated commit on `main`.
 - Backend production traffic is served by ECS Fargate, not EC2.
 - Frontend production traffic is served by CloudFront and private S3, not EC2.
-- `APP_DOMAIN` loads the SPA and supports hard-refresh deep links.
-- `API_DOMAIN` serves backend health and authenticated APIs.
-- CORS is clean from the production frontend.
-- Supabase Auth login, password reset, and invite flows use the production frontend domain.
+- `STAGE_APP_DOMAIN` and `PROD_APP_DOMAIN` load the SPA and support hard-refresh deep links.
+- `STAGE_API_DOMAIN` and `PROD_API_DOMAIN` serve backend health and authenticated APIs.
+- `STAGE_MARKETING_DOMAIN`, `PROD_MARKETING_DOMAIN`, `STAGE_HELP_DOMAIN`, and `PROD_HELP_DOMAIN` are either intentionally configured to their separate services or explicitly documented as pending separate website/help-center work.
+- `dev.velvetelves.com` remains unchanged and available.
+- GoDaddy DNS records for app/API are correct, and company email DNS records remain intact.
+- CORS is clean from each environment's frontend to its matching API.
+- Supabase Auth login, password reset, and invite flows use the matching environment frontend domain.
 - Textract-backed document parsing works from ECS using task-role credentials.
 - Stripe webhooks reach ECS and verify signatures.
 - DocuSign Connect reaches ECS and verifies HMAC.
@@ -2099,3 +2713,6 @@ The migration is complete when:
 - CloudFront Function SPA URL rewrite example: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/example_cloudfront_functions_url_rewrite_single_page_apps_section.html
 - CloudFront invalidations and versioned files: https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html
 - AWS CLI `s3 sync` options: https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html
+- Route 53 supported DNS record types and alias behavior: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/ResourceRecordTypes.html
+- Route 53 DNS migration for an existing domain: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/migrate-dns-domain-in-use.html
+- Route 53 domain registration transfer process: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/domain-transfer-to-route-53.html
