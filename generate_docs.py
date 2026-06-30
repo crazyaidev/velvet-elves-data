@@ -886,6 +886,57 @@ def create_payment_system_doc():
     save_document(doc, "PAYMENT_SYSTEM_GUIDE.docx")
 
 
+def create_godaddy_route53_config_doc():
+    """Generate a .docx export of the GoDaddy Route 53 configuration guide."""
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("GODADDY_ROUTE53_CONFIGURATION_GUIDE.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "GoDaddy DNS Configuration Guide", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "GODADDY_ROUTE53_CONFIGURATION_GUIDE.docx")
+
+
 TESTING_REVIEW_FEATURES = None  # Populated at bottom of file
 
 
@@ -4147,6 +4198,7 @@ TARGET_BUILDERS = {
     "testing-review": create_testing_review_doc,
     "transaction-system": create_transaction_system_doc,
     "payment-system": create_payment_system_doc,
+    "godaddy-route53-config": create_godaddy_route53_config_doc,
 }
 
 TARGET_ALIASES = {
@@ -4176,6 +4228,11 @@ TARGET_ALIASES = {
     "payment_system_guide.docx": "payment-system",
     "payments": "payment-system",
     "payment": "payment-system",
+    "godaddy_route53_configuration_guide": "godaddy-route53-config",
+    "godaddy_route53_configuration_guide.md": "godaddy-route53-config",
+    "godaddy_route53_configuration_guide.docx": "godaddy-route53-config",
+    "godaddy-route53": "godaddy-route53-config",
+    "route53-godaddy": "godaddy-route53-config",
     "all": "all",
 }
 
