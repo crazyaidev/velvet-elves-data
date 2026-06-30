@@ -2,7 +2,7 @@
 
 ## Features Currently Complete — Client Feedback Requested
 
-**Last Updated:** June 23, 2026  
+**Last Updated:** June 30, 2026  
 **Test Environment:** http://dev.velvetelves.com/  
 **Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  
 **Reviewer:** Client — please fill in the Feedback block under each feature
@@ -26,7 +26,7 @@
 ### Accounts you will need
 
 - **Agent or Elf** — covers the main day-to-day workflow.
-- **Team Lead or Admin** — needed to see the Delete button on transactions, the admin-only Task Templates pages, the Deletion Queue on the Documents page, and the full Team Members admin page.
+- **Team Lead or Admin** — needed to see the Delete button on transactions, the Task Templates and Users & Invites pages in Settings, the Deletion Queue on the Documents page, and the Team and Teams pages.
 - **Workspace Owner** — the very first person who registered the brokerage. Required for the Transfer ownership flow and Settings → Delete Organization (schedule deletion).
 - **Invited member** — sign up by clicking an invite-email link (instead of /register). Required for the invite-accept flow and the invitee branch of the onboarding wizard.
 - **Attorney** — loads the attorney workspace (Matters, Releases Queue, State Rules, Recording Calendar).
@@ -41,10 +41,10 @@
 2. Invite-accept flow (open an invite link as a brand-new user)
 3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay
 4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, opening a single deal in the AI deal workspace, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)
-5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before AI Email Review can send), My Playbook, and the Workspace settings (Company, Branding, Document Templates)
+5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before AI Email Review can send), Email Templates, My Playbook, Help & Tour, and — for Admins / owners — the Workspace cards (Company, Branding, Users & Invites, Task Templates, Document Templates, Vendor Templates, Team Playbook, Integrations, AI & Automation, Payment Access, Advertising)
 6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors
 7. Payments — invoices and commission payouts
-8. Team Lead or Admin extras — Team Overview, Teams, Team Members admin, invite / ownership / deactivate, Team Settings, plus the Admin pages (Integrations, AI Governance, Payment Access, Advertising, Audit Log)
+8. Team Lead or Admin extras — the Team Overview and Teams pages (sidebar Team group), invite / ownership / deactivate a member, the Oversight group (Communication Audit, Audit Log), and the Admin configuration cards now in the Settings hub (Integrations, AI & Automation, Payment Access, Advertising)
 9. Attorney workspace (Matters, Matter detail, Releases Queue, State Rules, Recording Calendar)
 10. Client, FSBO, and Vendor portals
 11. Public links (milestone viewer, invoice payment, advertise storefront) — no sign-in
@@ -604,14 +604,14 @@ Every signed-in page
 **How To Test**
 
 - Check the sidebar.
-  - Navigation items change depending on the signed-in role (for example an Agent sees Deals, Workflow, Payments, Vendors, and Intelligence groups; an Admin also sees Team and Admin groups).
+  - Navigation items change depending on the signed-in role (for example an Agent sees Deals, Workflow, Payments, Vendors, and Intelligence groups; a Team Lead and Admin also see a Team group with Team Overview and Teams, and an Admin sees an Oversight group with Communication Audit and Audit Log). All workspace configuration (Task Templates, Document Templates, Vendor Templates, Integrations, AI & Automation, Payment Access, Advertising, and the team playbook) now lives in the Settings hub, not the sidebar. Internal Velvet Elves staff also see a Platform group (Tenants, AI usage, Help center).
   - KPI tiles in the sidebar show numbers such as overdue tasks, closings this week, active deals, and pipeline value.
 - Check the top bar.
   - Click 'Today's AI Briefing' — a side panel should open (internal roles only).
   - Click any status chip (Critical / Needs Attention / On Track) — it should filter the transactions list.
   - Click the search box (or press Ctrl+K / Cmd+K) — a search panel should open and find deals, tasks, documents, and people as you type. Press Enter on a result to jump to it.
   - Click the bell icon — a notifications panel should open. If you have overdue or upcoming task reminders, a small number badge shows the unread count.
-  - Open the avatar menu — confirm just Settings and Log Out (Settings opens the Settings hub for internal roles).
+  - Open the avatar menu — confirm Settings, Help Center, and Log Out (Settings opens the Settings hub for internal roles; Help Center opens the public guides website in a new browser tab).
   - On a narrow browser window, click the mobile menu icon.
 
 **Expected Result**
@@ -620,7 +620,7 @@ Every signed-in page
 - The AI Briefing panel opens and closes cleanly.
 - Status chips take you to the correct filtered transaction view.
 - Search returns real results and the bell opens a real notifications list with an accurate unread count.
-- The avatar menu opens the Settings hub (Settings) or signs you out (Log Out). The mobile menu behaves correctly.
+- The avatar menu opens the Settings hub (Settings), the public Help Center in a new tab (Help Center), or signs you out (Log Out). The mobile menu behaves correctly.
 
 **Future Improvement Suggestions**
 
@@ -2498,10 +2498,10 @@ Avatar menu (top-right) → Settings (internal roles). Web address: /settings.
 
 **How To Test**
 
-- Open the avatar menu in the top-right corner and click Settings. Confirm a Settings page with a search box on top and cards grouped under 'Personal Settings' and 'Workspace Settings' (a platform admin also sees a 'Platform' group).
-- Confirm the Personal cards include Profile, Notifications, Email & E-signature, Email Templates, My Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, and Help & Tour.
-- As an Admin or workspace owner, confirm the Workspace cards include Company, Branding, Users & Invites, Teams, Task Templates, Document Templates, Vendor Templates, the four Team library cards, Integrations & Webhooks, AI & Automation, Payment Access, Advertising, and Delete Organization.
-- Sign in as an Agent or Transaction Coordinator and confirm you only see the Personal cards (no Workspace cards) — you should never see a card that leads to a 'not allowed' page.
+- Open the avatar menu in the top-right corner and click Settings. Confirm a Settings page with a search box on top and cards grouped under 'Personal Settings' and 'Workspace Settings' (internal Velvet Elves staff also see a 'Platform' group).
+- Confirm the Personal cards include Profile, Notifications, Email & E-signature, Email Templates, My Playbook, and Help & Tour.
+- As an Admin or workspace owner, confirm the Workspace cards include Company, Branding, Users & Invites, Task Templates, Document Templates, Vendor Templates, Team Playbook, Integrations & Webhooks, AI & Automation, Payment Access, Advertising, and Delete Organization. (A 'Billing & Credits' card also appears here once credit billing is switched on — it is off for now.)
+- Sign in as an Agent or Transaction Coordinator and confirm you only see the Personal cards (no Workspace cards) — you should never see a card that leads to a 'not allowed' page. A Team Lead additionally sees Users & Invites, Task Templates, Vendor Templates, and Team Playbook.
 - Type into the search box (for example 'docusign', 'logo', or 'credits') and confirm the cards filter as you type; clear it to see them all again.
 - Click any card and confirm it opens that setting, with a breadcrumb or back link to return to the hub.
 
@@ -2573,29 +2573,71 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-Settings → the Personal cards: Notifications, My Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, and Help & Tour.
+Settings → the Personal cards: Notifications, My Playbook, and Help & Tour.
 
 **How To Test**
 
 - Open the Notifications card.
   - Confirm a list of notification categories with Email / Push / In-app switches. Flip a few and click Save — confirm a success toast, then reload and confirm they stuck.
-- Open My Checklist Templates, My Tagged Notes, My Preferred Vendors, and My Internal Resources in turn.
-  - Each is your own personal list — add, edit, and remove an entry, then save. These are the 'My …' personal copies; the team-wide versions live under the Settings hub's Team library cards (feature 32.14).
-- Open the Help & Tour card and click Start tour.
-  - Confirm the product tour starts for whatever role you are signed in as (see feature 13).
+- Open the My Playbook card.
+  - Confirm one page with a row of buttons across the top: Checklist, Tagged notes, Preferred vendors, and Resources. Click each to switch the tool in place. Each is your own personal list — add, edit, and remove an entry, then save. These are the 'My …' personal copies; the team-wide versions live under the Settings hub's Team Playbook card (feature 32.14).
+  - Click 'Preview closing checklist' in the header and confirm a preview of how your whole playbook prints on a sample closing.
+- Open the Help & Tour card.
+  - Confirm two cards: a Help Center card with an 'Open Help Center' button (it opens the searchable guides website in a new browser tab), and a Help & tour card with a 'Start tour' button. Click Start tour and confirm the product tour starts for whatever role you are signed in as (see feature 13).
 - Portal roles get these as a lightweight Account window from the avatar menu → Settings: sign in as a Client or Vendor and confirm it shows Profile only; sign in as an FSBO Customer and confirm it shows Profile plus a Preferences section.
 
 **Expected Result**
 
 - Every section saves its own changes with a clear success toast and the changes persist after reloading.
+- My Playbook keeps all four personal tools on one page; the team-wide copies live on the Team Playbook card.
 - Internal roles see all personal cards; Client and Vendor see Profile only; FSBO sees Profile plus Preferences.
-- Help & Tour replays the role-appropriate product tour at any time.
+- The Help Center button opens the public guides website in a new tab; Help & Tour replays the role-appropriate product tour at any time.
 
 **Future Improvement Suggestions**
 
 - Add a one-click 'copy my checklist template to the team' shortcut.
 - Add a daily-digest email option in Notifications.
 - Add a per-feature mini-tour launcher in Help & Tour.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 28.3. Settings — Email Templates
+
+**Route / Location**
+
+Settings → Email Templates card (/email-templates). Agent, Transaction Coordinator, Team Lead, and Admin (Attorney does not see this card).
+
+**How To Test**
+
+- From the Settings hub, open the Email Templates card. Confirm a searchable library with filter buttons (All / Starter / Shared / Personal) and a search box on one line.
+- Confirm three kinds of template, each with a small label: Starter (built-in, read-only), Shared (visible to your whole brokerage), and Personal (your own).
+- Open a Starter template and confirm you cannot edit it directly, but you can click 'Save a copy' to make an editable Personal copy.
+- Click New template, fill in the name, category, subject, and body, then save. Confirm it appears with a 'Personal' label. As an Admin or Team Lead, confirm you can also create a Shared template for the whole brokerage.
+- Confirm the body and subject can use placeholders (for example the client's name or the property address) that fill in from the deal when the email is sent.
+- Edit one of your templates, then delete it and confirm a confirmation step appears before it is removed.
+- Type in the search box and confirm the list narrows by name, subject, or category.
+
+**Expected Result**
+
+- Starter templates are read-only; you customise them with 'Save a copy'.
+- Personal templates are yours alone; Shared templates are visible to the whole brokerage and only Admins / Team Leads can create them.
+- These templates appear in the Compose email flow, with placeholders filled from the deal.
+
+**Future Improvement Suggestions**
+
+- Show a live preview of a template with a sample deal filled in.
+- Let a user duplicate any template (not only Starter ones) as a starting point.
+- Track how often each template is used so the team can retire low-value ones.
 
 **Feedback**
 
@@ -3160,20 +3202,22 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/task-templates
+Settings → Task Templates card (/admin/task-templates). Team Lead and Admin.
 
 **How To Test**
 
+- From the Settings hub, open the Task Templates card.
 - Type in the search box to filter templates.
 - Confirm templates are grouped by category.
-- Click New Template and create a template.
+- Click New Template and create a template in the pop-up window.
   - Fill in Name, Description, Automation Level, and Category.
   - Submit.
-- Click an existing template to open it.
+- Click an existing template row to open its details in a pop-up window (see feature 31).
 
 **Expected Result**
 
 - The newly created template appears in the list right away.
+- Creating and opening a template both happen in a pop-up window — you stay on the list the whole time.
 
 **Future Improvement Suggestions**
 
@@ -3196,20 +3240,19 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/task-templates/<templateId>
+Settings → Task Templates card → click any template row (opens a pop-up window).
 
 **How To Test**
 
-- Open a template.
-  - Check the read-only detail view.
-- Click Edit Template and update several fields.
+- Open a template by clicking its row. A details pop-up opens with the read-only view.
+- Click Edit Template and update several fields in the edit pop-up.
   - Name, description, target, milestone label, dependency, float days, automation level, category, sort order, active toggle.
 - Try the dependency rule builder section.
 - Click Save.
 
 **Expected Result**
 
-- All changes persist and the page returns to read-only mode.
+- All changes persist and the pop-up returns to the read-only view.
 
 **Future Improvement Suggestions**
 
@@ -3228,28 +3271,28 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32. Admin user detail
+### 32. Member details pop-up
 
 **Route / Location**
 
-/admin/users/<userId> (reachable from /admin/users and /team)
+Settings → Users & Invites card → click any member row (opens a pop-up window). Also opens from the Teams page roster.
 
 **How To Test**
 
-- From /admin/users, click a member's name or 'View profile'. The detail page should open.
-- From /team, click any member tile in 'Recently added members' and confirm it opens the same page.
-- Confirm the page shows the member's name, email, phone, joined date, last sign-in, role, and active/inactive status. The workspace owner is clearly marked.
-- Paste /admin/users/some-fake-id directly in the browser. Confirm a 'Failed to load user' error card appears (not a white screen).
+- Open the Users & Invites card (Settings hub) and click any member row in the table. A details pop-up should open.
+- Confirm the pop-up shows the member's name, role, email, phone, team, status (Active / Deactivated), joined date, last sign-in, and bio (if any). The workspace owner is clearly marked, and a member invited from another brokerage shows a 'Guest' badge.
+- Confirm the owner-only Transfer ownership button and the Admin-only Deactivate button appear in the pop-up footer only when they apply (see features 32.5 and 32.6); they never appear on your own row or on the owner's row.
+- Close the pop-up and confirm you return to the table.
 
 **Expected Result**
 
-- A valid user id renders the profile without errors.
-- An invalid or deleted user id shows a clean error state with a way to navigate back.
+- Every member's full profile opens in a pop-up window — there is no separate page to navigate to.
+- The owner and any guest members are clearly marked, and the management actions only appear for users who can use them.
 
 **Future Improvement Suggestions**
 
 - Add an audit trail showing the user's recent actions (logins, role changes, transactions worked).
-- Add an inline Edit form so an Admin can update name, phone, or role from this page.
+- Add an inline Edit form so an Admin can update name, phone, or role from the pop-up.
 - Show recent transactions assigned to this user so a Team Lead has full context.
 
 **Feedback**
@@ -3268,29 +3311,27 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/team (Team Lead and Admin only)
+/team — sidebar → Team → Team Overview (Team Lead and Admin only)
 
 **How To Test**
 
-- Sign in as Team Lead or Admin and open Team from the sidebar.
+- Sign in as Team Lead or Admin and open Team Overview from the sidebar's Team group.
 - Try the same as Agent, Transaction Coordinator, Attorney, Client, FSBO, or Vendor — the page should redirect to Unauthorized.
-- Confirm the four overview numbers at the top: Active Members, Pending Invites, Seats Used (if your plan has a seat limit), and Recently Active.
-- Confirm the 'Recently added members' list shows up to 12 members with their role; the workspace owner is clearly marked.
-- Click any member to open their detail page (feature 32).
-- Confirm the Role Coverage area shows how many people you have in each role (Admin, Team Lead, Transaction Coordinator, Agent, Attorney).
-- Confirm the side panels show Pending Invites (with time left), Last Seen (recent sign-ins), and Seat Usage (if your plan has a seat limit).
-- Click the Team Members and Task Templates quick-link cards at the bottom and confirm they open the matching admin pages.
-- Click Manage team in the header and confirm it opens /admin/users (feature 32.2).
+- Confirm the four numbers across the top: Active Members, Active Tx (open transactions), Pipeline (open volume), and Pending Invites.
+- Confirm the main 'Agents & production' table lists each member with their role, team, active-transaction count, and pipeline value, sorted with the biggest producers first. The workspace owner is marked.
+- Confirm the supporting cards: By team (each team with its lead and counts), Role coverage (how many people in each role), Awaiting acceptance (pending invites with time left), and Last seen (recent sign-ins).
+- Click a member's name and confirm it opens the Users & Invites list; click Manage teams in the header (or a team in the 'By team' card) and confirm it opens the Teams page (feature 32.13).
+- Sign in as a Team Lead and confirm the page is scoped to only your own team (your team's name in the title, only your team's members, transactions, and invites) — you never see other teams or workspace-wide totals.
 
 **Expected Result**
 
-- Only Team Lead and Admin can reach the page.
-- Every panel reflects real data for your workspace.
-- Quick links navigate to the right admin page.
+- Only Team Lead and Admin can reach the page; an Admin sees the whole brokerage, a Team Lead sees only their own team.
+- Every panel reflects real data, and the production table never disagrees with the member count.
+- The header and team cards navigate to the Teams page.
 
 **Future Improvement Suggestions**
 
-- Let the user filter Team Members by clicking a role on the Role Coverage row.
+- Let the user filter the table by clicking a role on the Role coverage card.
 - Show a 7-day activity sparkline on the top numbers.
 - Allow pinning a favourite member for quick contact from the side rail.
 
@@ -3306,32 +3347,31 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32.2. Team Members admin — Active members tab
+### 32.2. Users & Invites — Active members tab
 
 **Route / Location**
 
-/admin/users (Team Lead and Admin only)
+Settings → Users & Invites card (/admin/users). Team Lead and Admin.
 
 **How To Test**
 
-- Open /admin/users from the Team Overview page (Manage team) or directly.
-- Sign in as Agent or another lower role and confirm the URL redirects to Unauthorized.
-- Confirm two tabs: 'Active members' and 'Pending invitations'.
-- On the Active members tab, type in the search box and confirm the list filters by name and email as you type.
-- Open the role dropdown, pick a role, and confirm only members with that role remain. Combine search and role filter and confirm both apply.
-- Expand a member card. Confirm Email, Phone, Joined date, and Last sign-in are shown, with a 'View full profile' button.
-- If you are the workspace owner, confirm a Transfer ownership button appears in the expanded card (see 32.5).
-- If you are Admin, confirm a Deactivate button appears in the expanded card for every member except yourself and the owner (see 32.6).
-- Apply a search term with no matches and confirm a clear 'no members match' message appears.
+- Open the Users & Invites card from the Settings hub (or by clicking a member's name on Team Overview).
+- Sign in as Agent or another lower role and confirm the card is not shown and the URL redirects to Unauthorized.
+- Confirm two tabs: 'Active members' and 'Pending invitations', plus an 'Invite user' button in the header.
+- On the Active members tab, confirm the members appear in a table (Member, Role, Team, Last sign-in). Type in the search box and confirm the list filters by name and email as you type.
+- Open the role dropdown, pick a role, and confirm only members with that role remain. As an Admin, also use the team dropdown to show only one team's members. Combine the filters and confirm they all apply.
+- Click any member row and confirm the member-details pop-up opens (feature 32), where the Transfer ownership (owner only) and Deactivate (Admin only) actions live.
+- Apply a search term with no matches and confirm a clear 'No members match this filter' message appears.
 
 **Expected Result**
 
-- Search and role filter narrow the list in real time.
-- Transfer ownership and Deactivate buttons only appear for users who have permission to use them, and never on your own card.
+- Members are shown in a clean table; clicking a row opens the details pop-up.
+- Search, role filter, and (Admin) team filter narrow the list in real time.
+- The owner and any guest members are clearly marked in the table.
 
 **Future Improvement Suggestions**
 
-- Show a 'last active' time directly on the collapsed card.
+- Show a 'last active' time more prominently in the table.
 - Add bulk selection so an Admin can deactivate or change role for multiple members at once.
 - Add an inline 'Resend welcome email' action for members who never signed in.
 
@@ -3347,19 +3387,19 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32.3. Team Members admin — Pending invitations tab
+### 32.3. Users & Invites — Pending invitations tab
 
 **Route / Location**
 
-/admin/users → 'Pending invitations' tab
+Settings → Users & Invites card → 'Pending invitations' tab (/admin/users)
 
 **How To Test**
 
-- Switch to the Pending invitations tab on /admin/users.
+- Switch to the Pending invitations tab on the Users & Invites page.
 - If there are pending invites, confirm each row shows the invited email, the invited role, and how much time is left before the invite expires.
 - Click Copy link on a row and confirm the invite URL is copied to your clipboard.
 - In the row's three-dot menu, try Resend email, Extend by 72h, and Revoke invitation. Each should show a confirming toast and update the row.
-- If there are no pending invites, confirm a clear empty state pointing at the Invite teammate button.
+- If there are no pending invites, confirm a clear empty state pointing at the Invite user button.
 - Block your browser clipboard and click Copy link — confirm a clear error appears rather than a silent failure.
 
 **Expected Result**
@@ -3386,15 +3426,15 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32.4. Invite teammate modal
+### 32.4. Invite user modal
 
 **Route / Location**
 
-/admin/users → 'Invite teammate' button
+Settings → Users & Invites card → 'Invite user' button. (The Teams page has a matching 'Invite to team' button that pre-locks the team — see feature 32.13.)
 
 **How To Test**
 
-- Click Invite teammate on /admin/users.
+- Click Invite user on the Users & Invites page.
 - Confirm two required fields: Email address and Role. A short hint under the dropdown explains what each role can do.
 - Sign in as different inviter roles (Agent, Team Lead, Admin) and confirm the dropdown only offers roles you are allowed to grant — for example only Admins can invite new Admins.
 - Try to send with an empty email and confirm it is blocked.
@@ -3430,16 +3470,16 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/users → member three-dot menu (workspace owner only)
+Settings → Users & Invites → click a member → Transfer ownership button in the pop-up (workspace owner only)
 
 **How To Test**
 
-- Sign in as the workspace owner and confirm you are clearly marked as the owner on /admin/users.
-- Open the three-dot menu (or expand the card) on a different member and confirm a Transfer ownership option is offered. It should not appear on your own row or on a member who is already the owner.
+- Sign in as the workspace owner and confirm you are clearly marked as the owner in the Users & Invites table.
+- Click a different member's row to open their details pop-up and confirm a Transfer ownership button is offered in the footer. It should not appear on your own row or on a member who is already the owner.
 - Click Transfer ownership. Confirm the warning dialog explains: the target will be promoted to Admin if they are not already one; you will stay as Admin but lose owner-only abilities (schedule deletion, transfer ownership); and the action is logged.
 - Confirm the transfer. After success, the owner mark moves from your row to the new owner's row.
 - Refresh the page and confirm the new ownership state persists.
-- Sign in as a regular Admin (not the owner) and confirm Transfer ownership is hidden from every member's menu.
+- Sign in as a regular Admin (not the owner) and confirm Transfer ownership is hidden from every member's pop-up.
 
 **Expected Result**
 
@@ -3469,11 +3509,11 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/users → member three-dot menu (Admin only)
+Settings → Users & Invites → click a member → Deactivate button in the pop-up (Admin only)
 
 **How To Test**
 
-- Sign in as an Admin who is not the target. Open another member's three-dot menu (or expand their card) and confirm a Deactivate option is offered.
+- Sign in as an Admin who is not the target. Open another member's details pop-up and confirm a Deactivate button is offered in the footer.
 - Confirm Deactivate is hidden on the workspace owner's row and on your own row.
 - Click Deactivate. A confirmation dialog should explain the member will no longer be able to sign in and can be re-activated later.
 - Cancel and confirm the member is still listed. Try again and confirm — the member disappears from Active members.
@@ -3630,11 +3670,11 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/vendor-templates
+Settings → Vendor Templates card (/admin/vendor-templates). Team Lead and Admin.
 
 **How To Test**
 
-- Sign in as Admin or Team Lead and open Team → Vendor Templates.
+- Sign in as Admin or Team Lead and open the Vendor Templates card from the Settings hub.
 - Confirm five system templates ship with every tenant: Inspection — Schedule Visit, Inspection — Reschedule, Appraisal — Schedule Visit, Title — Document Request, Generic Vendor — Scheduling.
 - Open any system template. Confirm its body includes the required reply footer 'Reply with: Scheduled: YYYY-MM-DD'. Tune the subject or body and click Save.
 - Click New template, fill in the name, category, subject, and body, then save. Confirm the new template appears with a 'Custom' label.
@@ -3673,7 +3713,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **How To Test**
 
-- Sign in as Team Lead or Admin and open Team → Communication audit.
+- Sign in as Team Lead or Admin and open Oversight → Communication Audit from the sidebar.
 - Confirm two tabs: 'Audit log' (visible to Team Lead and Admin) and 'Export requests' (visible to Admin only).
 - On the Audit log tab, use the filter row: search, channel, direction, date range, AI-only, vendor-only, and party email.
 - Filter to a single transaction and click Download CSV — a single-transaction CSV downloads.
@@ -3707,24 +3747,27 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/teams (Admin only; sidebar → Team → Teams)
+/admin/teams (sidebar → Team → Teams). Admin and Team Lead.
 
 **How To Test**
 
-- Sign in as an Admin and open Teams from the sidebar.
-- Confirm a list of the teams in your workspace, each showing its lead and member count.
-- Click New team, fill in the setup dialog (name and lead), and save — confirm the new team appears.
-- Edit a team and change its name or lead, then save.
-- Delete a team and confirm a confirmation step appears before it is removed.
+- Sign in as an Admin and open Teams from the sidebar. Confirm a two-part layout: a list of teams on the left, and the selected team's roster and actions on the right. The first team is selected automatically.
+- In the left list, confirm each team shows its lead and member count. Click a different team and confirm the right side updates.
+- For the selected team, confirm its member table appears right there (no jump to another page), with these action buttons: Invite to team, Manage members, and (Admin only) Rename and Delete.
+- Click New team (top right, Admin only), fill in the setup dialog (name and lead), and save — confirm the new team appears and is selected.
+- Click Manage members and confirm you can add members to, or remove members from, the team. Click Invite to team and confirm the invite window opens with the team already filled in.
+- Click Rename, change the name or lead, and save. Click Delete and confirm a warning explains the members will be unassigned (their accounts stay active) before it is removed.
+- Sign in as a Team Lead and confirm Teams shows only your own team, with Invite to team and Manage members available but no New team / Rename / Delete.
 
 **Expected Result**
 
-- Admins can create, rename, and delete teams.
-- Every change requires the expected confirmation and updates the list immediately.
+- Teams is a single workspace: pick a team on the left, manage it on the right.
+- Admins can create, rename, and delete teams and manage any team's members; a Team Lead manages only their own team's members.
+- Every destructive change asks for confirmation and updates the list immediately.
 
 **Future Improvement Suggestions**
 
-- Show each team's active-deal count and pipeline value.
+- Show each team's active-deal count and pipeline value in the left list.
 - Allow moving several members between teams at once.
 
 **Feedback**
@@ -3739,22 +3782,23 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32.14. Team Settings (team-wide playbook)
+### 32.14. Team Playbook (team-wide)
 
 **Route / Location**
 
-Settings → Team Checklist Templates / Team Tagged Notes / Team Preferred Vendors / Team Internal Resources cards (/admin/team-settings). Team Lead and Admin.
+Settings → Team Playbook card (/admin/team-settings). Team Lead and Admin.
 
 **How To Test**
 
-- From the Settings hub, open any of the four Team library cards (Team Checklist Templates, Team Tagged Notes, Team Preferred Vendors, Team Internal Resources). Each opens that one team tool in a centered page with a team picker in the header.
-- As an Admin, use the team picker at the top to choose which team you are editing. (A Team Lead is automatically locked to their own team.)
+- From the Settings hub, open the Team Playbook card. Confirm one page with a row of buttons across the top — Checklist, Tagged notes, Preferred vendors, and Resources — that switch the team tool in place (the same shape as My Playbook, but team-wide).
+- As an Admin, use the team picker in the header ('Editing for …') to choose which team you are editing. A Team Lead is automatically locked to their own team and sees an 'Editing your team's playbook' note instead of the picker.
 - In each tool, add or edit an entry and save. Confirm it persists.
+- Click 'Preview closing checklist' and confirm a preview of how this team's playbook prints on a sample closing.
 - Confirm these are the team-wide versions; the personal 'My …' copies live in Settings → My Playbook (feature 28.2).
 
 **Expected Result**
 
-- One place to edit a team's whole playbook (checklists, notes, vendors, resources).
+- One card edits a team's whole playbook (checklists, notes, vendors, resources) from a single page.
 - Admins choose a team; Team Leads are scoped to their own team automatically.
 - Saved changes apply to everyone on that team.
 
@@ -3779,11 +3823,11 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/integrations (Admin only; sidebar → Admin → Integrations)
+Settings → Integrations & Webhooks card (/admin/integrations). Admin or workspace owner.
 
 **How To Test**
 
-- Sign in as an Admin and open Integrations.
+- Sign in as an Admin and open the Integrations & Webhooks card from the Settings hub.
 - Click to register a new webhook endpoint, pick the events it should receive, and save.
 - Copy the signing secret with the copy button.
 - Fire a test event and confirm a delivery attempt is recorded with its result.
@@ -3811,15 +3855,15 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 ---
 
-### 32.16. Admin — AI Governance
+### 32.16. Admin — AI & Automation
 
 **Route / Location**
 
-/admin/confidence (Admin only; sidebar → Admin → AI Governance)
+Settings → AI & Automation card (/admin/confidence). Admin or workspace owner.
 
 **How To Test**
 
-- Sign in as an Admin and open AI Governance.
+- Sign in as an Admin and open the AI & Automation card from the Settings hub.
 - Confirm plain-English 'what AI can do' and 'what AI cannot do' lists.
 - Adjust the confidence thresholds (for example the review threshold and the auto-send threshold) and save.
 - Confirm the change affects how AI Email Review classifies and auto-sends drafts (feature 29.7+).
@@ -3850,11 +3894,11 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/payment-access (Admin only; sidebar → Admin → Payment Access)
+Settings → Payment Access card (/admin/payment-access). Admin or workspace owner.
 
 **How To Test**
 
-- Sign in as an Admin and open Payment Access.
+- Sign in as an Admin and open the Payment Access card from the Settings hub.
 - Confirm a grid of roles (Agent, Elf / Transaction Coordinator, Team Lead) against capabilities (create invoice, refund, trigger payout).
 - Turn a capability on or off for a role and save.
 - Sign in as that role and confirm the matching action appears or disappears on the Payments pages (features 26.8–26.9).
@@ -3885,11 +3929,11 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/advertising (Admin only; sidebar → Admin → Advertising)
+Settings → Advertising card (/admin/advertising). Admin or workspace owner.
 
 **How To Test**
 
-- Sign in as an Admin and open Advertising. Confirm three cards: Workspace ads (a single on/off toggle, OFF by default), Your house ads, and Performance.
+- Sign in as an Admin and open the Advertising card from the Settings hub. Confirm three cards: Workspace ads (a single on/off toggle, OFF by default), Your house ads, and Performance.
 - Turn Workspace ads on and confirm sponsored placements may then appear in the workspace; turn it off and confirm they stop.
 - Create a house ad: add the details, upload an image, and approve it. Confirm each ad shows a plain-English 'why it is / isn't showing' chip.
 - Pause a house ad and confirm it stops showing.
@@ -3922,11 +3966,11 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **Route / Location**
 
-/admin/audit-logs (Admin only; sidebar → Admin → Audit Log)
+/admin/audit-logs (Admin only; sidebar → Oversight → Audit Log)
 
 **How To Test**
 
-- Sign in as an Admin and open Audit Log.
+- Sign in as an Admin and open Oversight → Audit Log from the sidebar.
 - Confirm a list of recorded actions across the workspace (documents, transactions, tasks, users, invitations, vendors, AI emails, and so on).
 - Filter by entity type and confirm the list narrows.
 - Expand an entry and confirm it shows who did what and when.
@@ -3962,7 +4006,7 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 
 **How To Test**
 
-- Sign in as a platform admin and open Platform → Advertising.
+- Sign in as a platform admin and open the Platform Advertising card from the Settings hub (Platform group).
 - Sign in as any non-platform user and try /platform/advertising directly — confirm you get a 404 (the route's existence is not leaked).
 - Review and manage the platform-wide / partner ad inventory shown here.
 
@@ -4010,6 +4054,46 @@ _Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit,
 - Add a date-range filter to compare periods.
 - Let staff export the usage breakdown as a CSV.
 - Add a per-tenant cost-per-deal average column.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), any comments or issues you hit, and your priority for the improvement ideas above (High / Medium / Low / Skip)._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+> 
+> _Improvement priority:_ 
+
+---
+
+### 32.22. Platform Admin — Help Center authoring (internal Velvet Elves staff only)
+
+**Route / Location**
+
+/platform/help — sidebar → Platform → Help center (platform admins only)
+
+**How To Test**
+
+- Sign in as a platform admin and open Platform → Help center from the sidebar. This is where the public Help Center website's content is written and published.
+- Sign in as any non-platform user and try /platform/help directly — confirm you get a 404 (the route's existence is not leaked).
+- Confirm a knowledge-base layout: a list of collections (categories) on the left, and an editing pane on the right. Use the search box to find a collection.
+- Click New collection, give it a name, and save — confirm it appears in the tree. Open a collection and confirm you can add an article inside it.
+- Open an article. Confirm a writing column with a simple formatting toolbar and an Edit / Preview toggle (Preview shows the reader's view). Make a change and click Save.
+- Confirm the article status (Draft / Published) is shown as a read-only badge, and a separate Publish (or Unpublish) button asks you to confirm before it changes what the public sees. Confirm Archive and Delete live in a 'More' menu.
+- Use the Feedback and Settings buttons in the header and confirm they open the reader-feedback list and the Help Center settings.
+
+**Expected Result**
+
+- Only platform admins can reach the page; everyone else gets a 404.
+- Collections and articles can be created, edited, previewed, and published, with publishing always behind a clear confirmation.
+- Changes here drive the public Help Center website that customers reach from the in-app 'Help Center' link.
+
+**Future Improvement Suggestions**
+
+- Show where each article links from so staff can spot orphaned guides.
+- Add a side-by-side edit-and-preview mode for longer articles.
+- Track which articles get the most 'not helpful' votes so staff know what to rewrite first.
 
 **Feedback**
 

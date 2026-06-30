@@ -1,6 +1,6 @@
 # Velvet Elves — Still Being Built (Not Yet Ready for Client Feedback)
 
-**Last Updated:** June 23, 2026
+**Last Updated:** June 30, 2026
 
 This is the companion list to **FRONTEND_CLIENT_TESTING_REVIEW**. The testing review
 only covers features that are **fully complete** and ready for your feedback. The items
@@ -48,8 +48,8 @@ For now, use the "Forgot password?" link on the sign-in page to reset it.
 
 ## 3. Credit wallet & billing — switched off for now
 
-**Where:** Settings → **Billing & Credits** (workspace Admins / owners) and
-Platform → **Platform Billing** (internal Velvet Elves staff).
+**Where:** Settings → **Billing & Credits** (workspace Admins / owners) and the
+Settings hub's **Platform** group → **Platform Billing** (internal Velvet Elves staff).
 
 **Current state:** The credit-wallet billing system — buying credits, per-transaction
 pricing, the Stripe checkout flow, credit history, and the platform-side credit-pack pricing
@@ -142,6 +142,6 @@ a single workspace exactly as today and no switcher appears.
 
 ## How this list is kept honest
 
-Everything above was checked against the live frontend source code on June 23, 2026. As each
+Everything above was checked against the live frontend source code on June 30, 2026. As each
 item is finished, it will move out of this list and into the main **FRONTEND_CLIENT_TESTING_REVIEW**
 with full step-by-step testing instructions.
