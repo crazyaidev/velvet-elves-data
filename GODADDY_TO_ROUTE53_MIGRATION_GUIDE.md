@@ -33,7 +33,7 @@ help.stage.velvetelves.com       Staging help center
 
 velvetelves.com                  Production marketing site
 app.velvetelves.com              Production product frontend
-api.velvetelves.com              Production backend API
+api.prod.velvetelves.com              Production backend API
 help.velvetelves.com             Production help center
 ```
 
@@ -41,7 +41,7 @@ Known Stage 0 DNS snapshot:
 
 ```text
 velvetelves.com                  A      3.140.33.46       TTL 600
-api.velvetelves.com              A      3.140.33.46       TTL 600
+api.prod.velvetelves.com              A      3.140.33.46       TTL 600
 dev.velvetelves.com              A      18.188.144.155    TTL 600
 ```
 
@@ -287,7 +287,7 @@ Use these rules:
 | --- | --- | --- | --- |
 | `velvetelves.com` | A or Alias | Current target or future marketing target | Use Route 53 Alias for CloudFront if marketing is on CloudFront |
 | `app.velvetelves.com` | A Alias or CNAME | Production CloudFront target | Alias preferred in Route 53 |
-| `api.velvetelves.com` | A Alias or CNAME | Production ALB target | Alias preferred in Route 53 |
+| `api.prod.velvetelves.com` | A Alias or CNAME | Production ALB target | Alias preferred in Route 53 |
 | `dev.velvetelves.com` | A | `18.188.144.155` unless changed | Preserve existing dev server |
 | `stage.velvetelves.com` | A Alias or CNAME | Staging marketing target | Only if staging marketing exists |
 | `app.stage.velvetelves.com` | A Alias or CNAME | Staging CloudFront target | Product frontend staging |
@@ -370,7 +370,7 @@ Pick one Route 53 nameserver from the hosted zone and query it directly:
 $Route53NameServer = "<one-route53-name-server>"
 
 Resolve-DnsName velvetelves.com -Type A -Server $Route53NameServer
-Resolve-DnsName api.velvetelves.com -Type A -Server $Route53NameServer
+Resolve-DnsName api.prod.velvetelves.com -Type A -Server $Route53NameServer
 Resolve-DnsName dev.velvetelves.com -Type A -Server $Route53NameServer
 Resolve-DnsName velvetelves.com -Type MX -Server $Route53NameServer
 Resolve-DnsName velvetelves.com -Type TXT -Server $Route53NameServer
@@ -461,7 +461,7 @@ Run:
 Resolve-DnsName velvetelves.com -Type NS
 Resolve-DnsName velvetelves.com -Type A
 Resolve-DnsName app.velvetelves.com -ErrorAction SilentlyContinue
-Resolve-DnsName api.velvetelves.com -ErrorAction SilentlyContinue
+Resolve-DnsName api.prod.velvetelves.com -ErrorAction SilentlyContinue
 Resolve-DnsName dev.velvetelves.com
 Resolve-DnsName velvetelves.com -Type MX
 Resolve-DnsName velvetelves.com -Type TXT
@@ -474,7 +474,7 @@ Check:
 
 - `https://velvetelves.com`
 - `https://app.velvetelves.com`, if active
-- `https://api.velvetelves.com/api/health`, if active
+- `https://api.prod.velvetelves.com/api/health`, if active
 - `https://help.velvetelves.com`, if active
 - `https://dev.velvetelves.com`
 

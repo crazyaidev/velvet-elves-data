@@ -323,11 +323,11 @@ Use this when the backend has a stable HTTPS hostname.
 | Item | Shared Dev Example | Production Example |
 | --- | --- | --- |
 | Frontend | `https://dev.velvetelves.com` | `https://app.velvetelves.com` |
-| Backend/API | `https://dev.velvetelves.com` | `https://api.velvetelves.com` or final production API host |
-| Gmail OAuth callback | `https://dev.velvetelves.com/api/v1/integrations/gmail/callback` | `https://api.velvetelves.com/api/v1/integrations/gmail/callback` |
-| Gmail webhook | `https://dev.velvetelves.com/api/v1/integrations/email/webhook/gmail` | `https://api.velvetelves.com/api/v1/integrations/email/webhook/gmail` |
+| Backend/API | `https://dev.velvetelves.com` | `https://api.prod.velvetelves.com` or final production API host |
+| Gmail OAuth callback | `https://dev.velvetelves.com/api/v1/integrations/gmail/callback` | `https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback` |
+| Gmail webhook | `https://dev.velvetelves.com/api/v1/integrations/email/webhook/gmail` | `https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail` |
 
-If production uses a single combined host instead of `api.velvetelves.com`,
+If production uses a single combined host instead of `api.prod.velvetelves.com`,
 replace every production API example with that real backend host.
 
 ### Production `.env` Example
@@ -339,15 +339,15 @@ APP_ENV=production
 
 GOOGLE_CLIENT_ID=<production-google-oauth-client-id>
 GOOGLE_CLIENT_SECRET=<production-google-oauth-client-secret>
-GMAIL_REDIRECT_URI=https://api.velvetelves.com/api/v1/integrations/gmail/callback
+GMAIL_REDIRECT_URI=https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback
 
-EMAIL_WEBHOOK_PUBLIC_BASE_URL=https://api.velvetelves.com
+EMAIL_WEBHOOK_PUBLIC_BASE_URL=https://api.prod.velvetelves.com
 
 GMAIL_PUBSUB_TOPIC_NAME=projects/velvet-elves-prod/topics/gmail-inbound-prod
 GMAIL_WATCH_LABEL_IDS=INBOX
 GMAIL_WATCH_LABEL_FILTER_BEHAVIOR=INCLUDE
 
-PUBSUB_PUSH_AUDIENCE=https://api.velvetelves.com/api/v1/integrations/email/webhook/gmail
+PUBSUB_PUSH_AUDIENCE=https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail
 PUBSUB_PUSH_SERVICE_ACCOUNT_EMAIL=pubsub-push-gmail-prod@velvet-elves-prod.iam.gserviceaccount.com
 ```
 
@@ -359,7 +359,7 @@ PROJECT_NUMBER="<numeric-project-number>"
 TOPIC="gmail-inbound-prod"
 SUBSCRIPTION="gmail-inbound-prod-push"
 PUSH_SA="pubsub-push-gmail-prod@$PROJECT_ID.iam.gserviceaccount.com"
-PUSH_ENDPOINT="https://api.velvetelves.com/api/v1/integrations/email/webhook/gmail"
+PUSH_ENDPOINT="https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail"
 AUDIENCE="$PUSH_ENDPOINT"
 
 gcloud config set project "$PROJECT_ID"
@@ -393,7 +393,7 @@ gcloud pubsub subscriptions create "$SUBSCRIPTION" \
 In the production Google OAuth web client, add:
 
 ```text
-https://api.velvetelves.com/api/v1/integrations/gmail/callback
+https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback
 ```
 
 For production launch, the Google OAuth consent screen must also be production

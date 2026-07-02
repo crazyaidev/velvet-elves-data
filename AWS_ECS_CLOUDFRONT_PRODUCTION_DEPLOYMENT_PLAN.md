@@ -52,7 +52,7 @@ These facts come from the current project docs and app manifests.
     - `STAGE_HELP_DOMAIN`: `help.stage.velvetelves.com`.
     - `PROD_MARKETING_DOMAIN`: `velvetelves.com`.
     - `PROD_APP_DOMAIN`: `app.velvetelves.com`.
-    - `PROD_API_DOMAIN`: `api.velvetelves.com`.
+    - `PROD_API_DOMAIN`: `api.prod.velvetelves.com`.
     - `PROD_HELP_DOMAIN`: `help.velvetelves.com`.
   - DNS is currently managed in GoDaddy. Use GoDaddy for production and staging DNS records for now. Route 53 DNS hosting and domain registrar transfer are future follow-up items after the AWS migration is stable.
 
@@ -103,7 +103,7 @@ Actions:
    - `STAGE_HELP_DOMAIN=help.stage.velvetelves.com`
    - `PROD_MARKETING_DOMAIN=velvetelves.com`
    - `PROD_APP_DOMAIN=app.velvetelves.com`
-   - `PROD_API_DOMAIN=api.velvetelves.com`
+   - `PROD_API_DOMAIN=api.prod.velvetelves.com`
    - `PROD_HELP_DOMAIN=help.velvetelves.com`
 7. Confirm AWS CLI access, Docker access, Supabase CLI access, and GoDaddy DNS change access.
 8. Do not change CI/CD triggers yet unless there is already a safe staging target.
@@ -491,7 +491,7 @@ Separate public web surfaces:
   - Production: `app.velvetelves.com`
 - Backend API:
   - Staging: `api.stage.velvetelves.com`
-  - Production: `api.velvetelves.com`
+  - Production: `api.prod.velvetelves.com`
 - Help center:
   - Staging: `help.stage.velvetelves.com`
   - Production: `help.velvetelves.com`
@@ -539,7 +539,7 @@ Make these decisions before provisioning.
 | Staging help center domain | `STAGE_HELP_DOMAIN=help.stage.velvetelves.com` |
 | Production marketing domain | `PROD_MARKETING_DOMAIN=velvetelves.com` |
 | Production frontend domain | `PROD_APP_DOMAIN=app.velvetelves.com` |
-| Production API domain | `PROD_API_DOMAIN=api.velvetelves.com` |
+| Production API domain | `PROD_API_DOMAIN=api.prod.velvetelves.com` |
 | Production help center domain | `PROD_HELP_DOMAIN=help.velvetelves.com` |
 | Backend certificate | ACM certificate in the same region as each environment's ALB, likely `us-east-2` |
 | CloudFront certificate | ACM certificate for each CloudFront-hosted frontend, marketing, or help center domain in `us-east-1` |
@@ -552,7 +552,7 @@ Important CloudFront certificate rule: CloudFront viewer certificates from ACM m
 Important GoDaddy DNS notes:
 
 - Preserve all company email DNS records before any change: `MX`, SPF `TXT`, DKIM records, DMARC, provider verification records, `autodiscover`, and any mail-related `CNAME` or `SRV` records.
-- Subdomains such as `app.velvetelves.com`, `api.velvetelves.com`, `help.velvetelves.com`, `app.stage.velvetelves.com`, and `api.stage.velvetelves.com` can be pointed with CNAME records.
+- Subdomains such as `app.velvetelves.com`, `api.prod.velvetelves.com`, `help.velvetelves.com`, `app.stage.velvetelves.com`, and `api.stage.velvetelves.com` can be pointed with CNAME records.
 - The apex `velvetelves.com` cannot use a normal DNS CNAME. If the production marketing site is hosted on CloudFront while DNS remains in GoDaddy, confirm GoDaddy's supported apex record/forwarding option or move DNS hosting to Route 53 before apex CloudFront cutover.
 - Do not transfer the domain registrar from GoDaddy to Route 53 during the ECS/CloudFront app cutover. If Route 53 is desired later, first migrate DNS hosting safely, verify website/app/API/help/email behavior, then transfer registration.
 
@@ -593,7 +593,7 @@ $STAGE_API_DOMAIN = "api.stage.velvetelves.com"
 $STAGE_HELP_DOMAIN = "help.stage.velvetelves.com"
 $PROD_MARKETING_DOMAIN = "velvetelves.com"
 $PROD_APP_DOMAIN = "app.velvetelves.com"
-$PROD_API_DOMAIN = "api.velvetelves.com"
+$PROD_API_DOMAIN = "api.prod.velvetelves.com"
 $PROD_HELP_DOMAIN = "help.velvetelves.com"
 
 if ($ENV_NAME -eq "stage") {

@@ -75,7 +75,7 @@ Production:
 ```text
 velvetelves.com                  Production marketing site
 app.velvetelves.com              Production product frontend
-api.velvetelves.com              Production backend API
+api.prod.velvetelves.com         Production backend API
 help.velvetelves.com             Production help center
 ```
 
@@ -439,7 +439,7 @@ Deployment target:
 
 ```text
 main -> api.stage.velvetelves.com
-prod -> api.velvetelves.com
+prod -> api.prod.velvetelves.com
 ```
 
 Recommended AWS architecture:
@@ -498,7 +498,7 @@ Backend smoke tests:
 
 ```text
 https://api.stage.velvetelves.com/api/health
-https://api.velvetelves.com/api/health
+https://api.prod.velvetelves.com/api/health
 ```
 
 Backend rule:
@@ -559,7 +559,7 @@ Expected public API base URLs:
 
 ```text
 STAGE_VITE_API_BASE_URL=https://api.stage.velvetelves.com
-PROD_VITE_API_BASE_URL=https://api.velvetelves.com
+PROD_VITE_API_BASE_URL=https://api.prod.velvetelves.com
 ```
 
 Static deploy rules:
@@ -702,7 +702,7 @@ Expected public values:
 STAGE_HELP_SITE_ORIGIN=https://help.stage.velvetelves.com
 PROD_HELP_SITE_ORIGIN=https://help.velvetelves.com
 STAGE_VITE_HELP_API_BASE_URL=https://api.stage.velvetelves.com
-PROD_VITE_HELP_API_BASE_URL=https://api.velvetelves.com
+PROD_VITE_HELP_API_BASE_URL=https://api.prod.velvetelves.com
 ```
 
 Help center deploy rules:

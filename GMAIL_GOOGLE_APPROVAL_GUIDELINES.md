@@ -229,7 +229,7 @@ Use separate Google Cloud projects for development/testing and production. Submi
 - Add only production redirect URI:
 
 ```text
-https://api.velvetelves.com/api/v1/integrations/gmail/callback
+https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback
 ```
 
 - Keep local/dev redirect URIs in the dev project, not the production project.
@@ -250,13 +250,13 @@ projects/<production-project-id>/topics/gmail-inbound-prod
 - Push endpoint:
 
 ```text
-https://api.velvetelves.com/api/v1/integrations/email/webhook/gmail
+https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail
 ```
 
 - Pub/Sub push audience:
 
 ```text
-https://api.velvetelves.com/api/v1/integrations/email/webhook/gmail
+https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail
 ```
 
 - Gmail publisher service account has Pub/Sub Publisher on the topic:

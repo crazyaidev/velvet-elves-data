@@ -447,7 +447,7 @@ velvet-elves-help-center/
 - The whole site obeys the comfort rules: nothing below 12px, AA contrast, calm motion (150 to 250ms ease-out, no bounce).
 
 ### 7.8 Configuration and API client
-`VITE_HELP_API_BASE_URL` is a build-time value (per the AWS plan's note that Vite env is build-time) pointing at the environment's API host (`api.stage.velvetelves.com` or `api.velvetelves.com`). `lib/api.ts` calls only `/public/help/*`. The site fetches `/public/help/settings` on load to get the title, Book-a-Call URL, support email, default locale, and chat config.
+`VITE_HELP_API_BASE_URL` is a build-time value (per the AWS plan's note that Vite env is build-time) pointing at the environment's API host (`api.stage.velvetelves.com` or `api.prod.velvetelves.com`). `lib/api.ts` calls only `/public/help/*`. The site fetches `/public/help/settings` on load to get the title, Book-a-Call URL, support email, default locale, and chat config.
 
 ---
 

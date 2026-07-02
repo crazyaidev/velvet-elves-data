@@ -9,7 +9,7 @@ flows. This is the piece often called "Google Auth."
 It complements two sibling guides:
 
 - [GMAIL_PUBSUB_WEBHOOK_CONFIGURATION_GUIDE.md](GMAIL_PUBSUB_WEBHOOK_CONFIGURATION_GUIDE.md) — how Gmail push delivery (Pub/Sub) reaches the backend. That is a *separate* concern from OAuth.
-- [CI_CD_PIPELINE_IMPLEMENTATION_GUIDELINES.md](CI_CD_PIPELINE_IMPLEMENTATION_GUIDELINES.md) — the canonical domain model (`api.stage.velvetelves.com`, `api.velvetelves.com`).
+- [CI_CD_PIPELINE_IMPLEMENTATION_GUIDELINES.md](CI_CD_PIPELINE_IMPLEMENTATION_GUIDELINES.md) — the canonical domain model (`api.stage.velvetelves.com`, `api.prod.velvetelves.com`).
 
 > **Important — this is a manual, Console-only setup.** Unlike Pub/Sub topics
 > and subscriptions, the OAuth consent screen and OAuth 2.0 **web** Client ID
@@ -28,7 +28,7 @@ OAuth callback, so all redirect URIs point at the API host.
 | Environment | GCP project | Project number | API host | Gmail redirect URI | Calendar redirect URI |
 | ----------- | ----------- | -------------- | -------- | ------------------ | --------------------- |
 | Staging     | `velvet-elves-495419` | `690290770751` | `api.stage.velvetelves.com` | `https://api.stage.velvetelves.com/api/v1/integrations/gmail/callback` | `https://api.stage.velvetelves.com/api/v1/calendar/google/callback` |
-| Production  | `velvet-vles`         | `538509143953` | `api.velvetelves.com`       | `https://api.velvetelves.com/api/v1/integrations/gmail/callback`       | `https://api.velvetelves.com/api/v1/calendar/google/callback`       |
+| Production  | `velvet-vles`         | `538509143953` | `api.prod.velvetelves.com`       | `https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback`       | `https://api.prod.velvetelves.com/api/v1/calendar/google/callback`       |
 
 Gmail and Calendar **share one OAuth client** per environment (the backend uses
 the same client for both, with different scope sets). You register **both**
@@ -149,7 +149,7 @@ New UI: **Branding** tab. Legacy UI: "App information".
 Notes:
 
 - **Authorized domain** must be the top private domain `velvetelves.com`, not a
-  subdomain. It authorizes `app.velvetelves.com`, `api.velvetelves.com`, etc.
+  subdomain. It authorizes `app.velvetelves.com`, `api.prod.velvetelves.com`, etc.
 - The privacy policy and terms URLs must be live and on the authorized domain
   before you can submit for verification.
 
@@ -195,8 +195,8 @@ New UI: **Clients** tab → **Create client**. Legacy UI: **APIs & Services** �
 4. **Authorized redirect URIs:** click **Add URI** and add **both** of these
    (production example — substitute `api.stage.` for staging):
    ```
-   https://api.velvetelves.com/api/v1/integrations/gmail/callback
-   https://api.velvetelves.com/api/v1/calendar/google/callback
+   https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback
+   https://api.prod.velvetelves.com/api/v1/calendar/google/callback
    ```
 5. Click **Create**.
 6. A dialog shows the **Client ID** and **Client secret**. Copy both
@@ -222,8 +222,8 @@ The backend reads these from environment config. Production values live in
 ```env
 PROD_GOOGLE_CLIENT_ID=<new client id from Step 5>
 PROD_GOOGLE_CLIENT_SECRET=<new client secret from Step 5>
-PROD_GMAIL_REDIRECT_URI=https://api.velvetelves.com/api/v1/integrations/gmail/callback
-PROD_GOOGLE_CALENDAR_REDIRECT_URI=https://api.velvetelves.com/api/v1/calendar/google/callback
+PROD_GMAIL_REDIRECT_URI=https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback
+PROD_GOOGLE_CALENDAR_REDIRECT_URI=https://api.prod.velvetelves.com/api/v1/calendar/google/callback
 ```
 
 The redirect URIs are already correct in `.env.prod`; only the client ID and
@@ -366,8 +366,8 @@ Production project:   velvet-vles (number 538509143953)
 Staging project:      velvet-elves-495419 (number 690290770751)
 
 Production redirect URIs (both on one web client):
-  https://api.velvetelves.com/api/v1/integrations/gmail/callback
-  https://api.velvetelves.com/api/v1/calendar/google/callback
+  https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback
+  https://api.prod.velvetelves.com/api/v1/calendar/google/callback
 
 Staging redirect URIs (both on one web client):
   https://api.stage.velvetelves.com/api/v1/integrations/gmail/callback
