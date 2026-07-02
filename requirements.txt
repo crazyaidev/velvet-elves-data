@@ -3,7 +3,8 @@ VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
 ESTABLISHED PROJECT REQUIREMENTS
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-04-06 (Pre-Phase 3 design review — workflow logic alignment)
+Last Updated: 2026-07-02 (Section 15 added: Transaction Generation System
+             client-confirmed requirements from Q&A_Transaction_Generation_System.md)
 Timeline: 22 Weeks (MVP delivery)
 Budget: Under USD $40,000 (Fixed-Price)
 Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
@@ -1228,6 +1229,165 @@ Tech Stack: React (Frontend) | FastAPI (Backend) | OpenAI GPT + Claude (AI) |
       indicators, white-label theming
     - This specification is the canonical reference for frontend
       implementation; all Phase 3+ frontend work must align with it
+
+
+================================================================================
+15. TRANSACTION GENERATION SYSTEM - CLIENT-CONFIRMED REQUIREMENTS (Q&A 2026-07)
+================================================================================
+
+Source: Q&A_Transaction_Generation_System.md (Jake's answers to the five
+open questions in TRANSACTION_SYSTEM_GUIDE.md Section 8, including the
+Attorney/Title Workflow workbook he supplied for Question 5).
+These are client decisions. Where anything below conflicts with an earlier
+section of this document or with TRANSACTION_SYSTEM_GUIDE.md, this section
+prevails. Implementation plan: TRANSACTION_GENERATION_SYSTEM_UPDATE_PLAN.md.
+
+15.1 Title-Ordering Determination (Q&A Question 1)
+    - Read who-orders-title from the contract whenever the contract states it
+      (existing behavior, retained)
+    - When the contract is silent (or the AI read is below the acceptance
+      threshold), the user entering the transaction MUST be asked to answer
+      "who orders title" on the wizard verification screen before the deal
+      can be created; it becomes a required field with a mouse-only control
+    - NO brokerage-level default for the silent case (explicitly rejected:
+      a default could be incorrect and the user could overlook it)
+    - Keep the "No title task was generated - confirm who orders title"
+      coverage notice on the Tasks & create screen as the safety net
+    - The confirmed answer must deterministically produce exactly one title
+      task: "Order Title" (our side orders) or "Confirm Title Order" (the
+      other side orders); the Buyer/Seller answer must be evaluated against
+      the representation side to decide our-side vs counterparty
+
+15.2 Contract Deadline Windows - No Standardization (Q&A Question 2)
+    - NEVER pre-fill standard or brokerage-default deadline windows
+      (inspection period, inspection-response window, HOA-document delivery
+      window, insurance-commitment window); every number comes from the
+      contract or from the agent
+    - Confidence-banded extraction behavior, per field:
+        >= 90%: value accepted automatically, shown with its citation
+        70-89% (borderline): shown as an AI RECOMMENDATION that the agent
+          must explicitly approve before it is used; never silently filled
+        < 70% or not found: left blank for the agent to fill during
+          submission (honest blank, with a short note)
+    - Train/tune AI recognition of these four windows specifically; extract
+      them as explicit day counts with per-field confidence and source
+      citations, and measure recognition quality with the extraction
+      benchmark so improvement is provable
+
+15.3 Appraisal on Cash Deals (Q&A Question 3)
+    - On EVERY cash deal, regardless of state, AI must review the contract
+      for an explicit appraisal election (buyer elected vs waived appraisal)
+    - Elected: appraisal tasks are generated
+      Waived: no appraisal tasks
+      Silent or unsure: NO appraisal tasks by default and the agent is
+      PROMPTED to decide (client-confirmed: "Let's prompt the agent here.
+      The better our inputs, the better our Agents can correctly work the
+      file.")
+    - The election read uses the same confidence-and-confirm machinery as
+      15.2 (accept / recommend / blank+prompt)
+    - Remove the current master-list behavior that attaches a cash appraisal
+      follow-up task to every cash deal unconditionally
+    - Provide a simple one-click control on the live deal to flip the
+      appraisal answer later; flipping adds or removes the appraisal tasks
+      with completed work preserved and the change audit-logged
+
+15.4 Calendar Days vs Business Days (Q&A Question 4)
+    - Default is ALWAYS calendar days, for every deadline
+    - NO weekend/holiday roll of deadlines, in either direction: real estate
+      timelines can end on holidays and weekends, so a computed deadline
+      lands exactly where the count says. A timeline that hits too early is
+      acceptable; one that hits late and misses a client deadline is not
+    - AI reads each deadline's basis independently from the contract;
+      business-day counting applies ONLY to a deadline the contract
+      definitively writes in business days (or one an agent explicitly sets
+      to business days)
+    - Every deadline shows its basis in plain language (for example
+      "5 business days after Date of Acceptance") with the contract citation
+      when the basis was AI-determined
+    - This supersedes the earlier roll-to-next-business-day convention
+      described in TRANSACTION_SYSTEM_GUIDE.md Sections 4-7
+
+15.5 All-50-States Support & Attorney Closing Workflows (Q&A Question 5)
+    - The product is being built to sell to other brokerages, FSBO customers,
+      and attorneys; it must be usable in all 50 states. Model this as two
+      base workflows (title-company closing vs attorney closing) plus
+      per-state differences, not fifty hand-built task lists
+    - Build the attorney task lists by adapting the existing master lists
+      for attorneys vs title companies, and ADD attorney-only steps that have
+      no title-company equivalent (do not blindly swap)
+    - NO single "attorney state" yes/no toggle. Use per-state workflow flags:
+        requires_attorney_closing_control (true for NC, SC, GA, DE)
+        requires_attorney_title_opinion_or_exam (true for NC, DE)
+        requires_attorney_supervised_disbursement (true for SC, DE;
+          conservative attorney-controlled for NC, GA)
+        has_default_attorney_review_period (true only for the verified NJ
+          scenario)
+        attorney_review_trigger (delivery of signed contract / contract
+          clause / none)
+        title_company_role_allowed (support role in attorney-controlled
+          states; mixed role in NJ/NY)
+        agent_orders_title_default (false for NC, SC, GA, DE)
+        fsbo_reassigns_agent_tasks_to_customer (true)
+    - Verified state clusters (initial build):
+        NC / SC / GA / DE: attorney owns the legal/title/closing workflow;
+          the agent coordinates only. The agent's default task is "Confirm
+          closing attorney selected and send executed contract", NOT "Order
+          Title". No default attorney-review deadline unless the contract
+          creates one. SC is modeled as attorney supervision across five
+          components (title abstract, document preparation, closing,
+          recording, disbursement), where supervision means the attorney
+          reviewed the work product, not a checkbox
+        NJ: attorney-review deadline of 3 BUSINESS days counted from
+          DELIVERY of the completely signed contracts (not from acceptance),
+          created ONLY when a real-estate licensee prepared the contract.
+          Title company / title clerk / closing-agent roles remain in the
+          workflow. Do not model NJ as attorney-only
+        NY: attorney-approval deadline created ONLY when the contract
+          contains the approval contingency, using the contract's stated
+          period. Support both title pathways (attorney abstract/title
+          opinion AND title company/title insurance). Do not force one NY
+          workflow
+        ALL OTHER STATES: standard title/settlement workflow. DO NOT
+          classify a state as attorney-controlled until verified
+    - Attorney-specific task library (added tasks, with default owners per
+      Jake's workbook): confirm attorney selected; confirm attorney
+      representation/scope ("confirm who represents whom"); send executed
+      contract to attorney; attorney contract review (deadline only if
+      state/contract creates one); order or supervise title search/abstract;
+      preliminary title opinion or title certificate; review title results
+      and exceptions; resolve title defects / curative work; apply for or
+      coordinate title insurance; prepare or review deed; prepare or review
+      mortgage/deed-of-trust documents; conduct or control closing;
+      authorize or supervise disbursement; authorize or supervise recording;
+      final title opinion / post-closing title work
+    - FSBO / attorney-direct assignment rules: brokerage/agent coordination
+      tasks are reassigned to the customer (or attorney), never left on an
+      agent placeholder; attorney-required legal tasks always remain intact;
+      NJ FSBO must NOT auto-create the 3-business-day review deadline when
+      no licensee prepared the contract; NY attorney-direct may start with
+      "attorney drafts/reviews contract before execution" rather than
+      review-after-acceptance
+    - Compliance guardrail (RESPA, 12 U.S.C. 2608): the seller cannot
+      require the buyer to purchase title insurance from a particular title
+      company; provider-selection UI must never hard-assign a provider
+    - Jake's Attorney/Title Workflow workbook (embedded in
+      Q&A_Transaction_Generation_System.md, with source citations) is the
+      authoritative build matrix for clusters, flags, deadline logic, task
+      library, and FSBO/attorney-direct rules
+
+15.6 Cross-Cutting Delivery Constraints (re-affirmed for this workstream)
+    - Every behavior above must be fully validatable through the frontend UI
+      by non-developer real-estate professionals: mouse-first interactions,
+      minimal typing, no dead ends in the end-to-end flow
+    - Honest-blank principle: the system never invents dates, sides,
+      elections, or workflows. It reads a value from the contract (with
+      citation and confidence), recommends it for approval when borderline,
+      or asks the user; it never guesses silently
+    - Preview equals commit: what the wizard's review screens show is
+      exactly what generation creates
+    - The UI for these features must match the product's established design
+      language and read as a modern professional tool for real estate
+      experts
 
 
 ================================================================================

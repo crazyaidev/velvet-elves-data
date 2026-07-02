@@ -3544,28 +3544,31 @@ These patterns must be consistently applied across all pages.
 
 ### 10. Product Tour (role-aware spotlight overlay)
 - Implemented in `<ProductTour />` mounted inside `AppLayout`, wrapped by `<TourProvider />`. Spotlights any element with a `data-tour="…"` anchor in the layout chrome.
-- **Auto-start triggers:**
+- **Auto-start triggers (at most once per user, ever):**
   - Onboarding completion → `markTourPending()` writes `sessionStorage.velvet_elves_tour_pending = "1"` → `AppLayout` consumes the flag on next mount and auto-starts the tour.
-  - First sign-in for a user whose per-user `localStorage.velvet_elves_tour_completed:{userId}` is unset.
-- **Manual restart:** Settings → Help & Tour → Start tour (clears the per-user completion key and calls `TourProvider.start()`).
-- **Step lists** (selected via `getTourSteps(role)`):
-  - **Internal** (Agent, TC, Team Lead, Admin, default fallback): 9 steps — Welcome → KPI tiles → Active Transactions nav → Task Queue nav → All Documents nav → AI Briefing top-bar button → Search ⌘K → Notifications bell → +New Transaction → Finale.
-  - **Attorney:** 5 steps — Welcome → Matter Queue (transactions nav, relabelled) → Documents → Today's AI briefing → Finale.
-  - **External (FSBO / Client / Vendor):** 5 steps — Welcome → My Properties (transactions nav, relabelled) → Documents → Ask Velvet Elves AI (sidebar AI nav) → Finale.
-- **Visual style:** Backdrop `rgba(15,20,30,0.55)` + 2 px blur painted with one `box-shadow` so the cutout is pixel-perfect at any DPR. Spotlight = orange border + soft halo + 2 s pulse ring with 8 px padding. Pointer events pass through so the underlying UI stays live. Tooltip card 360 px wide, white, drop shadow, orange gradient accent strip, small caret pointing at the spotlight. Tooltip placement auto-flips (top/bottom/left/right) and clamps inside the viewport. Welcome and Finale render as a centered hero card with a uniform dim backdrop (no spotlight).
-- **Animations:** Framer Motion fade + spring-tween on spotlight position changes (~0.28 s); pulse ring loops every 2 s. Re-measures on every animation frame so the spotlight tracks UI that reflows mid-tour, plus auto-scroll if the target is off-screen.
+  - First sign-in for a user with no recorded tour state (server-side or local).
+  - The moment the tour auto-starts, a `started` state is persisted — refreshing mid-tour never relaunches it.
+- **Manual restart:** Settings → Help & Tour → Start tour (internal + Attorney; also Account modal → Help & tour). Replays never clear the persisted state.
+- **Step lists** (selected via `getTourSteps(role)`; every role's shell is AppLayout, so every role has a real list):
+  - **Internal** (Agent, TC, Team Lead, Admin, default fallback): 20 steps — Welcome → Workspace switcher → KPI tiles → Active Transactions → Clients → My Task Queue → All Documents → Closing Calendar → Invoices & Payments → Vendor Directory → Team (Team Overview + Teams; config lives in Settings) → Intelligence (AI Suggestions, AI Email Review, Vendor Proposals, Analytics) → Oversight (Communication Audit + Audit Log) → AI briefing → Search ⌘K → Notifications → Settings & your account (topbar account menu) → +New Transaction → Ask AI FAB → Finale. Role-gated steps (switcher, Team, Oversight, payouts) auto-skip for users without those surfaces.
+  - **Attorney:** 12 steps — Welcome → Matters → Releases Queue → Recording Calendar → State Rules → AI Suggestions → Upload Legal Packet → Search → Notifications → Settings & your account → Ask AI FAB → Finale.
+  - **FSBO:** 9 steps — Welcome → My Properties → Documents → Payments → Messages → Share milestones CTA → Notifications → Ask AI FAB → Portal finale.
+  - **Client:** 9 steps — Welcome → Home → Timeline → Documents → Payments → Agent Info → Ask-your-agent CTA → Notifications → Portal finale.
+  - **Vendor:** 6 steps — Welcome → Document Requests → My Uploads → Upload document CTA → Notifications → Portal finale.
+- **Visual style:** Backdrop `rgba(15,20,30,0.55)` drawn as one full-viewport SVG rect with an animated rounded-rect hole punched via an SVG mask (a giant box-shadow was culled by Chromium whenever the cutout touched a viewport edge — i.e. every sidebar target). Spotlight = 1.5 px orange ring + soft halo element + 2 s pulse ring, 8 px padding. Tooltip card 360 px wide, flat white, hairline `ve-border`, soft shadow, **no gradient strip**; sentence-case context line above a serif title; small caret pointing at the spotlight. Placement auto-flips and clamps inside the viewport. Welcome and Finale render as a centered hero card over the uniform dim.
+- **Animations:** Framer Motion fades + 0.28 s ease-out tween on spotlight moves; pulse loops every 2 s. Wrapped in `MotionConfig reducedMotion="user"`. Re-measures every animation frame; auto-scrolls the target into view once per step.
 - **Controls:**
-  - Next (orange primary, label flips to **Finish** on the last step).
-  - Back (ghost, disabled on step 1).
-  - Skip (small X in the top-right of the tooltip; clicking the dimmed area outside the spotlight also skips).
-  - Progress dots (one per step; current dot wide and orange; previously-seen dots clickable for backward jumps; forward jumps blocked).
-  - Step counter `2/9` style next to the dots.
-- **Keyboard:** `→` / `Enter` advance; `←` go back; `Esc` skip / dismiss. `⌘K` / `Ctrl+K` is **passed through** so global search remains reachable mid-tour.
-- **Persistence:**
-  - Marked complete only on Finish (or Esc on the final step). Skipping mid-tour does NOT mark complete.
-  - Storage keys: `localStorage.velvet_elves_tour_completed:{userId}` (per-user completion), `sessionStorage.velvet_elves_tour_pending` (cross-page hand-off from onboarding). Legacy `velvet_elves_tutorial_completed` is auto-deleted on first read so users stuck on the old broken global flag see the new tour.
-- **Resilience:** Steps whose target element does not exist for the role's sidebar are silently skipped after a ~1.2 s grace window for route-driven mounts. No broken arrows.
-- **Accessibility:** Rendered as `role="dialog" aria-modal="true"` with title id `ve-tour-title`. Pulse ring is `aria-hidden`. Respects `prefers-reduced-motion`.
+  - Next (orange primary; reads **Start tour** on the welcome card and **Finish** on the last step).
+  - Back (ghost, from step 2 on). Step 1 shows **Skip tour** (ghost) in its place.
+  - X in the card corner dismisses (tooltip notes it's replayable from Settings).
+  - Progress dots for tours ≤12 steps (backward jumps allowed, forward blocked); longer tours use a slim proportional bar. Counter reads `2 of 9`.
+  - Clicking the dimmed area does nothing (a misclick must not kill the tour).
+- **Keyboard:** `→` / `Enter` advance; `←` back; `Esc` dismisses. `⌘K` / `⌘L` pass through.
+- **Persistence (server-first):**
+  - Every exit persists: Finish → `completed`, X/Esc/Skip → `dismissed` (+ step index), auto-start → `started`. Any recorded state suppresses future auto-starts, so the tour can never nag on refresh.
+  - Authoritative record: `users.profile_settings_json.product_tour` (`{status, updated_at, step}`), written via `PATCH /users/me { profile_settings }` (whitelisted key) — sticks across browsers and devices. `localStorage.velvet_elves_tour_completed:{userId}` is written synchronously first as an offline fallback. `sessionStorage.velvet_elves_tour_pending` hands off from onboarding. Legacy `velvet_elves_tutorial_completed` is auto-deleted on first read.
+- **Resilience:** Steps whose target element does not exist for the role are silently skipped after a ~1.2 s grace window. While the probe is looking, the card is withheld (uniform dim only) so a step never flashes as a mislabeled centered card.
+- **Accessibility:** Rendered as `role="dialog" aria-modal="true"` with title id `ve-tour-title`. Dim/ring/pulse are `aria-hidden`. Respects `prefers-reduced-motion` via MotionConfig.
 
 ---
 
