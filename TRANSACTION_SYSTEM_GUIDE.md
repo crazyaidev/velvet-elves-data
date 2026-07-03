@@ -2,7 +2,7 @@
 
 **Audience:** Transaction coordinators, agents, team leads, and brokers (no technical background needed)
 **What this covers:** The full journey through the actual screens, with what each page looks like, from setting up your task list in Settings, to opening a new deal in the AI Wizard, to the task list the system builds, to working the deal on its transaction page
-**Last updated:** June 23, 2026
+**Last updated:** July 3, 2026 (Jake's five decisions from Section 8 are now built in; deadlines no longer move off weekends or holidays)
 
 ---
 
@@ -160,7 +160,7 @@ When you reach Step 5, the system fits your master task list to this deal. It do
 2. **Applies the deal's specifics.** No HOA, no HOA tasks. If your side orders title, "Order Title" appears; if the other side orders it, "Confirm Title Order" appears instead.
 3. **Handles dual agency** by merging duplicate tasks into one and skipping tasks that have no meaning when you represent both sides.
 4. **Applies the closing style** (a title-company closing versus an attorney closing).
-5. **Sets each deadline** by counting from the Contract Acceptance date or the Closing date. If a deadline lands on a weekend or a recognized holiday, it moves to the next business day, the way contracts expect.
+5. **Sets each deadline** by counting from the Contract Acceptance date or the Closing date. Every deadline counts in **calendar days** and lands exactly where the count says, weekends and holidays included; a real-estate timeline can end on a Sunday, and a deadline that arrives early is always safer than one that slips late. A deadline counts in **business days** only when the contract writes it that way, and its label says so plainly ("5 business days after Date of Acceptance"). A small gray "lands on Sat" tag appears on weekend deadlines so nothing surprises you.
 6. **Assigns each task to the right person** (you, the co-op agent, the buyer, the seller, the loan officer, or the title company).
 
 ### Two guarantees that protect you
@@ -232,95 +232,65 @@ The same tasks and deadlines feed the sidebar views, so you do not have to open 
 Pulling the promises from the start of this guide back together, now that you have seen them on screen:
 
 - **It follows your playbook.** Tasks come from your master list on the Task Templates page, never invented by the AI.
-- **It fits the deal.** Only the tasks that apply to this specific transaction appear, with deadlines counted from the contract and rolled to business days.
+- **It fits the deal.** Only the tasks that apply to this specific transaction appear, with deadlines counted from the contract in calendar days that land exactly where the count says.
 - **You stay in control.** You review and adjust the full list on the Step 5 "Tasks & create" screen before a single task is created, and what you preview is exactly what gets created.
 - **It is honest about gaps.** When the system is missing a date or a piece of information, it tells you plainly (a locked timeline, an undated task with a reason, a coverage notice) and leaves the task undated rather than guessing, so a confident-looking but wrong deadline never reaches you.
 
 ---
 
-## 8. A few decisions we need you to confirm
+## 8. Decisions from your brokerage, now built in
 
-The system is built to be honest rather than to guess. In a handful of places, the best default depends on how your brokerage and your local contracts actually work. We have already built a sensible, safe default for each one, so nothing here blocks day-to-day use. These questions simply let us fine-tune the system to your office. For each one below you will find what it is about, how the system behaves today, what we suggest, and the decision we need from you.
+Earlier versions of this guide ended with five open questions. Jake answered
+all five (the full exchange is preserved in
+`Q&A_Transaction_Generation_System.md`), and the system now works exactly as
+decided:
 
-### Question 1 - When the contract does not say who orders title
+1. **When the contract does not say who orders title, the system asks you —
+   never a default.** "Who Orders Title" is a required question on the
+   wizard's review screen: two clear cards ("Buyer orders title" / "Seller
+   orders title"), each telling you which task it will create. There is no
+   brokerage default to overlook. The "no title task" notice remains as the
+   safety net for deals created outside the wizard, and answering it there
+   creates the right task on the spot. Attorney closings skip the question
+   entirely — the attorney owns title work there.
 
-**What this is about.** Every deal needs to know whether your side or the other side is responsible for ordering the title work. That single answer decides which task you get: an **"Order Title"** task (your office orders it) or a **"Confirm Title Order"** task (you follow up to make sure the other side ordered it).
+2. **No standard deadline windows, ever.** The inspection, inspection
+   response, HOA document, and insurance windows come from the contract or
+   from you. When the AI is at least 90% sure, the value is filled in with
+   its citation. When it is fairly sure but not certain (roughly 70-89%),
+   the field stays EMPTY and an amber "AI suggests: 10 days · 82% · page 4"
+   chip appears — one click accepts it, or you type your own. Below that,
+   the field is simply blank for you to fill. Your admin can tune these
+   levels under AI & Automation.
 
-**How it works today.** The system reads this straight from the contract whenever the contract states it. When the contract is silent and the question was not answered in the wizard, the system does not guess. It leaves it blank and shows a notice on the "Tasks & create" screen: "No title task was generated, confirm who orders title." That way a deal can never quietly launch with no title task.
+3. **Cash deals: the appraisal follows the contract's election.** On every
+   cash deal, in every state, the AI looks for whether the buyer elected or
+   waived an appraisal. Elected: the appraisal tasks appear. Waived: they do
+   not. Silent: the wizard asks you ("Appraisal on this cash deal?") before
+   the deal can be created — no guessing. On a live deal, the Timeline tab
+   shows the recorded decision with a one-click switch; flipping it adds or
+   removes the appraisal tasks while completed work stays untouched.
 
-**What we suggest.** Keep that honest notice as the safety net, and, if you like, let your brokerage set a default side for the silent case, since most offices have a usual arrangement.
+4. **Calendar days, landing exactly where the count says.** Deadlines no
+   longer move off weekends or holidays: 5 days after a Monday acceptance is
+   Saturday, and it stays Saturday — hitting early always beats slipping
+   late. A deadline counts in business days only when the contract writes it
+   that way, and its label says so ("5 business days after Date of
+   Acceptance"). Weekend deadlines carry a small gray "lands on Sat" tag so
+   you see it coming.
 
-**Your call.** When the contract does not say who orders title, would you like the system to assume a side by default (and which side: your side or the other side), or keep prompting you to choose each time?
-
-**Jake's answer**: 
-
-### Question 2 - Standard deadline windows when the contract does not list them
-
-**What this is about.** A few deadlines are counted from a number of days the contract usually spells out: the inspection period, the inspection-response window, the HOA-document delivery window, and the insurance-commitment window.
-
-**How it works today.** The system uses the number written in the contract. When that number is missing, it does not invent one. It leaves that single deadline undated with a short note, so you can fill it in.
-
-**What we suggest.** Let your brokerage set standard fallback windows that pre-fill (visibly, so you can still change them) when the contract is silent. As a starting point, in calendar days: inspection 10, inspection response 5, HOA documents 10, insurance commitment 10.
-
-**Your call.** What standard day counts should we use for your market? Please confirm or adjust the four suggested numbers above.
-
-**Jake's answer**: There should be no standard deadline windows All purchase agreements are different and different things will matter to different agents and different brokerages. It doesn’t make sense to standardize anything because different markets determine different timelines. We need to train AI to recognize these fields better and make recommendations when it’s not 90% confident or above The recommendation would need to be approved by the agent and if it isn’t that confident it should just have a blank there for the agent to fill out during submission.
-
-**Response:** Agreed, and this is already how the system works, so nothing to undo. It does not standardize these windows: it reads the number from the contract, and when the contract is silent it leaves that deadline blank with a note rather than inventing one. It already uses the 90% bar you describe: above it the value is accepted, below it it is surfaced for the agent to confirm, and a value it cannot find is left blank for the agent to fill in. So I will not add standard windows. The real work your answer points to is recognition: training the AI to find these fields more reliably, and showing a borderline read (say 70 to 89%) as a recommendation the agent approves rather than a silent fill. The system already tunes confidence field by field, so I will focus there, on better extraction of the inspection, inspection-response, HOA-document, and insurance windows.
-
-
-### Question 3 - Appraisal on cash deals
-
-**What this is about.** Financed deals always include appraisal tasks (ordered, then completed) because the lender requires the appraisal. Cash deals usually have no lender and no appraisal.
-
-**How it works today.** Cash deals get no appraisal tasks by default.
-
-**What we suggest.** Keep cash deals appraisal-free by default. If some of your cash buyers do choose to appraise, we add a simple one-click "this cash deal has an appraisal" option on the deal, rather than always creating the tasks.
-
-**Your call.** Do your cash deals usually involve an appraisal?
-
-**Jake's answer**: AI should be Able to review the contract. Most cash deals or contracts should have something that signifies if the buyer would like an appraisal or not and if it does not have that it should have language in the contract that states whether the buyer would like an appraisal. I believe that AI should be trained to look for that on every cash deal regardless of state.
-
-**Response:** Agreed, and the right approach. Today the parser reads an appraisal deadline when the contract gives one, but it does not yet read an explicit "buyer elected or waived an appraisal" choice, and the current master list actually attaches a cash appraisal follow-up task to every cash deal by default (a small mismatch with how this guide describes it, worth knowing). I will add an explicit appraisal-election read to parsing on every cash deal and drive the appraisal task from it: elected means the tasks appear, waived means they do not, and silent-or-unsure means we ask the agent rather than guess, using the same confidence-and-confirm machinery as Question 2. One confirmation: when a cash contract is genuinely silent, default to no appraisal task and prompt the agent (my recommendation), or assume one?
-
-
-### Question 4 - Calendar days versus business days
-
-**What this is about.** Some contract deadlines are written in calendar days (every day counts) and some in business days (weekends and holidays are skipped). The two can land on different dates, so it matters which way each deadline is counted.
-
-**How it works today.** Every deadline is counted in calendar days, and if a deadline happens to land on a weekend or a recognized holiday, it is moved to the next business day.
-
-**What we suggest.** Switch only the specific deadlines your contracts actually write in business days to count that way. The likely candidates are the inspection-response deadline and the financing or clear-to-close deadline, but we want your confirmation rather than guessing.
-
-**Your call.** Which of your contract deadlines are written in business days rather than calendar days?
-
-**Jake's answer**: For this question AI should read the contract and determine each deadline independently. Some deadlines should be calendar days and others business days and if no determination is stated definitively in the contract then calendar days will be the default for the timer of the task.
-
-**Response:** Agreed, and the default you want is already in place: deadlines are counted in calendar days, and one that lands on a weekend or federal holiday rolls forward to the next business day. The piece to add is reading each deadline's basis from the contract. The math for true business-day counting is already built; what the system does not yet do is decide, per deadline, which to use. So I will add a per-deadline read during parsing, calendar versus business, defaulting to calendar (rolled forward) when the contract is silent, exactly as you describe. One wording confirmation: for a calendar-day deadline that lands on a Saturday, I recommend still rolling it to the next business day (a deadline you cannot act on is not useful), reserving true business-day counting for deadlines the contract writes that way.
-
-
-### Question 5 - Which states to support next
-
-**What this is about.** Closings work differently from state to state. In title-company states (such as Indiana, your primary market) the title company runs the closing. In attorney-closing states (for example New York, Georgia, or South Carolina) an attorney is involved and the task list is different.
-
-**How it works today.** The system is set up for title-company states, with Indiana fully supported. The attorney-state tasks (attorney review period, attorney-ordered title, attorney closing) are not built yet.
-
-**What we suggest.** Build the attorney-state workflow once you tell us which states your next brokerages are in, so we model the right one first instead of guessing.
-
-**Your call.** Which states are your next brokerages in, and are there any attorney-closing states you would like supported first?
-
-**Jake's answer**: We’re not building this to expand our brokerage into other states we are building this to sell to other brokerages to for Sale by owners to attorneys and attorney states So what we need to build is something that is usable for all 50 states. Let’s focus on the attorney closing states to build out those task lists using our existing lists and justice modifying them for attorneys versus title companies. If you have questions on any of the tasks and how they would relate to attorney states let us know and we will build those out for you.
-
-**Response:** Understood. That reframes this from "which states do we expand into" to "make the product sell into all 50 states, attorney states included," and the build is set up for it. The product already knows which states are attorney versus title-company, already has the switch that selects an attorney workflow over a title-company one, and the parser already reads whether a deal closes through an attorney or a title company. What is missing is the attorney task content: today's master list is title-company and Indiana shaped, with no attorney tasks yet. So your instruction, adapt the existing lists for attorneys versus title companies, is the lowest-risk path: clone the title-company list, swap the steps a title company runs (ordering title, scheduling and running the closing, disbursing) for the attorney equivalents (attorney review and approval period, attorney orders the title commitment, attorney conducts closing and disbursement), tag them to the attorney workflow, and the existing switch selects them by state or by what the contract says. Closing practice nationwide is really these two patterns plus state-specific disclosure forms, so "all 50 states" is two base workflows plus per-state form differences, not fifty hand-built lists.
-
-A few task questions so I can build the attorney list accurately (you offered):
-
-1. In attorney states, is the title commitment ordered by the attorney, or does an agent still order title and the attorney reviews it?
-2. Is there a formal attorney-review or approval period to model as its own deadline (for example the New York and New Jersey "attorney review," often around 3 business days), counted from contract acceptance?
-3. Who runs the closing and disburses funds: the attorney alone, or an attorney plus a title or settlement agent?
-4. Are there attorney-state steps with no title-company equivalent (for example an attorney opinion of title, or an attorney-prepared deed) that I should add rather than swap?
-5. For the for-sale-by-owner and attorney-direct customers you mentioned, does anything change versus a brokerage in who each task is assigned to?
-
+5. **Attorney states, per your workbook.** The product now carries two base
+   workflows instead of one list per state. In North Carolina, South
+   Carolina, Georgia, and Delaware the attorney owns the legal, title, and
+   closing steps — your coordination task is "Confirm Closing Attorney
+   Selected" and "Send Executed Contract to Closing Attorney", never "Order
+   Title" — and state-specific steps (like the North Carolina title
+   opinions) appear only where verified. New Jersey gets its 3-business-day
+   attorney-review deadline counted from delivery of the signed contracts,
+   and only when a licensee prepared the contract. New York (and anywhere
+   else) gets a review deadline only when the contract itself creates one.
+   Every other state runs the standard title-company workflow until its
+   rules are verified — no state is ever guessed into the attorney column.
 
 ---
 

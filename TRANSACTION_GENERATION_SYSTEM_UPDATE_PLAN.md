@@ -1,9 +1,12 @@
 # Transaction Generation System - Q&A-Driven Update Plan
 
-**Status:** PLAN ONLY. No source code has been changed.
+**Status:** IMPLEMENTED 2026-07-03 (uncommitted; 6 new migrations for Jan to
+apply — see the Implementation Status appendix at the end of this file for
+what shipped, what was deliberately adjusted, and the small remaining items).
 **Date:** 2026-07-02 (Revision 2, same day: corrections from a full
 workflow/logic review against the source; see the defect register II.3 and
-the "review corrections" notes marked [RC] throughout)
+the "review corrections" notes marked [RC] throughout. Revision 3,
+2026-07-03: implementation pass complete, status appendix added.)
 **Author:** Jan
 **Requirements basis:** `requirements.txt` Section 15 (added 2026-07-02 from
 `Q&A_Transaction_Generation_System.md`)
@@ -999,5 +1002,84 @@ through user-visible recompute/cascade previews only).
    workstream.
 
 ---
+
+## Implementation Status (2026-07-03)
+
+Everything below is IMPLEMENTED, tested, and uncommitted (Jan commits; the
+six new migrations are written but not DB-applied).
+
+**Migrations (apply in order, after 20260905090000):**
+- `20260906090000_derived_condition_semantics.sql` — D1 fix: title/warranty
+  conditions rewritten to the derived responsibility fields.
+- `20260906091000_confidence_recommendation_floor.sql` — §15.2 band floor.
+- `20260906092000_cash_appraisal_election.sql` — D2 fix:
+  `transactions.has_appraisal`, task 265 conditioned, cash "Appraisal
+  Completed" (271) seeded.
+- `20260906093000_deadline_day_basis.sql` — §15.4 per-deal basis map.
+- `20260906094000_template_workflow_column.sql` — D3 fix (part 1):
+  `task_templates.workflow` + title-company tags on 70/80/290/300/305/310/
+  320/350.
+- `20260906095000_attorney_task_library.sql` — the 15 workbook attorney
+  tasks (legacy ids 900-970, families, flag conditions).
+- `20260906096000_attorney_review_columns.sql` — NJ/NY review inputs on
+  transactions.
+
+**Shipped per phase (all with passing tests):**
+- Phase 0: derived-condition evaluator (`build_derived_condition_values` +
+  `evaluate_conditions(derived=…)`), `recommendation_floor` end to end
+  (model/repo/API validation/admin slider), band-order enforcement.
+- Phase 1: who-orders-title required in the wizard (skipped for attorney
+  closings AND the NC/SC/GA/DE cluster), option-card Missing-Info rows,
+  server coverage prompts on the workspace plan + resolve-in-place banners,
+  `retarget_conditional_tasks` (scoped diff by template_id; replaces the D4
+  name-matching switch — manual/AI tasks are never touched).
+- Phase 2: explicit `inspection_days`/`inspection_response_days` extraction
+  + four-window prompt guidance, recommendation-band UX (empty field + amber
+  "AI suggests" chip with one-click accept, scoped to the decision-critical
+  fields only), benchmark `QA_DECISION_FIELDS` floor.
+- Phase 3: `appraisal_election` parse read → tri-state `has_appraisal`;
+  cash-deal wizard gate; Timeline-tab one-click flip (useConfirm; completed
+  and manual work preserved); coverage prompt for API-created deals.
+- Phase 4: NO-ROLL shipped as the DEFAULT behind `ve_deadline_no_roll_v1`
+  (deliberate adjustment from the plan's flag-off rollout: Jake's Q4 answer
+  is categorical and confirmed, so the requirement ships on with
+  `VE_DEADLINE_NO_ROLL_V1=false` as the escape hatch); per-deal
+  `deadline_day_basis_json` read from the contract, effective-basis
+  resolution in the dependency engine + timeline planner, plain-language
+  business-day basis strings, "lands on Sat/Sun" hint chips (wizard +
+  workspace); all roll-era test assertions flipped to pin the new behavior.
+- Phase 5: `state_workflow_profiles.py` (the workbook as code — see the
+  deliberate adjustment below), `state_rules.py` rewritten (no binary state
+  list, no name matching; selection by the deal's resolved workflow ×
+  template `workflow` column; contract closing_mode beats geography;
+  statutory extras flag-gated so a contract-attorney deal in an unverified
+  state gets the generic chain only), attorney library seeded, NJ
+  3-business-days-from-delivery clock (licensee-prepared only; undated with
+  the honest reason when the delivery date is unknown), NY contract-clause
+  deadline, title coverage satisfied by the attorney title family, RESPA
+  §2608 helper note on the People tab's Title group.
+
+**Deliberate adjustments from the plan (with reasons):**
+1. State profiles live in CODE (`state_workflow_profiles.py`), not the
+   `state_workflow_profiles` DB table: the planner is sync and pure, the
+   profile data is static verified law, and a DB table without a platform
+   editing surface adds async threading for no capability. The table +
+   platform editor remain the follow-up when profile editing is wanted.
+2. `ve_deadline_no_roll_v1` defaults ON (see Phase 4 above).
+3. The frontend mirrors the NC/SC/GA/DE cluster as a small constant in
+   `wizardTypes.ts` (documented to stay in sync) so the wizard gate is
+   correct without a new API round-trip.
+
+**Remaining (small, non-blocking):**
+- Custom-deadline BASIS toggle in RuleFields/AddDeadlineModal and a term-row
+  basis override editor (the contract-read basis and template basis work;
+  the agent can already override any resolved DATE — only the per-rule
+  calendar/business toggle UI is pending).
+- FSBO owner-relabel of agent-coordination tasks (III.6.5(a)); the FSBO
+  next-steps surface already derives from tasks, and the attorney
+  scope-confirmation task ships in the library.
+- Task Templates page `workflow` chip (the API already returns the field).
+- Headless-Chrome screenshots of the changed surfaces (AW-style visual pass)
+  and the T1-T13 walkthroughs against a live dev backend.
 
 *End of plan.*
