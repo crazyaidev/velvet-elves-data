@@ -76,7 +76,7 @@ not needed at all. Pick ONE of the two options below.
 
 ```
 stripe listen \
-  --events checkout.session.completed,payment_intent.succeeded,charge.refunded,refund.updated \
+  --events checkout.session.completed,checkout.session.expired,payment_intent.succeeded,charge.refunded,refund.updated \
   --forward-to localhost:8000/api/v1/webhooks/stripe
 ```
 
@@ -87,10 +87,12 @@ stripe listen \
 - Keep this process running while testing.
 - The `--events` filter is optional; forwarding everything also works.
 
-These four events are exactly what the credit path needs:
-`checkout.session.completed` and `payment_intent.succeeded` both grant credits
-(Stripe fires both for a `mode=payment` purchase; the grant is idempotent so it
-only counts once), and `charge.refunded` / `refund.updated` reconcile refunds.
+These five events are exactly what the billing path needs:
+`checkout.session.completed` and `payment_intent.succeeded` both grant the
+purchased deals (Stripe fires both for a `mode=payment` purchase; the grant is
+idempotent so it only counts once), `checkout.session.expired` closes out an
+abandoned checkout so it never reads as a stuck purchase, and
+`charge.refunded` / `refund.updated` reconcile refunds.
 
 ### Option B: ngrok + a Dashboard endpoint
 
@@ -100,7 +102,7 @@ Use this instead of Option A, not in addition.
 ngrok http 8000
 # Stripe Dashboard -> Developers -> Webhooks -> Add endpoint
 #   URL:    https://<id>.ngrok-free.app/api/v1/webhooks/stripe
-#   events: checkout.session.completed, payment_intent.succeeded, charge.refunded, refund.updated
+#   events: checkout.session.completed, checkout.session.expired, payment_intent.succeeded, charge.refunded, refund.updated
 # Copy that endpoint's Signing secret (whsec_...) into STRIPE_WEBHOOK_SECRET
 ```
 

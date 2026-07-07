@@ -2,9 +2,30 @@
 
 **Status:** Draft for production approval  
 **Owner:** Jan (sole dev)  
-**Last updated:** 2026-05-13  
+**Last updated:** 2026-07-06 (refreshed against current code and GCP state; see Section 0)  
+**Companion checklist:** `GMAIL_GOOGLE_APPROVAL_TODO.md` is the sequenced, checkbox to-do list. This doc is the reference (reasoning, policy language, scope justifications, demo script, reviewer answers).  
 **Related implementation:** `velvet-elves-backend/app/services/email/gmail_provider.py`, `velvet-elves-backend/app/api/v1/integrations.py`  
 **Related project docs:** `MILESTONE_4_1_EMAIL_INTEGRATION_CONFIGURATION_GUIDE.md`, `GMAIL_PUBSUB_WEBHOOK_CONFIGURATION_GUIDE.md`, `MILESTONE_4_2_AI_EMAIL_WORKFLOW.md`, `SYSTEM_DESIGN.md`, `MULTI_TENANCY_IMPLEMENTATION_PLAN.md`
+
+---
+
+## 0. Current state (2026-07-06 refresh)
+
+This section supersedes anything below it where they conflict. It records what a source and GCP review confirmed on 2026-07-06.
+
+**Production Google Cloud project is `velvet-vles`** (project number 538509143953, display name "Velvet Elves"). Gmail, Pub/Sub, and Calendar APIs are enabled; a dedicated prod OAuth 2.0 Web client exists (`538509143953-sl6god134...`). Staging lives in a separate project (`velvet-elves-495419`). Only `velvet-vles` is submitted for verification.
+
+**Scopes requested today** (`gmail_provider.py`): `openid`, `email`, `profile`, `gmail.send`, `gmail.readonly`, `gmail.modify`. Calendar is a separate user consent on the same OAuth client and adds `calendar.events`.
+
+**Code-verified scope facts:**
+- The only Gmail endpoints called are `messages/send`, `messages` (list), `messages/{id}` (get), `users/me/history`, and `users/me/watch`. There is **no** `messages/modify`, `trash`, `batchModify`, or label add/remove anywhere in the provider. Therefore **`gmail.modify` is dead scope and should be removed** (drops the app to a single restricted scope, `gmail.readonly`). This upgrades the Section 4.2 recommendation from "probably remove" to "confirmed unused, remove."
+- `calendar.events` shares the same OAuth client, so it is reviewed alongside Gmail. The submission must either cover Calendar (describe + demo it) or accept that Calendar connect keeps showing the unverified screen until covered.
+
+**Public-pages gap:** the live public privacy page `velvetelves.com/legal` describes only the marketing site's email capture ("collects one thing: an email address"). It does **not** describe Gmail/Google user data, the Limited Use commitment, AI processing, or app-level deletion. It is insufficient for verification as written and must be extended or paired with an app-scoped privacy/Google-data page (Section 5).
+
+**Outstanding blocker:** the prod OAuth client redirect URIs still point at the old backend domain. They must move to `https://api.prod.velvetelves.com/api/v1/integrations/gmail/callback` and `.../api/v1/calendar/google/callback`, or prod connect returns `redirect_uri_mismatch`.
+
+**Not started:** scope minimization commit, consent-screen publish to Production, demo video, scope-justification packet, security evidence packet, submission.
 
 ---
 
@@ -109,21 +130,22 @@ Google's minimum-scope requirement is one of the highest-friction review areas. 
 | `gmail.readonly` | Read inbound messages for transaction matching and AI draft context | High | Keep only if message body/content is needed; justify with AI Email Review workflow |
 | `gmail.modify` | Broad read/modify/send capability | Very high | Remove unless the code must modify mailbox state, labels, or message read status |
 
-### 4.2 Strong recommendation: remove `gmail.modify` unless required
+### 4.2 Confirmed: remove `gmail.modify` (code-verified unused)
 
-The current code path appears to use:
+Source review on 2026-07-06 confirmed the provider calls only:
 
-- `users.watch`
-- `users.history.list`
-- `users.messages.get`
-- `users.messages.send`
+- `users.watch` (`users/me/watch`)
+- `users.history.list` (`users/me/history`)
+- `users.messages.get` (`users/me/messages/{id}`) and `users.messages.list` (`users/me/messages`)
+- `users.messages.send` (`users/me/messages/send`)
 
-If Velvet Elves is not modifying labels, changing read/unread state, deleting, archiving, or moving messages, `gmail.modify` will be difficult to justify. Before production submission:
+There is no label add/remove, read/unread change, trash, archive, delete, move, or `batchModify` call anywhere in `gmail_provider.py`. All of the above are covered by `gmail.readonly` (read/watch) and `gmail.send` (outbound). **`gmail.modify` is dead scope.** Before production submission:
 
-1. Search backend code for Gmail modify calls.
-2. Remove `gmail.modify` from `GMAIL_SCOPES` if unused.
-3. Re-test OAuth connect, inbound Pub/Sub, history sync, and outbound send.
-4. Confirm Google Cloud Console scopes exactly match the code.
+1. Remove `gmail.modify` from `GMAIL_SCOPES` in `app/services/email/gmail_provider.py`.
+2. Re-test OAuth connect, inbound Pub/Sub, history sync, and outbound send on staging (expect no behavior change).
+3. Make the Google Cloud Console consent-screen scopes exactly match the code.
+
+Result: the app carries a single restricted scope (`gmail.readonly`) plus the sensitive `gmail.send`, which is the narrowest defensible story for the current feature set and shrinks the security-assessment surface.
 
 If message body is not required for current production behavior, consider whether `gmail.metadata` can replace `gmail.readonly`. It is still restricted, but it better supports a least-privilege story for metadata-only matching. If AI replies need the message body, keep `gmail.readonly` and justify it directly.
 
