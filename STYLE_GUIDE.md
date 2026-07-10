@@ -90,6 +90,20 @@ The interface should feel like a high-end concierge, not a SaaS dashboard.
 | **Premium**    | Lora serif accents, mono small caps, soft shadows        | All-sans body, ALL-CAPS shouty headers, bevels             |
 | **AI-aware**   | Champagne (`#EE7623`) accent on AI-touched fields        | Robot icons, "AI Assistant" mascots, neon glows            |
 | **Confident**  | Decisive defaults, fewer choices, clear hierarchy        | Wizard-only-on-rails, 12-step modals, alert-driven UX      |
+| **Balanced**   | Deliberate use of space, actions where the eye expects them | Lopsided footers, half-empty cards, orphaned controls    |
+
+**"Professional UI design" means balanced and functional, not decorated.**
+The bar for a professional-grade real-estate tool is a surface that is
+**balanced** and **behaves like a precision tool** — clean layout and user
+convenience come first, decoration comes last (and often not at all). A step
+that is visually unbalanced — a button pushed to one edge with a void beside
+it, a bordered card with content clustered in one corner, a disabled control
+sitting alone — **fails this bar even when every color, font, and token is
+on-spec.** Balance is normative, not a finishing flourish; see § 4.5. This is
+distinct from "premium decoration": adding shine never fixes an unbalanced
+layout, and stripping the brand's expressive character to look "clean" is the
+opposite failure (a flat, characterless wizard was explicitly rejected). Aim
+for *balanced and expressive*.
 
 **Tone of voice in copy.** Plain, direct, a little warm. Address the user
 in the second person ("Drop files here", "Pick who you're representing").
@@ -252,6 +266,51 @@ fake spacing — let the parent's `space-y-N` carry it.
 | Modal dialog (alert)      | `max-w-[380px]`      |
 | Modal dialog (form)       | `max-w-lg` (512 px)  |
 | Wizard host modal         | `1040px`             |
+
+### 4.5 Layout balance & the action bar
+
+A professional tool feels **balanced**: horizontal space is used on
+purpose and controls sit where the eye expects them. Balance is a
+requirement, not a finishing touch — an unbalanced step undermines the
+tool's credibility even when every token is correct (§ 1).
+
+**The action bar.** Every step, form, or panel that ends in an advance
+control uses a single, balanced action bar:
+
+- **Secondary left, primary right, on one row.** Back / Cancel sit on the
+  left; the primary (Continue, Confirm, "Start AI extraction") sits on the
+  right. Don't split the two actions into separate bands — a mid-body CTA
+  card *and* a separate footer Back read as two disconnected actions.
+- **One primary per step, in one place.** Never duplicate the advance
+  action across a body card and a footer, and never split it under two
+  different labels (the "Start Intake" / "Start AI extraction" split was a
+  documented confusion — one name, one button).
+- **No lone control beside an empty half.** A `justify-between` row with a
+  single visible button leaves a lopsided void. If a step legitimately has
+  only one action, let its own action bar (e.g. a "ready" card) stand as
+  the footer — don't render a half-empty nav row around it.
+- **Never render a disabled control as a footer's sole occupant.** The
+  first step of a wizard has no back target: **omit Back entirely** (Exit /
+  Close in the top bar is the way out) rather than parking a dead, greyed-
+  out Back next to blank space. A disabled button is acceptable only when
+  it sits *paired* with its live counterpart and the disabled state is
+  momentary (e.g. a not-yet-valid primary that lights up on completion).
+
+**Cards fill their width on purpose.** A bordered card must not enclose
+content clustered in one corner with a large empty remainder. For a
+label + a compact control (a representation picker, an on/off row), anchor
+the label left and the control right (`justify-between`) so the card's
+width reads as intentional; stack to a column only on narrow screens
+(`flex-col sm:flex-row sm:items-center sm:justify-between`).
+
+**Empty space is a choice, not leftover.** Symmetric margins, aligned
+edges, and matched vertical rhythm (§ 4.3) make a surface feel engineered.
+If a region looks empty by accident, that is a bug — not minimalism.
+
+Canonical reference: the New Transaction wizard's **Upload** step. Step 1
+has no back target, so it renders no footer nav; its balanced
+"documents ready → Start AI extraction" bar is the footer, and the
+representation picker is a label-left / choices-right row.
 
 ---
 
@@ -708,6 +767,12 @@ These have been explicitly rejected by the client. Don't reintroduce:
     (`AdminPageHeader` + `px-3 md:px-6`, no `max-w`), not the centered
     `SettingsPageShell`. The centered single-column shell is for personal
     *config* settings, not tables of records (§ 15.4).
+22. **Lopsided action rows and orphaned dead controls.** A footer with a
+    single button pushed to one edge and empty space on the other, or a
+    disabled Back parked alone on a wizard's first step, reads as broken.
+    Actions come as a balanced **Back-left / primary-right** bar, or the
+    step's own action card stands as the footer; a step with no back target
+    omits Back entirely (§ 4.5).
 
 ---
 
@@ -1010,7 +1075,13 @@ decisions on one surface so the cognitive model stays intact.
 
 ---
 
-*Last revised: 2026-06-23 (rev 3 — flat-modal direction from Jan's
+*Last revised: 2026-07-09 (rev 4 — layout-balance direction from the client's
+AI-wizard Step-1 feedback: § 1 defines "professional = balanced & functional,
+not decorated" (and not flat/characterless); § 4.5 "Layout balance & the
+action bar" makes the Back-left / primary-right rule, the no-lone-control rule,
+and the no-orphaned-disabled-control rule normative; § 13 adds anti-pattern 22.
+Canonical reference: the wizard Upload step's footer-less balanced action bar.)
+Rev 3 (2026-06-23) — flat-modal direction from Jan's
 Task-Templates review: § 6.5 gains the flat header/footer anatomy and a
 clarified edit decision rule, § 6.3 reserves the champagne strip; § 9.3
 adds one-line filter bars + the `SegmentedControl` on/off voice; § 15.4
