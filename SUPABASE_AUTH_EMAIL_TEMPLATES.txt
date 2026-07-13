@@ -1,0 +1,323 @@
+================================================================================
+VELVET ELVES - SUPABASE AUTH EMAIL TEMPLATES (v3, standard professional copy)
+================================================================================
+
+Where to paste: Supabase Dashboard > Authentication > Emails (Email Templates).
+Each section below has the Subject line and the Body (Source tab, HTML).
+
+Copy standard
+- Standard business-correspondence structure: title, "Hello," salutation,
+  factual body ("We received a request to..."), a clear single action,
+  validity note, "no action is required" reassurance, and a
+  "Thank you, The Velvet Elves Team" sign-off.
+- Neutral, formal tone; no marketing language in transactional email.
+- Left-aligned text (business standard), one orange CTA per email.
+
+Design
+- 600px card, 48px inner padding, generous block spacing.
+- Brand tokens from the frontend tailwind ve.* palette: navy #1B2B3C,
+  orange #E26812, page background #F5F7FA, body text #4A4A4A.
+- Serif two-tone wordmark above the card, orange accent edge on the card.
+- Hidden preheader line per template (controls the inbox preview text).
+- Table layout, inline styles only, no external images/fonts, so it renders
+  correctly in Gmail/Outlook and stays self-contained.
+- The raw link is repeated as plain text under a divider for clients that
+  strip button styling.
+
+Setup reminders
+- Set the sender name to "Velvet Elves" (Authentication > Emails > SMTP
+  settings, or your custom SMTP provider).
+- Site URL and Redirect URLs (Authentication > URL Configuration) must list
+  the frontend origin(s), otherwise {{ .ConfirmationURL }} falls back to the
+  Site URL and drops the redirect. The frontend already routes the redirects:
+  signup confirmation -> /auth/confirm, password recovery -> /reset-password.
+- The "valid for 24 hours" wording matches Supabase's default email OTP
+  expiry. If you change Email OTP Expiration in Auth settings, update the
+  wording to match.
+- The app's transaction/party invites are sent by the backend, not by
+  Supabase. The "Invite user" template below only fires if
+  auth.admin.inviteUserByEmail is ever used; it is included for completeness.
+
+================================================================================
+1) CONFIRM SIGN UP
+================================================================================
+
+Subject:
+Verify your email address for Velvet Elves
+
+Body:
+<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;">Verify your email address to complete your Velvet Elves registration.</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:56px 16px 48px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;">
+        <tr>
+          <td align="center" style="padding:0 0 28px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;color:#1B2B3C;">Velvet <span style="color:#E26812;">Elves</span></td>
+        </tr>
+        <tr>
+          <td align="left" style="background-color:#FFFFFF;border:1px solid #E9E9E7;border-top:4px solid #E26812;border-radius:16px;padding:48px 48px 40px 48px;">
+            <h1 style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:22px;line-height:30px;font-weight:700;color:#1B2B3C;">Verify your email address</h1>
+            <p style="margin:0 0 16px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Hello,</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you for creating a Velvet Elves account. To complete your registration, please verify that {{ .Email }} is your email address.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" style="border-radius:10px;background-color:#E26812;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:13px 32px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">Verify email address</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#9A9A98;">This verification link is valid for 24 hours.</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">If you did not create a Velvet Elves account, no action is required and you can safely disregard this email.</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you,<br>The Velvet Elves Team</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td style="padding:32px 0 20px 0;"><div style="border-top:1px solid #EFEFED;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+            </table>
+            <p style="margin:0 0 6px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">If the button above does not work, copy and paste this link into your browser:</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#2C4C7F;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 24px 0 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">This message was sent to {{ .Email }} because this address was used to register a Velvet Elves account.<br>Velvet Elves &middot; Transaction management for real estate professionals &middot; Please do not reply to this automated message.</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+================================================================================
+2) RESET PASSWORD
+================================================================================
+
+Subject:
+Reset your Velvet Elves password
+
+Body:
+<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;">Follow the link to set a new password for your account.</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:56px 16px 48px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;">
+        <tr>
+          <td align="center" style="padding:0 0 28px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;color:#1B2B3C;">Velvet <span style="color:#E26812;">Elves</span></td>
+        </tr>
+        <tr>
+          <td align="left" style="background-color:#FFFFFF;border:1px solid #E9E9E7;border-top:4px solid #E26812;border-radius:16px;padding:48px 48px 40px 48px;">
+            <h1 style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:22px;line-height:30px;font-weight:700;color:#1B2B3C;">Reset your password</h1>
+            <p style="margin:0 0 16px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Hello,</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">We received a request to reset the password for the Velvet Elves account associated with {{ .Email }}. To set a new password, please use the button below.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" style="border-radius:10px;background-color:#E26812;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:13px 32px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">Reset password</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#9A9A98;">This link is valid for 24 hours and may be used only once.</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">If you did not request a password reset, no action is required; your password will remain unchanged.</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you,<br>The Velvet Elves Team</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td style="padding:32px 0 20px 0;"><div style="border-top:1px solid #EFEFED;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+            </table>
+            <p style="margin:0 0 6px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">If the button above does not work, copy and paste this link into your browser:</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#2C4C7F;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 24px 0 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">This message was sent to {{ .Email }} because a password reset was requested for this account.<br>Velvet Elves &middot; Transaction management for real estate professionals &middot; Please do not reply to this automated message.</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+================================================================================
+3) MAGIC LINK
+================================================================================
+(Only used if passwordless sign-in is ever enabled; safe to paste now so the
+default Supabase copy never reaches users.)
+
+Subject:
+Your Velvet Elves sign-in link
+
+Body:
+<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;">Use this one-time link to sign in to your account.</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:56px 16px 48px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;">
+        <tr>
+          <td align="center" style="padding:0 0 28px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;color:#1B2B3C;">Velvet <span style="color:#E26812;">Elves</span></td>
+        </tr>
+        <tr>
+          <td align="left" style="background-color:#FFFFFF;border:1px solid #E9E9E7;border-top:4px solid #E26812;border-radius:16px;padding:48px 48px 40px 48px;">
+            <h1 style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:22px;line-height:30px;font-weight:700;color:#1B2B3C;">Sign in to Velvet Elves</h1>
+            <p style="margin:0 0 16px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Hello,</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">We received a request to sign in to Velvet Elves as {{ .Email }}. To complete your sign-in, please use the button below.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" style="border-radius:10px;background-color:#E26812;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:13px 32px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">Sign in</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#9A9A98;">This link is valid for 24 hours and may be used only once.</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">If you did not request this sign-in link, no action is required and your account remains secure.</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you,<br>The Velvet Elves Team</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td style="padding:32px 0 20px 0;"><div style="border-top:1px solid #EFEFED;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+            </table>
+            <p style="margin:0 0 6px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">If the button above does not work, copy and paste this link into your browser:</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#2C4C7F;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 24px 0 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">This message was sent to {{ .Email }} because a sign-in link was requested for this account.<br>Velvet Elves &middot; Transaction management for real estate professionals &middot; Please do not reply to this automated message.</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+================================================================================
+4) CHANGE EMAIL ADDRESS
+================================================================================
+
+Subject:
+Confirm your new email address for Velvet Elves
+
+Body:
+<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;">Confirm the requested change to your account email address.</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:56px 16px 48px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;">
+        <tr>
+          <td align="center" style="padding:0 0 28px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;color:#1B2B3C;">Velvet <span style="color:#E26812;">Elves</span></td>
+        </tr>
+        <tr>
+          <td align="left" style="background-color:#FFFFFF;border:1px solid #E9E9E7;border-top:4px solid #E26812;border-radius:16px;padding:48px 48px 40px 48px;">
+            <h1 style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:22px;line-height:30px;font-weight:700;color:#1B2B3C;">Confirm your new email address</h1>
+            <p style="margin:0 0 16px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Hello,</p>
+            <p style="margin:0 0 20px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">We received a request to change the email address associated with your Velvet Elves account:</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin:0 0 28px 0;">
+              <tr>
+                <td align="left" style="background-color:#F8F8F6;border-radius:12px;padding:16px 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:14px;line-height:24px;color:#4A4A4A;"><span style="color:#9A9A98;">Current address:&nbsp;&nbsp;</span>{{ .Email }}<br><span style="color:#9A9A98;">New address:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>{{ .NewEmail }}</td>
+              </tr>
+            </table>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">To confirm this change, please use the button below. Your current email address remains active until the change is confirmed.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" style="border-radius:10px;background-color:#E26812;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:13px 32px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">Confirm email change</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#9A9A98;">This link is valid for 24 hours and may be used only once.</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">If you did not request this change, do not confirm it. We recommend resetting your password to keep your account secure.</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you,<br>The Velvet Elves Team</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td style="padding:32px 0 20px 0;"><div style="border-top:1px solid #EFEFED;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+            </table>
+            <p style="margin:0 0 6px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">If the button above does not work, copy and paste this link into your browser:</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#2C4C7F;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 24px 0 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">This message was sent because an email address change was requested for a Velvet Elves account.<br>Velvet Elves &middot; Transaction management for real estate professionals &middot; Please do not reply to this automated message.</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+================================================================================
+5) INVITE USER
+================================================================================
+(Fires only for auth.admin.inviteUserByEmail. The app's own transaction and
+team invites are sent by the backend with their own copy.)
+
+Subject:
+Invitation to join Velvet Elves
+
+Body:
+<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;">Accept your invitation and set up your Velvet Elves account.</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:56px 16px 48px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;">
+        <tr>
+          <td align="center" style="padding:0 0 28px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;color:#1B2B3C;">Velvet <span style="color:#E26812;">Elves</span></td>
+        </tr>
+        <tr>
+          <td align="left" style="background-color:#FFFFFF;border:1px solid #E9E9E7;border-top:4px solid #E26812;border-radius:16px;padding:48px 48px 40px 48px;">
+            <h1 style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:22px;line-height:30px;font-weight:700;color:#1B2B3C;">Invitation to join Velvet Elves</h1>
+            <p style="margin:0 0 16px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Hello,</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">You have been invited to create an account on Velvet Elves, the transaction management platform for real estate professionals. To accept the invitation and set up your account, please use the button below.</p>
+            <table cellpadding="0" cellspacing="0" role="presentation">
+              <tr>
+                <td align="center" style="border-radius:10px;background-color:#E26812;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank" style="display:inline-block;padding:13px 32px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:22px;font-weight:600;color:#FFFFFF;text-decoration:none;border-radius:10px;">Accept invitation</a>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:20px 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:13px;line-height:20px;color:#9A9A98;">This invitation link is valid for 24 hours.</p>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">If you were not expecting this invitation, no action is required and you can safely disregard this email.</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you,<br>The Velvet Elves Team</p>
+            <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+              <tr><td style="padding:32px 0 20px 0;"><div style="border-top:1px solid #EFEFED;font-size:0;line-height:0;">&nbsp;</div></td></tr>
+            </table>
+            <p style="margin:0 0 6px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">If the button above does not work, copy and paste this link into your browser:</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;word-break:break-all;"><a href="{{ .ConfirmationURL }}" style="color:#2C4C7F;text-decoration:underline;">{{ .ConfirmationURL }}</a></p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 24px 0 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">This invitation was sent to {{ .Email }}.<br>Velvet Elves &middot; Transaction management for real estate professionals &middot; Please do not reply to this automated message.</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+================================================================================
+6) REAUTHENTICATION
+================================================================================
+(Sent when a signed-in user must re-verify before a sensitive change.
+This template has no link; it shows a one-time code.)
+
+Subject:
+Your Velvet Elves verification code
+
+Body:
+<div style="display:none;max-height:0px;overflow:hidden;mso-hide:all;">Use this one-time code to verify your identity.</div>
+<table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#F5F7FA;">
+  <tr>
+    <td align="center" style="padding:56px 16px 48px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;width:100%;">
+        <tr>
+          <td align="center" style="padding:0 0 28px 0;font-family:Georgia,'Times New Roman',serif;font-size:24px;line-height:30px;color:#1B2B3C;">Velvet <span style="color:#E26812;">Elves</span></td>
+        </tr>
+        <tr>
+          <td align="left" style="background-color:#FFFFFF;border:1px solid #E9E9E7;border-top:4px solid #E26812;border-radius:16px;padding:48px 48px 40px 48px;">
+            <h1 style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:22px;line-height:30px;font-weight:700;color:#1B2B3C;">Your verification code</h1>
+            <p style="margin:0 0 16px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Hello,</p>
+            <p style="margin:0 0 24px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">A verification code was requested for your Velvet Elves account. Please enter the following code to confirm your identity and continue:</p>
+            <table cellpadding="0" cellspacing="0" role="presentation" style="margin:0 0 24px 0;">
+              <tr>
+                <td align="center" style="background-color:#FEF3E6;border:1px solid #F4BA87;border-radius:12px;padding:16px 36px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:28px;line-height:36px;font-weight:700;letter-spacing:8px;color:#1B2B3C;">{{ .Token }}</td>
+              </tr>
+            </table>
+            <p style="margin:0 0 28px 0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">This code may be used only once. If you did not request it, please disregard this email; we recommend changing your password if you receive repeated codes you did not request.</p>
+            <p style="margin:0;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:15px;line-height:24px;color:#4A4A4A;">Thank you,<br>The Velvet Elves Team</p>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="padding:28px 24px 0 24px;font-family:-apple-system,'Segoe UI',Arial,Helvetica,sans-serif;font-size:12px;line-height:19px;color:#9A9A98;">This message was sent to {{ .Email }} for a Velvet Elves account verification.<br>Velvet Elves &middot; Transaction management for real estate professionals &middot; Please do not reply to this automated message.</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+================================================================================
+END OF TEMPLATES
+================================================================================
