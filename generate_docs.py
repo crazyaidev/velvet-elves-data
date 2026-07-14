@@ -1052,6 +1052,64 @@ def create_transaction_automation_guide_doc():
     save_document(doc, "TRANSACTION_PROCESSING_AND_AUTOMATION_GUIDE.docx")
 
 
+def create_transaction_logic_workflow_guide_doc():
+    """Generate a .docx export of TRANSACTION_PROCESSING_LOGIC_AND_WORKFLOW_GUIDE.md
+    (client audience: Jake).
+
+    Mirrors create_transaction_automation_guide_doc: reuses the generic
+    markdown renderer (extract_feedback_header + render_feedback_body) so the
+    guide gets the same title page, metadata table, headings, bullets, and
+    tables as the other generated documents.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("TRANSACTION_PROCESSING_LOGIC_AND_WORKFLOW_GUIDE.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "TRANSACTION_PROCESSING_LOGIC_AND_WORKFLOW_GUIDE.docx")
+
+
 def create_gmail_approval_plan_doc():
     """Generate a .docx export of GMAIL_GOOGLE_APPROVAL_PLAN.md (client audience).
 
@@ -4426,6 +4484,7 @@ TARGET_BUILDERS = {
     "godaddy-route53-config": create_godaddy_route53_config_doc,
     "transaction-processing-method": create_transaction_processing_method_doc,
     "transaction-automation-guide": create_transaction_automation_guide_doc,
+    "transaction-logic-workflow-guide": create_transaction_logic_workflow_guide_doc,
     "gmail-approval-plan": create_gmail_approval_plan_doc,
 }
 
@@ -4468,6 +4527,11 @@ TARGET_ALIASES = {
     "transaction_processing_method.docx": "transaction-processing-method",
     "processing-method": "transaction-processing-method",
     "method": "transaction-processing-method",
+    "transaction_processing_logic_and_workflow_guide": "transaction-logic-workflow-guide",
+    "transaction_processing_logic_and_workflow_guide.md": "transaction-logic-workflow-guide",
+    "transaction_processing_logic_and_workflow_guide.docx": "transaction-logic-workflow-guide",
+    "logic-workflow-guide": "transaction-logic-workflow-guide",
+    "workflow-guide": "transaction-logic-workflow-guide",
     "gmail_google_approval_plan": "gmail-approval-plan",
     "gmail_google_approval_plan.md": "gmail-approval-plan",
     "gmail_google_approval_plan.docx": "gmail-approval-plan",
