@@ -281,8 +281,8 @@ Invoke-RestMethod -Uri 'http://localhost:8000/api/v1/ai-emails/settings' `
 2. Confirm:
    - The header callout reads `N AI drafts awaiting review` (only when N > 0). Clicking it routes to `/ai-emails`.
    - A second callout reads `N outbound emails sent on your behalf today` when applicable.
-3. Confirm the bell badge counts AI drafts pending toward unread.
-4. Click "Mark all seen" — bell badge goes to zero, but if AI drafts remain pending the badge shows the draft count (drafts are always actionable items, not just date-bound).
+3. Confirm the bell badge counts pending AI drafts toward unread (alongside due-date task notifications).
+4. Click "Mark all as read" — the bell badge goes to zero (drafts included) and a confirmation toast appears. The badge only re-lights when a genuinely new draft or task notification arrives; a still-pending draft you already acknowledged does not keep it lit.
 
 ### 3.10 Auto-send threshold (high confidence path)
 

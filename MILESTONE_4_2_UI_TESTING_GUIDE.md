@@ -313,13 +313,13 @@ Before testing the AI email screens, you need:
 
 ### What to verify
 
-1. **Badge count.** The bell shows a red badge with the unread count. AI drafts always count toward unread until the panel is opened.
-2. **Click the bell.** A dropdown panel opens.
+1. **Badge count.** The bell shows a red badge with the unread count. It counts due-date task notifications and pending AI drafts that have arrived since you last marked the panel read.
+2. **Click the bell.** A dropdown panel opens. Opening it does **not** silently clear the badge — the count stays until you explicitly acknowledge it.
 3. At the top of the panel, look for two callouts (only visible when applicable):
    - 🟠 **"N AI drafts awaiting review"** — clickable.
    - 📧 **"N outbound emails sent on your behalf today"** — informational.
 4. **Click the AI drafts callout** ➜ panel closes, you navigate to `/ai-emails`.
-5. **Mark all seen.** Click **Mark all seen** at the bottom. The bell badge clears (or shrinks to just the AI draft count if any remain).
+5. **Mark all as read.** Click **Mark all as read** at the bottom. The bell badge clears to zero (drafts included) and a confirmation toast appears; the button then reads **All read** and is disabled until new activity arrives.
 
 ### Edge cases
 
