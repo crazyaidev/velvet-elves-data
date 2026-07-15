@@ -1520,12 +1520,31 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Standalone wizard (minimal shell — logo + top stepper, no sidebar)
 - **Primary content area:** Multi-step wizard — see Cross-Cutting Workflow A for complete specification
-- **Phases (public 5-phase stepper; internal steps in parentheses):**
+- **Phases (public 4-phase stepper; internal steps in parentheses) — four-step
+  reorganization + Jake's answers, 2026-07:**
   1. Upload (Document Upload → AI Parsing Progress)
-  2. Review details (Address & Contacts → Purchase Info → Missing Info → Confirm)
-  3. Timeline — anchor gate, server-resolved deadline rules, cascade preview, Add Deadline modal
-  4. Compliance — the document checklist: per-row Attach Document modal (pick an intake/supporting file OR upload a new one mid-wizard), Add Document modal (real upload before the transaction exists; the file links at commit), AI verification chip on every fresh upload (checking → confirmed / mismatch warning, advisory only)
-  5. Tasks & create — Review Tasks (rule editor, related compliance item, Auto-Email toggle) → Approve & Create
+  2. Contract Details (`purchase`) — property address + price/dates/financing/
+     contingencies/notes on one step; a "✦ Found in the contract — needs your
+     eyes" band surfaces no-default decisions (who orders title, cash-deal
+     appraisal election)
+  3. Contacts & Fees (`address`) — parties (each a full contact card) + the two
+     fee cards (Professional + Transaction). A fee is paid by Buyer / Seller /
+     Both; each paying side carries its OWN amount and `%`/`$` unit (so "Both"
+     is two independent rows, e.g. seller 2% + buyer $250). A contract-stated
+     fee shows as a read-only hint; the cards prefill from the last deal
+     (localStorage) and are withheld from create until confirmed or edited.
+     `missing` (Missing Info) is a hidden auto-skip grouped in this phase.
+  4. Verification (`confirm`) — the review summary (source-linked value tables),
+     the folded Timeline anchor + AI proposal cards (deadlines, compliance,
+     tasks), the deal brief, the signature decision (client → e-sign queue;
+     counterparty → "request the signed copy from the other agent" task), and
+     referenced-missing-doc requests. **Create happens here** via a full-width
+     **"Upload Transaction"** button + disclaimer; the footer is Back-only.
+     Tasks/timeline/compliance are generated + auto-matched at commit.
+- **Retired from navigation (kept as legal step ids for stale-draft coercion):**
+  the standalone `timeline`, the manual attach-documents `checklist`, and the
+  `review` (Tasks preview) steps. The compliance-checklist EDIT surface moved to
+  the transaction workspace; requirements still auto-match + commit at create.
 
 ### 4. User Actions & State Transitions
 - See Cross-Cutting Workflow A for complete action specification per step

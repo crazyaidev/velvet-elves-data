@@ -27,6 +27,102 @@ stepper.
 
 ---
 
+## 0 · Four-step reorganization (2026-07) — test these first
+
+Audri's "less is more" reorg changed the review flow. Test the new behaviors
+below; the older sections keep their original internal step numbers for
+reference. Use the **`velvet-elves-data/testing_docs/`** 5915 E 350 N packet
+(PA + 4 counters + amendment + EM + seller disclosure + post-closing
+possession + pre-approval) for a realistic end-to-end run.
+
+### 0.1 Review-step order: Contract Details before Contacts
+**How to test.** Upload the packet (or skip to manual) and let parsing finish.
+- ✅ The first review screen is **"Contract Details"** — it holds the **property
+  address** (Street/City/State/ZIP) **and** the price, dates, financing,
+  contingencies, and notes, all on one step.
+- ✅ Clicking Continue goes to **"Contacts & Fees"** (parties), then to the
+  confirmation.
+- ❌ The property address is no longer on the parties step.
+
+### 0.2 Contacts & Fees — fee cards (per-side amounts)
+**How to test.** Reach the "Contacts & Fees" step; scroll below the parties.
+- ✅ A **Fees** section with two cards: **Professional fee** and **Transaction
+  fee**.
+- ✅ Each card has a **Buyer / Seller / Both** "Who pays?" toggle. Buyer or
+  Seller shows ONE amount box with its own **`% / $`** toggle. **Both** shows
+  **two labeled rows** — a Buyer amount+toggle AND a Seller amount+toggle — each
+  independent, so a split can be "seller 2%, buyer $250" (Jake #3). There is no
+  single amount split by shares.
+- ✅ Entering "3", clicking `%`, leaving payer on `Seller` is the entire
+  professional-fee flow. Fees are optional — leaving them blank never blocks
+  Continue.
+- ✅ **Transaction fee** helper text reads: "A broker, team, or brokerage admin
+  fee collected on the deal. Separate from the app's own per-deal billing fee."
+  (Jake #2 — capture-only.)
+
+### 0.2a Contract fee hint + prefill from last deal (Jake #5)
+**How to test.** Upload a contract that states a commission (e.g. "Seller pays
+3% listing commission"); reach Contacts & Fees.
+- ✅ A read-only **"The contract mentions: …"** hint sits on the Professional fee
+  card with its page citation. It NEVER auto-fills a number — the amount box
+  stays empty for you to enter.
+- ✅ On your **second** deal in the same browser, both fee cards arrive
+  **prefilled** from the last deal with a **"Prefilled from your last deal.
+  Confirm they're right for this one."** banner and a **"Looks right"** button.
+- ✅ The prefilled fees are **withheld from create** until you click "Looks
+  right" OR edit any fee field. (Create a deal without confirming → the deal has
+  no fees; confirm, then create → the fees are saved.)
+
+### 0.3 "Needs your eyes" decision band (Contract Details)
+**How to test.** Upload a contract that does NOT state who orders title (or use
+a manual entry), so the AI cannot settle the title decision.
+- ✅ At the top of **Contract Details**, an orange **"✦ Found in the contract —
+  needs your eyes"** band shows the one-click **Buyer/Seller orders title**
+  cards (and the cash-deal appraisal election when applicable).
+- ✅ When the contract states the title decision (normal case), the band does
+  **not** appear.
+
+### 0.4 Fees on Verification + workspace
+**How to test.** Enter fees, reach the Verification step, then create the deal.
+- ✅ The Verification summary shows a **Fees** card ("Professional fee — 3% ·
+  seller", a "Both" split as "buyer $250 · seller 2%", etc.).
+- ✅ After creating, the transaction workspace **Deal brief** shows the same
+  fees under a "Deal fees" line.
+- ✅ A deal with no fees shows no fee line anywhere (honest absence).
+
+### 0.5 Verification step + "Upload Transaction" (create moved here — Jake #1)
+**How to test.** Walk any deal to the last step (now labeled **"Verification"**,
+"Step 4 of 4").
+- ✅ The manual **attach-documents checklist step is gone** from the flow. The
+  deal is created right on Verification with a **full-width "Upload
+  Transaction"** button plus a disclaimer that tasks, timeline, and the
+  compliance checklist are generated at create and editable from the workspace.
+- ✅ The Verification footer is **Back-only** (no Continue/primary there).
+- ✅ Compliance requirements still auto-match uploads and commit at create (they
+  just aren't hand-edited in the wizard anymore — that surface moved to the
+  workspace). The `missing`-info step is retained (auto-skipped when nothing is
+  missing).
+- ✅ A double-check disagreement or a missing source document **disables**
+  "Upload Transaction" until resolved.
+- ✅ Below-tier AI compliance proposals appear on Verification as
+  **"✦ Found in the contract — compliance to review"** cards (Add / Dismiss, or
+  Waive it / Keep it). Verified ones flow to the plan silently.
+
+### 0.6 Document review → client-scoped actions (Jake #1)
+**How to test.** Upload a buyer-rep contract where the SELLER's signature block
+is unsigned (and/or a packet that references a document you did not upload).
+- ✅ On Verification, when the unsigned party is the **other side**, the
+  signature panel offers **"Request the signed copy from the other agent"** and
+  does NOT offer to e-sign the contract to them. When your **own client** is
+  unsigned, the e-sign queue is offered as before.
+- ✅ Referenced-but-missing documents show a **"Request from the other agent"**
+  button; clicking it queues the request.
+- ✅ Accepting either becomes a plain task on the new transaction ("Request
+  signed copy from the other agent" / "Request missing documents from the other
+  agent") — never an e-signature sent to the counterparty.
+
+---
+
 ## 1 · Step 1 — Documents
 
 ### 1.1 Mandatory representation radio

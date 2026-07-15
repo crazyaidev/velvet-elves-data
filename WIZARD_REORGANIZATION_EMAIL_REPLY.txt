@@ -1,0 +1,32 @@
+Subject: Re: Wizard Reorganization
+
+Hi Audri,
+
+This is a strong direction, and "less is more" is exactly the right instinct for intake. I'm on board with the four-step shape. Here's my read on each step, what already exists, and a few calls I'd like from you before I build.
+
+Step 1 (Document Upload): No change, agreed. Drop and parse stays as it is.
+
+Step 2 (Review Contract Details): I like pulling the contract facts away from the people. I'll group it exactly as you listed: Property Details, Deal Type & Pricing, Key Dates, Financing Summary, Contingencies/Terms & Extras, and Notes. The wizard already scores every field the AI fills with a confidence level and parks the borderline ones as one-click items to confirm, so I'll drive the "needs your eyes" flag straight off that and float the least-certain fields to the top.
+
+One small opinion: I'd surface "needs your eyes" as a clear highlight on the uncertain fields rather than printing a percentage next to every field, so the screen stays calm. I can show the exact number on the flagged fields or on hover. Say the word if you'd rather see the percentage everywhere.
+
+Step 3 (Review Contact Information and Fees): Agreed. All parties in one place (listing agent, co-agent, buyer(s)/seller(s), mortgage, title, and so on), with the same "needs your eyes" treatment.
+
+On fees, we show a detected professional fee today but not who pays it or the amount, so I'll build the fee section out properly:
+- A Professional fee box: the amount and who pays it.
+- A separate Transaction fee box, with the same controls.
+- Each accepts a percentage or a dollar amount (a simple $ / % toggle).
+- Each can be assigned to buyer, seller, or split between both.
+
+Two clarifications so I place and label these correctly:
+1. "Transaction fee": what should this capture, a coordinator or brokerage admin fee that a party pays inside the deal? I want to be sure it reads clearly and stays separate from the app's own per-deal billing fee.
+2. For a split, do you want a simple buyer / seller / both choice, or the ability to enter the exact share each side pays?
+
+Step 4 (Verification): Yes. A read-only summary of everything from Steps 2 and 3, with the confirmation disclaimer sitting just above the button, a short line stating that by uploading they confirm the reviewed details are correct and will be used throughout the transaction. And I'll make the "Upload Transaction" button span the full width of the review section.
+
+One bigger question, the document checklist. Today the wizard ends on a Documents step that asks you to attach files. Your four steps don't include it, and I think that's the right move. At the moment a deal is created you rarely have most of those documents yet, so that step mostly asks for files that don't exist yet. My recommendation is to retire it from the wizard and let document collection live in the transaction workspace after creation, where the files actually arrive over time. If you'd rather keep a lighter version inside the wizard I can, but I'd lean toward dropping it to honor "less is more." Let me know your preference.
+
+Send the testing docs whenever they're ready and I'll line everything up.
+
+Thanks so much,
+Jan

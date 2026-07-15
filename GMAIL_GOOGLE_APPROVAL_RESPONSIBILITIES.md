@@ -20,7 +20,7 @@ All preparation is mine: everything technical, all materials, and every guidelin
 | J5 | Complete consent-screen branding: app name, logo, home page, privacy and terms URLs, authorized domain `velvetelves.com` | Incomplete branding blocks submission | Open, support email needed from Jake (K2) |
 | J6 | Verify `velvetelves.com` ownership in Google Search Console (I hold DNS in Route 53) | Unverified authorized domain blocks verification | Open |
 | J7 | Write and publish the public pages: app privacy policy covering Gmail data, the exact Limited Use statement, AI disclosure, data deletion page, support page | Reviewers check public pages against the app; current `/legal` covers only the marketing email form | Open, needs K1 + K2 to finalize |
-| J8 | Decide and fold in the Calendar connection (`calendar.events` rides the same OAuth client) | Uncovered scope on the same client keeps showing warnings after Gmail approval | Open decision, mine |
+| J8 | Include the Calendar connection (`calendar.events`) in the submission | Calendar is a REQUIRED feature, not optional; it rides the same OAuth client, so it must be in the scope list, justifications, and demo video | Settled: include it (no owner sign-off needed) |
 | J9 | Record and upload the unlisted demo video showing consent, inbound read, human-approved send, disconnect | Mandatory submission artifact | Open, after J1-J5 |
 | J10 | Write the per-scope justifications | Mandatory submission artifact | Open |
 | J11 | Prepare the security evidence packet (architecture, token encryption, tenant isolation, logging policy, AI provider no-training terms) | Expected for restricted Gmail read access; being ready avoids weeks of scramble if the audit round comes | Open |
@@ -36,16 +36,17 @@ Six things, and only the first two block my work soon. K5 and K6 exist because J
 | # | Issue | Why it is his | When I need it |
 |---|---|---|---|
 | K1 | Give me the company's legal name and state | Goes into the privacy policy and terms; it is a business fact, not a technical one | **DONE 2026-07-06**: Orange Door, LLP dba Velvet Elves, Indiana |
-| K2 | Give me a support email address that a person actually reads, ideally `support@velvetelves.com`, and tell me who monitors it | Google requires a monitored support contact on the consent screen and public pages | **DONE 2026-07-06**: `support@velvetelves.com`; GoDaddy catchall receives it today, real mailbox once Workspace is live; monitor person still to confirm |
+| K2 | Give me a support email address that a person actually reads, ideally `support@velvetelves.com` | Google requires a monitored support contact on the consent screen and public pages | **DONE 2026-07-06**: `support@velvetelves.com`; catchall now, real mailbox once Workspace lands. Monitoring is inherently the owners' (Jake/Audri handle company mail + review correspondence); no staff name needed from them |
 | K3 | Buy Google Workspace for `velvetelves.com` (decision = YES, Jake started signup 2026-07-06) | It is a paid subscription on the company, and the project currently lives under his personal Google account | In progress: domain-verification record added by me 2026-07-07 (CNAME `73007731`→`google.com`, live + INSYNC); Jake clicks Verify / Check again in the signup to finish claiming the domain |
 | K4 | During the review: change nothing inside the Google Cloud project | Unexpected changes can restart a review | From submission day until approval |
 | K5 | Perform the submission in Google Cloud Console using my package (J12): publish to Production, walk the Verification Center screens, paste the prepared answers, attach the links, submit | He is the account under which the project lives and the owner of the submission; my package removes every technical decision from the walk-through | Same day the package lands if possible; package targeted for mid July (every idle day pushes launch a day) |
 | K6 | Front the review correspondence: forward each reviewer email to me the same day, send back the answer I draft | Google writes to the submitter, which is him; I supply the content (J13), he supplies the same-day turnaround | From submission day until approval |
+| K7 | If Google requires the paid security assessment (CASA): choose, engage, and pay an approved assessor | It is a paid engagement and a business decision, so it is the owners'. I advise on the approach and supply every technical material the assessor needs (J11); I do not engage or pay | Only if Google requires it |
 
 Optional fifth: a read-through of the privacy policy text before it goes live (K1 makes it accurate; his sign-off makes it his).
 
 ## Not on either list
 
 - The review duration itself: roughly 3 to 6 weeks after submission, up to ~8 with a security audit. Nobody can buy it down; the plan absorbs it by running in parallel with all other launch work.
-- The possible security audit cost: only exists if Google demands the audit. If it happens, I bring Jake exact numbers before committing (that becomes a K item then, not before).
+- The possible security audit engagement and cost: only exists if Google demands the audit. If it happens, it is the owners' to engage and pay (K7); I advise on the approach and prepare the technical materials, and I never engage or commit spend myself.
 - Team testing: not blocked by anything here; tester accounts work throughout.

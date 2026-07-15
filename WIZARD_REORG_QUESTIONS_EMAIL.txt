@@ -1,0 +1,27 @@
+Subject: Wizard reorg: a few decisions I need from you
+
+Hi Audri,
+
+Good progress on the reorganization. The Contract Details and Contacts & Fees split is in, the fee boxes (professional and transaction, percentage or dollar, buyer/seller/both) are capturing and now show on the deal summary and the workspace, and the "needs your eyes" prompts surface the contract decisions the AI can't settle.
+
+A handful of your items depend on decisions only you can make. Here are the questions, grouped so they're quick to answer.
+
+1. The documents checklist step (the big one).
+Your four-step plan doesn't include the current "Documents" checklist step, so my read is that it leaves the wizard and document collection happens in the transaction workspace after creation. That's also where the "Upload Transaction" button and the Verification summary you asked for would land. Before I move the create button and retire that step, I want to confirm: do you want the documents checklist gone from the wizard entirely, with document tracking living in the workspace? Or should a lighter version stay?
+
+2. The "transaction fee," what is it exactly?
+I want to label it right. Is the transaction fee a coordinator or brokerage admin fee that a party pays inside the deal? I ask because the app already has its own per-deal billing fee (what you're charged per file), and I want the two to never get confused on screen. If it helps I can label yours "Transaction / coordinator fee."
+
+3. Splitting a fee between buyer and seller.
+When a fee is paid by "Both," do you want a simple 50/50 split, or the ability to type the exact share each side pays (for example 40% buyer / 60% seller)? I've built the exact-share option with 50/50 as the default, but tell me if you'd rather keep it to a plain "both."
+
+4. Showing AI certainty.
+For the "needs your eyes" flagging, do you want the AI confidence percentage shown on every field, or only a highlight on the fields that actually need a second look (with the number available on those)? I lean toward flagging only the uncertain ones so the screen stays calm, but it's your call.
+
+5. Fee convenience (nice-to-haves, optional).
+Two small ideas: should the wizard remember your fees and prefill them on the next deal, and when the contract itself mentions a fee, should I show that as a hint next to the fee box? Both are optional; say the word if you want either.
+
+The first question is the one that unblocks the most, so if you can only answer one, start there. Send the testing docs whenever they're ready and I'll keep going.
+
+Thanks,
+Jan

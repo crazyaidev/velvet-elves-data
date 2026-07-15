@@ -1,0 +1,41 @@
+Subject: Re: Wizard reorg: a few decisions I need from you
+
+Hey Jake,
+
+Thanks, I'm clear on all of it.
+
+1. Documents.
+Everything is collected up front in Step 1. The AI parses the whole packet, then reviews and acts:
+   - Execution: is the controlling chain fully signed? A "countered" PA is fine on its own; a missing required signature is not.
+   - Logical gaps: a missing counter (#1 and #3 in, but not #2), or no pre-approval on a financed deal.
+   - Each gap becomes a task, scoped to your client: get your client to sign, or request the signed / missing doc from the other agent.
+
+What that changes in the wizard:
+   - The separate "attach documents" checklist step comes out (that isn't how you collect).
+   - Its "what's unsigned or missing" review moves into the parse.
+   - Create moves onto the Verification summary.
+
+Most of the machinery already exists; my work is turning those findings into the one-click task suggestions.
+
+2. Transaction fee.
+   - Two fields stay: Professional fee (commissions) and Transaction fee (the broker / team / brokerage admin fee).
+   - A capture field for now, labeled so it's never confused with the app's own billing charge.
+   - Good hook for invoicing later.
+
+3. Split.
+   - Your "seller 2%, buyer $250" examples mean each side can differ in both amount and unit.
+   - So "Both" gives each side its own amount box with its own $ / % toggle. Buyer-only or Seller-only stay a single entry.
+
+4. AI certainty.
+   - I'll flag only the fields that need a look, with the confidence number available on those.
+
+5. Convenience.
+   - Contract hint next to the fee box when the contract states a fee.
+   - Prefill from your last deal, but as a value you have to confirm, never silently applied.
+
+Starting now: the fee changes (3), the hint and confirm-to-use prefill (5), and the flagging (4). Taking on the documents review and the Verification move (1) next.
+
+I've already got the 10 test documents Audri sent (the 5915 E 350 N packet), and I'm validating against them as I build.
+
+Thanks dude,
+Jan
