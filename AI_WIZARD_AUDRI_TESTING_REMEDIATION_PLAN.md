@@ -342,11 +342,83 @@ Work executed against the real 10-PDF `testing_docs/` packet. Method: OCR'd all 
 | **2.7-iii sticky needs-your-eyes / 2.5 re-ask** | Resolved by determinism: the intake pass now emits the **"Seller post-closing possession surrender deadline"** as `[verified]` with a **located citation** and a `30 days after closing_date` rule (was the sticky, dateless, "citation could not be located" card). The Post-Closing Possession checklist row is `satisfied_by` the uploaded doc (no re-ask). | Live intake run confirms verified+cited proposals and the upload-satisfies match. |
 | **2.7-ii contingency closing-anchor** | Frontend: made the day↔date converters anchor-aware and route post-closing/after-closing contingencies to `closing_date` (converters + the extraction-time apply at `NewTransactionWizard.tsx`). Inspection stays acceptance-anchored. | `tsc` clean; WizardFlow 68 green. |
 | **2.19 deal brief** | Removed `WizardDealBrief` from the wizard (kept on the workspace hero); updated the command-bar test. | WizardFlow 68 green. |
+| **2.17 double-check `document_type`** (found in UI verification) | Dropped `document_type` from the double-check critical fields — in a multi-doc packet "the document type" is ambiguous ("amendment" vs "purchase_agreement") and forced a blocking confirm for a non-actionable choice (Audri Screenshot_124). The other user-facing fields stay double-checked. | Real UI: the Contract Details double-check went from **2 confirms to 1** (price only); banner reads "double-checked **7** critical fields — both reads agree." 8 double-check tests + 48 packet/pipeline tests green. |
 
-**Test suites after these changes:** backend `test_document_packet_parsing.py` 33 passed (5 new backstop/robustness tests), parsing+intake+pipeline+resolution set 73 passed; frontend `tsc -p tsconfig.app.json` clean, WizardFlow 68 passed.
+**Test suites after these changes:** backend `test_document_packet_parsing.py` 33+ passed (backstop/robustness + double-check tests), parsing+intake+pipeline+resolution set green; frontend `tsc -p tsconfig.app.json` clean, WizardFlow 68 passed.
+
+### UI verification (headless Chrome against a local full stack, 2026-07-16)
+
+Drove the **real wizard** with puppeteer-core against a fresh local stack (backend :8010 running the changed code, frontend :5199), logged in as the local admin, and **uploaded all 10 `testing_docs/` PDFs simultaneously** — exactly as Audri tests. Confirmed on-screen:
+
+- **Contract Details:** Who Orders Title = **Buyer**; Home Inspection = **15 days** (deadline Jul 12, 2026); Acceptance **Jun 27**, Closing **Jul 31**, **Possession Aug 30, 2026** (closing+30); property 5915 E 350 N / Franklin / IN / 46131. Double-check shows **1** confirm (price 992,000 vs 950,000), pass-1 992,000 pre-selected — `document_type` no longer flagged.
+- **Contacts & Fees:** Representing = **Seller**; **no FSBO section**; parties correct (Campbell sellers, Jamie Spitler / Coldwell Banker Stiles listing agent, Theresa Volk buyer's agent, Cody Reichart / Rural 1st loan officer); contract fee **hint** present with source.
+- **Verification (Step 4 of 4):** summary reads Title Ordered By **Buyer**, Purchase Price **$992,000**, Earnest Money **$9,000**, Possession **Aug 30, 2026**; all **10 documents show "Extracted"** with **zero "Attach document" re-asks**; **no deal brief**; **no signature-not-executed panel** (PA read as fully executed); **no "referenced documents not uploaded"** banner; **no "citation could not be located"** sticky card; the full-width **"Upload Transaction"** create button is present.
+
+Not yet UI-verified (require creating the deal + the bucket-B migrations, or unbuilt features): the workspace compliance-checklist EM "4 business days" row (confirmed headlessly), the post-create welcome/task workflow (2.12/2.14/2.15), and the remaining UI items (2.9/2.13/2.18/2.20).
 
 ### Remaining (precisely specified above; not yet implemented)
 
 - **2.12 / 2.14 / 2.15 (bucket B)** — apply migrations `20260917/18/…` + redeploy + verify. Zero code; needs the target DB + deploy.
 - **2.13 next-step task-link** — backend: persist `ai_next_step_task_id` (schema change) and map to `nextStep.taskId`; the FE branch already exists (`TransactionCard.tsx:640-648`). Needs a migration + full-stack validation.
-- **2.9 Add-as-task**, **2.17 double-check context**, **2.18 feedback modal (free-text+anonymous)**, **2.20 scroll containment** — frontend UI items. Deferred because they need browser + screenshot sign-off (invariant: screenshot-gate UI phases), which this environment can't produce; each is specced in its §2 entry.
+- **2.9 Add-as-task**, **2.18 feedback modal (free-text+anonymous)**, **2.20 scroll containment** — frontend UI items, each specced in its §2 entry.
+- **2.17 double-check** — the `document_type` noise is now dropped (done, above); the optional per-row context header + evidence auto-focus remains.
+
+### Live click-through session (real Chrome, local stack, 2026-07-16)
+
+Drove the app end to end in Chrome (puppeteer-core) against the local stack, uploaded all 10 PDFs at once, **created the transaction**, and landed on the workspace. Additional outcomes beyond the wizard verification above:
+
+- **Workspace hero (created deal):** address 5915 E 350 N, **Possession Aug 30 2026**, **$992,000**, sellers Campbell, listing agent Jake Stiles / Coldwell Banker Stiles, buyer's agent Theresa Volk, lender Rural 1st; a task reads **"Buyer earnest money delivery extended to 4 business days"** (issue 6 reflected post-create).
+- **2.12 / 2.14 / 2.15 confirmed built-but-deployment-gated:** create generates the tasks (Buyer/Co-op Welcome, Review Documentation, Appraisal Ordered, etc.), but they show **overdue** because the AI executor only processes `automation_level='Automated'` rows, and migrations `20260917090000` / `20260918090000` (which promote the welcome/pending templates) are **not applied on this DB** — exactly the predicted state. Resolution is a controlled deploy: apply those migrations + ensure a connected mailbox. **Caution:** promoting the templates on a shared DB lets the hourly executor act on *other* active deals' Automated tasks (real sends), so this belongs in a deliberate deploy, not an ad-hoc DB edit.
+- **2.13 confirmed unresolved:** the workspace next-step banner ("Confirm Appraisal") **opens the AI chat panel**, not the task — because `nextStep.taskId` is empty (backend never populates it). The fix is the specced `ai_next_step_task_id` backend change; the frontend branch already exists.
+- **2.17 done:** the double-check `document_type` noise is dropped (this session); the panel already labels each row with its field (e.g. "PURCHASE PRICE"). The optional evidence auto-focus remains.
+- **2.18 IMPLEMENTED (this session):** the "Suggest AI Improvement" modal is now a **free-text primary field** ("Your suggestion", required) with the structured field/expected/AI-value inputs collapsed under "+ Add specifics", plus a **"Submit anonymously"** checkbox that scrubs the submitter from the stored feedback content (FE `SuggestImprovementButton.tsx` + `types/api.ts`; BE `AIImprovementFeedbackRequest.anonymous` + endpoint). FE tsc clean; Suggest-AI-Improvement test green.
+- **2.20 verified already contained:** across every wizard step the modal's columns scrolled within their own bounds (the "Scroll down to finish this step" pill + inner scroll), with no page-body overflow — the reorg's scroll-ownership layout resolved the old infinite-scroll.
+
+**Still genuinely open after this session:** **2.9** (Add-as-task button — new feature) and **2.13** (next-step task link — backend `ai_next_step_task_id`). **2.12/2.14/2.15** are code-complete and await a controlled migration deploy. Created test transaction id: `a716535f-1533-40b8-8d14-b055b0ff0d9a`.
+
+### Session 2 — DB verification + full click-through (2026-07-16, corrections)
+
+Applied the DB-truth check via the Supabase CLI + `asyncpg` on the local-testing DB. Two earlier conclusions were **wrong** and are corrected here:
+
+- **2.12 / 2.14 were already WORKING (not deployment-gated).** Migrations `20260917/18/19` are **already applied** (`supabase migration list` shows them Local+Remote; template `automation_level` = `Automated`), and the admin has connected mailboxes. The created deal's tasks prove the executor ran: **Seller/Co-op Agent/Loan Officer Welcome + Review Documentation + Pending Reminder → `Completed` / `COMPLETED_BY_AI`**; Confirm Title Order surfaced `no_recipient` (correct — no title email on the deal). The "overdue" tasks I saw earlier were the deal-timeline Manual tasks, not the welcome tasks (those completed silently). So 2.12 and 2.14 are **resolved + DB-verified**.
+- **2.13 was already RESOLVED (not an open build).** Clicking the actual next-step CTA opens the **"Complete this task"** modal ("Velvet Elves AI can complete this for you… Send & complete task / I'll handle it myself"), not the chat drawer. The plumbing exists end to end: backend populates `next_deadline_task_id` (`dashboard.py:2727`), FE maps it to `nextStep.taskId` (`TransactionListPage.tsx:323`), and the card branch opens `onOpenTaskEmail` (the list page provides the callback + renders `<TaskEmailFlow>`). My first "opens chat" result was a **flawed test** (it clicked a `☰` menu icon, not the CTA). The §2.13 review-log entry (which said the task id was never populated) is superseded.
+- **2.15 browser-verified:** that same modal uses a **"TRANSACTION PARTY"** dropdown ("Shyna Elene — you (account holder)"), no vendor picker.
+
+New this session:
+- **2.9 Add-as-task IMPLEMENTED:** the AI compliance-proposal cards on Verification gained an **"Add as task"** button (non-waive proposals). It creates a task named for the item, due **≥ 7 days before closing** (floored to `closing − 7d`, editable), decides the proposal, and toasts the date. Threads through `aiAddedTasks → addedTasks` at commit. FE tsc clean; new WizardFlow assertion green (task flows to create as `kind:'task'`, `due_date` = close − 7d). Note: on the 5915 packet the compliance items verify deterministically, so the button appears only when an item is `needs_review` (the case it exists for) — validated via the integration test.
+
+**Final tally: all 20 Audri items are resolved** — 17 verified in the live browser, 2 (2.12/2.14) DB-verified, and the extraction cluster proven deterministic on the real packet; 2.9 and 2.18 built + tested this session; 2.13/2.15 were already resolved (now browser-verified). The only optional follow-on is the 2.17 evidence auto-focus (document_type noise already removed).
+
+### Session 3 — title recurrence (2026-07-16, URGENT): root cause + fix
+
+Audri re-hit issue #1 ("didn't pick up who orders title") on the current build — her screenshot showed the §15.1 "deliberately no default" decision card despite the earlier fixes (and the 7-field double-check banner proving current code).
+
+**Root cause (the backstop worked; its confidence stamp guaranteed the UI ignored it):**
+1. The model returned `title_ordered_by = null` for that run's input (temperature is pinned only for sampling-capable models, and even then determinism holds only for *identical* input — a fresh upload's OCR bytes differ).
+2. `apply_title_ordering_backstop` correctly read `[X] Buyer` and filled the value — **stamped confidence 0.6** (via `setdefault`).
+3. Frontend: `purchase.title_ordered_by` (and `purchase.inspection_days`) are `RECOMMEND_BAND_FIELDS` — `applyIfBetter` **never fills** a band field below the accept band (`auto_proceed_threshold`, default 0.90); it parks the value as a chip at best. The field stayed empty.
+4. Empty field → the no-default decision card → "didn't pick up who orders title again."
+
+Ruled out by evidence: OCR variance (a fresh Textract run of the PA still renders `Seller [X] | Buyer will select…` and the backstop reads buyer); model-config regression (tenants have no `ai_provider_config`; env resolves gpt-5.4, `no_sampling_params=False`, temperature still pinned); code regression (backstop returns buyer on the cached full-packet control).
+
+**Fix (`document_packet_parsing.py`):**
+- `_BACKSTOP_CONFIDENCE = 0.95` — a backstop fill is a deterministic, ambiguity-guarded read of an explicit mark, not a model guess; it must CLEAR the accept band or the UI throws it away. Applied to all three backstops (title, inspection, possession).
+- Provenance is now **assigned, not `setdefault`** — a model that returns null can still leave a stale low per-field confidence behind, which would have dragged the fill back under the band.
+- Added the **bare-mark channel** (`X`/`☒` without brackets, standalone-token guarded, bracketed markers take precedence, exactly-one-party ambiguity guard kept) — the §2.1 hardening that had been planned but never implemented.
+- 4 new unit tests (band-clearing stamp, stale-confidence overwrite, bare mark, no match inside words like TAX); suite 36/36 green. End-to-end mapping verified: the FE receives `{value:'buyer', confidence:0.95, source:'checkbox_backstop'}`.
+
+**Live verification (real Chrome, all 10 PDFs uploaded simultaneously, fresh :8010 backend):** Contract Details shows **Who Orders Title = Buyer** filled (screenshot `title-fix-1.png`), no "could not settle" card; EM $9,000, acceptance 6/27, closing 7/31, possession 8/30, inspection 15 days all correct.
+
+**Guarantee now:** the field fills whenever EITHER the model reads the box OR any readable mark (bracketed `[X]`, glyph `☒`, or bare `X`) exists in the title clause. It stays empty — showing the decision card — only when the packet genuinely contains no readable mark, which is the honest §15.1 case.
+
+**Deploy note:** any long-running backend process (e.g. the default `:8000` dev server) must be **restarted** to pick this up.
+
+### Session 3b — fill-and-flag policy + welcome-email dedup (2026-07-16)
+
+**Fill-and-flag (client decision, after the title recurrence re-hit in the user's own test):** the 0.95-backstop fix covered the model-returns-null path, but a middle path remained: the model extracts the RIGHT value at sub-band confidence (e.g. buyer @ 0.75) and the wizard deliberately withheld it — `applyIfBetter` parked band-field values below `accept` as a chip and left the field empty, which reads as "the AI didn't pick it up" even when extraction was correct. New policy: **an extracted value ALWAYS fills the form; confidence only controls flagging, never withholding.**
+- `applyIfBetter`: the band branch now records the review flag and falls through to apply (previously parked-and-returned); a flagged fill keeps its chip, a confident fill still clears it.
+- All six `renderRecommendation` call sites un-gated (they only rendered the chip while the field was EMPTY — with fill-and-flag the chip is the review affordance for a FILLED value). Chip copy: "AI read: <value> · NN% · source" with **Looks right** / Enter manually.
+- The §15.2 park test rewritten to pin the new behavior (82% inspection read → field HAS 10, chip present, "Looks right" clears the chip and keeps the value). WizardFlow 68/68 green; tsc clean.
+- The §15.1 no-default title decision card still appears when the packet genuinely yields nothing — null extraction + no readable mark.
+
+**Welcome-email dedup (client decision, Option A):** the platform hello@ "party introduction" was retired for transactions — welcoming the parties is the agent's task-matrix job (Automated Welcome tasks send through the agent's own mailbox, first-person, signed by the agent), so the platform intro double-welcomed every party from a second address, and replies to hello@ currently bounce. Removed both call sites (`transaction_parties.py` per-party add; `transactions.py` Incomplete→Active sweep) and the service functions; the **account welcome** (signup) keeps hello@ untouched; `transaction_parties.welcome_email_sent_at` remains as history. Welcome-service tests updated incl. a retirement guard test; ruff clean; 184 targeted backend tests green.
