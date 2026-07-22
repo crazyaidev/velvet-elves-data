@@ -31,7 +31,7 @@ Four principles hold everywhere, and I treat them as rules of the system rather 
 
 ## Part 2 - The AI Wizard, step by step
 
-**Where:** the orange **+ New Transaction** button in the top-right corner of every page, or directly at `https://app.velvetelves.com/transactions/new`. The wizard is a full-screen workspace with a three-phase stepper across the top: **Upload**, **Review details**, **Documents**.
+**Where:** the orange **+ New Transaction** button in the top-right corner of every page, or directly at `https://app.velvetelves.com/transactions/new`. The wizard is a full-screen workspace with a four-phase stepper across the top: **Upload**, **Contract Details**, **Contacts & Fees**, **Verification**.
 
 ### 2.1 Upload
 
@@ -63,25 +63,35 @@ Every extracted value comes back with a **citation** (which document, which page
 
 ### 2.3 The Autopilot fast path
 
-After a clean parse, the wizard checks whether the extraction cleared the confidence bar you configure (Settings, AI & Automation, Confidence gates) on every critical field, with all parties signed. If so, the journey compresses to a single **Confirm** screen: check the anchor dates, click Create, done. Anything that did not clear the bar surfaces for one-click review. If not, the wizard walks the normal review path below.
+After a clean parse, the wizard checks whether the extraction cleared the confidence bar you configure (Settings, AI & Automation, Confidence gates) on every critical field, with all parties signed. If so, the journey compresses to the **Verification** screen: check the anchor dates, click Upload Transaction, done. Anything that did not clear the bar surfaces for one-click review. If not, the wizard walks the normal review path below.
 
-### 2.4 Review details (the normal path)
+### 2.4 Contract Details (stage 2)
 
-- **Address and contacts.** The extracted property address plus a card for every party: buyers, sellers, both agents, loan officer, title company, closing attorney. Every value has a "show me where" link that opens the document viewer scrolled to the exact source line, with the text highlighted. Contact cards pre-fill from your vendor directory when the AI-read name, email, or phone matches a vendor you already know, and your own agent card fills from your profile.
-- **Purchase info.** Price, earnest money, financing, the anchor dates, and every contingency. Day-count and date fields stay in sync: edit "14 days" and the date recomputes, edit the date and the count recomputes. The contract's own earnest-money delivery window (including whether it counts business days) rides through to the committed deadline. Cash deals ask whether the buyer elected an appraisal. Marking a deal FSBO is only offered when you represent the buyer, and the wizard warns you if the packet itself names a listing agent, since a represented seller is not a FSBO.
-- **Missing info.** Only the fields the AI could not read. Fixed decisions such as "who orders title" are one-click choices; the rest are simple inputs.
-- **Confirm.** The review hub: every fact with its citation, the double-check panel, AI-proposed deadlines to accept or dismiss, the deal watch-outs, and a preview of every derived deadline. If the packet is not fully signed, you can queue an e-signature request from here. Nothing proceeds until you approve this screen.
+Everything the contract says about the property and the deal, on one screen:
+
+- **Property details.** The extracted address, with a "show me where" link on every value that opens the document viewer scrolled to the exact source line, text highlighted.
+- **Deal type and pricing, key dates, financing, contingencies, terms and notes.** Price, earnest money, financing, the anchor dates, and every contingency. Day-count and date fields stay in sync: edit "14 days" and the date recomputes, edit the date and the count recomputes. The contract's own earnest-money delivery window (including whether it counts business days) rides through to the committed deadline. Cash deals ask whether the buyer elected an appraisal.
+- **"Found in the contract - needs your eyes."** Anything the AI read at low confidence, or could not read at all, is flagged here as a chip that jumps to the field. Fixed decisions such as "who orders title" are one-click choices, never free typing, and a deal cannot be created while one of them is unanswered: the answer changes which tasks get generated.
+
+### 2.5 Contacts & Fees (stage 3)
+
+- **Contacts.** A card for every party: buyers, sellers, both agents, loan officer, title company, closing attorney, each with its citation. Cards pre-fill from your vendor directory when the AI-read name, email, or phone matches a vendor you already know, and your own agent card fills from your profile. Marking a deal FSBO is only offered when you represent the buyer, and the wizard warns you if the packet itself names a listing agent, since a represented seller is not a FSBO.
+- **Fees.** Your professional fee and any transaction fee (a broker/team admin fee, separate from the app's own per-deal billing fee). Each is paid by the buyer, the seller, or both, and **each paying side carries its own amount and its own unit**, so a split can be "seller 2%, buyer $250". A fee the contract mentions shows as a read-only hint - the number is always yours to enter. The cards prefill from your last deal and are withheld from the deal until you confirm or edit them, so a stale number never rides through unseen.
 
 A natural-language command bar is available throughout ("change the closing date to March 3," "add a buyer named..."), and every command previews its change before applying, with undo.
 
-### 2.5 Documents (the compliance checklist)
+### 2.6 Verification (stage 4) - where the deal is created
 
-The wizard previews the deal's compliance checklist: the documents this deal must collect, each with a due date computed by the same engine that will compute the task deadlines. Two behaviors came directly from your feedback:
+The review hub, and the only place a deal is created:
 
-- **The wizard never asks for a document you already uploaded.** Uploads are auto-matched to checklist rows by their AI-detected type first, then by filename; a manual match always wins over the automatic one.
-- **Future paperwork does not read as an intake demand.** The list shows "documents you may have now" in full, while "collected as the deal progresses" (closing disclosure, deed, title commitment, and so on) is collapsed behind a count you can expand.
+- **The full summary:** every fact with its citation, grouped property / dates / financing / terms / parties / fees, each row with an Edit jump back to the stage that owns it.
+- **The double-check panel** and the AI proposals (deadlines, checklist rows, tasks) to accept or dismiss.
+- **The signature decision, scoped to your client.** If the packet is not fully signed, the wizard offers the action that fits *whose* signature is missing: your own client's side gets the e-signature queue; the **other** side gets "request the signed copy from the other agent," which becomes a real task addressed to the co-op agent rather than an e-signature sent to someone else's client. Referenced-but-missing documents (a Counter #2 the packet mentions but you don't have) offer the same one-click request.
+- **A confirmation line and a full-width "Upload Transaction" button.** Nothing is created until you click it.
 
-You can waive rows, add rows, or import your own checklist; a removed row is committed as waived, never silently deleted. Your work is saved continuously: a local draft plus a server-side draft, so you can resume on another device, and "Save draft" stores the deal as an Incomplete shell you can finish later.
+**The compliance checklist is no longer a step you walk.** It is still built for the deal and committed at creation, with your uploads auto-matched to their rows (the wizard never asks for a document you already gave it, matching by AI-detected type first, then by filename; a manual match always wins). Editing the checklist - add, attach, waive, request by email - now lives on the deal's **Compliance** tab in the workspace, where it stays useful for the life of the deal instead of only at intake.
+
+Your work is saved continuously: a local draft plus a server-side draft, so you can resume on another device, and "Save draft" stores the deal as an Incomplete shell you can finish later.
 
 ### 2.6 If the AI is unavailable
 
@@ -91,18 +101,18 @@ The wizard says so honestly and runs "floor only": the standard plan still works
 
 ## Part 3 - The moment of creation
 
-Clicking Create runs a precise sequence. The important property: the deterministic planner that generated the preview is re-run to produce the committed rows, so the preview and the database always agree.
+Clicking **Upload Transaction** runs a precise sequence. The important property: the deterministic planner that generated the preview is re-run to produce the committed rows, so the preview and the database always agree.
 
-1. **The transaction is created.** When billing is enabled, this is the single moment a deal is charged: one flat fee at creation, with team members always free. If the wallet is empty the wizard shows an in-flow paywall, sends you to Stripe, and finishes the exact same commit when you return. A failed creation is never charged.
+1. **The transaction is created**, including the fees you entered and a record of the decisions you made on Verification (your signature choice, which roles the packet showed unsigned, and any missing documents you asked for). That record is what stops the automation from contradicting you an hour later - see Part 6.8. When billing is enabled, this is the single moment a deal is charged: one flat fee at creation, with team members always free. If the wallet is empty the wizard shows an in-flow paywall, sends you to Stripe, and finishes the exact same commit when you return. A failed creation is never charged.
 2. **The people are saved.** Every buyer, seller, agent, lender, title contact, and attorney becomes a party on the deal. Each service provider is also silently added to your master vendor directory (matched by email, then phone, then company name), so the directory builds itself and future wizard runs pre-fill from it. Nobody is asked to "save vendors" mid-flow anymore.
-3. **Introduction emails.** People added to an active deal receive a branded introduction email from `hello@velvetelves.com` so they know the file is being managed on the platform.
+3. **Welcome emails** are the agent's own Automated tasks, sent from your connected mailbox so replies land in your normal thread (Part 6.3). The platform does not send transaction introductions from its own address.
 4. **FSBO invitation.** On a FSBO deal, the unrepresented seller receives a transaction-scoped invitation to a limited seller portal. The deal remains yours.
-5. **Documents are linked** to the new deal, and the confirmed compliance checklist is committed, including waived rows and accepted AI rows with their citations.
+5. **Documents are linked** to the new deal, and the compliance checklist is committed, including waived rows and accepted AI rows with their citations, with your uploads already auto-matched to their rows.
 6. **E-signature** is queued only if the packet was not fully signed, you chose to queue it, and a signature provider is connected.
-7. **The full task plan is generated** (Part 4).
+7. **The full task plan is generated** (Part 4). Any "request from the other agent" action you accepted on Verification becomes a real task here: addressed to the co-op agent, due two days after acceptance, and tagged so the AI knows that ask already has an owner.
 8. **Watch-outs are persisted** with their citations, so the workspace can show them for the life of the deal.
 
-You land in the new deal's workspace.
+You land in the new deal's workspace, and a one-time line across the top tells you exactly what was built - "23 tasks (5 handled by AI) · 12 checklist items, 3 documents attached · Fees captured · 1 request to the other agent" - with every segment linking to the tab whose rows back that number. It is the receipt for what Verification promised, and it appears only on that first visit.
 
 ---
 
@@ -225,7 +235,19 @@ At every posture, on every deal:
 - Waiving a checklist item, legal decisions, and releasing documents are always human.
 - Everything the AI applies on its own is reversible and visible in the Automation lens.
 
----
+### 6.8 The AI does not overrule what you decided at intake
+
+The signature decision you make on Verification is stored with the deal, and the **Review Documentation** task (Part 6.3) reads it before it does anything. One ask has one owner:
+
+| What you chose on Verification | What the AI does when documents are still unsigned |
+|---|---|
+| **Mark not required** | Closes the review with a note saying you marked signatures not required. No chase, ever. |
+| **I'll handle signing later** | Keeps the finding visible so it is not lost, but drafts nothing. You asked it to hold off. |
+| **Request the signed copy from the other agent** | Points at the task that already covers it ("your request task covers this") and drafts nothing. If you complete that task while documents are still unsigned, the normal chase resumes - a stalled ask is never silently dropped. |
+| **Queue e-signature** | Waits on the envelope and reports its progress. |
+| Nothing (you didn't answer), or a deal created outside the wizard | Unchanged from before: the AI drafts the request email for your review. |
+
+One related correction: a document that is simply **out for e-signature** is never chased to the co-op agent on any deal. A pending envelope is our own channel in flight, not the other side's failure, so the AI reports it as "awaiting e-signature" instead of asking someone else's agent about your client's signature.
 
 ## Part 7 - Quick reference: where everything lives
 

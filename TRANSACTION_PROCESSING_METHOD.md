@@ -20,15 +20,14 @@ Processing a transaction in the system is three steps:
 
 ## Step 1 - Create the deal from the contract
 
-Click **"+ New Transaction"** (always in the top bar) and drag in the signed contract with any counters and addenda. The wizard then walks five short screens:
+Click **"+ New Transaction"** (always in the top bar) and drag in the signed contract with any counters and addenda. The wizard then walks four short screens:
 
 1. **Upload** - the AI reads the whole package and works out which document controls each term (a counter beats the contract, an amendment beats both).
-2. **Review details** - every fact it pulled (property, parties, price, dates, deal specifics) shown next to the contract itself. Each AI-read value links to the exact clause it came from; anything uncertain is highlighted; anything not found is left blank and asked for.
-3. **Timeline** - the deal's deadlines in order, each showing how it was counted (for example "10 days after acceptance").
-4. **Checklist** - the document checklist this deal must satisfy.
-5. **Tasks & create** - the complete proposed task list, grouped by milestone, each task with its due date, owner, and why it is included. Untick what you do not want, then click **"Approve & Create"**.
+2. **Contract Details** - every fact it pulled about the property and the deal (address, price, dates, financing, contingencies), shown next to the contract itself. Each AI-read value links to the exact clause it came from; anything uncertain is flagged as a chip that jumps to the field; fixed decisions such as "who orders title" are one-click choices, and the deal cannot be created while one is unanswered.
+3. **Contacts & Fees** - a card for every party (buyers, sellers, both agents, lender, title, attorney), plus your professional fee and any transaction fee. Each fee is paid by buyer, seller, or both, and each paying side carries its own amount and unit.
+4. **Verification** - the full summary with citations, the AI's proposed deadlines and checklist rows to accept or dismiss, and the signature decision. Then a confirmation line and one full-width **"Upload Transaction"** button.
 
-The list you approve is exactly the list that gets created, and the tasks come only from your master task list; the AI never invents tasks.
+What you verified is exactly what gets created: the task list, the timeline, and the document checklist are all generated at that click, with your uploaded documents already matched to their checklist rows. The tasks come only from your master task list; the AI never invents tasks. You land on the new deal's page with a one-line receipt of everything that was just built.
 
 ---
 

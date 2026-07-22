@@ -756,18 +756,21 @@ click "Save deadline".
   are saved as "waived" and can be un-waived later from the
   Documents view.
 
-### 11.3 Use your own checklist
-**How to test.** Click "Use your own checklist" → Paste text tab → paste
-two lines ("Septic Certificate", "Well Test") → "Read checklist".
+### 11.3 Checklist import is retired (verify its absence)
+The "Use your own checklist" import was retired on 2026-07-22 (client
+decision D3): with the wizard's checklist step gone, the feature had no
+reachable screen, so the code and the endpoint were removed rather than
+left compiled-but-unusable.
+
+**How to test.** Look for any "Use your own checklist" / import control on
+the deal's **Compliance** tab, and on a resumed pre-reorganization draft.
 
 **Expected result.**
-- ✅ A review list appears with both rows CHECKED but NOT yet added.
-- ✅ Unchecking one and clicking "Add 1 document" adds only the checked
-  row to the checklist. Nothing was added without that click.
-- ✅ The Upload tab accepts PDF/TXT/CSV; a scanned image-only PDF says
-  honestly that no items were found and suggests the paste tab.
-- ✅ "Add as tasks instead" adds the rows as Manual tasks on the Review
-  Tasks step (the older paste behavior).
+- ✅ No import control exists anywhere in the app.
+- ✅ You can still build a checklist by hand: **Add requirement** on the
+  Compliance tab, or **Generate defaults** for the deal type.
+- ✅ Attach, waive/un-waive, and request-by-email all still work on those
+  hand-added rows exactly like library rows.
 
 ### 11.4 Life after the wizard
 **How to test.** Create the transaction, open its Documents view (the

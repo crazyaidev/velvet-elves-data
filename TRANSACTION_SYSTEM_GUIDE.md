@@ -34,7 +34,7 @@ Here is the map of the workflow before we walk through each page:
 |---|---|---|
 | Set up your task list | Settings, then Task Templates (`/admin/task-templates`) | A searchable library of task cards with colored "automation" chips, plus a "New template" button |
 | Start a new deal | The "+ New Transaction" button, which opens the AI Wizard (`/transactions/new`) | A full-screen, two-panel wizard: a dark progress rail on the left, your work in the center, the contract on the right |
-| Build and approve the task list | The wizard's last step, "Tasks & create" | A summary banner, the full task list grouped by milestone, and an orange "Approve & Create" button |
+| Verify and create the deal | The wizard's last step, "Verification" | The full summary with citations, the AI's proposals, and a full-width orange "Upload Transaction" button under a confirmation line |
 | Work the deal | The transaction page (`/transactions/:id`) | A deal header, then a white card with tabs (Timeline, Compliance, Documents, Tasks, People, Activity) and an AI Agent panel |
 | See work across all deals | Active Transactions, My Task Queue, Closing Calendar (sidebar) | A list of deal cards, a single list of your tasks, and a calendar of deadlines |
 
@@ -102,48 +102,44 @@ Click the orange **"+ New Transaction"** button (top bar). After you upload a co
 
 The wizard is a **two-panel workspace**:
 
-- On the **left** is a **dark branded rail** that shows your progress: a label like **"Step 3 of 5 · Timeline"** and a row of dots that fill in orange and turn to checkmarks as you complete each phase. You can click a completed step to jump back to it.
+- On the **left** is a **dark branded rail** that shows your progress: a label like **"Step 2 of 4 · Contract Details"** and a row of dots that fill in orange and turn to checkmarks as you complete each phase. You can click a completed step to jump back to it.
 - In the **center** is your working area for the current step.
-- On the **right** is the **source document viewer** showing the contract itself, so you can check the system's reading against the original. (On the last two steps the contract viewer steps aside for a slim read-only timeline of the deal's deadlines.)
-- Along the **bottom** is a **Back** button and one orange **primary button** whose label changes by step: "Start Intake", then "Continue" or "Confirm Details", then "Confirm Timeline", "Confirm Checklist", and finally "Approve & Create".
+- On the **right** is the **source document viewer** showing the contract itself, so you can check the system's reading against the original.
+- Along the **bottom** is a **Back** button and, on the middle steps, one orange **Continue** button. On the final step the create button is not in the footer at all: it is a full-width **"Upload Transaction"** button in the review column itself, directly under a short confirmation line.
 
-The five phases are described below.
+The four phases are described below.
 
 ### Step 1 - Upload
 
-You drag the signed contract onto the page (plus any counters or addenda). A short **AI Parsing** view shows the system reading the documents. The bottom button reads **"Start Intake"**.
+You drag the signed contract onto the page (plus any counters or addenda). A short **AI Parsing** view shows the system reading the documents.
 
-### Step 2 - Review details
+### Step 2 - Contract Details
 
-The center shows the facts the system pulled from the contract as simple **Name / Value rows** (property address, parties, purchase price, and the deal's specifics such as HOA, inspection, and who orders title). The contract sits in the **viewer on the right**.
+The center shows the facts the system pulled from the contract as simple **Name / Value rows**: the property address, then the deal's pricing, key dates, financing, contingencies, terms, and notes. The contract sits in the **viewer on the right**.
 
 Three things on this screen make it trustworthy:
 
 - **Every value links to the contract.** Next to a value the AI found, a small magnifier opens a strip that reads, for example, **"Source: 'The above offer is Accepted ...' Page 9 · AI confidence 93%"** with a **"View in Document"** button. Clicking it switches the right-hand viewer to that page and draws a highlight box over the quoted text. (When more than one file is uploaded, the viewer shows a tab per file plus page controls, zoom, and a "Search document text" box.)
-- **It double-checks the critical fields.** A panel titled **"Double-check found N values to verify"** appears only when the system's two independent readings of an important field genuinely disagree. It no longer flags differences that are only formatting, for example a street address with and without the city and zip.
-- **It points out genuinely missing documents.** A note like **"5 referenced documents not uploaded"** lists documents the contract refers to but that you did not include. It only appears when a document is truly missing, not when it is already in your upload.
+- **Anything uncertain is flagged, not buried.** A **"✦ Found in the contract - needs your eyes"** band at the top lists every low-confidence or unanswered field as a chip; clicking a chip scrolls to and focuses that field. A value the AI read at low confidence still fills the field - the confidence only controls the flag, never whether you see the reading.
+- **It double-checks the critical fields.** A panel titled **"Double-check found N values to verify"** appears only when the system's two independent readings of an important field genuinely disagree. It does not flag differences that are only formatting.
 
-Anything the system could not find is gathered into a short **Missing Info** step so you can fill it in, with a **"Double-check found 1 value to verify"** style prompt where needed.
+Fixed decisions such as **who orders title** (and, on a cash deal, the appraisal election) are one-click choices rather than free typing, and the deal cannot be created while one is unanswered - the answer changes which tasks are generated.
 
-### Step 3 - Timeline ("Review your timeline")
+### Step 3 - Contacts & Fees
 
-At the top is an orange **anchor card** asking **"Does this Date of Acceptance look right?"** with the date shown large, because every deadline is counted from it.
+The center shows a card for every party on the deal (buyers, sellers, both agents, loan officer, title company, closing attorney), each with its citation and pre-filled from your vendor directory where the system recognizes a contact.
 
-- If the date came from the contract, a **"View in document"** link shows where.
-- If the system could not find that date, the card says so plainly and shows a **date picker**. **It never makes up a date.**
-- The deadline list below stays **dimmed and locked** until you click **"Looks good"** to confirm the date; only then does it unlock.
-- Each deadline row shows its name, its date, and **how it was worked out** (for example "5 days after Date of Acceptance"). Core dates like Closing and Possession have no Remove button.
-- **"Edit date"** on the anchor card lets you pick a different day and shows a summary of how many deadlines move. **"+ Add deadline"** adds a custom item. If the contract held a deal-specific deadline, an **"AI suggestions"** group appears with cards, each showing the rule, a **confidence chip**, and a citation link; you **Add** or **Skip** each one.
+Below the contacts are the two **fee cards**: your **professional fee** and any **transaction fee** (a broker, team, or brokerage admin fee collected on the deal - separate from the app's own per-deal billing fee). For each: click **Buyer**, **Seller**, or **Both**, type one number, and click **%** or **$**. When both sides pay, each side keeps its own amount and its own unit, so "seller 2%, buyer $250" is expressible. A fee the contract itself mentions appears as a read-only hint - the number is always yours to enter. The cards prefill from your last deal and are held back from the deal until you confirm or edit them.
 
-The bottom button reads **"Confirm Timeline"**.
+### Step 4 - Verification
 
-### Step 4 - Compliance
+The full summary of everything you verified, with citations and Edit jumps back to the step that owns each row, plus the AI's proposed deadlines and checklist rows to accept or dismiss, and the deal's watch-outs.
 
-The center lists the standard documents this type of deal needs so you can track what has been collected. You can **Add document**, attach files, or load **"Use your own checklist"**. The bottom button reads **"Confirm Checklist"**.
+If the paperwork is not fully signed, this step offers the action that matches **whose** signature is missing: your own client's side gets the **e-signature queue**; the other side gets **"request the signed copy from the other agent"**, which becomes a real task addressed to the co-op agent instead of an e-signature sent to someone else's client. Referenced-but-missing documents offer the same one-click request.
 
-### Step 5 - Tasks & create
+At the bottom of the review column sits a short confirmation line and the full-width **"Upload Transaction"** button. Because that click is the moment the deal is created, it has its own section below.
 
-This is where you review the full proposed task list and approve it. Because it is the moment the deal is created, it has its own section below.
+**Note on the document checklist:** it is no longer a step you walk. The checklist is still built for the deal and committed when you click Upload Transaction, with your uploaded files already matched to their rows, and you edit it afterwards on the deal's **Compliance** tab - where it stays useful for the whole transaction rather than only at intake.
 
 ### What the AI does, and does not, do
 
@@ -170,19 +166,21 @@ When you reach Step 5, the system fits your master task list to this deal. It do
 
 ---
 
-## 5. Reviewing and approving (the "Tasks & create" screen)
+## 5. Creating the deal (the Verification screen)
 
-Step 5 shows the complete proposed list before anything is created.
+Step 4 is the last screen, and the only place a deal is created.
 
 ### What the screen looks like
 
-- **A summary banner** at the top in a soft card: a headline like **"24 tasks · Mar 12 - Jul 18"**, then small chips: **"24 will be created"**, **"2 undated"** (amber when above zero), and **"6 milestones"**.
-- **An amber "undated" notice** when some tasks could not be dated yet, explaining why (for example a missing key date) and that you can add it now or set it later.
-- **An amber "coverage" notice** when a required workflow produced no task, for example **"No title task was generated, confirm who orders title."**
-- **A "Search tasks" box**, and below it the **tasks grouped by milestone**. Each task shows its due date, who it is for, and **why it was included**; you uncheck the ones you do not want (unchecked tasks will not be created).
-- **A "Suggest more tasks" action** asks the AI for optional extras, which you add or skip one by one.
+- **The full summary** of everything you verified, grouped property / dates / financing / terms / parties / fees, every row carrying its citation and an **Edit** jump back to the step that owns it.
+- **The AI's proposals** - deal-specific deadlines, checklist rows, and coordination tasks - each with the rule it came from and a citation, accepted or dismissed one click at a time.
+- **The deal's watch-outs**, kept with their citations for the life of the deal.
+- **The signature decision**, when the paperwork is not fully signed: the e-signature queue for your own client's missing signature, or "request the signed copy from the other agent" when the missing signature is the other side's.
+- **A confirmation line and a full-width "Upload Transaction" button** at the end of the review column. The footer on this step carries only **Back** - there is one create button, never two.
 
-When the list looks right, the bottom button reads **"Approve & Create"**. Clicking it creates exactly the list you reviewed and opens the deal's transaction page.
+Clicking **Upload Transaction** creates the deal, generates the full task plan and timeline from your master task list, commits the document checklist with your uploads already attached, and opens the deal's transaction page. A one-time line across the top of that page tells you exactly what was built and links each number to the tab that holds it.
+
+The deal cannot be created while a decision-critical answer is missing (who orders title; the appraisal election on a cash deal), while the double-check has an unresolved disagreement, or before at least one document is uploaded.
 
 ---
 

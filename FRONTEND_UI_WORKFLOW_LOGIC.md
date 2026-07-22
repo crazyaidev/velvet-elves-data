@@ -1603,8 +1603,9 @@ This is a pure redirect route. No UI rendered.
   - Status pill dropdown (status change with confirm; Closed asks for post-closing feedback)
   - Champagne "AI next step" strip (from the plan aggregate)
   - Tab pills (active = bg-ve-orange) + quick-action pills: Add Task | Upload Document (classified-upload dialog) | Sync Deadlines | More ▾ (Compose, Print closing checklist, Ask the AI)
-- **Deal Overview card (above the tabs):** stat band (purchase price, days to close, open tasks, missing documents — honest sparklines only), tracking-date chip rail (closing/possession route through the cascade), embedded deal brief
-- **Tab bar:** Timeline | Compliance | Documents | Tasks | People | Activity
+- **Creation receipt strip (first visit after the wizard only, `?created=1`):** one flat green line — "Created just now · N tasks (M handled by AI) · N checklist items · N documents attached · Fees captured · E-signature queued · N requests to the other agent" — each segment linking to the tab whose rows back that number, dismissible, never shown again. Segments render only when their count is real.
+- **No overview/KPI/tracking/brief band above the tabs.** The body is the agent pane (persistent left column on xl) beside the workbench, and the workbench is its own tab bar plus the active tab. The deal brief lives INSIDE the Timeline tab (below).
+- **Tab bar:** Timeline | Compliance | Documents | Tasks | People | Activity (+ Agent on narrow screens)
 - **Primary content area (per tab; ONE card per tab):**
 
   **Timeline Tab:**
@@ -1630,6 +1631,7 @@ This is a pure redirect route. No UI rendered.
   - Add Task modal (shared Dialog; completion method + assignee via branded selects; AI-suggested approaches)
 
   **People Tab:**
+  - **Deal fees** at the top: the professional fee and transaction fee as "3% · seller" / "buyer $250 · seller 2%" rows, editable in place (pencil → Radix dialog with the wizard's fee-card anatomy: Buyer/Seller/Both, one amount + `%`/`$` per paying side, "Remove fee"); with no fees entered an editing role sees "+ Add fees", and a viewer without edit rights sees nothing at all. Mirrors the `PATCH /transactions/{id}` role gate (Agent / TeamLead / Admin, D5); every edit lands in the Activity audit trail. Fees live here — with the deal's commercial relationships — because the deal brief / overview band stays off the workspace page (Jan's 2026-06-13 review).
   - Representation-aware groups (Buyer, Seller, Agents, Lender, Title + Other contacts); add/edit via AddContactModal; Assign team; Manage client access; client thread; compose
 
   **Activity Tab:**
