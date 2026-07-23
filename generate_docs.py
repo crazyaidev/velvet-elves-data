@@ -1052,6 +1052,122 @@ def create_transaction_automation_guide_doc():
     save_document(doc, "TRANSACTION_PROCESSING_AND_AUTOMATION_GUIDE.docx")
 
 
+def create_ai_wizard_questions_doc():
+    """Generate a .docx export of AI_WIZARD_QUESTIONS_FOR_AUDRI.md (client
+    audience: Audri).
+
+    Mirrors create_transaction_processing_method_doc: reuses the generic
+    markdown renderer (extract_feedback_header + render_feedback_body) so the
+    Q&A gets the same title page, metadata table, headings, bullets, and tables
+    as the other generated documents.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("AI_WIZARD_QUESTIONS_FOR_AUDRI.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "AI_WIZARD_QUESTIONS_FOR_AUDRI.docx")
+
+
+def create_ai_wizard_status_report_doc():
+    """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
+    audience: Audri / Jake).
+
+    Mirrors create_ai_wizard_questions_doc: reuses the generic markdown renderer
+    (extract_feedback_header + render_feedback_body) so the report gets the same
+    title page, metadata table, headings, bullets, and tables as the other
+    generated documents.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("AI_WIZARD_TESTING_STATUS_REPORT.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "AI_WIZARD_TESTING_STATUS_REPORT.docx")
+
+
 def create_transaction_logic_workflow_guide_doc():
     """Generate a .docx export of TRANSACTION_PROCESSING_LOGIC_AND_WORKFLOW_GUIDE.md
     (client audience: Jake).
@@ -4486,6 +4602,8 @@ TARGET_BUILDERS = {
     "transaction-automation-guide": create_transaction_automation_guide_doc,
     "transaction-logic-workflow-guide": create_transaction_logic_workflow_guide_doc,
     "gmail-approval-plan": create_gmail_approval_plan_doc,
+    "ai-wizard-questions": create_ai_wizard_questions_doc,
+    "ai-wizard-status": create_ai_wizard_status_report_doc,
 }
 
 TARGET_ALIASES = {
@@ -4537,6 +4655,20 @@ TARGET_ALIASES = {
     "gmail_google_approval_plan.docx": "gmail-approval-plan",
     "gmail-approval": "gmail-approval-plan",
     "approval-plan": "gmail-approval-plan",
+    "ai_wizard_questions_for_audri": "ai-wizard-questions",
+    "ai_wizard_questions_for_audri.md": "ai-wizard-questions",
+    "ai_wizard_questions_for_audri.docx": "ai-wizard-questions",
+    "ai-wizard-questions-for-audri": "ai-wizard-questions",
+    "wizard-questions": "ai-wizard-questions",
+    "questions-for-audri": "ai-wizard-questions",
+    "audri-questions": "ai-wizard-questions",
+    "ai_wizard_testing_status_report": "ai-wizard-status",
+    "ai_wizard_testing_status_report.md": "ai-wizard-status",
+    "ai_wizard_testing_status_report.docx": "ai-wizard-status",
+    "ai-wizard-testing-status-report": "ai-wizard-status",
+    "wizard-status": "ai-wizard-status",
+    "testing-status": "ai-wizard-status",
+    "status-report": "ai-wizard-status",
     "all": "all",
 }
 

@@ -1123,46 +1123,43 @@ This is a pure redirect route. No UI rendered.
   - Expand chevron (right side)
 
   **Card Expanded State (Drawer):**
-  Three-column layout:
+  Three-column layout, as designed in `ve-active_transactions.html`. The
+  drawer is the fast path: a coordinator triaging a list should be able to
+  tick a task, set a date, or call a party without leaving it.
 
   **Column 1 — Tasks:**
-  - Section title: "Tasks" with "+ Add" link
-  - Grouped: Overdue (red header, overdue task items) | Upcoming (task items with due dates) | Completed (dimmed, collapsed by default)
-  - Each task row: checkbox (click to complete) | task name | due date (mono, red if overdue) | assigned-to avatar
-  - "+ Add Task" button at bottom → opens Add Task modal
+  - Section title: "Tasks" with "+ Add" link and a full-view expander
+  - Grouped: Overdue | Due Today | Upcoming | Completed
+  - Each task row: checkbox (click to complete, optimistic with Undo toast) |
+    task name | due date (mono, red if overdue) | email-the-party button
+  - "+ Add Task" button at the bottom → Add Task modal
 
   **Column 2 — Key Dates:**
   - Section title: "Key Dates" with "(click to edit)" hint
-  - Date rows, each with:
-    - Label (e.g., "EM Delivered", "Inspection Response", "Closing Date")
-    - Date value (mono font, red if overdue, amber if today, green if future)
-    - Pencil edit icon → click opens inline date popover
-    - For Closing Date and Possession: also shows time-of-day or "Time: TBD"
-  - Full list: EM Delivered | Inspection Response | Appraisal Expected | CD Delivered | Cleared to Close | Closing Date (+ time) | Possession (+ time)
+  - Rows: EM Delivered | Inspection Response | Appraisal Expected |
+    CD Delivered | Cleared to Close | Closing Date (+ time) | Possession
+    (+ time); each opens the inline date popover
+  - Sync-deadlines button for connected calendars
 
   **Column 3 — Contacts:**
-  - Section title: "Contacts"
-  - Grouped by role: Buyer | Seller | Listing Agent | Buyer's Agent | Lender | Title | Inspector | etc.
-  - Each contact: name | company | one-click phone icon | one-click email icon
-  - Expand/collapse per group
-  - Empty slots show "Add [role]" link (e.g., "Add title company") → opens Add Contact modal
-  - Secondary contact support: "Add contact" link under existing primary
+  - Representation-aware groups (Buyer, Seller, Agents, Lender, Title)
+  - Each contact: avatar | name | company/role | phone + email one-click |
+    expandable detail; per-group "Add" → Add Contact modal
+  - "Assign team" action in the column header
 
   **Below columns:**
-  - AI Suggestions panel: "AI Suggestions for This Deal" with up to 3 contextual suggestions computed client-side from card state: overdue task review, draft inspection response (if date missing), prepare closing checklist (if close ≤14 days), upload documents (if doc_count=0), AI next-step help. Each suggestion button opens AI Chat panel. Panel only renders when ≥1 suggestion applies.
-  - Footer actions bar: "View/Add Documents" | "Print Checklist" | "Transaction History" | Price display
+  - Invoices & Payments panel (per-deal invoice rows + Create)
+  - AI Suggestions strip (up to 3 contextual suggestions, each opening chat)
+  - Footer actions: Open workspace | View/Add Docs | Print | History |
+    Comms | Client access | Client Q&A | Invoice | Delete (TeamLead/Admin)
 
 - **Overlay/modal inventory:**
   - New Transaction quick-create modal
-  - Add Task modal
-  - Add Contact modal
-  - Transaction Documents modal
-  - All Documents search modal (sidebar link)
-  - Transaction History side panel
-  - Edit Date popover (inline)
-  - AI Chat floating panel
-  - Print Checklist (browser print)
-  - Export CSV download
+  - Add Task modal · Add Contact modal · Assign Team modal
+  - Transaction Documents modal · Manage Client Access modal
+  - Client Q&A drawer · Transaction History panel · Communications panel
+  - Task email flow · New Invoice modal · Edit Date popover (inline)
+  - AI Chat floating panel · Print Checklist · Export CSV/Excel/PDF
 
 ### 4. User Actions & State Transitions
 
@@ -1186,10 +1183,24 @@ This is a pure redirect route. No UI rendered.
 - Empty results: "No transactions match '[query]'" with clear button
 
 **Transaction card click (expand/collapse):**
-- Trigger: Click on card (not on interactive elements within card)
-- Immediate UI: Card expands with slide-down animation showing 3-column drawer (tasks, key dates, contacts)
-- Data source: All drawer data (task sections, key dates, contact groups, AI suggestions) is included in the `GET /api/v1/dashboard/transaction-cards` response — no separate detail fetch needed
-- AI suggestions panel: Populated client-side from card state (overdue task count, missing key dates, approaching close date, document count)
+- Trigger: Click on the card (not on an interactive element within it)
+- Immediate UI: Card expands with the 3-column drawer (tasks, key dates,
+  contacts), the invoices panel, the AI-suggestions strip, and the footer
+- Data source: all drawer data (task sections, key dates, contact groups) is
+  included in the `GET /api/v1/dashboard/transaction-cards` response — no
+  separate detail fetch
+- The card title and the maximize icon open the deal's detail page at
+  `/transactions/:id`; `?expand=<id>` / `?highlight=<id>` still expand a card
+  in place, so every existing link and bookmark behaves as before.
+
+**Where each surface is used (2026-07-22):**
+- The **list + drawer** is for triage across deals: scan, tick a task, set a
+  date, call someone, move on.
+- The **Transaction Detail page** is for working one deal: the full plan with
+  the cascade, the checklist, the document manager, billing, the audit trail,
+  and the assistant. Surfaces that are about ONE deal (dashboards, calendar,
+  task queue, payments, notifications, the Clients hub) link there via
+  `workspaceUrl()`.
 
 **AI next-step banner (`tab-banner-sub` text):**
 - **Data source:** `TransactionCardAPI.ai_next_step` returned by `GET /api/v1/dashboard/transaction-cards`. Each card also reports `ai_next_step_source: 'ai' | 'rule'` and `ai_next_step_updated_at`. Both fields exist only for internal frontend logic and are not displayed — the banner looks identical in both modes so users never see an "AI vs rule" distinction.
@@ -1597,18 +1608,79 @@ This is a pure redirect route. No UI rendered.
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell (Attorney keeps the Matter Workspace on the same route)
 - **Sidebar state:** DEALS group, "Transactions" highlighted
-- **Page header (sticky white bar; the page owns its scroll):**
-  - Breadcrumb: Deals › Transactions › [street address]
-  - Serif identity row: client names + stage pill + inline address
+**Layout (redesigned 2026-07-22).** The page follows the shape people know
+from any record-detail screen: a header that identifies the record and its
+state, a full-width row of section tabs, and ONE content column (max 1180px).
+The AI assistant is a 400px panel DOCKED to the right only when the user opens
+it (remembered per user) — it is not a permanent half of the page, and the
+sections are no longer a card nested inside a grid inside a padded body.
+
+- **Page header — four quiet lines (sticky white bar; the page owns its scroll):**
+  1. Breadcrumb: Deals › Transactions › [street address]
+  2. **Identity and actions on ONE line** — serif deal name + stage pill on the
+     left; on the right, four controls of the same pill shape: automation
+     posture (a chip that opens the three choices and "N handled today · M
+     need you"), status, "Ask AI", and the "⋯" menu. Actions align to the
+     title, not to the breadcrumb.
+  3. **Facts line** — one sentence, one style, one separator: address · Closes
+     [date] ([N] days) · price · [N] overdue · [N]% complete. Only "overdue"
+     takes an accent colour; days-to-close reddens inside 7 days. Task
+     progress is a fact here, not a progress bar wedged between buttons (the
+     bar lives on the Overview tab's Progress panel).
+  4. Section tabs.
+  - **Deal stats line (2026-07-22):** days to close (+ closing date), overdue
+    task count, purchase price — the three numbers the list card carries, so
+    both surfaces answer them the same way. All from the plan aggregate's
+    header block; no extra request.
+  - % complete indicator, "Saving…" in-flight pill
   - Status pill dropdown (status change with confirm; Closed asks for post-closing feedback)
-  - Champagne "AI next step" strip (from the plan aggregate)
-  - Tab pills (active = bg-ve-orange) + quick-action pills: Add Task | Upload Document (classified-upload dialog) | Sync Deadlines | More ▾ (Compose, Print closing checklist, Ask the AI)
+  - **"⋯" overflow menu (2026-07-22):** Print closing checklist (all internal
+    roles) | Delete transaction… (TeamLead/Admin only, `useConfirm` with
+    destructive tone, names the address, returns to the list on success)
+  - Automation posture control + "N handled / M needs you"
+  - Champagne "AI next step" strip (from the plan aggregate). Its CTA opens
+    the task email flow for the backing task (`ai_next_step.task_id` +
+    `task_label`), or falls back to the Tasks tab when no dated task backs
+    the guidance.
 - **Creation receipt strip (first visit after the wizard only, `?created=1`):** one flat green line — "Created just now · N tasks (M handled by AI) · N checklist items · N documents attached · Fees captured · E-signature queued · N requests to the other agent" — each segment linking to the tab whose rows back that number, dismissible, never shown again. Segments render only when their count is real.
-- **No overview/KPI/tracking/brief band above the tabs.** The body is the agent pane (persistent left column on xl) beside the workbench, and the workbench is its own tab bar plus the active tab. The deal brief lives INSIDE the Timeline tab (below).
-- **Tab bar:** Timeline | Compliance | Documents | Tasks | People | Activity (+ Agent on narrow screens)
+- **Tab bar (full width, on the header surface):** Overview | Timeline |
+  Tasks | Documents | People | Billing | Activity (+ Email with the agent
+  flag, + Agent on narrow screens). **Compliance is not a tab** — the
+  checklist is a view of Documents (Files | Checklist), because both are the
+  deal's paperwork.
+- **Body:** the next-action strip, then the active section. The assistant
+  docks on the right when opened from the header's "Ask AI".
+- **Deep links:** `?tab=`, `?view=files|checklist` (Documents),
+  `?task=<id>` (flash), `?requirement=<id>` (flash), `?qa=1` / `?access=1`
+  (People opens the Client Q&A drawer / Manage client access once, then the
+  flag is stripped), `?created=1` (receipt). `?tab=compliance` predates the
+  Documents merge and resolves to Documents › Checklist.
 - **Primary content area (per tab; ONE card per tab):**
 
+  **Overview Tab (the landing view, 2026-07-22):**
+  - Four panels answering what someone arrives with, each handing off to the
+    tab that owns it rather than duplicating its editors:
+    - **Needs you** — overdue and due-today tasks (click opens the task on
+      Tasks), plus a missing-documents line when there are any
+    - **Key dates** — the seven tracking dates as status-colored chips;
+      clicking one goes to Timeline, where dates are edited
+    - **Progress** — tasks complete of total with a bar, open/overdue counts,
+      purchase price
+    - **People** — the parties on the deal, with "Manage"
+  - Honest by construction: a panel renders only when it has real data, and
+    nothing here is a second place to edit the same thing.
+
   **Timeline Tab:**
+  - **Tracking dates rail (2026-07-22):** the seven operational fields the
+    card drawer used to own (EM Delivered, Inspection Response, Appraisal
+    Expected, CD Delivered, Cleared to Close, Closing, Possession) as compact
+    chips colored by status. The five pure tracking fields open the date
+    popover and save directly (no planner anchor references those columns);
+    **Closing and Possession open the cascade preview instead** — the card
+    wrote them raw and silently stranded every rule-driven deadline, which is
+    the behavior this migration ends. Stored times render read-only, as they
+    did on the card. Saving invalidates the dashboard cards query too, so the
+    list agrees immediately.
   - The plan, alive: core dates, term-derived deadlines, deadline tasks, optional document due dates (pill toggle)
   - Command bar ("Tell me what to change" — closed intents, preview-then-apply, undo)
   - Mini-map; core-date/term edits run the cascade preview → Apply → Undo
@@ -1633,6 +1705,20 @@ This is a pure redirect route. No UI rendered.
   **People Tab:**
   - **Deal fees** at the top: the professional fee and transaction fee as "3% · seller" / "buyer $250 · seller 2%" rows, editable in place (pencil → Radix dialog with the wizard's fee-card anatomy: Buyer/Seller/Both, one amount + `%`/`$` per paying side, "Remove fee"); with no fees entered an editing role sees "+ Add fees", and a viewer without edit rights sees nothing at all. Mirrors the `PATCH /transactions/{id}` role gate (Agent / TeamLead / Admin, D5); every edit lands in the Activity audit trail. Fees live here — with the deal's commercial relationships — because the deal brief / overview band stays off the workspace page (Jan's 2026-06-13 review).
   - Representation-aware groups (Buyer, Seller, Agents, Lender, Title + Other contacts); add/edit via AddContactModal; Assign team; Manage client access; client thread; compose
+  - **Client Q&A badge (2026-07-22):** an amber dot on the Client Q&A button
+    when this deal's client is waiting on an answer (from the same cheap
+    tenant-wide thread summary the list uses). `?qa=1` opens the drawer on
+    arrival; `?access=1` opens Manage client access.
+
+  **Billing Tab (2026-07-22):**
+  - This deal's invoices: status pill (Draft / Sent / Paid / Void /
+    Uncollectible), payer, due-or-paid date (overdue marked), amount; a row
+    opens `/payments/invoices/:id`. Reads `GET /api/v1/invoices?scope=tenant`
+    so a team sees every invoice raised on the deal.
+  - "Create invoice" (prefilled NewInvoiceModal) renders only with the
+    `can_create_invoice` capability; the LIST is readable by every internal
+    role, matching the endpoint (which needs authentication, not capability).
+  - Empty state names the action; "View all in Payments" link.
 
   **Activity Tab:**
   - History feed (audit + task events) with search; Communications panel mounts from page context
@@ -1645,6 +1731,8 @@ This is a pure redirect route. No UI rendered.
   - Add Contact / Assign Team / Manage Client Access modals
   - Compose Email modal; Post-closing feedback modal
   - Documents manager modal (with Missing-documents panel)
+  - New Invoice modal (Billing tab); Task email flow (next-step CTA)
+  - Delete-transaction confirm (destructive `useConfirm`)
   - AI Chat panel; Print Checklist
 
 ### 4. User Actions & State Transitions

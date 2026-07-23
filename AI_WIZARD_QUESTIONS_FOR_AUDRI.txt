@@ -1,0 +1,173 @@
+================================================================================
+AI WIZARD — QUESTIONS FOR AUDRI
+Follow-ups from the 2026-07-22 testing round
+Prepared 2026-07-23
+================================================================================
+
+Hi Audri — thank you for the detailed testing notes. Everything is implemented
+and verified in the browser. A few points need your confirmation before we
+consider them final. For each one I've written what I built as the default, a
+plain example, and the exact thing I need you to confirm or correct. You can
+just reply "yes that's right" or tell me what to change.
+
+Two of the earlier questions are already answered and closed:
+  - Parsing screen  -> you confirmed: 4 fixed steps + spinner. DONE.
+  - Document scroll  -> you confirmed: turn the page at the edge. DONE
+    (delivered as smooth continuous scrolling through all pages).
+
+The questions below are the ones still open.
+
+--------------------------------------------------------------------------------
+QUESTION 1 — "Create a task to collect this information": which roles get it?
+--------------------------------------------------------------------------------
+Your note said the button should appear on all roles EXCEPT Buyer, Seller, and
+Co Agent.
+
+What I built (default):
+  The button appears on VENDOR contacts only — Title Company, Lender / Loan
+  Officer, Inspector, Appraiser, Closing Attorney. It is HIDDEN on:
+     - Buyer
+     - Seller
+     - The buyer's agent
+     - The listing agent
+  (i.e. both principals and BOTH agents are always required, never deferrable.)
+
+Why I want to confirm:
+  You named "Co Agent" (the other side's agent). You did NOT mention your OWN
+  side's agent. My default hides the button on BOTH agents, because a deal is
+  worked THROUGH the agents, so their email/phone should never be skippable.
+
+Example:
+  Representing the Buyer. You add the Title Company but don't have their email
+  yet -> the "Create a task to collect this information" button shows, you click
+  it, and the deal is created with a task to chase the title rep's details.
+  But on the Buyer's Agent card (you or your teammate), the button does NOT
+  show — those details are always required.
+
+PLEASE CONFIRM:
+  a) Is it correct that BOTH agents (your side AND the co-agent) are always
+     required and never get the button?  OR
+  b) Should YOUR OWN side's agent also be allowed to defer (button shows)?
+
+--------------------------------------------------------------------------------
+QUESTION 2 — Expiration dates: never shown at all vs. renamed?
+--------------------------------------------------------------------------------
+Your note said the "Counter offer expiration" box should say "Counter Offer 1
+Expiration", and also: "Regardless of document, it should never call out
+expiration dates. If a user is uploading the transaction the expiration dates
+are irrelevant."
+
+What I built (default):
+  I read your stronger statement as the real intent, so I made the system NEVER
+  surface an expiration date at all — offer expiration, counter-offer
+  expiration, "offer void if not accepted by", acceptance deadline, and
+  pre-approval / financing pre-qualification letter expiration are all
+  suppressed. The result: that box never appears (instead of appearing with a
+  better name like "Counter Offer 1 Expiration").
+
+Why I want to confirm:
+  Since these dates have already passed by the time a deal is uploaded, they can
+  never be a deadline anyone needs to act on. Suppressing them entirely felt
+  more correct than renaming a box the user should never see. But your first
+  sentence asked for a rename, so I want to be sure.
+
+Example:
+  You upload a purchase agreement + 4 counter offers. In testing, NO expiration
+  box appeared at all, even though each counter offer had an expiration clause.
+
+PLEASE CONFIRM:
+  a) Suppress ALL expiration dates entirely (my default — the box never
+     appears)?  OR
+  b) You'd rather it still appear, just correctly named ("Counter Offer 1
+     Expiration")?
+  c) Also: is it right to include the PRE-APPROVAL / financing pre-qual letter
+     expiration in the "never show" list, or is a pre-approval expiration
+     something you'd actually want flagged?
+
+--------------------------------------------------------------------------------
+QUESTION 3 — Seller / dual-rep fees: is the model right?
+--------------------------------------------------------------------------------
+Your new request: when representing the Seller (or Buyer & Seller), ask for the
+listing professional fee AND the buyer agent's professional fee, and ask whether
+the seller is paying any of the buyer agent's fee (and how much).
+
+What I built (default):
+  - Buyer rep: one "Professional fee" card (your fee) — unchanged.
+  - Seller rep: two cards ->
+        "Listing professional fee"  (paid by the seller)
+        "Buyer agent professional fee"  + the question
+             "Is the seller paying any of the buyer agent's fee?" (Yes/No)
+             -> if Yes: "How much is the seller paying?"
+  - Buyer & Seller (dual): same two-card layout; the buyer-agent fee is noted
+    as "also you" since you hold both sides.
+
+The "how much is the seller paying" assumption:
+  When the seller pays PART of the buyer agent's fee, I assume the REMAINDER is
+  paid by the buyer. On the Verification screen it reads, e.g.:
+     "Buyer agent professional fee: 2.5% - Paid by Seller 2%, rest Paid by Buyer"
+
+PLEASE CONFIRM:
+  a) Is the two-card seller/dual layout what you had in mind?
+  b) Is "the seller pays X, the buyer pays the rest" the correct way to split
+     the buyer agent's fee — or is there another arrangement you see in
+     practice (e.g. the seller pays a flat dollar amount and anything above that
+     is the buyer's)?
+  c) On a Buyer & Seller (dual) deal, should we STILL ask "is the seller paying
+     any of the buyer agent's fee?" — or is that question only meaningful when
+     the two agents are different people?
+
+--------------------------------------------------------------------------------
+QUESTION 4 — "Paid by Buyer / Paid by Seller" wording on split fees
+--------------------------------------------------------------------------------
+You asked for "Paid by Buyer" / "Paid by Seller" instead of "buyer" / "seller".
+Done. One wording choice to confirm for the case where a fee is split between
+both sides.
+
+What I built (default):
+  - Paid by one side:   "3% - Paid by Seller"   /   "$495 - Paid by Buyer"
+  - Split between both:  "Paid by Buyer $250 - Paid by Seller 2%"
+
+PLEASE CONFIRM:
+  Is that split wording clear, or would you phrase the both-sides case
+  differently?
+
+--------------------------------------------------------------------------------
+QUESTION 5 — The collect-info task itself (naming / timing)
+--------------------------------------------------------------------------------
+When you defer a vendor's contact info, a task is created at upload. It's a
+plain to-do on the deal.
+
+What I built (default):
+  - Task name: "Collect contact details for <Vendor Name>"
+  - Description: "Get the email and phone for <Vendor> (<company>) — the
+    <role> on this deal — and add them on the People tab."
+  - It's a manual task (no auto-email, since there's no email yet), due a couple
+    of days after contract acceptance, and it shows on the Verification summary
+    before upload so you know it was created.
+
+PLEASE CONFIRM:
+  a) Is that task wording good, or would you word it differently?
+  b) Is "a couple of days after acceptance" a fine default due date, or should
+     these have no due date / a different timing?
+
+--------------------------------------------------------------------------------
+QUESTION 6 — "Needs your eyes" wording (feedback welcome, not blocking)
+--------------------------------------------------------------------------------
+You said the boxes at the top were bold and prominent (good) but unclear on what
+was wrong / what to fix. I added a one-line explanation to each section plus a
+"Why you're seeing this:" line on every card, in plain English. Example:
+
+  Seller surrender possession time        [AI - 74%]
+  Deadline: not stated
+  Why you're seeing this: AI found the obligation but no date or day count for
+  it, so there is nothing to put on the calendar yet.
+        [ Add deadline ]   [ Dismiss ]
+
+PLEASE CONFIRM:
+  Is this level of explanation clear enough now, or is there specific wording
+  you'd like changed? (Not blocking — just want your read.)
+
+================================================================================
+Thanks! Reply inline under each question — a "yes" is enough where the default
+is right. Anything you change, I'll update and re-verify in the browser.
+================================================================================

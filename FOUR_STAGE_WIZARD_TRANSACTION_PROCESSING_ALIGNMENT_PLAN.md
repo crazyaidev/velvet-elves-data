@@ -1,6 +1,6 @@
 # Transaction Processing Alignment with the Four-Stage AI Wizard - Plan
 
-**Status:** **IMPLEMENTED 2026-07-22** (uncommitted; Jan commits). All 7 phases built and green: backend 95 tests (79 existing suites + 16 new in `test_intake_handoff_alignment.py`) with `ruff check app/` clean; frontend `tsc` clean and the **full vitest suite 340/340 across 49 files**. See "Implementation status" below Part 0 for what shipped, the design deviation the source forced, the wrong turn the tests caught, and what remains.
+**Status:** **IMPLEMENTED 2026-07-22** (uncommitted; Jan commits). All 7 phases built and green: backend 95 tests (79 existing suites + 16 new in `test_intake_handoff_alignment.py`) with `ruff check app/` clean; frontend **`npm run build` passing** (full `tsc --noEmit` + vite) and the **vitest suite 340/340 across 49 files**. See "Implementation status" below Part 0 for what shipped, the design deviation the source forced, the wrong turn the tests caught, and what remains.
 **Prepared by:** Jan
 **Date:** 2026-07-22 (rev 3. Rev 2 was a full workflow/logic review of rev 1 against the documentation set and the current source - Appendix B lists every correction it produced. Rev 3 applies the client's D3 answer: the checklist-import feature is **retired**, and corrects one rev-2 imprecision found while scoping the retirement, Appendix B #12.)
 **Purpose:** The AI Wizard (transaction creation) was reorganized into Audri's four stages - Upload / Contract Details / Contacts & Fees / Verification - with the checklist step retired, per-side fees added, and client-scoped signature/missing-document actions added. Transaction processing (the workspace, the task engine, the automation system, the cross-deal queues) was designed against the old wizard. This plan audits every seam between creation and processing against the current source, names the inconsistencies precisely, and lays out the changes that make the two stages one coherent workflow.
@@ -25,7 +25,9 @@ These are the standing rules from the client and from past failures, restated he
 
 ## Implementation status (2026-07-22)
 
-All seven phases are built. Suites: backend `test_intake_handoff_alignment.py` (16 new) + `test_ai_task_executor` / `test_task_generation` / `test_transactions_api` / `test_transactions_advanced` / `test_transaction_fees` / `test_transaction_plan` (79) all green, ruff clean; frontend `tsc -p tsconfig.app.json` clean, `WizardFlow` 68/68.
+All seven phases are built. Suites: backend `test_intake_handoff_alignment.py` (16 new) + `test_ai_task_executor` / `test_task_generation` / `test_transactions_api` / `test_transactions_advanced` / `test_transaction_fees` / `test_transaction_plan` (79) all green, ruff clean; frontend `npm run build` passing and vitest 340/340 across 49 files.
+
+**Verification note (a mistake worth not repeating):** the interim typechecks in this session were run as `npx tsc … | tail`, so the reported exit code came from `tail`, not `tsc` — they proved nothing. One real error (an unused type left over from an earlier draft of `FeeEditDialog`) survived to `npm run build`, which runs `tsc --noEmit` unpiped. **Verify a typecheck with the compiler's own exit status, never through a pipe.**
 
 | Phase | Shipped |
 |---|---|
