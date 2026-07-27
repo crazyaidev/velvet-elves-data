@@ -1,0 +1,21 @@
+Subject: Re: The AI stack we run Cloudflare on is now yours
+
+Hi Jake,
+
+Good one. I read it, and the short version is that this is a real tool, and the good news is the app already does most of what makes it exciting. The parts it does not do yet line up almost exactly with the agent functionality you are pointing at, so it is worth keeping on the list for then.
+
+Here is how their five points map to what I have already built:
+
+1. One place for every model. Already built. Every AI call in the app runs through a single switchboard that can use OpenAI or Claude, and the model is picked from a setting rather than hardcoded. Adding a provider is a small change in one spot.
+
+2. Spend you can see and cap. The "see" half is built. During testing I already track tokens and cost on every AI call and can show cost per deal and per tenant, which is exactly what we need to set pricing. What I have not built yet is a hard cap that auto-shuts off a runaway. That is a fair thing to want, and a gateway is one way to get it.
+
+3. Keys and data that stay put. Already handled. The API keys live in a secure store, not in the code, and client information is encrypted at rest. The one genuinely new idea is their scanner that checks every prompt for leaked private data. That is a nice safety net worth a look later.
+
+4 and 5. Agents that reach only what they should, and Code Mode. These two are the real reason to bookmark it. They only matter once the AI has actual tools to act with, which is the agent functionality I have been planning but have not turned on yet. Once I build that, their access controls and speed tricks could save me real work.
+
+So my honest read: nothing to switch on today, because we would mostly be paying a middleman for things I have already built. But it is a strong candidate for the moment I start the agent work. When I get there I will do a quick evaluation, cost, speed, and whether their safety and agent controls beat building the same thing myself, and bring you a recommendation.
+
+Thanks for sending it. Good one to have in the back pocket.
+
+Jan
