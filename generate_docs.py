@@ -1110,6 +1110,86 @@ def create_ai_wizard_questions_doc():
     save_document(doc, "AI_WIZARD_QUESTIONS_FOR_AUDRI.docx")
 
 
+def _create_markdown_doc(source_md, output_docx):
+    """Render a client-facing markdown file to .docx with the house title page.
+
+    Extracted from the per-document builders below, which were all the same
+    forty lines with a different filename. Any markdown file whose header is
+    ``# Title`` followed by ``**Label:** value`` metadata lines renders here.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines(source_md)
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, output_docx)
+
+
+def create_task_email_testing_guide_doc():
+    """Generate a .docx of TASK_LIST_AND_EMAIL_TESTING_GUIDE.md (audience:
+    Audri / Jake — the task-list and email testing round)."""
+    _create_markdown_doc(
+        "TASK_LIST_AND_EMAIL_TESTING_GUIDE.md",
+        "TASK_LIST_AND_EMAIL_TESTING_GUIDE.docx",
+    )
+
+
+def create_todo_list_doc():
+    """Generate a .docx of todo_list.md — the companion "not ready for feedback
+    yet" list that ships alongside every testing guide."""
+    _create_markdown_doc("todo_list.md", "TODO_LIST.docx")
+
+
+def create_stage_testing_results_doc():
+    """Generate a .docx of STAGE_TESTING_RESULTS_2026-07-28.md — the record of
+    working the testing guide against staging (audience: Audri / Jake)."""
+    _create_markdown_doc(
+        "STAGE_TESTING_RESULTS_2026-07-28.md",
+        "STAGE_TESTING_RESULTS_2026-07-28.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -4604,6 +4684,9 @@ TARGET_BUILDERS = {
     "gmail-approval-plan": create_gmail_approval_plan_doc,
     "ai-wizard-questions": create_ai_wizard_questions_doc,
     "ai-wizard-status": create_ai_wizard_status_report_doc,
+    "task-email-testing-guide": create_task_email_testing_guide_doc,
+    "todo-list": create_todo_list_doc,
+    "stage-testing-results": create_stage_testing_results_doc,
 }
 
 TARGET_ALIASES = {
@@ -4669,6 +4752,18 @@ TARGET_ALIASES = {
     "wizard-status": "ai-wizard-status",
     "testing-status": "ai-wizard-status",
     "status-report": "ai-wizard-status",
+    "task_list_and_email_testing_guide": "task-email-testing-guide",
+    "task_list_and_email_testing_guide.md": "task-email-testing-guide",
+    "task_list_and_email_testing_guide.docx": "task-email-testing-guide",
+    "task-email-guide": "task-email-testing-guide",
+    "email-testing-guide": "task-email-testing-guide",
+    "task-testing-guide": "task-email-testing-guide",
+    "todo_list": "todo-list",
+    "todo_list.md": "todo-list",
+    "todo": "todo-list",
+    "stage_testing_results": "stage-testing-results",
+    "stage-results": "stage-testing-results",
+    "stage-testing": "stage-testing-results",
     "all": "all",
 }
 
