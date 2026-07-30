@@ -1190,6 +1190,16 @@ def create_stage_testing_results_doc():
     )
 
 
+def create_billing_minimum_price_doc():
+    """Generate a .docx of BILLING_SYSTEM_AND_MINIMUM_PRICE_FOR_JAKE.md — how the
+    credit/flat-fee billing system works and the minimum price per credit
+    (audience: Jake, for approval)."""
+    _create_markdown_doc(
+        "BILLING_SYSTEM_AND_MINIMUM_PRICE_FOR_JAKE.md",
+        "BILLING_SYSTEM_AND_MINIMUM_PRICE_FOR_JAKE.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -4687,6 +4697,7 @@ TARGET_BUILDERS = {
     "task-email-testing-guide": create_task_email_testing_guide_doc,
     "todo-list": create_todo_list_doc,
     "stage-testing-results": create_stage_testing_results_doc,
+    "billing-minimum-price": create_billing_minimum_price_doc,
 }
 
 TARGET_ALIASES = {
