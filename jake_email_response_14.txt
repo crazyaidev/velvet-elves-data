@@ -1,0 +1,119 @@
+Subject: Re: Pitch battle readiness and the 2 minute video
+
+Hi Jake,
+
+Short answer: enter it, but pitch the intake and the timeline, not the email
+queue. I went back through the actual code before writing this rather than
+trusting my own status notes, and that changed one thing I would have told you
+yesterday. Details below.
+
+WHAT IS SOLID ENOUGH TO PUT ON SCREEN
+
+Intake is the strongest thing we have and it is not a demo trick. The wizard
+runs in four steps: Upload, Contract Details, Contacts and Fees, Verification.
+Behind it there is a real resolution stage that reads a whole packet and works
+out which document actually governs, so four counter offers and an amendment
+resolve to one set of controlling terms instead of the last file read winning.
+Every extracted value carries a citation back to the document name and page,
+and there is a second verification pass over the critical fields that flags
+disagreement rather than hiding it. That is the part competitors describe and
+do not show.
+
+Dates are computed, not typed. The dependency engine derives every task date
+from two anchors, the contract acceptance date and the closing date, using
+finish-to-start and start-to-start links with day offsets, including offsets
+that read values out of the contract such as the inspection period. That is why
+a deal lands with a full dated task list a few seconds after creation.
+
+The AI genuinely sends some mail by itself. Five rows in the task library are
+marked Automated, the welcome emails, the title order and the documentation
+review, and the executor completes them without anyone clicking. The safety
+model around it is real and worth saying out loud in a pitch: those bodies are
+fixed library templates rather than free written by a model, recipients can
+only come from parties captured off the contract, the deal has to be active, it
+has to have a connected mailbox, and anything overdue past a threshold is
+surfaced to a human instead of firing a stale email at a client. Everything
+else still waits for a person.
+
+The tree itself is healthy today. Backend suite is 1388 passing and the
+frontend typechecks clean.
+
+WHAT I WOULD NOT SHOW, AND THE CORRECTION
+
+I told you the inbound email side was rebuilt. It was, and then it was reverted
+the same afternoon, in both repositories, because the new message based inbox
+removed a surface that also carried outbound drafts. So the code that is
+actually there is the older AI Email Review page, and it has the problems that
+review found. Single words like listing, loan, commission, buyer and seller
+each count on their own as proof a message is about a deal, and a street
+address anywhere in the text counts too, including in a signature footer, so
+newsletters and recruiter mail can still earn a drafted reply. A message that
+states something rather than asking a question, such as the title commitment
+being ready, is classified as having no actionable intent and produces nothing
+at all. There is also no special handling of wire or money email in the code
+that exists today.
+
+That last point matters because I nearly had you build the video around it.
+Please strike it. I am not comfortable claiming a wire fraud safeguard on
+camera when the shipped code does not implement one.
+
+Two other things not to click while recording: the Sharing page is still a
+Coming Soon placeholder, and the AI Coach block on the team dashboard is an
+unbuilt paid add-on.
+
+WHAT IS ACTUALLY BLOCKING REAL CUSTOMERS
+
+Checked in AWS rather than in my notes. The scheduler secret is now wired into
+both the production and staging task definitions, so that part is done, but
+there is no EventBridge rule or schedule in our region at all. Nothing calls
+the hourly tick, in either environment, so the system only acts when somebody
+does something. Everything in the video plan below is triggered by a click, so
+this does not affect the recording, but it does mean we cannot yet say the
+software works a deal overnight.
+
+The Google verification submission is still the real gate on opening the doors,
+since without it every customer connecting a mailbox meets the unverified app
+warning and tokens keep expiring. The package is mine to finish and the
+submission is yours to make.
+
+Pricing is live and consistent: I queried both environments and each returns
+$49 a transaction, first deal free, with the ten plus two bundle at $490.
+
+THE TWO MINUTES
+
+The reason two minutes feels impossible is that the instinct is to tour the
+product, and the product is large. Show one deal instead.
+
+Twelve seconds on the problem. Thirty on dropping the whole packet in at once,
+with the read compressed and a visible clock so the compression is honest, then
+one click on a citation so the viewer watches it prove where a number came
+from. Twenty five on the deal existing, with the task list scrolled slowly
+enough to read real dates. Twenty five on the welcome emails having already
+sent themselves, shown in the Handled by AI group and the sent folder, which is
+the beat that separates this from a form filler. Fifteen on the deal workspace
+showing what is missing and what is next. Ten on price.
+
+Record it, do not demo live. A ten document packet takes about three minutes to
+read because it is running OCR and two extraction passes over roughly a hundred
+pages. That is fast for the work and slow for a stage.
+
+BEFORE THE PITCH
+
+Stage a demo tenant with one believable deal, because a fresh account is
+deliberately empty and empty looks bad on camera. Point every party on that
+deal at a mailbox we control. Do not connect Gmail on camera. I would start no
+new feature between now and the pitch date.
+
+WHAT I NEED FROM YOU
+
+The date and the format, who is in the room, and whether we say $49 out loud
+given ListedKit sits at $14.99. Give me the date and I will record clean
+captures of each beat so the edit and the voiceover are all that is left for
+you and Audri.
+
+My honest overall read: what you would be pitching works, and I can stand
+behind every claim in that script because I checked each one in the code today
+rather than in my own reports. The risk is not the product. It is claiming the
+one part I just had to walk back.
+
+Jan
