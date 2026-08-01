@@ -1175,6 +1175,24 @@ def create_task_email_testing_guide_doc():
     )
 
 
+def create_core_features_testing_guide_doc():
+    """Generate a .docx of CORE_FEATURES_TESTING_GUIDE.md (audience: Audri /
+    Jake — the core-product testing round, everything except the AI wizard)."""
+    _create_markdown_doc(
+        "CORE_FEATURES_TESTING_GUIDE.md",
+        "CORE_FEATURES_TESTING_GUIDE.docx",
+    )
+
+
+def create_core_features_testing_checklist_doc():
+    """Generate a .docx of CORE_FEATURES_TESTING_CHECKLIST.md — the tick-box
+    companion to the core-features testing guide."""
+    _create_markdown_doc(
+        "CORE_FEATURES_TESTING_CHECKLIST.md",
+        "CORE_FEATURES_TESTING_CHECKLIST.docx",
+    )
+
+
 def create_todo_list_doc():
     """Generate a .docx of todo_list.md — the companion "not ready for feedback
     yet" list that ships alongside every testing guide."""
@@ -1459,10 +1477,19 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("")
     lines.append("## Features Currently Complete — Client Feedback Requested")
     lines.append("")
-    lines.append("**Last Updated:** June 30, 2026  ")
-    lines.append("**Test Environment:** http://dev.velvetelves.com/  ")
+    lines.append("**Last Updated:** July 31, 2026 (first written June 30, 2026)  ")
+    lines.append("**Test Environment:** https://app.stage.velvetelves.com  ")
     lines.append("**Recommended Browsers:** Chrome or Edge (please allow pop-ups and downloads)  ")
     lines.append("**Reviewer:** Client — please fill in the Feedback block under each feature")
+    lines.append("")
+    lines.append("> **Start with `CORE_FEATURES_TESTING_GUIDE.md` instead.** That guide is the")
+    lines.append("> current, source-verified walkthrough of the core product, written to be worked")
+    lines.append("> through in order, with a tick-box companion in `CORE_FEATURES_TESTING_CHECKLIST.md`.")
+    lines.append("> This document remains the exhaustive per-feature reference — including the")
+    lines.append("> Attorney workspace, the Client / FSBO / Vendor portals, the public links, and the")
+    lines.append("> platform screens, which the core guide does not cover. Sections re-verified against")
+    lines.append("> the source on July 31, 2026 are the sign-up page and the Email screen (29.7–29.10);")
+    lines.append("> where the two documents disagree anywhere else, the core guide is the newer one.")
     lines.append("")
     lines.append("---")
     lines.append("")
@@ -1498,8 +1525,8 @@ def _write_testing_review_md(output_filename="FRONTEND_CLIENT_TESTING_REVIEW.md"
     lines.append("2. Invite-accept flow (open an invite link as a brand-new user)")
     lines.append("3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay")
     lines.append("4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, opening a single deal in the AI deal workspace, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)")
-    lines.append("5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before AI Email Review can send), Email Templates, My Playbook, Help & Tour, and — for Admins / owners — the Workspace cards (Company, Branding, Users & Invites, Task Templates, Document Templates, Vendor Templates, Team Playbook, Integrations, AI & Automation, Payment Access, Advertising)")
-    lines.append("6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors")
+    lines.append("5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before Email can send), Email Templates, My Playbook, Help & Tour, and — for Admins / owners — the Workspace cards (Company, Branding, Users & Invites, Task Templates, Document Templates, Vendor Templates, Team Playbook, Integrations, AI & Automation, Payment Access, Advertising)")
+    lines.append("6. Intelligence — Email at /ai-emails (formerly called AI Email Review), AI Suggestions, Analytics, and Vendors")
     lines.append("7. Payments — invoices and commission payouts")
     lines.append("8. Team Lead or Admin extras — the Team Overview and Teams pages (sidebar Team group), invite / ownership / deactivate a member, the Oversight group (Communication Audit, Audit Log), and the Admin configuration cards now in the Settings hub (Integrations, AI & Automation, Payment Access, Advertising)")
     lines.append("9. Attorney workspace (Matters, Matter detail, Releases Queue, State Rules, Recording Calendar)")
@@ -1619,14 +1646,25 @@ def create_testing_review_doc():
                          alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(13))
     doc.add_paragraph()
 
-    _add_plain_paragraph(doc, "Last Updated: June 30, 2026",
+    _add_plain_paragraph(doc, "Last Updated: July 31, 2026 (first written June 30, 2026)",
                          bold=True, space_after=Pt(3))
-    _add_plain_paragraph(doc, "Test Environment: http://dev.velvetelves.com/",
+    _add_plain_paragraph(doc, "Test Environment: https://app.stage.velvetelves.com",
                          space_after=Pt(3))
     _add_plain_paragraph(doc, "Recommended Browsers: Chrome or Edge (please allow pop-ups and downloads)",
                          space_after=Pt(3))
     _add_plain_paragraph(doc, "Reviewer: Client — please fill in the Feedback block under each feature",
                          space_after=Pt(6))
+    _add_plain_paragraph(
+        doc,
+        "Start with CORE_FEATURES_TESTING_GUIDE.md instead. That guide is the current, "
+        "source-verified walkthrough of the core product, written to be worked through in "
+        "order, with a tick-box companion in CORE_FEATURES_TESTING_CHECKLIST.md. This "
+        "document remains the exhaustive per-feature reference — including the Attorney "
+        "workspace, the Client / FSBO / Vendor portals, the public links, and the platform "
+        "screens, which the core guide does not cover. Sections re-verified against the "
+        "source on July 31, 2026 are the sign-up page and the Email screen (29.7–29.10); "
+        "where the two documents disagree anywhere else, the core guide is the newer one.",
+        space_after=Pt(6))
 
     doc.add_page_break()
 
@@ -1667,8 +1705,8 @@ def create_testing_review_doc():
         "2. Invite-accept flow (open an invite link as a brand-new user)",
         "3. Onboarding wizard (test both founder and invitee branches) and the product tour overlay",
         "4. Standard Agent or Elf workflow (dashboard, new transaction, transactions list, opening a single deal in the AI deal workspace, My Task Queue, Closing Calendar, Clients, Contacts, All Documents)",
-        "5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before AI Email Review can send), Email Templates, My Playbook, Help & Tour, and — for Admins / owners — the Workspace cards (Company, Branding, Users & Invites, Task Templates, Document Templates, Vendor Templates, Team Playbook, Integrations, AI & Automation, Payment Access, Advertising)",
-        "6. Intelligence — AI Email Review at /ai-emails, AI Suggestions, Analytics, and Vendors",
+        "5. The Settings hub (avatar menu → Settings): your Profile, Notifications, Email & E-signature connections (needed before Email can send), Email Templates, My Playbook, Help & Tour, and — for Admins / owners — the Workspace cards (Company, Branding, Users & Invites, Task Templates, Document Templates, Vendor Templates, Team Playbook, Integrations, AI & Automation, Payment Access, Advertising)",
+        "6. Intelligence — Email at /ai-emails (formerly called AI Email Review), AI Suggestions, Analytics, and Vendors",
         "7. Payments — invoices and commission payouts",
         "8. Team Lead or Admin extras — the Team Overview and Teams pages (sidebar Team group), invite / ownership / deactivate a member, the Oversight group (Communication Audit, Audit Log), and the Admin configuration cards now in the Settings hub (Integrations, AI & Automation, Payment Access, Advertising)",
         "9. Attorney workspace (Matters, Matter detail, Releases Queue, State Rules, Recording Calendar)",
@@ -1815,8 +1853,9 @@ TESTING_REVIEW_FEATURES = [
         "feature": "Register (sign-up) page",
         "route": "/register",
         "how_to_test": [
-            "Open /register and confirm the fields: Full name, Organization (optional), Email, Password, Confirm Password, Phone (optional), and a Terms / Privacy checkbox. A Google sign-up button is also available.",
-            "Note: there is no Role dropdown. The first person to register for an organization is automatically the Admin and Owner of a brand-new workspace. To join an existing brokerage you must use an invite link — typing the brokerage name in Organization does not join you to it.",
+            "Open /register and confirm the fields: Full name, Role, Organization (optional), Email, Password, Confirm Password, Phone (optional), and a Terms / Privacy checkbox. A Google sign-up button is also available.",
+            "Open the Role dropdown and confirm it offers Agent, Team Leader, Transaction Coordinator, and Admin. It sets up your workspace for how you work, and the page says you can change it on the next screen (the onboarding wizard).",
+            "Note: typing a brokerage name in Organization creates a BRAND-NEW workspace with you as its admin and owner. It does not join you to an existing brokerage — for that you must use an invite link.",
             "Type an email already in use and confirm the page blocks Create Account and offers a 'Sign in instead' link.",
             "Type a weak password (under 8 characters, no number, no symbol, etc.) and confirm the page shows which rules still need to be met.",
             "Type mismatching passwords and confirm Create Account is blocked until they match.",
@@ -1832,6 +1871,7 @@ TESTING_REVIEW_FEATURES = [
             "Show a one-line preview of how the Organization name will appear on outbound emails before you submit.",
             "Add Microsoft / Outlook and Apple sign-up buttons next to Google.",
             "Auto-suggest an Organization name from the email domain (for example 'acme-realty.com' suggests 'Acme Realty').",
+            "Offer the remaining account types (Attorney, For-Sale-By-Owner) in the Role dropdown once those self-sign-up flows are finished.",
         ],
     },
     {
@@ -2478,13 +2518,13 @@ TESTING_REVIEW_FEATURES = [
             "Open the Email tab and confirm an Outbox / Inbox switch at the top, each showing a count.",
             "On Outbox, confirm any AI drafts for this deal are listed as 'Pending review', with a banner saying nothing sends without your approval. Sent and discarded emails appear below them.",
             "Click Inbox and confirm incoming emails matched to this deal are listed separately.",
-            "Click a draft row and confirm it opens the full AI Email Review screen, where you can review, edit, approve, or discard it.",
+            "Click a draft row and confirm it opens the full Email screen, where you can review, edit, approve, or discard it.",
             "Click Compose to start a new email for this deal.",
         ],
         "expected_result": [
             "Outbox and Inbox are kept separate, each with its own count.",
             "Drafts are clearly marked 'Pending review' — the assistant never sends on its own.",
-            "Opening a draft takes you to the AI Email Review screen to finish it.",
+            "Opening a draft takes you to the Email screen to finish it.",
         ],
         "future_ideas": [
             "Let the user re-file an email that was matched to the wrong deal.",
@@ -3419,7 +3459,7 @@ TESTING_REVIEW_FEATURES = [
         "expected_result": [
             "Every provider connects through its official sign-in popup — no password is typed into Velvet Elves.",
             "Disconnect always asks for confirmation first.",
-            "At least one inbox must be connected for AI Email Review (features 29.7+) to send replies, and DocuSign must be connected for Send for Signature on the Documents center.",
+            "At least one inbox must be connected for the Email screen (features 29.7+) to send replies, and DocuSign must be connected for Send for Signature on the Documents center.",
         ],
         "future_ideas": [
             "Show a 'Last synced' time and a manual 'Sync now' button per inbox.",
@@ -3478,96 +3518,106 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "29.7",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "AI Email Review — overview, list, and filter tabs",
+        "feature": "Email — the two streams (Inbox and Outbox)",
         "route": "/ai-emails",
         "how_to_test": [
-            "Open Intelligence → AI Email Review from the sidebar (Agent, Transaction Coordinator, Team Lead, and Admin only; Attorney and external roles do not see this entry).",
-            "Confirm the filter tabs: All, Needs Review, Ready to Send, Low Confidence, Escalated — each with a count.",
-            "Click each tab in turn and confirm the list narrows to that subset.",
-            "Click Refresh and confirm the list reloads.",
-            "Leave the page open for at least 60 seconds. The list should silently re-fetch every minute, and any new draft should appear without a manual refresh.",
-            "Open the top-bar bell on another page and confirm the unread count matches the All tab here.",
-            "Force an empty state by switching to a tab with no matches and confirm a clear empty message appears.",
+            "Open Intelligence → Email from the sidebar (Agent, Transaction Coordinator, Team Lead, and Admin only; Attorney and external roles do not see this entry). Note the name: the nav entry, the breadcrumb, and the page heading all read 'Email'. It was called 'AI Email Review' in earlier documents.",
+            "Confirm there are exactly two tabs — Inbox and Outbox — each with a count. Inbox is the mail that arrived; Outbox is what the AI has prepared for you to send.",
+            "Switch between the tabs and confirm the list and the reading pane both change, with no leftover selection from the other tab.",
+            "Use the deal filter to narrow to one property, and confirm the deal options and their counts match the tab you are on. 'Unlinked' is pinned first and holds anything the AI could not match to a deal.",
+            "Type in the search box and confirm it filters whichever stream is on screen.",
+            "Click Refresh and confirm the list reloads. Leave the page open for a minute and confirm new items appear on their own.",
+            "Admins only: confirm an 'Audit log' button opens the email audit trail.",
+            "Force an empty state (filter to a deal with no mail) and confirm a clear empty message appears.",
         ],
         "expected_result": [
-            "The list only contains drafts your role is allowed to act on.",
-            "Auto-refresh runs every 60 seconds; the list also refreshes immediately after Approve / Edit / Discard / Regenerate.",
+            "Two tabs and nothing else. There is no 'Filtered out', 'Needs you', or 'Waiting' view — those were tried and removed.",
+            "The list refreshes on its own, and also immediately after Approve / Edit / Discard / Regenerate.",
+            "The deal filter never offers a deal that then shows zero rows in the tab you are looking at.",
             "Empty and error states show a clear next step.",
         ],
         "future_ideas": [
-            "Add an inline search box and sort control inside the list.",
-            "Add per-row checkboxes plus bulk Approve / Discard so a reviewer can clear a backlog quickly.",
-            "Wire the deep-link /ai-emails/:logId so notifications open the exact draft in question.",
-            "Stream live updates so the list does not have to poll every minute.",
+            "Bring back a way to see and restore filtered mail — today the confirmation names a 'Filtered out' screen that does not exist.",
+            "Add a button to re-file a message onto the right deal (the machinery exists; there is no control for it).",
+            "Add a sort control alongside the search and deal filter.",
+            "Stream live updates so the list does not have to poll.",
         ],
     },
     {
         "no": "29.8",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "AI Email Review — what each draft row shows",
-        "route": "/ai-emails (list of drafts)",
+        "feature": "Email — what each row shows",
+        "route": "/ai-emails (the list, either tab)",
         "how_to_test": [
-            "Look at any draft row. Confirm it shows: the subject, the recipient(s), the kind of email (Factual question / Document request / Vendor reply / Uncertain / Other), a confidence percent, an Escalated marker if the draft is past its deadline, and a 'how long ago' timestamp.",
-            "Click a row and confirm the detail pane on the right loads the full draft (see 29.9).",
-            "Note: there is no per-row search, sort, or bulk action yet — the only filtering surface is the tab row at the top. Please flag if this is missing for the way you want to work.",
+            "On the Outbox tab, look at any row. Confirm it shows the subject, who it is going to, its deal, what kind of email it is (Factual question / Document request / Vendor reply / Needs a careful read / Composed email), and a 'how long ago' timestamp.",
+            "Confirm each Outbox row also carries a status: Escalated (red), Needs review (amber), To review (grey), or Ready to send (green). 'Ready to send' means a person — or the workspace's Autopilot posture — pre-approved the send. It does NOT mean the AI was confident; confidence is shown separately.",
+            "On the Inbox tab, confirm each row shows the sender, the subject, a snippet, its deal, and the category triage assigned it: Money, Date change, Document, Doc request, Update, Question, Needs a read, Vendor reply, or FYI. You never assign a category yourself.",
+            "Tick the checkbox on one or more Inbox rows and confirm a bulk action bar appears offering Delete, with a count.",
+            "Click any row and confirm the reading pane loads it (see 29.9).",
         ],
         "expected_result": [
-            "Every row tells you at a glance how confident the AI is, who the email is to, and whether it is overdue.",
-            "Selection survives the 60-second auto-refresh as long as the draft is still in the same filter.",
+            "Every row tells you at a glance who it involves, which deal it belongs to, and whether it is waiting on you.",
+            "Money mail is never drafted automatically and carries a standing wire-fraud warning when you open it.",
+            "Selection survives the automatic refresh as long as the row is still in the list.",
         ],
         "future_ideas": [
-            "Show the transaction address on each row so a reviewer can scan deals without opening each draft.",
-            "Show an attachment indicator (planned alongside attachment support).",
+            "Show an attachment indicator on the row.",
             "Offer a compact / comfortable density toggle for high-volume reviewers.",
+            "Let a reviewer correct a category on the row when triage gets one wrong.",
         ],
     },
     {
         "no": "29.9",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "AI Email Review — what the draft detail shows",
-        "route": "/ai-emails (open any draft)",
+        "feature": "Email — what the reading pane shows",
+        "route": "/ai-emails (open any row)",
         "how_to_test": [
-            "Open any draft and confirm the top of the detail shows the email kind, the confidence percent, and an Escalated marker if applicable. The subject and the To / Cc lines are also visible (by default the file owner is automatically CC'd).",
-            "Read the AI-drafted reply. Any phrases the AI is unsure about should be highlighted in the body, and if it made any explicit assumptions, those are listed below the body as 'Flagged assumptions'.",
-            "On the right side, confirm an 'AI Verified From' card lists every piece of source data the AI used (address, closing date, status, document names, etc.). If the list is empty, a warning explains that no source data was cited and that the agent should verify each fact manually.",
-            "Below it, confirm an 'Original Inbound' card shows the email that triggered this draft (sender, time, subject, body). If the original can't be loaded, the card says so cleanly.",
+            "Open an Outbox row and confirm the top shows the subject, the confidence percent, the status chip, what kind of email it is, and when it was drafted. If the AI could not match it to a property it says 'Not linked to a deal'.",
+            "If it is a reply, confirm an 'Original message' section shows the email that triggered it, above the draft. A composed email (a task email, a document request) has no original and correctly shows none.",
+            "Read the draft under 'Suggested reply' (or 'Drafted email'). Confirm the To / Cc line, any attachments, and — where the AI was unsure — highlighted phrases in the body.",
+            "If the AI made assumptions, confirm a 'Check these before sending' box lists them.",
+            "If the underlying facts have moved since the draft was written, confirm a 'Facts may have changed' warning appears and tells you to regenerate or edit before sending. A draft in this state is also excluded from 'Send all ready'.",
+            "Confirm a 'Facts the AI used' section lists the source data behind the draft (address, closing date, status, document names). If it is empty, that is a warning sign — verify each fact yourself.",
+            "Open an Inbox row and confirm you can read the message itself. Money-related mail carries a standing wire-fraud warning and is never drafted for you.",
         ],
         "expected_result": [
-            "The confidence percent, kind, and escalation status match whatever was shown on the list row.",
-            "Highlighted phrases in the body match the explicit 'Flagged assumptions' list.",
-            "AI Verified From only shows facts the AI actually used — it does not guess.",
-            "Original Inbound shows the email that triggered this reply, not the entire thread (full-thread view is a future improvement).",
+            "The confidence percent, kind, and status match what was shown on the list row.",
+            "Highlighted phrases in the body match the listed assumptions.",
+            "'Facts the AI used' only shows facts the AI actually used — it does not guess.",
+            "The line 'Nothing sends until you approve it' is visible above every draft.",
         ],
         "future_ideas": [
-            "Show the entire thread, not just the immediate inbound, so a reviewer can see prior context.",
-            "Make each AI Verified From row clickable so it deep-links to the source field on the transaction record.",
-            "Add an inline 'Flag this fact as wrong' button that pushes a correction back into the AI's training data.",
+            "Show the entire thread, not just the immediate message, so a reviewer can see prior context.",
+            "Make each 'Facts the AI used' row clickable so it deep-links to the source field on the transaction record.",
+            "Add an inline 'this fact is wrong' correction that feeds back into the AI.",
         ],
     },
     {
         "no": "29.10",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "AI Email Review — Approve & Send, Edit & Send, Regenerate, Discard",
-        "route": "/ai-emails (action buttons on the open draft)",
+        "feature": "Email — Approve & send, Edit, Regenerate, Discard, Send all ready",
+        "route": "/ai-emails (action bar on the open draft)",
         "how_to_test": [
-            "Open a draft and click Approve & Send. Confirm the email is sent and a toast confirms.",
-            "Open another draft and click Edit. The subject and body should become editable. Make a change and click Send Edit — confirm the edited version is sent.",
-            "Click Regenerate on a draft. Confirm the AI redraws a fresh reply from the original inbound email.",
-            "Click Discard. Confirm a warning explains the draft will be removed but the original inbound message stays in the communication log. Confirm Discard removes the draft.",
-            "Disconnect your email provider in Settings → Email & E-signature, then click Approve & Send on a draft. Confirm a clear error explains that no email provider is connected.",
-            "Confirm the actions that are NOT here yet: no Reassign, no 'Mark Reviewed', no attachment uploader, no scheduled-send.",
+            "Open a draft and click 'Approve & send'. Confirm the email is sent, a toast confirms, and it appears in your own Sent folder.",
+            "Open another draft and click Edit. The subject and body become editable. Make a change and click 'Send edited reply' (or 'Send edited email') — confirm YOUR version is what was sent, not the original. Cancel restores the AI's text.",
+            "Click Regenerate and confirm the AI redraws from the original message. Regenerate only exists on replies — a composed email has nothing to re-run, so the button is correctly absent there.",
+            "Click Discard. Confirm the warning explains the draft leaves your queue but the original message stays in the communication log.",
+            "When any drafts are pre-approved, confirm a 'Send all ready · N' button appears above the Outbox list, and that clicking it asks you to confirm and names how many replies it will send. Read the recipients before using it.",
+            "Confirm 'Send all ready' does NOT appear when nothing is pre-approved. Only the Autopilot posture (Settings → AI & Automation) pre-approves drafts.",
+            "Disconnect your mailbox in Settings → Email & E-signature, then click Approve & send. Confirm you are told to reconnect, that nothing was sent, and that you are NOT signed out of the app.",
+            "Confirm the actions that are NOT here yet: no Reassign, no 'Mark Reviewed', no attachment uploader, no scheduled-send, no re-file onto another deal.",
         ],
         "expected_result": [
-            "Approve, Edit, Regenerate, and Discard all complete with a toast and the list refreshes.",
-            "Editing a draft also clears its flagged assumptions, since the human reviewer rewrote the content.",
-            "Discard preserves the original inbound message in the communication log — only the draft disappears.",
-            "If your role is not allowed to act, an error toast explains it on click rather than the button being hidden.",
+            "Approve, Edit, Regenerate and Discard all complete with a toast and the list refreshes.",
+            "Nothing sends without a person: Approve & send and Send edited are the only send paths, and 'Send all ready' batches only drafts that were already pre-approved.",
+            "Discard preserves the original message in the communication log — only the draft disappears.",
+            "A draft flagged 'Facts may have changed' is excluded from Send all ready.",
         ],
         "future_ideas": [
             "Add a Reassign button so a Team Lead can hand a draft to a colleague without opening it.",
             "Add a Mark Reviewed (no-send) status for drafts the human read but does not want to send.",
             "Add support for attachments when replying so contracts and addenda can ride out with the AI reply.",
-            "Add a per-tenant 'Auto-send when confidence is over X%' threshold (backend already supports it; no UI yet).",
+            "Add a button to re-file a message onto the right deal.",
         ],
     },
     {
@@ -4128,7 +4178,7 @@ TESTING_REVIEW_FEATURES = [
             "Sign in as an Admin and open the AI & Automation card from the Settings hub.",
             "Confirm plain-English 'what AI can do' and 'what AI cannot do' lists.",
             "Adjust the confidence thresholds (for example the review threshold and the auto-send threshold) and save.",
-            "Confirm the change affects how AI Email Review classifies and auto-sends drafts (feature 29.7+).",
+            "Confirm the change affects how the Email screen classifies and pre-approves drafts (feature 29.7+).",
         ],
         "expected_result": [
             "Admins control the AI confidence thresholds for the whole workspace.",
@@ -4695,12 +4745,25 @@ TARGET_BUILDERS = {
     "ai-wizard-questions": create_ai_wizard_questions_doc,
     "ai-wizard-status": create_ai_wizard_status_report_doc,
     "task-email-testing-guide": create_task_email_testing_guide_doc,
+    "core-features-testing-guide": create_core_features_testing_guide_doc,
+    "core-features-testing-checklist": create_core_features_testing_checklist_doc,
     "todo-list": create_todo_list_doc,
     "stage-testing-results": create_stage_testing_results_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
 }
 
 TARGET_ALIASES = {
+    "core_features_testing_guide": "core-features-testing-guide",
+    "core_features_testing_guide.md": "core-features-testing-guide",
+    "core_features_testing_guide.docx": "core-features-testing-guide",
+    "core-features-guide": "core-features-testing-guide",
+    "core-guide": "core-features-testing-guide",
+    "core": "core-features-testing-guide",
+    "core_features_testing_checklist": "core-features-testing-checklist",
+    "core_features_testing_checklist.md": "core-features-testing-checklist",
+    "core_features_testing_checklist.docx": "core-features-testing-checklist",
+    "core-checklist": "core-features-testing-checklist",
+    "checklist": "core-features-testing-checklist",
     "requirements.txt": "requirements",
     "requirements.docx": "requirements",
     "milestones.txt": "milestones",

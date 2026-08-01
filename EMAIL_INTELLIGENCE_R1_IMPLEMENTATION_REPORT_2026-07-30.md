@@ -341,6 +341,54 @@ Splitting them is what makes the saving legible: junk should now cost at most a
 cached triage call and never a draft. `/platform/costs` groups by `feature`
 generically, so both appear with no console change.
 
+### Second review round (client, 2026-07-31)
+
+Four issues, all reproduced and fixed.
+
+**1. The Inbox showed 50 unrelated mailbox emails.** Google account notices, a
+crypto newsletter, a ChatGPT digest, a YouTube link. The cause: **22 of the 25
+inbound rows in this tenant were never triaged** — they were written before the
+pipeline existed — and the read model listed every inbound row regardless. The
+Inbox now shows only mail the pipeline actually judged (`triage_source` set).
+Untriaged legacy rows are not deleted, just not presented as vetted transaction
+mail. Inbox went from 50 rows to 3.
+
+**Five views collapsed to two: Inbox and Outbox.** Needs you / Incoming /
+Outgoing / Waiting / Filtered out was noise — the page has exactly two jobs, and
+slicing them five ways made people hunt for which tab held their work.
+"Filtered" survives as a subdued chip rather than a peer tab: it is the audit
+trail that makes an aggressive filter safe to ship, so it must stay reachable,
+but it is not somewhere anyone works. **The transaction filter applies to both
+tabs** — mail and drafts alike belong to a deal, and narrowing to one file is
+the most common thing a coordinator wants.
+
+**2. The "AI drafts awaiting review" notification led nowhere useful.** It
+navigated to plain `/ai-emails`, which opens the Inbox — while the drafts it
+advertised sat one tab over. It now goes to `?view=outbox`, and the page reads
+that parameter.
+
+**3. A deep-linked draft was selected but invisible.** The row *was* highlighted;
+it was simply scrolled far down the list, so the pane showed the draft while the
+list looked like nothing was chosen. Rows now `scrollIntoView` when selected and
+carry `aria-current`, so the state is exposed to assistive tech rather than
+conveyed by colour alone. Arriving via `/ai-emails/:logId` also switches to the
+Outbox, since a draft deep link is always an outgoing row.
+
+**4. Tab styling did not match the rest of the product.** The pills are now the
+same underline treatment the Active Transactions index uses — 2.5px orange
+underline, semibold label, IBM Plex Mono count badge — so the two list surfaces
+read as one product.
+
+Two harness corrections while verifying: a cross-page style probe matched an
+unrelated bordered button on `/transactions` (whose filter strip only renders in
+the "active" status view) and reported a false mismatch, and the toolbar row
+check compared top edges when the subdued Filtered chip is deliberately centred
+against taller tabs. Both now assert the right thing.
+
+**Noted, not fixed (pre-existing, unrelated):** `/transactions` logs a
+react-query error — the `ad-slot / transactions_inline` query returns
+`undefined`. Outside this work; flagged rather than silently absorbed.
+
 ### The test suite was making live AI calls (CI, 2026-07-31)
 
 CI failed `test_inbound_webhook_persists_log` — `persisted: 0` where the test

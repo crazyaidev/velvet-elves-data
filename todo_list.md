@@ -1,6 +1,6 @@
 # Velvet Elves — Still Being Built (Not Yet Ready for Client Feedback)
 
-**Last Updated:** July 28, 2026
+**Last Updated:** July 31, 2026
 
 This is the companion list to the testing guides. Those guides only cover features that
 are **fully complete** and ready for your feedback. The items below are still being built,
@@ -8,55 +8,62 @@ are waiting on a decision, or are intentionally switched off — so we are **not
 for feedback on them yet. They are listed so you can see what is coming and so nobody
 spends time testing something unfinished.
 
-**Section A** covers the current round (task lists and email). **Section B** carries over
-the items from the earlier round, re-checked against the code today.
+Every item below was re-checked against the live source code on **July 31, 2026**, when
+`CORE_FEATURES_TESTING_GUIDE.md` was written.
+
+- **Section A** — automation and email.
+- **Section B** — everything else, carried forward and re-checked.
+- **Section C** — what has moved **off** this list since the last version, so you know
+  what is now fair game.
 
 If any item below is more urgent for you than its current position suggests, tell us and
 we will re-prioritise it.
 
 ---
 
-## Section A — Task lists & email (current round)
+## Section A — Automation & email
 
-## A1. Automated emails do not yet fire on a schedule
+### A1. Automation does not yet run on a timer
 
 **Where:** anywhere the AI is meant to act on its own over time.
 
-**Current state:** The AI sends an Automated task's email when something *triggers* it —
-creating a deal, or uploading documents to one. Those triggers work today and are covered
-in the testing guide. What is **not** switched on yet is the hourly timer that would make
-the AI act on a deal where nothing has happened recently.
+**Current state:** the AI acts when something *triggers* it — creating a deal, uploading
+documents to one, pressing a button. Those triggers work today and are covered in the
+testing guide. What is **not** switched on is the hourly timer that would let the AI act
+on a deal where nothing has happened recently. Settings → AI & Automation says so
+honestly at the top of the page: *"Automation is not running — the scheduler has never
+checked in."*
 
 **What this means for testing:** you will see welcome emails send themselves when you
-upload a deal. You will **not** see the AI act overnight on an older deal. Please do not
-report that as a bug yet.
+create a deal. You will **not** see the AI act overnight on an older deal. Please do not
+report that as a bug.
 
 **What is still needed:** Jan to switch on the scheduled run in stage. It is deliberately
-being done by hand first so we can read exactly what it would send before it sends it.
+being done by hand first — one manual run, counts read, mailboxes audited — because the
+job sweeps every workspace and sends real email. The steps are in
+`SCHEDULER_AND_STAGE_ENABLEMENT_RUNBOOK.md`.
 
 ---
 
-## A2. A stuck AI task has no "Try again" button
+### A2. A blocked AI task has no "Try again" button
 
 **Where:** Needs You, and the Tasks tab on a deal.
 
-**Current state:** When the AI cannot finish one of its own tasks it tells you why — a
-missing email address, a missing contract. Once you fix the cause, it picks the task back
+**Current state:** when the AI cannot finish one of its own tasks it tells you why — a
+missing email address, a missing contract. Once you fix the cause it picks the task back
 up on its own the next time that deal is touched. What is missing is a button to say
 "try it again now".
 
 **What this means for testing:** after you fix the cause, the task may not clear
 instantly. That is expected for now.
 
-**What is still needed:** a "Try again" action on the task.
-
 ---
 
-## A3. Emailing a whole group of vendor tasks at once
+### A3. Emailing a whole group of vendor tasks at once
 
 **Where:** My Task Queue → the **Vendor** grouping.
 
-**Current state:** You can email **one task at a time** from a vendor's group, and that
+**Current state:** you can email **one task at a time** from a vendor's group, and that
 email is sent from your mailbox and recorded on the deal. What does not exist is a single
 email covering several outstanding tasks for the same vendor.
 
@@ -64,19 +71,16 @@ email covering several outstanding tasks for the same vendor.
 mail program. Nothing it sent was recorded against the deal, which defeats the point, so
 we removed it rather than leave it misleading.
 
-**What is still needed:** a proper multi-task email that is still sent and logged through
-Velvet Elves.
-
 ---
 
-## A4. Two tasks can still share a name
+### A4. Two tasks can still share a name
 
 **Where:** any task list.
 
-**Current state:** A few tasks in the task database share a name and differ only in who
+**Current state:** a few tasks in the task database share a name and differ only in who
 they are addressed to — for example two "Internal Thank You" tasks, one to your own client
-and one to the co-op agent. They now show a small label saying who each one goes to, so
-they can be told apart.
+and one to the co-op agent. They show a small label saying who each one goes to, so they
+can be told apart.
 
 **Open question for Jake:** would you rather we **rename** them outright — "Internal Thank
 You — Your Client" and "Internal Thank You — Co-op Agent"? That is a change to the task
@@ -84,161 +88,151 @@ database itself, so we want your decision before making it.
 
 ---
 
-## A5. iCloud mailboxes cannot be tested for connection health
+### A5. "Filtered out" is named in the app but does not exist in it
+
+**Where:** Email → Inbox, when you mark a message as not relevant.
+
+**Current state:** the confirmation says the message *"moves to Filtered out"* and that you
+can *"restore it there any time"*. There is no Filtered out screen. The view existed
+briefly and was removed on request; the machinery behind it survives, so the message is
+recoverable **by us** but not **by you**.
+
+**What is still needed:** either bring the view back, or change the wording so it does not
+promise a screen that is not there. This is a wording bug we already know about — please
+do not spend time writing it up.
+
+---
+
+### A6. iCloud mailboxes
 
 **Where:** Settings → Email & E-signature.
 
-**Current state:** Gmail and Outlook both have a **Test connection** button that checks
-your mailbox without sending anything. iCloud does not — Apple does not offer the same
-kind of check. iCloud is not shown in the interface at all today (see item B5), so this
-only matters if we switch it on later.
+**Current state:** only **Gmail** and **Outlook** are offered. iCloud is intentionally
+hidden because Apple does not offer a standard one-click sign-in and needs an
+"app-specific password" flow we still want to review. It also has no equivalent of the
+**Test connection** check the other two have.
 
 ---
 
-## A6. Replies coming back in — now confirmed working on stage
+## Section B — Everything else
 
-**Where:** AI Email Review.
+### B1. Sharing page (internal staff) — placeholder
 
-**Status (July 28, 2026): resolved — this is now testable.** Jan verified the full
-round trip on stage: an email sent from a deal was received back, matched to the
-correct deal, and a suggested reply was prepared. Part 6 of the testing guide no
-longer needs checking with Jan first.
+**Where:** the **Sharing** entry, `/sharing`.
 
----
+**Current state:** still a "Coming Soon" placeholder. It does not yet let staff create or
+manage share links from a dedicated page.
 
-## Section B — Earlier round (re-checked July 28, 2026)
-
-## B1. Sharing page (internal staff) — placeholder
-
-**Where:** `/sharing` (the internal "Sharing" surface for Agents / Team Leads / Admins)
-
-**Current state:** This page is still a "Coming Soon" placeholder. It does not yet let
-staff create or manage share links from a dedicated page.
-
-**Note:** Sharing milestone links with sellers already works today **for FSBO customers**
-through the "Share milestones" button in their own workspace — that flow is complete and
-is covered in the testing review. Only the separate internal staff Sharing page is unfinished.
-
-**What is still needed:** A real share-link manager (create a link, see live links, revoke
-a link) for internal staff.
+**Note:** sharing milestone links with sellers already works today **for FSBO customers**
+through the "Share milestones" button in their own workspace. Only the separate internal
+staff Sharing page is unfinished.
 
 ---
 
-## B2. In-app password change — not built yet
+### B2. In-app password change — not built yet
 
 **Where:** Settings → Profile.
 
-**Current state:** You can now edit your name, photo, phone, bio, email signature, and even
-your sign-in **email address** from Settings → Profile (this is complete and covered in the
-review, feature 28.1). The one piece still missing is changing your **password** from inside
-the app — there is no password field on the Profile page yet.
+**Current state:** you can edit your photo, name, phone, bio, email signature, and your
+sign-in **email address**. The one piece still missing is changing your **password** from
+inside the app.
 
-**What is still needed:** An account-security control to change your password while signed in.
-For now, use the "Forgot password?" link on the sign-in page to reset it.
-
-> This replaces the earlier "change email / change password" item — changing your email
-> address inside the app is now done.
+**For now:** use the "Forgot password?" link on the sign-in page.
 
 ---
 
-## B3. Credit wallet & billing — switched off for now
+### B3. AI Coach — intentionally switched off
 
-**Where:** Settings → **Billing & Credits** (workspace Admins / owners) and the
-Settings hub's **Platform** group → **Platform Billing** (internal Velvet Elves staff).
+**Where:** the "Add the AI Real Estate Coach" block on the solo-agent dashboard, and the
+locked **AI Coach** entry Team Leaders see in the sidebar.
 
-**Current state:** The credit-wallet billing system — buying credits, per-transaction
-pricing, the Stripe checkout flow, credit history, and the platform-side credit-pack pricing
-and billing-health screens — is built but **switched off behind a feature flag** while
-pricing is being finalised. With the flag off, the **Billing & Credits** card does not appear
-in the Settings hub and creating a transaction is free.
-
-**What is still needed:** Final pricing sign-off, then switch the flag on. Until then we are
-not asking for feedback on the billing screens.
+**Current state:** deliberately off. AI Coach is planned as a future paid add-on, so it is
+not part of this release. The promotional block is visible but its **Add AI Coach** and
+**See how it works** buttons do nothing.
 
 ---
 
-## B4. AI Coach / "AI Coach Pro" advanced analytics — intentionally switched off
+### B4. AI deal workspace — a few extras still on the way
 
-**Where:** The sidebar "AI Coach" entry (Team dashboards) and the "AI Coach Pro — Advanced
-Analytics" block on the Analytics page.
+**Where:** the deal workspace that opens when you click a single transaction.
 
-**Current state:** These coaching surfaces are deliberately turned **off** for now. AI Coach
-is planned as a future paid add-on, so it is not part of this release and not ready for
-feedback.
+**Current state:** the workspace itself is **complete and in this round's testing guide**
+— the AI assistant, its proposals and approvals, the safe date moves, document analysis on
+upload, and all seven tabs (Timeline, Compliance, Documents, Tasks, People, Activity,
+Email). A few extras around it are still being built:
 
-**What is still needed:** Build and enable the AI Coach experience when that add-on is in scope.
-
----
-
-## B5. iCloud email integration — hidden for now
-
-**Where:** Settings → Email & E-signature.
-
-**Current state:** Only **Gmail** and **Outlook** are offered today (both complete and in the
-review). iCloud is intentionally hidden because Apple does not offer a standard one-click
-sign-in and needs an "app-specific password" flow we still want to review.
-
-**What is still needed:** Finish and re-enable the iCloud (Apple Mail) connection flow.
+- **Voice input.** A microphone button is shown in the assistant's message box but is
+  switched off ("coming soon"). Typing works fully today.
+- **A built-in document viewer.** The assistant points you to the Documents tab to open a
+  file; opening it inside the assistant window is still being built.
+- **Re-filing an email onto the right deal.** The Email tab's Outbox and Inbox are
+  complete, and the machinery to move a misfiled email exists — but there is no button for
+  it yet.
+- **Team-lead oversight, "always approve" rules, and merging documents.** Planned for a
+  later stage. Today every AI action requires your explicit approval, one at a time, which
+  is by design.
 
 ---
 
-## B6. AI deal workspace — parts still on the way
+### B5. New Transaction wizard — address type-ahead is switched off
 
-**Where:** The AI deal workspace that opens when you click a single transaction
-(`/transactions/<deal>`).
+**Where:** New Transaction wizard, the Street Address field.
 
-**Current state:** The deal workspace is **complete and in the testing review** (items 17.1–17.8):
-the AI assistant, the suggestions and one-click fixes, the safe date moves, document analysis on
-upload, the deal tabs, and the Email tab are all ready for your feedback. A few **extras around it
-are still being built**, so we are not asking for feedback on these specific pieces yet:
+**Current state:** the field still suggests addresses you have used before, and AI parsing
+fills the address from an uploaded contract. The **live address type-ahead** (Google-powered
+"start typing and pick a real address") is **switched off** in every environment because
+the map-service key is not configured.
 
-- **Voice input.** A microphone button is shown in the assistant's message box but is switched off
-  for now ("coming soon"). Typing works fully today.
-- **A built-in document viewer.** Today the assistant points you to the Documents tab to open a file;
-  opening the document inside the assistant window itself is still being built.
-- **Re-filing an email to the right deal.** The Email tab's Outbox and Inbox are complete; the tool to
-  move an email that landed on the wrong deal is not built yet.
-- **A full activity feed of the assistant's actions.** The Activity tab already shows date changes,
-  status updates, and checklist edits. A complete, single feed of every AI action is still being
-  expanded — for now, each applied action points you to the tab where you can see its result.
-- **Team-lead oversight, "always approve" rules, and merging documents.** These are planned for a later
-  stage. Today every AI action requires your explicit approval, one at a time, which is by design.
+**What is still needed:** add the address-service key and switch it back on.
 
-**What is still needed:** Finish and switch on the items above as their later phases are completed.
+> The wizard as a whole is not part of the current testing round — it has its own guide.
 
 ---
 
-## B7. New Transaction wizard — address type-ahead is switched off for now
+### B6. Belonging to more than one workspace — waiting on a billing decision
 
-**Where:** New Transaction wizard → Step 3 (Address & Contacts), the Street Address field.
+**Where:** the workspace switcher near the top of the sidebar, and the "guest" invite flow
+(being invited into another brokerage with an email you already use).
 
-**Current state:** The Street Address field still suggests addresses you have used before, and AI
-parsing fills the address from an uploaded contract. The **live address type-ahead** (Google-powered
-"start typing and pick a real address" suggestions) is **temporarily switched off** because the map
-service key is not configured in this environment — so we are not asking for feedback on it yet. Every
-other part of Step 3 is complete and is in the testing review.
-
-**What is still needed:** Add the address-service key and switch the live type-ahead back on.
-
----
-
-## B8. Belonging to more than one workspace — waiting on a billing decision
-
-**Where:** A workspace switcher near the top of the sidebar, and the "guest" invite flow (being
-invited into another brokerage with an email you already use).
-
-**Current state (updated July 28, 2026):** The feature flag is now **on** in the local and stage
-environments, so the workspace switcher appears and guest invitations work. What is still
-outstanding is the **billing rule for guest members** — who pays when someone from another
-brokerage is working in your workspace. That is a pricing decision, not code.
+**Current state:** this is now **on by default** in every environment, so the switcher
+appears and guest invitations work. What is still outstanding is the **billing rule for
+guest members** — who pays when someone from another brokerage is working in your
+workspace. That is a pricing decision, not code. Until it is settled, a guest occupies no
+seat in the host workspace.
 
 **What is still needed:** Jake to confirm the guest-member billing rule.
 
 ---
 
+### B7. Help Center content
+
+**Where:** the Help Center link in the avatar menu and Settings → Help & Tour.
+
+**Current state:** the Help Center is a separate website with its own authoring tools
+behind the platform screens. The rewritten article set exists but has not been loaded into
+the live database, so what you see may be thin or out of date.
+
+**What is still needed:** load the article set, then re-check the links from inside the app.
+
+---
+
+## Section C — What has moved off this list
+
+These were on the previous version of this list and are now **ready for your feedback**.
+They are covered in `CORE_FEATURES_TESTING_GUIDE.md`.
+
+| Was | Now |
+|---|---|
+| **Credit wallet & billing — switched off behind a flag** | **Live.** Billing is now a flat fee per deal, no seats and no subscription, with optional prepaid deals. It appears in Settings → Billing for Admins and owners. Covered in Part 16. |
+| **Replies coming back in — unverified** | **Verified end to end on stage** on July 28. Covered in Part 9. |
+| **Changing your sign-in email address** | **Done.** Settings → Profile. Only the password change is still missing (B2). |
+| **Belonging to more than one workspace — flag off** | The feature is **on**; only the guest-billing rule is outstanding (B6). |
+
+---
+
 ## How this list is kept honest
 
-Section A was checked against the live source code on July 28, 2026, after the task-and-email
-fixes landed. Section B was first written on June 30, 2026 and re-checked on July 28. As each
-item is finished, it will move out of this list and into the main **FRONTEND_CLIENT_TESTING_REVIEW**
-with full step-by-step testing instructions.
+Every item was checked against the live source code on July 31, 2026 — not against an
+earlier plan document. Where a plan and the code disagreed, the code won and this list
+follows the code. As each item is finished it moves out of this list and into a testing
+guide with step-by-step instructions.
