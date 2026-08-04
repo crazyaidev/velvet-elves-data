@@ -291,7 +291,27 @@ gmail-api-push@system.gserviceaccount.com
 - Pub/Sub service agent can mint OIDC tokens for the push service account.
 - Backend validates the Pub/Sub OIDC JWT audience and service account email.
 - Backend resolves Pub/Sub payload `emailAddress` to the active Gmail integration.
-- Backend renews `users.watch` daily, before the 7-day expiration window.
+- Backend renews `users.watch` before the 7-day expiration window, by two
+  complementary paths (see the status caveat below before quoting this to an
+  assessor):
+  1. **Renew-after-sync.** The Gmail webhook re-registers the watch when it is
+     inside the renewal window, immediately after a successful history sync.
+     Active mailboxes notify many times a day, so this alone sustains them
+     with no scheduler involved.
+  2. **Renew-due scan.** `POST /api/v1/integrations/gmail/watches/renew-due`
+     (admin/cron authenticated) re-registers every active integration whose
+     watch is missing or near expiry, covering mailboxes too idle to trigger
+     path 1. It is wired into the hourly internal schedules tick.
+
+  Renewal preserves the stored `lastHistoryId` sync cursor: `users.watch`
+  returns a fresh baseline `historyId`, and adopting it would silently skip
+  every message that arrived between the last sync and the renewal.
+
+  **Status caveat (2026-08-01):** path 1 is live in production. Path 2 is
+  deployed but the external scheduler that drives the tick has not been
+  created yet, so idle-mailbox renewal is not running in production today.
+  Do not describe path 2 as operational in a security questionnaire until the
+  schedule exists and a tick has been observed running.
 
 ---
 
@@ -429,7 +449,11 @@ Create a folder for security evidence with:
 - Validate OAuth `state` and PKCE verifier.
 - Validate Pub/Sub push JWT issuer, audience, signature, and service account email.
 - Store Gmail `historyId` per integration and process deltas idempotently.
-- Renew Gmail watches daily.
+- Renew Gmail watches before their 7-day expiry, via renew-after-sync in the
+  webhook plus the `renew-due` scan for idle mailboxes. Verify the scheduler
+  that drives the scan is actually executing: a deployed endpoint nothing ever
+  calls is not renewal, and that exact gap took production inbound mail down
+  silently for two weeks in July 2026.
 - Implement disconnect so the integration is deactivated and future Gmail API calls stop.
 - Confirm no cross-tenant access path can read another user's integration or communication log.
 - Ensure production service accounts have least privilege.
@@ -557,7 +581,9 @@ In Google Cloud Console:
 - [ ] Token refresh works.
 - [ ] Gmail send works.
 - [ ] Gmail inbound Pub/Sub works.
-- [ ] Gmail watch renewal exists and is monitored.
+- [ ] Gmail watch renewal **runs**, not merely exists: renew-after-sync
+      observed in logs, and the scheduled `renew-due` scan observed executing
+      (a tick marker written, not just an endpoint deployed).
 - [ ] Disconnect stops future Gmail use.
 
 ### Public pages

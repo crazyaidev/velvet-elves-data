@@ -1,0 +1,224 @@
+# Google OAuth Verification — Demo Video Guideline
+
+**Prepared by:** Jan
+**Date:** August 3, 2026
+**Purpose:** exactly what the demo video must contain, how to record it, and what causes rejection. This is the last artifact needed before the submission package goes to Jake.
+**Related:** `GMAIL_GOOGLE_APPROVAL_CRITICAL_PATH.md`, `GMAIL_GOOGLE_APPROVAL_PACKAGE_PLAYBOOK.md`, `CORE_FEATURES_TESTING_GUIDE.md`
+
+---
+
+## 1. Can the staging video be reused?
+
+**No. It must be re-recorded against production.** The existing staging recording is still valuable, but only as a rehearsal.
+
+The reason is not cosmetic. Staging and production are two different Google Cloud projects with two different OAuth clients:
+
+- Production: project `velvet-vles`, the client actually being submitted for verification
+- Staging: project `velvet-elves-495419`, a completely separate client
+
+The consent screen shown in a staging recording therefore belongs to a client Google is not being asked to verify. On top of that, every piece of branding work completed on 2026-08-03 (the app logo, the app name, the authorized domains, the privacy and terms links) was applied to the **production** project only. Staging's consent screen does not carry any of it, so a staging video would show a consent screen that does not match the submission.
+
+Reviewers compare the video against the project under review. A mismatch between the two is a documented cause of rejection, and it is an avoidable one.
+
+**What the staging video is good for:** proving the flow works end to end, validating the running order, checking pacing and length, and finding awkward moments before the real take. Treat it as the rehearsal it effectively was.
+
+---
+
+## 2. Format and technical requirements
+
+**Video**
+- Upload to YouTube as **Unlisted**. Not Private — a reviewer must be able to open the link without signing in or being granted access. Not Public either, since it contains product internals.
+- Length: aim for **6 to 10 minutes**. Long enough to show every scope in use, short enough that a reviewer watches all of it.
+- Resolution: **1080p minimum**. Text has to be readable; a reviewer will not squint at a scope description.
+- Keep the **browser address bar visible for the entire recording**. This is how a reviewer confirms which app and which domain they are looking at.
+- Consider browser zoom around 110 to 125 percent so form labels and consent text are comfortably legible.
+- Record the browser window, not the whole desktop, so nothing personal is captured.
+
+**Audio**
+- Audio is **not strictly mandatory**, but the video must be understandable to an English-speaking reviewer. You have two acceptable options:
+  1. **Spoken narration in English.** The most common approach and the easiest to follow.
+  2. **On-screen text captions** placed before or during each scene, describing what is about to happen and why.
+- Either satisfies the requirement. Content and clarity matter far more than production polish.
+- Do **not** add background music. It adds nothing and can obscure narration.
+
+**Editing**
+- Cuts are acceptable for dead time, such as waiting for an email to arrive.
+- Do **not** cut away from, speed past, or obscure the OAuth consent screen. That screen is the single most important frame in the video.
+- No blurring over the requested permissions.
+
+---
+
+## 3. What Google actually evaluates
+
+Three things, and the video must satisfy all of them:
+
+1. **The OAuth consent screen is shown in full**, with the app name and every requested permission legible.
+2. **Every requested scope is demonstrated in actual use**, not merely described.
+3. **The app's identity matches the submission** — the same client, the same domain, the same branding.
+
+Everything in the shot list below exists to serve one of those three.
+
+---
+
+## 4. Before you press record
+
+- **Record against production**: `app.prod.velvetelves.com`. Never the stage host.
+- **Disconnect Gmail first** in Settings so the connect flow can be shown from a clean start.
+- **Use a test Google account**, not a personal or customer mailbox.
+- **Seed one test transaction** with a plausible but fictional property address and fictional party names.
+- **No real client data anywhere on screen at any point.** This includes the deal list behind a modal, notification toasts, and browser tabs.
+- **Sign out of other Google accounts** in the browser, or use a clean profile. A multi-account picker mid-consent is confusing and can also break the flow.
+- **Close unrelated tabs** and silence desktop notifications.
+- Have a second mailbox ready to send the inbound test message from.
+
+---
+
+## 5. The shot list
+
+Follow this order. Each scene notes what to show and what to say.
+
+### Scene 1 — The public identity (about 45 seconds)
+
+Open `https://velvetelves.com/`, then navigate to `https://velvetelves.com/privacy`.
+
+Scroll to the Google user data section and **pause on the Limited Use sentence** long enough to read it. Then show `https://velvetelves.com/data-deletion`.
+
+Say: what the product is, in one sentence — a transaction coordination tool for real estate brokerages — and that the privacy policy discloses exactly how Google user data is used.
+
+Why it matters: proves the public pages exist, are reachable, and contain the Limited Use commitment.
+
+### Scene 2 — Sign in (about 20 seconds)
+
+Sign in to the production app as the test agent. Land on the dashboard.
+
+Keep it brief. This scene only establishes that the app is real and the user is authenticated.
+
+### Scene 3 — Connect Gmail, the critical scene (about 90 seconds)
+
+Go to **Settings → Email & E-signature**. Show Gmail listed as not connected. Click **Connect**.
+
+When the Google window opens:
+
+- **Show the account chooser**, then the consent screen.
+- The "Google hasn't verified this app" screen will appear. **Leave it in.** Every unverified app shows it, reviewers expect it, and hiding it looks evasive. Click **Advanced**, then the continue link.
+- **Stop and hold on the consent screen.** This is the most important frame in the entire video. The app name "Velvet Elves", the logo, and every requested permission must be clearly readable. Scroll slowly if the list does not fit on screen.
+
+Say: which permissions are being requested and, in one line each, why. Read them out.
+
+Return to the app and show the **Connected** state with the mailbox address. Click **Test connection** and show the "Connected as ..." result.
+
+Why it matters: this is the OAuth grant. Without this scene the video fails on its own.
+
+### Scene 4 — gmail.readonly in use (about 2 minutes)
+
+From your second mailbox, send an email to the connected test mailbox referring to the seeded test deal (mention the property address in the subject or body).
+
+Wait for it to arrive. Cut the dead time if you want.
+
+Then show:
+- **Intelligence → Email → Inbox tab**, with the message present
+- The message attached to the correct transaction
+- Open the deal and show its **Email tab** carrying the same message
+
+Say: inbound mail is read so it can be matched to the right transaction, logged in that deal's communication history, and used as context for a reply. Name the scope out loud: this is what `gmail.readonly` is for.
+
+Why it matters: this is the only restricted scope in the submission, so it needs the clearest demonstration in the video.
+
+### Scene 5 — The AI draft and human approval (about 90 seconds)
+
+Open the AI-prepared draft for that message. Show the recipient, subject, and body, and the panel showing what the AI based it on.
+
+Say, explicitly and unambiguously: **the AI prepares a draft, and nothing is sent unless a person approves it.**
+
+Optionally click **Edit** and change a word, to show the human is in control of the final text.
+
+Why it matters: this directly addresses the single biggest reviewer concern with AI plus mailbox access, which is unsupervised sending. State it plainly rather than implying it.
+
+### Scene 6 — gmail.send in use (about 60 seconds)
+
+Click **Approve & send**. Show the confirmation.
+
+Then switch to the test mailbox and show the message **in the Sent folder**, sent from the user's own address.
+
+Say: sending only ever happens after this explicit approval, one transaction-specific message at a time, from the user's own mailbox. Name the scope: this is `gmail.send`.
+
+Why it matters: proves the send is user-initiated, singular, and not bulk.
+
+### Scene 7 — calendar.events in use (about 60 seconds)
+
+Note: **Calendar is a separate consent from Gmail.** There will be a second OAuth screen here, and it should also be shown in full.
+
+Go to **Closing Calendar**. Open the **Connect calendar** menu and choose **Google Calendar**. Complete the consent (show the screen again). Then click **Add my closings**.
+
+Switch to Google Calendar in the browser and show the transaction deadline that was written there.
+
+Say: transaction closing dates are written to the user's calendar at their request, and the app creates and updates only these events. Name the scope: `calendar.events`.
+
+Why it matters: `calendar.events` is on the same OAuth client and is part of this submission, so it must be demonstrated or it looks unjustified.
+
+### Scene 8 — Disconnect and revocation (about 45 seconds)
+
+Return to **Settings → Email & E-signature** and click **Disconnect** on Gmail.
+
+The confirmation dialog appears and explains the consequence — that disconnecting stops syncing inbound mail and prevents sending from that address. **Show that dialog**, then confirm.
+
+Show Gmail returning to the disconnected state.
+
+Say: the user can revoke access at any time from inside the product, and can also remove access from their Google Account security page.
+
+Why it matters: reviewers want to see that access is not a one-way door.
+
+### Scene 9 — Closing statement (about 20 seconds)
+
+State plainly, on camera or in captions:
+
+- Google user data is used only to provide these transaction features
+- It is never sold, never used for advertising, and never used to train generalized AI models
+- Users can disconnect at any time and request deletion
+
+---
+
+## 6. Scope to scene map
+
+Use this to check the video before uploading. Every requested scope must appear in the left column with a scene that proves it.
+
+| Scope | Type | Proven by |
+| --- | --- | --- |
+| `openid` | basic | Scene 3, the connected account identity |
+| `userinfo.email` | basic | Scene 3, connected mailbox address shown in Settings |
+| `userinfo.profile` | basic | Scene 3, connected account name shown |
+| `gmail.readonly` | **restricted** | Scene 4, inbound message matched to a deal |
+| `gmail.send` | sensitive | Scene 6, approved reply appearing in the Sent folder |
+| `calendar.events` | sensitive | Scene 7, closing date written into Google Calendar |
+
+If any row lacks a scene, the video is incomplete. If any scene shows a scope **not** in this table, remove it — demonstrating unrequested access invites questions.
+
+---
+
+## 7. What causes rejection
+
+- **Saying or implying the AI sends email automatically.** Say "prepares a draft for approval", never "sends automatically".
+- **Not showing the consent screen**, or cutting past it.
+- **Showing a different OAuth client or project** than the one submitted. This is exactly why the staging recording cannot be used.
+- **Real customer data on screen**, including in the background.
+- **Demonstrating scopes that are not being requested.**
+- **A Private video** the reviewer cannot open. It must be Unlisted.
+- **Illegible text**, especially the permission list on the consent screen.
+- **Hiding the unverified-app warning.** Leave it in; it is expected.
+
+---
+
+## 8. Final checks before sending the link
+
+- [ ] Recorded against production, not staging
+- [ ] The consent screen is shown in full and is readable
+- [ ] All six scopes have a matching scene, per section 6
+- [ ] No real client data anywhere, including backgrounds and toasts
+- [ ] Human approval before sending is stated out loud or in captions
+- [ ] Both consent screens appear (Gmail and Calendar are separate grants)
+- [ ] Disconnect is demonstrated
+- [ ] Uploaded to YouTube as **Unlisted**
+- [ ] The link opens correctly in a private browsing window while signed out
+- [ ] Length is between 6 and 10 minutes
+
+The last item on that list is worth doing literally: open the link in a private window with no Google account signed in. If it does not play, the reviewer cannot watch it, and the submission stalls on something entirely avoidable.

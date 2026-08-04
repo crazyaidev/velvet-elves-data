@@ -15,7 +15,14 @@ Important: settings alone do not create Gmail webhooks. The backend must also:
 1. Call Gmail `users.watch` after Gmail OAuth succeeds.
 2. Store the returned `historyId` and `expiration` per integration.
 3. Renew the watch before expiration. Google recommends daily renewal because
-   watches expire within 7 days.
+   watches expire within 7 days. As implemented: the webhook renews
+   opportunistically after each successful history sync (sustains active
+   mailboxes with no scheduler), and `POST /integrations/gmail/watches/renew-due`
+   re-registers watches that are missing or near expiry (covers idle mailboxes).
+   Renewal keeps the existing `lastHistoryId` rather than adopting the new
+   baseline, so no message is skipped. **The renew-due scan only protects idle
+   mailboxes if an external scheduler actually calls the tick** — verify that
+   before relying on it.
 4. Validate Pub/Sub push JWTs on inbound Gmail webhook requests.
 5. Resolve the Gmail Pub/Sub payload's `emailAddress` to the matching active
    integration, rather than relying on a `user_id` query parameter.

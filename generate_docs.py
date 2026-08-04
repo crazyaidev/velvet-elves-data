@@ -1391,6 +1391,119 @@ def create_gmail_approval_plan_doc():
     save_document(doc, "GMAIL_GOOGLE_APPROVAL_PLAN.docx")
 
 
+def create_demo_video_guideline_doc():
+    """Generate a .docx export of DEMO_VIDEO_GUIDELINE.txt.
+
+    Mirrors create_gmail_approval_plan_doc: reuses the generic markdown
+    renderer (extract_feedback_header + render_feedback_body), so the .txt
+    source is authored in markdown and gets the same title page, metadata
+    table, headings, bullets, and tables as every other generated document.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("DEMO_VIDEO_GUIDELINE.txt")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "DEMO_VIDEO_GUIDELINE.docx")
+
+
+def create_demo_video_guide_for_jake_doc():
+    """Generate a .docx export of DEMO_VIDEO_GUIDE_FOR_JAKE.md (client audience).
+
+    The plain-language recording guide Jake follows to shoot the Google
+    verification demo video. Distinct from DEMO_VIDEO_GUIDELINE.txt, which is
+    the internal spec; this one is written for a non-technical reader.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("DEMO_VIDEO_GUIDE_FOR_JAKE.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "DEMO_VIDEO_GUIDE_FOR_JAKE.docx")
+
+
 TESTING_REVIEW_FEATURES = None  # Populated at bottom of file
 
 
@@ -4749,6 +4862,8 @@ TARGET_BUILDERS = {
     "core-features-testing-checklist": create_core_features_testing_checklist_doc,
     "todo-list": create_todo_list_doc,
     "stage-testing-results": create_stage_testing_results_doc,
+    "demo-video-guideline": create_demo_video_guideline_doc,
+    "demo-video-guide-for-jake": create_demo_video_guide_for_jake_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
 }
 
@@ -4838,6 +4953,18 @@ TARGET_ALIASES = {
     "stage_testing_results": "stage-testing-results",
     "stage-results": "stage-testing-results",
     "stage-testing": "stage-testing-results",
+    "demo_video_guideline": "demo-video-guideline",
+    "demo_video_guideline.txt": "demo-video-guideline",
+    "demo_video_guideline.docx": "demo-video-guideline",
+    "demo-video": "demo-video-guideline",
+    "video-guideline": "demo-video-guideline",
+    "demo": "demo-video-guideline",
+    "demo_video_guide_for_jake": "demo-video-guide-for-jake",
+    "demo_video_guide_for_jake.md": "demo-video-guide-for-jake",
+    "demo_video_guide_for_jake.docx": "demo-video-guide-for-jake",
+    "demo-video-jake": "demo-video-guide-for-jake",
+    "video-for-jake": "demo-video-guide-for-jake",
+    "jake-video": "demo-video-guide-for-jake",
     "all": "all",
 }
 

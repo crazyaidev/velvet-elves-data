@@ -116,7 +116,7 @@ All Console-UI only unless noted. gcloud cannot edit OAuth clients or the consen
 ### 3.4 Publish
 
 - [ ] Publish the app to **Production** (out of Testing) so verification can be requested.
-- [ ] Re-confirm Pub/Sub prod is intact after any Console changes: topic `gmail-inbound-prod`, subscription `gmail-inbound-prod-push`, publisher `gmail-api-push@system.gserviceaccount.com`, push audience `https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail`, daily `users.watch` renewal running.
+- [ ] Re-confirm Pub/Sub prod is intact after any Console changes: topic `gmail-inbound-prod`, subscription `gmail-inbound-prod-push`, publisher `gmail-api-push@system.gserviceaccount.com`, push audience `https://api.prod.velvetelves.com/api/v1/integrations/email/webhook/gmail`, and `users.watch` renewal actually running (renew-after-sync visible in logs; the `renew-due` scan only counts once a scheduler is calling the tick — as of 2026-08-01 no schedule exists, so this half is not yet true).
 
 ---
 
