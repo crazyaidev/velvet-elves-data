@@ -1218,6 +1218,16 @@ def create_billing_minimum_price_doc():
     )
 
 
+def create_email_guideline_questions_doc():
+    """Generate a .docx of EMAIL_GUIDELINE_QUESTIONS_FOR_JAKE.md — the open
+    questions and decisions arising from Jake's Agent_Email_Instructions.md and
+    Tasks_Attachments.csv (audience: Jake, for decisions)."""
+    _create_markdown_doc(
+        "EMAIL_GUIDELINE_QUESTIONS_FOR_JAKE.md",
+        "EMAIL_GUIDELINE_QUESTIONS_FOR_JAKE.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -4865,6 +4875,7 @@ TARGET_BUILDERS = {
     "demo-video-guideline": create_demo_video_guideline_doc,
     "demo-video-guide-for-jake": create_demo_video_guide_for_jake_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
+    "email-guideline-questions": create_email_guideline_questions_doc,
 }
 
 TARGET_ALIASES = {
@@ -4965,6 +4976,14 @@ TARGET_ALIASES = {
     "demo-video-jake": "demo-video-guide-for-jake",
     "video-for-jake": "demo-video-guide-for-jake",
     "jake-video": "demo-video-guide-for-jake",
+    "email_guideline_questions_for_jake": "email-guideline-questions",
+    "email_guideline_questions_for_jake.md": "email-guideline-questions",
+    "email_guideline_questions_for_jake.docx": "email-guideline-questions",
+    "email-guideline-questions-for-jake": "email-guideline-questions",
+    "email-questions": "email-guideline-questions",
+    "email-guideline": "email-guideline-questions",
+    "jake-email-questions": "email-guideline-questions",
+    "attachment-questions": "email-guideline-questions",
     "all": "all",
 }
 

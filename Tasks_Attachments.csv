@@ -1,0 +1,41 @@
+﻿Task Name,Task ID,Task Dependency,Documents to Attach,Documents to Exclude
+Buyer Welcome (Automated),10,5,"Full purchase/sale package. (PA, LBP, SD, Counters, Addendums, Amendments, Copy of EM, if available)",n/a
+Seller Welcome (Automated),20,5,"Full purchase/sale package. (PA, LBP, SD, Counters, Addendums, Amendments, Copy of EM, if available)",n/a
+Co-op Agent Welcome (Automated),30,5,"Full purchase/sale package. (PA, LBP, SD, Counters, Addendums, Amendments, Copy of EM, if available)",n/a
+Loan Officer Welcome (Automated),60,5,"Send the Loan Officer an email with the following documents:
+• Purchase Agreement (Fully executed)
+• All Counters (Fully executed)
+• BLC or Tax Sheet
+• Copy of Earnest Money Check (If uploaded)",Addendums & Amendments
+Order Title (Automated),70,5,"Order the title work by sending the Title Rep an email with the following documents:
+• Purchase Agreement (Fully executed)
+• All Counters (Fully executed)
+• BLC or Tax Sheet
+• Sellers Disclosure (If uploaded)",Addendums & Amendments
+Request HOA Docs (To Be Automated),90,5,"Check the document center to see if the Homeowners Association (HOA) documents have been uploaded. If they have not, ask the Listing Agent for a copy of the HOA docs.",n/a
+Request HOA Docs (To Be Automated),95,5,"Check the document center to see if the Homeowners Association (HOA) documents have been uploaded. If they have not, email the Seller to request the HOA docs or for a contact to request them from.",n/a
+Request HOA Docs (To Be Automated),100,5,"Check the document center to see if the Homeowners Association (HOA) documents have been uploaded. If they have not, email the Seller to request the HOA docs or for a contact to request them from.",n/a
+Request Utility Info (To Be Automated),130,1000,"Check the document center to see if utility (utilities) information has been uploaded. If it hasn’t, send a request to the listing agent to ask for the utility information.",n/a
+Request Utility Info (To Be Automated),135,1000,"Check the document center to see if utility information has been uploaded. If it hasn’t, email the seller to request the utility company information.",n/a
+Request Utility Info (To Be Automated),140,1000,"Check the document center to see if utility information has been uploaded. If it hasn’t, email the seller to request the utility company information.",n/a
+Confirm Home Warranty Order (To Be Automated),180,1000,"If a home warranty needs to be ordered, follow up with the agent responsible to order the home warranty to ensure the home warranty was ordered and that the invoice was sent to the title company. 
+If you are unable to complete the task, reschedule it to follow up again tomorrow.",n/a
+Insurance Reminder  (To Be Automated),200,1000,n/a,n/a
+Buyer's Inspection Response Due (To Be Automated),235,5,n/a,n/a
+Inspection Response Reminder (To Be Automated),240,5,n/a,n/a
+Appraisal Ordered (To Be Automated),260,5,purchase agreement,n/a
+Appraisal Completed (To Be Automated),270,1000,n/a,n/a
+Buyer Documentation (To Be Automated),280,1000,n/a,n/a
+Title Work Completed (To Be Automated),290,"70,80",title work,n/a
+Deliver Title (To Be Automated),300,290,title work,n/a
+Deliver Title (To Be Automated),305,290,title work,n/a
+Deliver Title (To Be Automated),310,290,title work,n/a
+Deliver Title to the Loan Officer (To Be Automated),320,290,title work,n/a
+Clear to Close (To Be Automated),330,1000,n/a,n/a
+Closing Disclosure Delivered (To Be Automated),340,1000,n/a,n/a
+Schedule Pick Up of Sign and Lockbox (To Be Automated),453,1000,n/a,n/a
+Change MLS Listing Status to Sold (To Be Automated),455,1000,n/a,n/a
+Request Testimonials  (To Be Automated),460,1000,n/a,n/a
+Request Testimonials (To Be Automated),470,1000,n/a,n/a
+Exemptions and Thank You (To Be Automated),480,1000,n/a,n/a
+Thank You (To Be Automated),490,1000,n/a,n/a
