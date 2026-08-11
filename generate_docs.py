@@ -1514,6 +1514,62 @@ def create_demo_video_guide_for_jake_doc():
     save_document(doc, "DEMO_VIDEO_GUIDE_FOR_JAKE.docx")
 
 
+def create_google_demo_video_requirements_doc():
+    """Generate a .docx export of GOOGLE_DEMO_VIDEO_REQUIREMENTS.md.
+
+    The post-rejection rewrite of the demo-video spec (2026-08-06), written
+    against Google's actual review feedback. Supersedes DEMO_VIDEO_GUIDELINE
+    and DEMO_VIDEO_GUIDE_FOR_JAKE, which predate the review.
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("GOOGLE_DEMO_VIDEO_REQUIREMENTS.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    # --- TITLE PAGE ---
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+
+    # --- CONTENT ---
+    render_feedback_body(doc, body_lines)
+
+    save_document(doc, "GOOGLE_DEMO_VIDEO_REQUIREMENTS.docx")
+
+
 TESTING_REVIEW_FEATURES = None  # Populated at bottom of file
 
 
@@ -4874,6 +4930,7 @@ TARGET_BUILDERS = {
     "stage-testing-results": create_stage_testing_results_doc,
     "demo-video-guideline": create_demo_video_guideline_doc,
     "demo-video-guide-for-jake": create_demo_video_guide_for_jake_doc,
+    "google-demo-video-requirements": create_google_demo_video_requirements_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
     "email-guideline-questions": create_email_guideline_questions_doc,
 }
@@ -4976,6 +5033,12 @@ TARGET_ALIASES = {
     "demo-video-jake": "demo-video-guide-for-jake",
     "video-for-jake": "demo-video-guide-for-jake",
     "jake-video": "demo-video-guide-for-jake",
+    "google_demo_video_requirements": "google-demo-video-requirements",
+    "google_demo_video_requirements.md": "google-demo-video-requirements",
+    "google_demo_video_requirements.docx": "google-demo-video-requirements",
+    "demo-video-requirements": "google-demo-video-requirements",
+    "video-requirements": "google-demo-video-requirements",
+    "demo-v2": "google-demo-video-requirements",
     "email_guideline_questions_for_jake": "email-guideline-questions",
     "email_guideline_questions_for_jake.md": "email-guideline-questions",
     "email_guideline_questions_for_jake.docx": "email-guideline-questions",

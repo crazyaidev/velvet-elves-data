@@ -384,4 +384,84 @@ Verified rows: the founder shows "Self sign-up" + "1 transaction"; the invited t
 ### 14.5 Still open
 
 - **Q-C / Q3 remain with Jake:** which addresses seed `INTERNAL_SIGNUP_EMAILS`, and which production account gets platform admin. In the dev database 69 of 77 accounts still classify as "outside" because our older fixtures use ordinary-looking domains; the classifier is correct, the tester list is simply not filled in yet.
-- `SIGNUP_ALERT_RECIPIENTS` is unset, so the alert is inert until someone is named (Q2).
+- `SIGNUP_ALERT_RECIPIENTS` is unset, so the alert is inert until someone is named (Q2). **Superseded by §15** — the list is now editable in the UI.
+
+---
+
+## 15. Registration alerts settings UI (2026-08-07)
+
+Uncommitted. Replaces the .env-only answer to Q2/Q-C: recipients and our own
+tester addresses are edited in the product, not at deploy time.
+
+**Why it changed.** Both lists were `.env` values, so adding a recipient meant a
+deploy. With the pipeline down and the committee possibly signing up any day,
+that is the wrong place for a list that changes by the week.
+
+### 15.1 Where it lives
+
+`/platform/registrations/alerts`, reached from an **Alerts** button in the
+Registrations page header. A sub-page rather than a nav entry, matching
+`/platform/help/settings`. Inside `PlatformAdminGuard`, so it 404s for everyone
+else — these lists decide who receives other customers' names and addresses.
+
+### 15.2 Precedence — the rule to preserve
+
+A stored value wins; `.env` is a fallback **only for a key that was never set**.
+An empty stored list therefore means *nobody*, and must never re-inherit the
+`.env` list — otherwise someone who removed themselves keeps being emailed
+other customers' details. The UI marks any list still coming from `.env` with a
+`from .env` chip so an unexplained value is never a mystery.
+
+A malformed stored value degrades to the addresses that do parse, and an
+unreadable settings table degrades to `.env`: the alert must not fail closed,
+because notifying two of three people beats notifying nobody.
+
+### 15.3 Files
+
+| File | What |
+|---|---|
+| `app/services/signup_alert_config.py` | **New.** Load/save + precedence + `parse_email_list` (splits on comma/semicolon/newline, dedupes by mailbox, reports every bad entry at once, caps the list). |
+| `app/services/platform_settings_service.py` | Two new keys for the stored lists. |
+| `app/api/v1/platform_registrations.py` | `GET`/`PUT /alert-settings`, platform-admin only. |
+| `app/services/signup_alert_email.py`, `internal_signups.py` | Both now read the stored config, so the alert and the page's Outside view cannot disagree. |
+| `src/components/ui/email-list-input.tsx` | **New.** Chip-based multi-address input + the pure `mergeEmails`. |
+| `src/pages/platform/RegistrationAlertsPage.tsx` | **New.** The settings page. |
+| `src/hooks/usePlatformRegistrations.ts` | `useRegistrationAlertSettings` + update mutation; saving invalidates the registrations list, since the tester list changes what the table means. |
+| `app/tests/test_signup_alert_config.py` | **New.** 12 tests, precedence first. |
+
+### 15.4 The bug the smoke check caught
+
+An address typed into the box but never committed with Enter was **lost on
+save**: no chip existed, so the form looked unedited and Save was disabled; and
+committing on blur could not fix it, because a state update from `onBlur` does
+not reach the Save click's closure in the same tick.
+
+Fixed by making the half-typed entry caller-owned (`draft`/`onDraftChange`) and
+merging it through the pure `mergeEmails` at save time. Save now enables on
+pending text, and the entry survives. Regression-checked (`C0`, `C2` in
+`_tools/registration-alerts-smoke.mjs`).
+
+### 15.5 Verification
+
+- 59 backend tests pass; `tsc --noEmit` and `npm run build` exit 0.
+- 14-check browser smoke pass (`_tools/registration-alerts-smoke.mjs`): render
+  and breadcrumb, non-production notice, Save gating, comma-separated entry,
+  `+tag` de-duplication, invalid entry chipped/explained/blocking, save +
+  persist across reload, the `from .env` chip clearing, and — end to end — a
+  saved tester address actually shrinking the Outside view (69 of 77).
+
+### 15.7 Follow-on: the page's first real finding (2026-08-07)
+
+Reviewing the deployed-pending page surfaced random-looking names, reported as
+garbled text. They are not: **81 of 87 production accounts are bot
+registrations**, rendered correctly. The page gained a suspected-bot label,
+an authenticity filter, and a "Real outside signups" tile (the unqualified
+"Outside" count read 81 and looked like traction); `/users/register` gained the
+rate limit it never had. Full analysis and the open cleanup decision:
+`PROD_BOT_SIGNUPS_FINDING_2026-08-07.md`.
+
+### 15.6 Still open
+
+- Q3 (Jake's production account email for platform admin) remains outstanding.
+- Q2 is no longer blocking: the list is editable in-product. It is empty on
+  production until someone is named, so the alert stays inert until then.
