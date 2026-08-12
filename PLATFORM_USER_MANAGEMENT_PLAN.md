@@ -57,12 +57,55 @@ typecheck error is pre-existing in `vite.config.ts` (a Vitest `test` key on a
 * **`20260927090000_user_deactivation_stamp.sql` has not been applied** to dev,
   stage or prod. `deactivated_at` / `deactivated_reason` are written by
   `UserRepository.deactivate`, so the migration must land before deploy.
-* **No live browser verification.** The local backend points at a Supabase
-  project I could not confirm is disposable, and registering accounts would have
-  written real rows and potentially sent mail. Everything below the UI is
-  covered by the 41 API tests; the pages themselves are verified by typecheck,
-  lint and a production build only. Worth a pass on dev before this ships.
 * **Nothing is committed.** Per standing practice, Jan commits.
+
+---
+
+## 16. Browser pass, 2026-08-10 (real dev data, platform-admin session)
+
+Driven headless against the dev database as a real platform admin. Backend
+`1792 passed`; `tsc`, `eslint` and `vite build` clean. Three defects found, all
+fixed and re-verified in the browser.
+
+**B1 — "Transactions could not be loaded" (reported).** Two bugs in one select:
+the column is **`address`, not `property_address`**, so PostgREST rejected the
+whole query; and `address` is **Fernet-encrypted**, so even a corrected name
+would have rendered ciphertext. Now selects the real columns, decrypts, and runs
+the result through `compose_address` per the double-store invariant. Verified:
+`148 Honey Creek Rd` renders on a live account.
+
+**B2 — Badges and secondary text were far below the contrast floor (reported).**
+The chips were hand-rolled as `bg-ve-surface-2 text-ve-text-muted` behind a
+`ring-1 ring-inset ring-…/30` hairline — grey on grey. Secondary text used
+`ve-text-ghost` (#B0B0B0, ~2.0:1 on white) for content including the most common
+activity state on the screen. Fixes:
+  * New `PlatformBadge` on the palette's designed `bg`/`border`/`text` triplets,
+    with tone assigned by **meaning** — authority blue, ownership purple,
+    account warnings red, "one of ours" deliberately neutral.
+  * `ve-text-ghost` raised to `ve-text-muted` (~4.7:1) everywhere it carried
+    content; placeholders left light, which is conventional.
+  * Activity dots filled rather than pale.
+
+**B3 — Section purpose was not conveyed (reported).** A 10px mono uppercase
+ghost label named each box without saying what it was for, and the treatment was
+duplicated in two components that would have drifted. Replaced with one shared
+`PlatformSection`: tinted icon tile, a real title, and a **required** one-line
+subtitle. A section that cannot be described in a sentence is one whose purpose
+is not clear enough to ship.
+
+**B4 — Lifecycle events appeared twice in the timeline (found during the pass,
+not reported).** `AuditService.log_lifecycle` mirrors an event into both
+`audit_logs` and `platform_audit` by design, so the naive merge rendered "tenant
+created" twice with identical timestamps. Now de-duplicated on
+`(action, second)`, with the tenant-scoped row winning because it is the one the
+customer can also see.
+
+**A blind spot worth knowing about.** The Supabase test double **discards the
+column list passed to `.select()`** and returns whole rows, so no test in this
+suite can catch a column that does not exist in the real schema — which is
+exactly how B1 shipped past 41 green tests. Hand-written select strings against
+real tables need a live check. This is now recorded at the top of
+`test_platform_users_api.py`.
 
 ---
 
