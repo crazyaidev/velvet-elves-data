@@ -1218,6 +1218,15 @@ def create_billing_minimum_price_doc():
     )
 
 
+def create_first_conference_listedkit_advantage_strategy_doc():
+    """Generate a .docx of FIRST_CONFERENCE_LISTEDKIT_ADVANTAGE_STRATEGY.md —
+    Jake-facing competitive strategy, unveil list, and Sept 12 lock plan."""
+    _create_markdown_doc(
+        "FIRST_CONFERENCE_LISTEDKIT_ADVANTAGE_STRATEGY.md",
+        "FIRST_CONFERENCE_LISTEDKIT_ADVANTAGE_STRATEGY.docx",
+    )
+
+
 def create_email_guideline_questions_doc():
     """Generate a .docx of EMAIL_GUIDELINE_QUESTIONS_FOR_JAKE.md — the open
     questions and decisions arising from Jake's Agent_Email_Instructions.md and
@@ -4933,6 +4942,7 @@ TARGET_BUILDERS = {
     "google-demo-video-requirements": create_google_demo_video_requirements_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
     "email-guideline-questions": create_email_guideline_questions_doc,
+    "first-conference-listedkit-advantage-strategy": create_first_conference_listedkit_advantage_strategy_doc,
 }
 
 TARGET_ALIASES = {
@@ -5047,6 +5057,12 @@ TARGET_ALIASES = {
     "email-guideline": "email-guideline-questions",
     "jake-email-questions": "email-guideline-questions",
     "attachment-questions": "email-guideline-questions",
+    "first_conference_listedkit_advantage_strategy": "first-conference-listedkit-advantage-strategy",
+    "first_conference_listedkit_advantage_strategy.md": "first-conference-listedkit-advantage-strategy",
+    "first_conference_listedkit_advantage_strategy.docx": "first-conference-listedkit-advantage-strategy",
+    "first-conference-strategy": "first-conference-listedkit-advantage-strategy",
+    "listedkit-advantage-strategy": "first-conference-listedkit-advantage-strategy",
+    "conference-strategy": "first-conference-listedkit-advantage-strategy",
     "all": "all",
 }
 
