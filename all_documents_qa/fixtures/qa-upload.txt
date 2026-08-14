@@ -1,0 +1,3 @@
+Velvet Elves QA fixture — All Documents upload
+Generated for Chrome QA of Workflow › All Documents.
+This is a plain-text stand-in for a closing document.

@@ -1237,6 +1237,16 @@ def create_email_guideline_questions_doc():
     )
 
 
+def create_smart_ai_automation_for_jake_doc():
+    """Generate a .docx of SMART_AI_AUTOMATION_SYSTEM_FOR_JAKE.md — plain-language
+    briefing of the smart AI automation system, what is live on staging, the
+    forward plan, and open decisions (audience: Jake)."""
+    _create_markdown_doc(
+        "SMART_AI_AUTOMATION_SYSTEM_FOR_JAKE.md",
+        "SMART_AI_AUTOMATION_SYSTEM_FOR_JAKE.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -4942,6 +4952,7 @@ TARGET_BUILDERS = {
     "google-demo-video-requirements": create_google_demo_video_requirements_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
     "email-guideline-questions": create_email_guideline_questions_doc,
+    "smart-ai-automation-for-jake": create_smart_ai_automation_for_jake_doc,
     "first-conference-listedkit-advantage-strategy": create_first_conference_listedkit_advantage_strategy_doc,
 }
 
@@ -5057,6 +5068,13 @@ TARGET_ALIASES = {
     "email-guideline": "email-guideline-questions",
     "jake-email-questions": "email-guideline-questions",
     "attachment-questions": "email-guideline-questions",
+    "smart_ai_automation_system_for_jake": "smart-ai-automation-for-jake",
+    "smart_ai_automation_system_for_jake.md": "smart-ai-automation-for-jake",
+    "smart_ai_automation_system_for_jake.docx": "smart-ai-automation-for-jake",
+    "smart-ai-automation-system-for-jake": "smart-ai-automation-for-jake",
+    "smart-automation-jake": "smart-ai-automation-for-jake",
+    "jake-smart-automation": "smart-ai-automation-for-jake",
+    "smart-ai-automation": "smart-ai-automation-for-jake",
     "first_conference_listedkit_advantage_strategy": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.md": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.docx": "first-conference-listedkit-advantage-strategy",

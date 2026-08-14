@@ -1,0 +1,46 @@
+# Chrome / Playwright QA run output
+# Scripts write screenshots, page dumps, findings.json, and CSV/PDF exports
+# into artifacts_* folders. Keep the .mjs harnesses and fixture PDFs.
+artifacts_*/
+
+# Ad-hoc numbered verify/retest dumps (screenshots + results.json)
+_part*_retest/
+_part*_verify/
+
+# Playwright / test-runner leftovers
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Python bytecode and test caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.ruff_cache/
+
+# Node (if a QA script is run with a local install)
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
