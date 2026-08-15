@@ -1808,8 +1808,8 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/tasks/queue`
 - **Page title:** "My Task Queue"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney
-- **Redirect rule:** Client/FSBO/Vendor → their portals
+- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Redirect rule:** Attorney → `/dashboard/attorney` (counsel uses the matter workspace, not the Agent task queue); Client/FSBO/Vendor → their portals
 - **Auth requirement:** Protected + internal role
 
 ### 2. Entry Conditions & Data Loading
@@ -1978,7 +1978,8 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/closing-calendar`
 - **Page title:** "Closing Calendar"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney, Admin
+- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Auth requirement:** Protected + internal ops role. Attorney uses `/attorney/recording-calendar`. Typed `/calendar` URLs bounce to the Attorney desk.
 - **Auth requirement:** Protected + internal role
 
 ### 2. Entry Conditions & Data Loading
@@ -2067,8 +2068,8 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/documents/all`
 - **Page title:** "All Documents"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney, Admin
-- **Auth requirement:** Protected + internal role
+- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Auth requirement:** Protected + internal ops role. Attorney reviews documents on the matter workspace; typed `/documents` URLs bounce to the Attorney desk.
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
@@ -2180,8 +2181,8 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/ai-suggestions`
 - **Page title:** "AI Suggestions"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney
-- **Auth requirement:** Protected + internal role
+- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Auth requirement:** Protected + internal ops role. Attorney Ask AI lives on the desk; typed `/ai-suggestions` URLs bounce to the Attorney desk.
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
@@ -2725,6 +2726,22 @@ sections are no longer a card nested inside a grid inside a padded body.
 - Same Month/Week/List views as Closing Calendar
 
 ### 4–10. Same interaction patterns as Closing Calendar (§5.3) with attorney-specific context
+
+---
+
+## 7.5 Search, notifications, and URL isolation
+
+The Attorney Workspace is a specialized legal desk. Counsel must not reach default (Agent) workspace pages by search, notification, settings card, typed URL, or post-login return.
+
+**In scope:** assigned matters (`/dashboard/attorney`, `/transactions/:id`), legal-packet upload, Ask AI, counsel search (matters and docs-on-file → matter workspace), counsel notifications (need review / ready to release), `/attorney/releases`, `/attorney/recording-calendar`, `/attorney/state-rules`, personal settings (Profile, Notifications prefs, Help & Tour).
+
+**Out of scope (RoleRoute internal-ops only; Attorney → `/dashboard`):** `/documents`, `/calendar`, `/contacts`, `/ai-suggestions`, `/reports`, `/ai-emails`, `/tasks/queue`, `/settings/connections`, `/settings/my-playbook`.
+
+**Search (⌘K):** no “Open All Documents”, no Task Queue, no Create transaction. Hits open `/transactions/{id}?section=review&tab=needs-call`. Backend omits task and contact types for Attorney.
+
+**Topbar Today's AI Briefing:** same orange chip as the Agent workspace. Opens Ask AI on assigned matters (“what should I focus on today across my legal queue?”). Does not load Agent Critical / Needs Attention / On Track counts.
+
+**Notifications:** no AI Drafts banner, no outbound-email count, no Overdue/Today/Tomorrow task feed. Bell lists matters that need sign-off or are ready to release.
 
 ---
 

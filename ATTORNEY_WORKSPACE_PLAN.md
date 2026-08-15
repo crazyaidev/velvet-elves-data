@@ -2,10 +2,10 @@
 
 ## Review corrections in rev 3
 
-- **Topbar AI briefing corrected.** The current shell disables the shared
-  AI briefing bar for Attorney (`dashboardShellConfig.ts` sets
-  `showAiBriefingBar: false`). This plan no longer claims an attorney
-  briefing chip is already wired through `useAttorneyDashboard`.
+- **Topbar AI briefing corrected.** `showAiBriefingBar` stays false so
+  AppLayout never loads the Agent Critical / Needs Attention briefing.
+  AttorneyLayout renders its own **Today's AI Briefing** chip that
+  opens Ask AI on the legal queue.
 - **Topbar upload CTA corrected.** The Attorney `upload-legal-packet`
   primary-CTA branch already exists, but it currently navigates to
   `/dashboard/attorney?panel=upload`. The fix is to retarget it to
@@ -269,12 +269,11 @@ whether I judge it *necessary* for the Attorney role to be functional.
   "+ New Transaction" per `SYSTEM_DESIGN.md` §3.4. The
   `upload-legal-packet` branch already exists in `AppLayout`; retarget
   it from `/dashboard/attorney?panel=upload` to `/attorney/intake`.
-- **No shared topbar AI briefing bar for MVP.** The current shell
-  intentionally sets `showAiBriefingBar: false` for Attorney so the
-  internal transaction briefing does not leak into the legal workflow.
-  If an attorney-specific briefing chip is reintroduced later, derive
-  it from `GET /api/v1/dashboard/attorney` counts; do not add a fresh
-  LLM call.
+- **Counsel topbar AI briefing chip.** AttorneyLayout shows the same
+  orange **Today's AI Briefing** chip as the Agent top bar. It opens
+  Ask AI on the legal queue (`transactionId: null`, counsel prompt).
+  `showAiBriefingBar` stays false so AppLayout never loads the Agent
+  Critical / Needs Attention / On Track briefing API for this role.
 
 **Attorney Matter Workspace — per-matter detail (new dedicated page):**
 
@@ -315,6 +314,23 @@ whether I judge it *necessary* for the Attorney role to be functional.
 
 - Recording Calendar (`/attorney/recording-calendar`)
 - State Rules (modal at `?panel=state-rules`)
+
+### 1.5 Specialized scope / isolation
+
+The Attorney Workspace is not the default Agent workspace. Counsel must not
+reach Agent surfaces by search, notification, settings, typed URL, or
+post-login return.
+
+**In:** caseload + matter workspace, legal-packet upload, Ask AI, matter-scoped
+search, legal-queue notifications, releases, recording calendar, state rules,
+Profile / notification prefs / Help.
+
+**Out:** All Documents, closing calendar, Contacts directory, AI Suggestions
+page, Analytics, AI email outbox, Task Queue, Email & E-signature, My Playbook,
+Create transaction.
+
+See `ATTORNEY_WORKSPACE_SCOPE_FINDINGS.md` and
+`ATTORNEY_WORKSPACE_SCOPE_FIX_PLAN.md`.
 
 ---
 
@@ -1067,10 +1083,9 @@ honestly queue parsing and create attorney review state.
    attorneys start wanting a cross-reference view, the per-state
    handler needs real data first, then a page can wrap it.
 
-4. **No topbar AI briefing for Attorney.** This is now a deliberate
-   MVP decision, not an unresolved data-source question. If product
-   later wants an Attorney briefing chip, derive it from dashboard
-   counts / cached AI fields and keep `showAiBriefingBar` role-safe.
+4. **Counsel topbar AI briefing.** AttorneyLayout shows Today's AI
+   Briefing (caseload Ask AI). Keep `showAiBriefingBar` false so the
+   Agent deal-count API never runs for this role.
 
 5. **Attorney hold storage shape (Phase B gap 3).** The recommendation
    is a dedicated `attorney_matter_state` row keyed on transaction_id.

@@ -1366,7 +1366,7 @@ GET    /api/v1/health/ready                # Readiness check (DB connectivity)
 | Milestone sharing | No | No | No | No | No | Share own | Share own (expirable links) | No |
 | Confidence settings | Global floor | Team threshold | No | No | No | No | No | No |
 | Audit logs | Full | Team | No | No | Own matters | No | No | No |
-| AI Suggestions | All | Team | Own txn | Assigned | Attorney-relevant | No | No | No |
+| AI Suggestions | All | Team | Own txn | Assigned | Ask AI on assigned matters (no `/ai-suggestions` page) | No | No | No |
 | Analytics | System-wide | Team + per-agent | Own | No | No | No | No | No |
 | Notifications | Own | Own | Own | Own | Own | Own | Own | Own |
 | Client portal | No | No | No | No | No | Full | No | No |
@@ -1869,6 +1869,13 @@ deals).
   attorney-specific approval gates.
 - **State rules surface**: modal/watch for closing mode, recording timelines,
   disbursement timing, and same-day release checks.
+
+**Workspace isolation (2026-08-15):** Attorney is not an Agent with extra
+legal buttons. Direct URL access to All Documents (`/documents`), the closing
+calendar (`/calendar`), Contacts, AI Suggestions, Analytics, and the AI email
+outbox is denied. Search and notifications stay on assigned matters. Counsel
+Ask AI replaces the Agent Suggestions page. Document review happens on the
+matter workspace, not the All Documents queue.
 
 #### 4.3.1f FSBO Customer Workspace
 
