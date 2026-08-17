@@ -1247,6 +1247,16 @@ def create_smart_ai_automation_for_jake_doc():
     )
 
 
+def create_aime_transaction_workflow_questions_for_jake_doc():
+    """Generate a .docx of AIME_TRANSACTION_WORKFLOW_QUESTIONS_FOR_JAKE.md —
+    workflow issues and questions for Jake after his AI architecture and
+    Audri's automation answers (audience: Jake; real-estate logic only)."""
+    _create_markdown_doc(
+        "AIME_TRANSACTION_WORKFLOW_QUESTIONS_FOR_JAKE.md",
+        "AIME_TRANSACTION_WORKFLOW_QUESTIONS_FOR_JAKE.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -4953,6 +4963,7 @@ TARGET_BUILDERS = {
     "billing-minimum-price": create_billing_minimum_price_doc,
     "email-guideline-questions": create_email_guideline_questions_doc,
     "smart-ai-automation-for-jake": create_smart_ai_automation_for_jake_doc,
+    "aime-transaction-workflow-questions": create_aime_transaction_workflow_questions_for_jake_doc,
     "first-conference-listedkit-advantage-strategy": create_first_conference_listedkit_advantage_strategy_doc,
 }
 
@@ -5075,6 +5086,14 @@ TARGET_ALIASES = {
     "smart-automation-jake": "smart-ai-automation-for-jake",
     "jake-smart-automation": "smart-ai-automation-for-jake",
     "smart-ai-automation": "smart-ai-automation-for-jake",
+    "aime_transaction_workflow_questions_for_jake": "aime-transaction-workflow-questions",
+    "aime_transaction_workflow_questions_for_jake.md": "aime-transaction-workflow-questions",
+    "aime_transaction_workflow_questions_for_jake.docx": "aime-transaction-workflow-questions",
+    "aime-transaction-workflow-questions-for-jake": "aime-transaction-workflow-questions",
+    "aime-workflow-questions": "aime-transaction-workflow-questions",
+    "aime-questions-for-jake": "aime-transaction-workflow-questions",
+    "jake-aime-questions": "aime-transaction-workflow-questions",
+    "tme-questions-for-jake": "aime-transaction-workflow-questions",
     "first_conference_listedkit_advantage_strategy": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.md": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.docx": "first-conference-listedkit-advantage-strategy",

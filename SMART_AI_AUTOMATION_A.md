@@ -260,6 +260,8 @@ I am stating these as commitments, because they are how we keep your agents out 
 
 \- We will **not** put those letters on a brand-new production workspace that is still on Manual and has no mailbox.
 
+As long as these are NOT hard stops and just for the conference. Most of these will be easy to automate once we get you additional information on exactly how each task will be completed. They will become common sense after we get through 4-5 of them.
+
 # **6\. What I need from you**
 
 Please tick one box per question. The first five change what buyers, sellers, lenders, and title reps see.
@@ -406,7 +408,7 @@ Until F–J are answered, those tasks stay **prepared drafts or human work**. Th
 
 **Question L — Writing style: per agent or per brokerage?**
 
-\- \[X \] Per agent (my recommendation) Really it’s per user. TC, TL, Admin, etc.
+\- \[X \] Per agent (my recommendation) Really it’s per user. TC, TL, Admin, etc. user
 
 \- \[ \] Per brokerage, set by the admin
 
@@ -418,13 +420,13 @@ Until F–J are answered, those tasks stay **prepared drafts or human work**. Th
 
 \- \[ \] Rename deal Autopilot to something else — suggestion: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-\- \[X\] Let's discuss on a call (my recommendation) Agreed and I would love to hear your thoughts/concerns about this. 
+\- \[X\] Let's discuss on a call (my recommendation) Agreed and I would love to hear your thoughts/concerns about this. Should we use our AI name for this? (Aime)
 
 **Question N — After a library letter sends, should the deal progress bar count that AI task, or only the Automation activity line?** Today progress often ignores Automated rows on purpose so the human bar stays honest.
 
-\- \[X \] Keep progress as the human bar; show AI work on Automation / handled today (my recommendation)
+\- \[ \] Keep progress as the human bar; show AI work on Automation / handled today (my recommendation)
 
-\- \[ \] Count Automated completions in progress % as well
+\- \[X \] Count Automated completions in progress % as well This will show a user that AI is working on their files while they have been away, which is a staple to our marketing campaign and general product as a whole.
 
 # **7\. What I will build next, in order**
 
