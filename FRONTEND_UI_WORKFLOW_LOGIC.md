@@ -2907,20 +2907,26 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ---
 
+> **Shipping nav (2026-08-17 operational rebuild).** Represented clients use
+> `ClientWorkspaceLayout` with **Home · Next Steps · Timeline · Documents · Updates**.
+> Payments and Agent Info stay reachable from Home, not as sidebar items.
+> Documents = the client's own uploads **plus** packets staff marked
+> `documents.is_client_visible`. "Ask your team" is the human
+> `is_client_visible` thread — not an LLM. Next Steps and Home both render
+> `home.next_action` from `derive_client_next_action`. See
+> `CLIENT_PORTAL_OPERATIONAL_REBUILD_PLAN.md`.
+
 > **2026-05-30 redesign — the "closing concierge" Home.** The client landing is
 > now **`/client/home`** (`ClientHomePage`), a single warm, card-based concierge
 > screen reconstructed from Jake's design comp and implemented per
-> `CLIENT_WORKSPACE_REDESIGN_PLAN.md`. The client nav set is **Home · Timeline ·
-> Documents · Payments · Agent Info** (the comp's "Next Steps" and "Updates"
-> destinations are surfaced *on* Home as the Next Best Action and Recent Updates /
-> Ask Velvet cards — no separate pages, no duplicate nav). The Home is fed by an
+> `CLIENT_WORKSPACE_REDESIGN_PLAN.md`. The Home is fed by an
 > **additive `home` block** on the same canonical `GET /api/v1/dashboard/client`
 > read (no new endpoint): hero (buy/sell verb + decrypted address + phase chip +
 > closing target + progress %), next best action, "what Velvet is handling",
 > upcoming dates, recent updates, documents-needing-attention, and key contacts
-> (agent + deal parties). "Ask Velvet" reuses the existing two-way
-> `is_client_visible` thread (`/api/v1/client/messages`) — no new LLM. The four
-> tool surfaces below (§9.1–§9.4) remain reachable from the new nav.
+> (agent + deal parties). "Ask your team" reuses the existing two-way
+> `is_client_visible` thread (`/api/v1/client/messages`) — no new LLM. The tool
+> surfaces below remain reachable from the new nav.
 
 ## 9.1 Client Transactions — `/client/transactions`
 
@@ -2987,20 +2993,20 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ## 9.2 Client Documents — `/client/documents`
 
-- Leads with the **real** `PortalDocumentList` (the role-scoped GET /documents,
-  which returns only the client's own uploads — never agent-internal files) with
-  per-row "Flag for deletion". This is the single document representation; the
-  old five-column hardcoded-zero status board was removed (CLIENT_WORKSPACE_PLAN.md D4).
+- Leads with items waiting on the client, then **From your team** (staff-shared
+  `is_client_visible` packets) and **You uploaded**. Per-row actions: **Open**,
+  **Sign** / **Acknowledge** when derived, **Flag for deletion** on own uploads
+  only. Shared packets are not client-deletable.
+- Deep links: `/client/documents/:id?sign=1` / `?ack=1`.
 - A **slim, real status summary** driven by `documents_summary` shows only the
   buckets that actually have documents: **In progress / Uploaded / Verified /
   Complete**. "Missing" is **not** shown for a represented client — required-doc
-  tracking is the agent's responsibility on a represented deal, so a client-facing
-  Missing count would be fiction.
+  tracking is the agent's responsibility; sharing is explicit, not a Missing counter.
 - **Upload is a modal** (`ClientUploadModal`) launched from the page header CTA,
   collecting **transaction + document type** (+ optional label) before submit —
   not a bare on-page dropzone (L2/L3).
-- Cannot delete documents directly; "Flag for deletion" sends a request to the agent.
-- Cannot see the full document center (only the client's own documents).
+- Staff share control lives on the deal Documents tab (**Share with client**:
+  Review / Acknowledge / Sign / Unshare).
 
 ---
 

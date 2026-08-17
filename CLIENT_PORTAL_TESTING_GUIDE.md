@@ -40,7 +40,7 @@ what staff action drives each surface:
 |---|---|---|
 | **My Transactions** (`/client/transactions`) | Transaction cards: address, status pill, closing date, milestone stepper, next milestone | An **active `transaction_assignments` row** linking the client to the transaction; the transaction's `status`, `closing_date`, key-date columns |
 | **Milestones** (`/client/milestones`) | Vertical timeline (completed / current / upcoming) + plain-English notes + key dates | **Tasks** on the transaction (status → state, `due_date` → order). If no tasks exist, falls back to the transaction's **key dates** |
-| **Documents** (`/client/documents`) | List of the client's **own** uploads + a status summary (In progress / Uploaded / Verified / Complete) | Documents whose `uploaded_by == client.id`. Staff change `status` / `review_status` / `signature_status` to move buckets. **Agent-uploaded docs never appear here.** |
+| **Documents** (`/client/documents`) | Own uploads **plus** files staff shared (`documents.is_client_visible`) + a status summary (In progress / Uploaded / Verified / Complete) | Staff **Share with client** (Review / Acknowledge / Sign) on the deal Documents tab. Own uploads still appear via `uploaded_by == client.id`. Unshared agent files never appear. Missing counts stay omitted. |
 | **Agent Info** (`/client/agent`) | Agent name, company, bio, photo, phone, email | An assigned **Agent** (resolved by `users.role` priority Agent→TC→TeamLead→Attorney) with `bio`, `avatar_url`, `company_name`, `phone` filled on their profile |
 | **Ask a question** thread | Client's own questions + any team reply explicitly surfaced | Client POSTs a question (auto client-visible). A **team reply only appears if `communication_logs.is_client_visible = true`** — there is no staff UI for this yet (see Known gaps) |
 
@@ -219,14 +219,15 @@ To populate and exercise the Documents surface:
 
 Confirm the client **cannot** see staff-only data:
 
-- **Agent-uploaded documents** do not appear on the client Documents page.
+- **Unshared agent-uploaded documents** do not appear on the client Documents page.
+  Files the agent **Share with client**'d do appear (Open / Sign / Acknowledge).
 - **Internal notes, AI drafts, document-action and system rows** in
   `communication_logs` do **not** appear in the client thread (only
   `is_client_visible = true` rows do).
 - **Tasks, internal comm logs, AI suggestions** are absent from every client surface.
 - A client linked to transaction A **cannot** read transaction B's thread/docs
   (the `assert_client_transaction_access` 403 guard).
-- Client **cannot hard-delete** a document (only "Flag for deletion").
+- Client **cannot hard-delete** a shared packet (Flag is own-uploads only).
 
 ---
 
@@ -240,18 +241,14 @@ Confirm the client **cannot** see staff-only data:
    the **Client Q&A** drawer is the staff reply path. The `is_client_visible = true`
    write happens server-side when the composer is used; ordinary internal
    notes/emails still never leak in.
-3. **Documents are own-uploads-only.** By design — but testers often expect
-   agent docs to show. They won't. The new **Clients hub** surfaces the count of
-   the client's own uploads still awaiting review per deal, which is the
-   discovery surface for that scope.
+3. **Sharing is explicit.** Open the deal → Documents tab → **Share with client**
+   (Review / Acknowledge / Sign). Until that happens, agent files stay invisible.
+   The Clients hub now also counts packets waiting on the client (unsigned /
+   unacknowledged shared files).
 4. **"Missing" document count is intentionally absent** for represented clients.
-5. **No generic in-app notifications feed yet.** The `client_question` row that
-   is written best-effort to the `notifications` table on every client question
-   is currently consumed by nothing in the UI — discovery instead runs through
-   the Client Q&A action's amber dot (per-card) and the **Clients** hub's
-   per-client unanswered pill. The deep-link plumbing (`transaction_id` on the
-   notification, `?clientqa=1` on the transactions list) is in place for the day
-   a generic feed lands.
+5. **Client bell** reads `GET /api/v1/client/notifications` (reply, shared doc,
+   signature ready, open invoice). Staff pending-task notifications stay off this
+   feed.
 
 ---
 
