@@ -1599,6 +1599,58 @@ def create_google_demo_video_requirements_doc():
     save_document(doc, "GOOGLE_DEMO_VIDEO_REQUIREMENTS.docx")
 
 
+def create_google_reviewer_testing_guidelines_doc():
+    """Generate a .docx export of GOOGLE_REVIEWER_TESTING_GUIDELINES.md.
+
+    Step-by-step instructions for Google Trust and Safety reviewers, written
+    against the 2026-08-06 verification email (test credentials, no auth
+    blockers, navigation that demonstrates each submitted scope).
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("GOOGLE_REVIEWER_TESTING_GUIDELINES.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+    render_feedback_body(doc, body_lines)
+    save_document(doc, "GOOGLE_REVIEWER_TESTING_GUIDELINES.docx")
+
+
 TESTING_REVIEW_FEATURES = None  # Populated at bottom of file
 
 
@@ -4960,6 +5012,7 @@ TARGET_BUILDERS = {
     "demo-video-guideline": create_demo_video_guideline_doc,
     "demo-video-guide-for-jake": create_demo_video_guide_for_jake_doc,
     "google-demo-video-requirements": create_google_demo_video_requirements_doc,
+    "google-reviewer-testing-guidelines": create_google_reviewer_testing_guidelines_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
     "email-guideline-questions": create_email_guideline_questions_doc,
     "smart-ai-automation-for-jake": create_smart_ai_automation_for_jake_doc,
@@ -5071,6 +5124,12 @@ TARGET_ALIASES = {
     "demo-video-requirements": "google-demo-video-requirements",
     "video-requirements": "google-demo-video-requirements",
     "demo-v2": "google-demo-video-requirements",
+    "google_reviewer_testing_guidelines": "google-reviewer-testing-guidelines",
+    "google_reviewer_testing_guidelines.md": "google-reviewer-testing-guidelines",
+    "google_reviewer_testing_guidelines.docx": "google-reviewer-testing-guidelines",
+    "google-reviewer-guidelines": "google-reviewer-testing-guidelines",
+    "reviewer-testing-guidelines": "google-reviewer-testing-guidelines",
+    "google-testing-guidelines": "google-reviewer-testing-guidelines",
     "email_guideline_questions_for_jake": "email-guideline-questions",
     "email_guideline_questions_for_jake.md": "email-guideline-questions",
     "email_guideline_questions_for_jake.docx": "email-guideline-questions",
