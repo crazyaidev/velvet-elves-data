@@ -483,11 +483,30 @@ async function run() {
       'f5.to_handle.upload',
       /Upload document/i.test(nyHandle) ? 'PASS' : 'FAIL',
     )
-    log(
-      'f5.to_handle.give_back_not_on_missing_doc',
-      /Upload document/i.test(nyHandle) ? 'PASS' : 'FAIL',
-      'missing-doc rows should offer Upload document',
-    )
+    const missingDocCard = page
+      .locator('div.bg-white')
+      .filter({ hasText: /Order Title|Upload document/i })
+      .filter({ has: page.getByRole('link', { name: /Upload document/i }) })
+      .first()
+    if (await missingDocCard.isVisible({ timeout: 2500 }).catch(() => false)) {
+      const giveBackOnMissing = missingDocCard.getByRole('button', {
+        name: /^Give this back to the AI$/i,
+      })
+      const stillThere = await giveBackOnMissing.isVisible({ timeout: 800 }).catch(() => false)
+      log(
+        'f5.to_handle.give_back_not_on_missing_doc',
+        stillThere ? 'FAIL' : 'PASS',
+        stillThere
+          ? 'Give-back still on a missing-document card'
+          : 'Upload document only; Give-back hidden',
+      )
+    } else {
+      log(
+        'f5.to_handle.give_back_not_on_missing_doc',
+        /Upload document/i.test(nyHandle) ? 'PASS' : 'SKIP',
+        'no scoped missing-doc card; fallback is Upload document present',
+      )
+    }
     const tryNow = page.getByRole('button', { name: /Try now \(this deal only\)/i }).first()
     log(
       'f5.try_now_admin',
@@ -527,6 +546,19 @@ async function run() {
     } else {
       log('f5.add_contact_href', 'SKIP', 'no Add contact row in the current Needs You slice')
     }
+    await clickVisible(page.getByRole('button', { name: /Ready to send items/i }), 'f5.ready_click')
+    await waitSettled(page, 400)
+    const readyText = await bodyText(page)
+    writeFileSync(path.join(OUT, 'f5_ready_to_send.txt'), readyText)
+    const giveBackOnReady = page.getByRole('button', { name: /^Give this back to the AI$/i })
+    const giveBackReadyCount = await giveBackOnReady.count()
+    log(
+      'f16.give_back_absent_on_ready_to_send',
+      giveBackReadyCount === 0 ? 'PASS' : 'FAIL',
+      giveBackReadyCount === 0
+        ? 'no Give-back on Ready to send (Assisted letters wait for Send)'
+        : `${giveBackReadyCount} Give-back button(s) on Ready to send`,
+    )
     logForbidden('f5.forbidden', ny)
 
     // ── Feature 21 Intelligence Email ──────────────────────────────────
@@ -670,6 +702,38 @@ async function run() {
       .waitFor({ timeout: 25000 })
       .catch(() => {})
     const tasks = await dump(page, 'f11_tasks')
+    const utilityCard = page.locator('li').filter({ hasText: 'Deliver Utility Info' }).first()
+    if (await utilityCard.isVisible({ timeout: 2500 }).catch(() => false)) {
+      const giveBackOnUtility = utilityCard.getByRole('button', {
+        name: /^Give this back to the AI$/i,
+      })
+      const stillThere = await giveBackOnUtility.isVisible({ timeout: 800 }).catch(() => false)
+      log(
+        'f16.give_back_hidden_on_missing_doc_task',
+        stillThere ? 'FAIL' : 'PASS',
+        stillThere
+          ? 'Give-back still on Deliver Utility Info (missing attachment)'
+          : 'Give-back hidden on missing-document task after deploy',
+      )
+    } else {
+      log('f16.give_back_hidden_on_missing_doc_task', 'SKIP', 'Deliver Utility Info not on this file')
+    }
+    const welcomeCard = page.locator('li').filter({ hasText: /Buyer Welcome/i }).first()
+    if (await welcomeCard.isVisible({ timeout: 1500 }).catch(() => false)) {
+      const giveBackOnWelcome = welcomeCard.getByRole('button', {
+        name: /^Give this back to the AI$/i,
+      })
+      const stillThere = await giveBackOnWelcome.isVisible({ timeout: 600 }).catch(() => false)
+      log(
+        'f16.give_back_hidden_on_assisted_welcome',
+        stillThere ? 'FAIL' : 'PASS',
+        stillThere
+          ? 'Give-back still on Buyer Welcome'
+          : 'no Give-back on Buyer Welcome',
+      )
+    } else {
+      log('f16.give_back_hidden_on_assisted_welcome', 'SKIP', 'Buyer Welcome row not visible')
+    }
     const closingRow = page.getByText(CLOSING_TASK, { exact: false }).first()
     const closingVisible = await closingRow.isVisible({ timeout: 5000 }).catch(() => false)
     if (!closingVisible) {
