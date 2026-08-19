@@ -77,7 +77,7 @@ ListedKit references:
 Frontend source verified directly (not exhaustive, the load-bearing files):
 
 - `src/pages/transactions/TransactionWorkspacePage.tsx` (current shell: 6 tab pills, sticky header, deep links `?tab` / `?task` / `?requirement`, workspace-wide drop, status control, quick actions)
-- `src/components/workspace/`: `WorkspaceHeader.tsx` (DealOverviewCard, quick-action pills incl. `SyncDeadlinesButton`), `TimelineTab.tsx` (command bar with closed-intent executors, cascade routing), `ComplianceTab.tsx`, `DocumentsTab.tsx`, `TasksTab.tsx`, `PeopleTab.tsx`, `ActivityTab.tsx`, `CascadeEditor.tsx`, `AiEvidenceChip.tsx`, `TimelineMiniMap.tsx`, `DealBriefBand.tsx`
+- `src/components/workspace/`: `WorkspaceHeader.tsx` (DealOverviewCard, quick-action pills incl. `SyncDeadlinesButton`), `TimelineTab.tsx` (command bar with closed-intent executors, cascade routing), `ComplianceTab.tsx`, `DocumentsTab.tsx`, `TasksTab.tsx`, `ContactsTab.tsx`, `ActivityTab.tsx`, `CascadeEditor.tsx`, `AiEvidenceChip.tsx`, `TimelineMiniMap.tsx`, `DealBriefBand.tsx`
 - `src/contexts/AiChatContext.tsx` and `src/components/active-transactions/AIChatPanel.tsx` (floating panel, in-memory conversation, `suggested_actions` prompt chips; no persistence)
 - `src/components/wizard/WizardCommandBar.tsx` (closed-intent NL bar: classify via `/api/v1/ai/wizard-command`, deterministic preview, Apply, one-click Undo)
 - `src/components/active-transactions/ComposeEmailModal.tsx`, `AddTaskModal.tsx`, `src/components/documents/AddDocumentModal.tsx`, `src/pages/AiEmailReviewPage.tsx`
@@ -197,7 +197,7 @@ The decisive fact of this project: almost every "hand" the agent needs already e
 | Documents: upload, classify-verify, OCR geometry, pages, split, versions, email, flag-deletion | `/documents/*` | Document actions, evidence locating |
 | AI emails: compose (pending_review), drafts by transaction, refile inbound, approve/edit-send/regenerate/discard, templates, settings, test-inbound | `/ai-emails/*` | Email actions and the UI-only test harness |
 | Communication logs by transaction | `/communication-logs/transaction/{id}` | Email tab inbox/outbox data |
-| Parties CRUD | `/transactions/{id}/parties` | People actions, @ mentions |
+| Parties CRUD | `/transactions/{id}/parties` | Contacts actions, @ mentions |
 | Tasks CRUD with basis/auto_draft_email semantics, status changes | `/tasks/*` | Task actions |
 | Read-only contextual chat with deterministic closing-date answers | `POST /dashboard/ai-chat` | Stays for the global panel; its context loader and the fixed-format closing-date rule carry over |
 | Closed-intent command parser | `POST /ai/wizard-command` | Extended, not replaced, for agent intent classification |
@@ -268,7 +268,7 @@ Non-goals for this project: scheduled sends, document merge, SMS/voice channels,
 |   [3 due this week] [readiness]     |   in split mode                              |
 |                                     |                                              |
 |  Conversation stream:               |  Active tab card (Timeline | Compliance |    |
-|   - user + agent messages           |   Documents | Tasks | People | Activity |    |
+|   - user + agent messages           |   Documents | Tasks | Contacts | Activity |    |
 |   - issue cards                     |   Email)                                     |
 |   - action proposal cards           |                                              |
 |   - applied/result cards w/ Undo    |  Rows referenced by the conversation flash   |
@@ -308,7 +308,7 @@ Layout rules:
 
 ### 7.4 The composer
 
-- `+` button opens the reference picker (popover with tabs: Documents, Tasks, Deadlines, Requirements, People, Emails; search within; click to insert a chip). 100 percent mouse-driven.
+- `+` button opens the reference picker (popover with tabs: Documents, Tasks, Deadlines, Requirements, Contacts, Emails; search within; click to insert a chip). 100 percent mouse-driven.
 - `/` opens the command menu (mouse-selectable; typing filters): `/draft-email`, `/request-document`, `/scan` (compliance scan), `/summarize`, `/compare`, `/add-task`, `/add-deadline`, `/move-date`, `/readiness`, `/help`. Each command inserts a guided card, not raw text (e.g. `/draft-email` opens recipient chips + intent field, mirroring ComposeEmailModal's vocabulary).
 - `@` filters this transaction's parties (from `/transactions/{id}/parties`); `#` filters documents, tasks, deadlines, requirements (from the plan aggregate + documents list). Both insert typed chips.
 - Attach: clicking the paperclip or dropping a file onto the composer routes through the existing classified-upload dialog (AddDocumentModal anatomy: file + name + type), uploads via `/documents/upload`, inherits the AI verification chip, then inserts a document reference chip into the conversation with a system note "Uploaded {name} ({type})". The existing page-wide drop zone keeps its current instant-upload behavior; only a drop specifically on the composer goes through chat.
@@ -338,7 +338,7 @@ Phase E2 full tab:
 
 ### 7.7 Details consolidation (later phase, decision AW7)
 
-ListedKit's Details tab (screenshots 10, 11) maps to our DealOverviewCard + PeopleTab + term rows. Proposal: a Details tab consolidating property facts, financing, terms (term rows already in the plan aggregate), parties, and a "Generate summary" action (print/PDF via the existing checklist/print utilities, extended with the deal brief). Not a v1 dependency; the existing tabs already expose the data.
+ListedKit's Details tab (screenshots 10, 11) maps to our DealOverviewCard + ContactsTab + term rows. Proposal: a Details tab consolidating property facts, financing, terms (term rows already in the plan aggregate), parties, and a "Generate summary" action (print/PDF via the existing checklist/print utilities, extended with the deal brief). Not a v1 dependency; the existing tabs already expose the data.
 
 ---
 
@@ -718,7 +718,7 @@ Every script starts on a visible page, ends with visible proof, and names its pr
 | AW4 | Issue sensitivity | Which detector thresholds count as "blocker" vs "warning" (e.g. missing doc due in 3 vs 7 days). Recommendation: ship the table in 8.3 with conservative defaults, tune from UAT. |
 | AW5 | Always-approve rules (Phase 5) | Off entirely in v1. Recommendation: revisit only after a month of UAT data; never for sends/waives/deletes/date applies regardless. |
 | AW6 | Voice input | Browser dictation is uneven and nothing depends on it. Recommendation: skip in v1; revisit with the future SMS/voice milestone. |
-| AW7 | Details tab consolidation | Fold DealOverviewCard + People + terms into a ListedKit-style Details tab, or keep the current six tabs + Email. Recommendation: keep current tabs for v1; Details is cosmetic consolidation, not capability. |
+| AW7 | Details tab consolidation | Fold DealOverviewCard + Contacts + terms into a ListedKit-style Details tab, or keep the current six tabs + Email. Recommendation: keep current tabs for v1; Details is cosmetic consolidation, not capability. |
 | AW8 | Per-transaction "Draft from" account selector | Only matters for multi-account users. Recommendation: display-only in E2; selector when multi-account demand is real. |
 | AW9 | Thread retention | Agent conversations are work records; align retention with the communication-log policy (2 years from last login)? Recommendation: yes, same purge job family. |
 | AW10 | Header progress indicator copy | "12 of 38 tasks complete" (absolute, recommended) vs ListedKit's bare percentage. |

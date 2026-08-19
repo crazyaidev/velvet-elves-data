@@ -140,7 +140,7 @@ plain to-do on the deal.
 What I built (default):
   - Task name: "Collect contact details for <Vendor Name>"
   - Description: "Get the email and phone for <Vendor> (<company>) — the
-    <role> on this deal — and add them on the People tab."
+    <role> on this deal — and add them on the Contacts tab."
   - It's a manual task (no auto-email, since there's no email yet), due a couple
     of days after contract acceptance, and it shows on the Verification summary
     before upload so you know it was created.

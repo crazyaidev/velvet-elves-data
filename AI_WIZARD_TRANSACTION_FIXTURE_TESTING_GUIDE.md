@@ -130,7 +130,7 @@ Open the transaction detail page from the card.
   dates derived from acceptance, inspection, HOA, and closing anchors.
 - Documents tab: the PDF should be linked to the transaction.
 - Tasks tab: generated tasks should have due dates that match the preview.
-- People tab: all extracted party/contact records should be editable.
+- Contacts tab: all extracted party/contact records should be editable.
 - Activity tab: create, document-link, requirement, and task-generation events
   should appear as available.
 - Agent tab / Email tab: if the agent workspace flag is enabled, references

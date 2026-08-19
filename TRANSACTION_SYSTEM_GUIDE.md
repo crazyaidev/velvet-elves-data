@@ -35,7 +35,7 @@ Here is the map of the workflow before we walk through each page:
 | Set up your task list | Settings, then Task Templates (`/admin/task-templates`) | A searchable library of task cards with colored "automation" chips, plus a "New template" button |
 | Start a new deal | The "+ New Transaction" button, which opens the AI Wizard (`/transactions/new`) | A full-screen, two-panel wizard: a dark progress rail on the left, your work in the center, the contract on the right |
 | Verify and create the deal | The wizard's last step, "Verification" | The full summary with citations, the AI's proposals, and a full-width orange "Upload Transaction" button under a confirmation line |
-| Work the deal | The transaction page (`/transactions/:id`) | A deal header, then a white card with tabs (Timeline, Compliance, Documents, Tasks, People, Activity) and an AI Agent panel |
+| Work the deal | The transaction page (`/transactions/:id`) | A deal header, then a white card with tabs (Timeline, Compliance, Documents, Tasks, Contacts, Activity) and an AI Agent panel |
 | See work across all deals | Active Transactions, My Task Queue, Closing Calendar (sidebar) | A list of deal cards, a single list of your tasks, and a calendar of deadlines |
 
 ---
@@ -196,7 +196,7 @@ After the deal is created you work it on its **transaction page** (`/transaction
   - **Compliance** - the document checklist from the wizard, with what is still outstanding.
   - **Documents** - the deal's files, with an Upload button.
   - **Tasks** - the task list the wizard built (detailed below).
-  - **People** - the parties on the deal (buyer, seller, agents, lender, title).
+  - **Contacts** - the parties on the deal (buyer, seller, agents, lender, title).
   - **Activity** - the history of what has happened on the deal.
 - **An AI Agent panel.** On a wide screen it sits to the right of the card as a working assistant (you can ask it about the deal or have it take actions); on a narrow screen it is an **Agent** tab. An **Email** area handles the deal's correspondence.
 
@@ -300,7 +300,7 @@ decided:
 |---|---|---|
 | Task Templates | Settings, or Team sidebar (`/admin/task-templates`) | Library of task rows with colored automation chips, search, category chips, "New template" |
 | AI Wizard | "+ New Transaction" button (`/transactions/new`) | Two-panel wizard: dark progress rail, center work area, contract viewer; step-specific orange button |
-| Transaction page | A deal card in Active Transactions (`/transactions/:id`) | Deal header, white card with tabs (Timeline, Compliance, Documents, Tasks, People, Activity), AI Agent panel |
+| Transaction page | A deal card in Active Transactions (`/transactions/:id`) | Deal header, white card with tabs (Timeline, Compliance, Documents, Tasks, Contacts, Activity), AI Agent panel |
 | Active Transactions | Sidebar, Deals group (`/transactions/active`) | All active deals as cards |
 | My Task Queue | Sidebar, Workflow group (`/tasks/queue`) | Every task assigned to you, across deals |
 | Closing Calendar | Sidebar, Workflow group | Your deadlines on a calendar |

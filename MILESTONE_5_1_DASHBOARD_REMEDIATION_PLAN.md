@@ -539,7 +539,7 @@ Change `src/pages/dashboards/AttorneyDashboardPage.tsx`:
    - `MatterTimeline`
    - `MatterActivity`
    - `AiLegalBrief`
-   - `MatterPeoplePanel`
+   - `MatterContactsPanel`
    - `SendPacketModal`
 9. Handle URL panels:
    - `panel=state-rules` opens `StateRulesModal`

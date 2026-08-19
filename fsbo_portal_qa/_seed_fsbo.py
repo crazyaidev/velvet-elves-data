@@ -215,7 +215,7 @@ def main():
     for tx in (prep, contract):
         ensure_assignment(staff_tok, tx["id"], fsbo_id)
 
-    # People on the under-contract file
+    # Contacts on the under-contract file
     status, party = req(
         "POST",
         f"/api/v1/transactions/{contract['id']}/parties",

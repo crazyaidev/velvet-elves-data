@@ -158,7 +158,7 @@ not part of this release. The promotional block is visible but its **Add AI Coac
 
 **Current state:** the workspace itself is **complete and in this round's testing guide**
 — the AI assistant, its proposals and approvals, the safe date moves, document analysis on
-upload, and all seven tabs (Timeline, Compliance, Documents, Tasks, People, Activity,
+upload, and all seven tabs (Timeline, Compliance, Documents, Tasks, Contacts, Activity,
 Email). A few extras around it are still being built:
 
 - **Voice input.** A microphone button is shown in the assistant's message box but is

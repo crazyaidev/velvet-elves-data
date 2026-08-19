@@ -70,7 +70,7 @@ The fix below re-grounds every article in what the code renders today.
 | Account menu | `AppLayout.tsx` | Settings · Help Center · Log Out. |
 | Deals list tabs | `TransactionListPage.tsx` | All, Overdue, Due Today, Needs Attention, Closing Soon, In Inspection, On Track, Unhealthy. Sort: Urgency, Close Date, Client Name, Price. |
 | Deal card | `components/shared/TransactionCard.tsx` | Expands in place to 3 columns (Tasks / Key Dates / Contacts) + milestone bar + AI next-step; opens the full workspace at `/transactions/:id`. |
-| Deal workspace | `TransactionWorkspacePage.tsx` | Tabs: Agent, Timeline, Compliance, Documents, Tasks, People, Activity, Email. |
+| Deal workspace | `TransactionWorkspacePage.tsx` | Tabs: Agent, Timeline, Compliance, Documents, Tasks, Contacts, Activity, Email. |
 | New-transaction wizard | `wizardTypes.ts` | Steps: Documents, AI Parsing, Address & Contacts, Purchase Info, Missing Info, Confirm, Timeline, Compliance, Review Tasks. |
 | Transaction status | `models/enums.py` | Active, Incomplete, Paused, Completed, Closed. |
 | Closing modes | `types/enums.ts` | attorney, title_escrow, shared_approval. |
@@ -293,7 +293,7 @@ Opening a deal shows a tabbed workspace:
 - **Compliance** — required documents and checklist status.
 - **Documents** — files on the deal, with e-signature.
 - **Tasks** — this deal's task list.
-- **People** — the parties and vendors.
+- **Contacts** — the parties and vendors.
 - **Activity** — the full, searchable history.
 - **Email** — the deal's messages.
 
@@ -642,7 +642,7 @@ A **party** is a contact in their role on a specific deal ([Transaction parties]
 **Parties are everyone involved in one deal**, and most are captured automatically when the AI reads your contract.
 
 ## Who counts
-Buyers and sellers, the agents, the loan officer, the title rep, and the closing/settlement attorney when there is one. They appear on the deal's **People** tab and as grouped contact cards with call/email actions. Add or correct a party any time.
+Buyers and sellers, the agents, the loan officer, the title rep, and the closing/settlement attorney when there is one. They appear on the deal's **Contacts** tab and as grouped contact cards with call/email actions. Add or correct a party any time.
 
 ## Parties vs. the vendor directory
 A provider acting as a party is not automatically a saved vendor. To reuse them, **save the party as a vendor**. See [The vendor directory](/articles/vendor-directory).

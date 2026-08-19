@@ -73,7 +73,7 @@ verbs. Today's unfriendly product is the shell:
 - `AppLayout` is Transaction OS: KPI strip (Missing Docs, Share Links Live,
   Days To Close), Dashboard vs Workspace, tours, Concierge.
 - Property Detail is a six-rail **matter file** (Overview / Timeline /
-  Documents / People / Sharing / Messages), documented as Dotloop / Clio
+  Documents / Contacts / Sharing / Messages), documented as Dotloop / Clio
   for legal pros — the wrong audience.
 - `FsboPortalShell` breadcrumbs say `Workspace › …` (internal tool
   language). Duplicate tab bars were already a rev-4 defect.
@@ -146,7 +146,7 @@ seller operate a staff dashboard to do it.**
 | Notifications | Topbar bell | Until 2026-08-17 it showed tenant AI drafts. Now seller-safe (share views + coordinator messages). Still no reply/sign/pay kinds |
 | Ask Aime | FAB; FSBO-safe greeting after QA | Explains missing docs. Cannot upload, share, or message for the seller. Concierge rail opens the same chat |
 | Document board Verified / Complete | Staff review + e-sign envelope state | Seller sees "In progress" on files they just uploaded and cannot tell what *they* must do next vs what the coordinator is reviewing |
-| People / Call / Email | Property Detail rail from `transaction_parties` | Present; no in-portal next step attached |
+| Contacts / Call / Email | Property Detail rail from `transaction_parties` | Present; no in-portal next step attached |
 | Staff invite | Wizard auto-invite **only** if `is_fsbo` **and** representation is Buyer. Seller-rep FSBO files skip it. Failure toast points at "Client Access" (`role_in_transaction = 'client'`), which will not list this seller | Buyer-rep invite works. True unrepresented-seller files need a manual ForSaleByOwner invite |
 
 Chrome **bellfix: 49 pass / 0 fail / 1 warn**. That is "the doors open." It is
@@ -178,7 +178,7 @@ clothes:
 
 ```
 Dashboard  +  My Properties  +  Documents  +  Payments  +  Messages
-+ property workspace (Overview / Timeline / Documents / People / Sharing / Messages)
++ property workspace (Overview / Timeline / Documents / Contacts / Sharing / Messages)
 + Overview hero + persistent banner + Documents CTA
 + Ask Aime + Concierge upsell + Share modal
 ```
@@ -213,7 +213,7 @@ removing it would make the sale worse.
 | **J5. Sign / acknowledge what was sent to *me*** | Yes (parity with Client) | `client_documents` already allows FSBO. `sign-url` always returns `signing_url: null` / `mode: "download"`. Staff share notify only hits `role_in_transaction = 'client'`, so an FSBO-only file bells nobody. Documents projection does not list `is_client_visible` packets | Reuse Client packet columns + Acknowledge. Sign CTA opens/views the file until a real signing URL exists. Extend notify to `for_sale_by_owner` |
 | **J6. Pay an invoice** | Yes when one exists | Nav always visible; empty | Hide Payments unless `open` count > 0. NBA may rank Pay |
 | **J7. Know Velvet is not my agent** | Yes — legal | Boundary notice exists | Keep on Home + share viewer + Ask Aime. Remove Concierge upsell that implies a product they cannot buy in-portal |
-| **J8. Call/email people on the file** | Mild | Six-rail People pane | Keep as a **section on the property file page**, not a nav destination |
+| **J8. Call/email people on the file** | Mild | Six-rail Contacts pane | Keep as a **section on the property file page**, not a nav destination |
 | **J9. Ask Aime** | Mild, after J2–J4 work | Seller-safe explanations | Keep FAB. Never as a substitute for upload/share/reply. No Concierge prompt until Concierge is a real FSBO SKU |
 | **J10. Flag a mistaken upload** | Yes | Works | Keep on own uploads only, not shared packets |
 | **J11. Listing-prep beyond two disclosures** | Spec yes, product no | Not implemented | **Later:** photo / go-live only if staff can assign those as *seller-completable* items. Do not invent a fake launch checklist. Not Phase 3 (share) and not Phase 4 (packets) |
@@ -264,11 +264,11 @@ shows "In progress" for unreviewed uploads.
 Payments is a permanent nav item (Client **Home** hides the Payments control
 when `open_invoice_count === 0`; Client's concierge nav is Home / Next
 Steps / Timeline / Documents / Updates). Overview "Learn about Concierge"
-opens Ask Aime. People contact info belongs on the property file page;
+opens Ask Aime. Contact info belongs on the property file page;
 Agent Info must never appear.
 
 ### F8 — Property workspace is an internal matter file
-Overview / Timeline / Documents / People / Sharing / Messages on one
+Overview / Timeline / Documents / Contacts / Sharing / Messages on one
 property clones the staff deal workspace (the page docstring cites Dotloop /
 Clio). A seller with one house should live on Home; the property record is
 a **scrolling file page**, not a second app.
@@ -319,7 +319,7 @@ Recommendations. Flag in the implementing PR if product overrides.
 | **S11** | Payments | Hide nav and Home tile unless open invoice count > 0 (Client **Home** `showPayments` when `open_invoice_count === 0`; not a sixth Client nav item) | Permanent empty Payments |
 | **S12** | Ask Aime | Keep FAB. Remove Concierge upsell. Do not start an LLM slice until J2–J5 complete in production | Making Ask Aime the product |
 | **S13** | Persistent banner | **Remove.** Home owns the single next action | Keep banner except on `/fsbo` and `/fsbo/documents` |
-| **S14** | Property file page | One scrolling page: next action, dates/progress, this file's documents, people (call/email), share. Header CTA = that property's next seller action. No six-rail matter shell | Keep Overview / Timeline / Documents / People / Sharing / Messages as the default |
+| **S14** | Property file page | One scrolling page: next action, dates/progress, this file's documents, people (call/email), share. Header CTA = that property's next seller action. No six-rail matter shell | Keep Overview / Timeline / Documents / Contacts / Sharing / Messages as the default |
 | **S15** | Seller-owed vs file-required | Split the sets. File-required (`required_doc_types_for`) may stay for coordinator completeness / share-viewer progress. Seller NBA and upload prefill use an ordered **seller-owed** list: listing-prep = `sellers_disclosure`, `lead_paint_disclosure`. Under contract = **empty by default** (PA / CD / settlement / deed are not automatically the seller's job). Staff may later flag a type seller-completable | Using `_UNDER_CONTRACT_REQUIRED` as the upload NBA |
 | **S16** | Staff sees seller replies | Seller send writes `is_client_visible` inbound notes onto the **deal communication log**. Extend `notify_transaction_clients` and staff Client Hub / Q&A links to `for_sale_by_owner`, or unanswered FSBO questions never appear on the represented-client surfaces | Assuming Client Q&A already lists this seller. Pointing wizard failures at "Client Access" |
 | **S17** | Messages URL | Canonical route `/fsbo/messages`. `/fsbo/milestones` redirects in Phase 1 (same slice as the shell) | Inventing a second mailbox or leaving `/fsbo/milestones` as the live URL |

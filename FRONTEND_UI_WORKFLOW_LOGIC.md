@@ -1644,7 +1644,7 @@ sections are no longer a card nested inside a grid inside a padded body.
     the guidance.
 - **Creation receipt strip (first visit after the wizard only, `?created=1`):** one flat green line — "Created just now · N tasks (M handled by AI) · N checklist items · N documents attached · Fees captured · E-signature queued · N requests to the other agent" — each segment linking to the tab whose rows back that number, dismissible, never shown again. Segments render only when their count is real.
 - **Tab bar (full width, on the header surface):** Overview | Timeline |
-  Tasks | Documents | People | Billing | Activity (+ Email with the agent
+  Tasks | Documents | Contacts | Billing | Activity (+ Email with the agent
   flag, + Agent on narrow screens). **Compliance is not a tab** — the
   checklist is a view of Documents (Files | Checklist), because both are the
   deal's paperwork.
@@ -1652,7 +1652,7 @@ sections are no longer a card nested inside a grid inside a padded body.
   docks on the right when opened from the header's "Ask AI".
 - **Deep links:** `?tab=`, `?view=files|checklist` (Documents),
   `?task=<id>` (flash), `?requirement=<id>` (flash), `?qa=1` / `?access=1`
-  (People opens the Client Q&A drawer / Manage client access once, then the
+  (Contacts opens the Client Q&A drawer / Manage client access once, then the
   flag is stripped), `?created=1` (receipt). `?tab=compliance` predates the
   Documents merge and resolves to Documents › Checklist.
 - **Primary content area (per tab; ONE card per tab):**
@@ -1666,7 +1666,7 @@ sections are no longer a card nested inside a grid inside a padded body.
       clicking one goes to Timeline, where dates are edited
     - **Progress** — tasks complete of total with a bar, open/overdue counts,
       purchase price
-    - **People** — the parties on the deal, with "Manage"
+    - **Contacts** — the parties on the deal, with "Manage"
   - Honest by construction: a panel renders only when it has real data, and
     nothing here is a second place to edit the same thing.
 
@@ -1702,7 +1702,7 @@ sections are no longer a card nested inside a grid inside a padded body.
   - Grouped sections (Overdue / Due Today / Upcoming / Completed) with status menu, basis chips, related-compliance links, Auto-Email toggle (eligible targets only), AI evidence chips
   - Add Task modal (shared Dialog; completion method + assignee via branded selects; AI-suggested approaches)
 
-  **People Tab:**
+  **Contacts Tab:**
   - **Deal fees** at the top: the professional fee and transaction fee as "3% · seller" / "buyer $250 · seller 2%" rows, editable in place (pencil → Radix dialog with the wizard's fee-card anatomy: Buyer/Seller/Both, one amount + `%`/`$` per paying side, "Remove fee"); with no fees entered an editing role sees "+ Add fees", and a viewer without edit rights sees nothing at all. Mirrors the `PATCH /transactions/{id}` role gate (Agent / TeamLead / Admin, D5); every edit lands in the Activity audit trail. Fees live here — with the deal's commercial relationships — because the deal brief / overview band stays off the workspace page (Jan's 2026-06-13 review).
   - Representation-aware groups (Buyer, Seller, Agents, Lender, Title + Other contacts); add/edit via AddContactModal; Assign team; Manage client access; client thread; compose
   - **Client Q&A badge (2026-07-22):** an amber dot on the Client Q&A button
@@ -2895,7 +2895,7 @@ The Attorney Workspace is a specialized legal desk. Counsel must not reach defau
 
 **Ask Velvet Elves AI — floating widget, not a page.** There is no `/fsbo/ask-ai` route. The floating `FloatingAskAi` button sits on every FSBO page; clicking it opens the shared `AiChatContext` panel with an FSBO-friendly placeholder. The Property Detail and Overview "Plain-English guide" cards link to it via `aiChat.open(...)`.
 
-**Property Detail "People involved" panel.** `/fsbo/properties/:id` includes a "People involved" rail card sourced from `transaction_parties` (decrypted via `_safe_decrypt`). Each contact carries role label, name (or company), and inline Call / Email buttons. Empty rows (no name / email / phone / company) are dropped server-side.
+**Property Detail "Contacts involved" panel.** `/fsbo/properties/:id` includes a "Contacts involved" rail card sourced from `transaction_parties` (decrypted via `_safe_decrypt`). Each contact carries role label, name (or company), and inline Call / Email buttons. Empty rows (no name / email / phone / company) are dropped server-side.
 
 **Unread coordinator messages.** Property Detail and Milestones pages render a small orange dot for any message with `seen === false`. On mount, the page POSTs the visible log_ids to `/api/v1/dashboard/fsbo/messages/seen` so the dot is suppressed on the next refetch. The endpoint upserts `(log_id, user_id)` into `communication_log_views` and rejects ids that don't belong to the FSBO user's transactions.
 

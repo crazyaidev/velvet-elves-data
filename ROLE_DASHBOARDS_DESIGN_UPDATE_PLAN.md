@@ -553,7 +553,7 @@ copy must follow pattern 14.
    - **Matter card stack** (`DashboardCard flush bodyTint='soft'`).
      Each matter row expands to `MatterSummaryRow` /
      `MatterDocChecklist` / `MatterTimeline` / `MatterActivity` /
-     `AiLegalBrief` / `MatterPeoplePanel`. People panel uses
+     `AiLegalBrief` / `MatterContactsPanel`. Contacts panel uses
      collapsible contact rows with real email/phone (pattern 8).
    - **Legal-packet upload intake** (`tone='brand'`, icon `Upload`,
      `eyebrow='✦ Legal packets'`) — `UploadIntakeCard` with attorney

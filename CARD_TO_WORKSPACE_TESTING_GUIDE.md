@@ -41,7 +41,7 @@ bug worth reporting.
 Open any deal (click its name on a card, or the ⤢ icon).
 
 1. **You land on Overview.** Four panels: **Needs you**, **Key dates**,
-   **Progress**, **People**. This is the page telling you where the deal
+   **Progress**, **Contacts**. This is the page telling you where the deal
    stands before asking you to change anything.
 2. **Needs you** lists what is overdue or due today. Click a row — it takes
    you to the Tasks tab with that task highlighted. If a deal is missing
@@ -52,7 +52,7 @@ Open any deal (click its name on a card, or the ⤢ icon).
 4. **The header** carries the deal name, its stage, and the facts that decide
    urgency: address, days to close, overdue count, price. These must match
    what the card on the list says for the same deal.
-5. **Tabs**: Overview · Timeline · Tasks · Documents · People · Billing ·
+5. **Tabs**: Overview · Timeline · Tasks · Documents · Contacts · Billing ·
    Activity (plus Email). There is no longer a separate "Compliance" tab —
    open **Documents** and you will see two views, **Files** and **Checklist**.
    The checklist is exactly what Compliance used to be.
@@ -93,7 +93,7 @@ Each should land on the right part of the right deal in one click:
 - Notification bell → the deal's **Tasks** tab with that task highlighted.
 - Closing Calendar → the deal's **Timeline**.
 - My Task Queue → the deal's **Tasks** tab at that task.
-- Clients hub → "Q&A" and "Access" open the deal's **People** tab with the
+- Clients hub → "Q&A" and "Access" open the deal's **Contacts** tab with the
   right panel already open.
 - An invoice / payment / payout → the deal's **Billing** tab.
 - Dashboard priority cards, action queue, analytics → the deal.

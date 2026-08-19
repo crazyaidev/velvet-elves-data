@@ -200,7 +200,7 @@ Result codes: **PASS** · **FAIL** · **PARTIAL** · **BLOCKED** · **N/A**
 | TX-144 | Per-group Add | Click "Add" in a group header | Add Contact modal pre-set to that role, company field per group |
 | TX-145 | Empty group placeholder | Find an empty group | Dashed "Add …" affordance that opens the same modal |
 | TX-146 | Create a contact | Submit the modal | `POST /transactions/:id/parties`; card refreshes; toast |
-| TX-147 | Edit / remove a contact | Look for the affordance | Spec and plan both describe managing parties from this surface `[SPEC §4.6 People]` |
+| TX-147 | Edit / remove a contact | Look for the affordance | Spec and plan both describe managing parties from this surface `[SPEC §4.6 Contacts]` |
 | TX-148 | Assign team modal | Click "Assign team" | Roster with assignable roles; Admin may add; TeamLead/Admin may remove |
 | TX-149 | Assignment reflected on the card | After assigning | Assignee chip updates |
 
@@ -300,7 +300,7 @@ Result codes: **PASS** · **FAIL** · **PARTIAL** · **BLOCKED** · **N/A**
 
 | ID | Feature | Steps | Expected |
 | --- | --- | --- | --- |
-| TX-250 | **Tab set** | Inspect | Overview · Timeline · Tasks · Documents · People · Billing · Activity (+ Email, + Agent on narrow) `[SPEC §4.6, PLAN §16.3]` |
+| TX-250 | **Tab set** | Inspect | Overview · Timeline · Tasks · Documents · Contacts · Billing · Activity (+ Email, + Agent on narrow) `[SPEC §4.6, PLAN §16.3]` |
 | TX-251 | **Landing tab** | Open a deal fresh | Lands on **Overview** `[PLAN §16.3]` |
 | TX-252 | **Compliance placement** | Look for Compliance | Compliance is the **Checklist view of Documents**, not its own tab `[SPEC §4.6, PLAN §16.3]` |
 | TX-253 | `?tab=compliance` legacy link | Load it | Resolves to Documents › Checklist `[SPEC §4.6]` |
@@ -318,7 +318,7 @@ Result codes: **PASS** · **FAIL** · **PARTIAL** · **BLOCKED** · **N/A**
 | TX-260 | **Needs you panel** | Inspect | Overdue + due-today tasks; click opens the task on Tasks; missing-documents line when any `[SPEC §4.6]` |
 | TX-261 | **Key dates panel** | Inspect | Seven tracking dates as status-coloured chips; click goes to Timeline `[SPEC §4.6]` |
 | TX-262 | **Progress panel** | Inspect | Tasks complete/total with a bar, open/overdue counts, purchase price `[SPEC §4.6]` |
-| TX-263 | **People panel** | Inspect | Parties on the deal + "Manage" `[SPEC §4.6]` |
+| TX-263 | **Contacts panel** | Inspect | Parties on the deal + "Manage" `[SPEC §4.6]` |
 | TX-264 | Honest panels | Deal with sparse data | A panel renders only when it has real data `[SPEC §4.6]` |
 | TX-265 | **AI next-step strip** | Inspect the body | Champagne strip; CTA opens the task email flow for the backing task `[SPEC §4.6]` |
 
@@ -380,7 +380,7 @@ Result codes: **PASS** · **FAIL** · **PARTIAL** · **BLOCKED** · **N/A**
 
 ---
 
-## 18. Detail page — People tab
+## 18. Detail page — Contacts tab
 
 | ID | Feature | Steps | Expected |
 | --- | --- | --- | --- |
@@ -473,7 +473,7 @@ Result codes: **PASS** · **FAIL** · **PARTIAL** · **BLOCKED** · **N/A**
 | 15. Timeline tab | 12 | | | | | |
 | 16. Documents/Checklist | 12 | | | | | |
 | 17. Tasks tab | 11 | | | | | |
-| 18. People tab | 13 | | | | | |
+| 18. Contacts tab | 13 | | | | | |
 | 19. Billing/Activity/Email/Agent | 13 | | | | | |
 | 20. Detail states & edges | 12 | | | | | |
 | 21. Cross-surface | 6 | | | | | |

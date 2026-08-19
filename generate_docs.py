@@ -2610,7 +2610,7 @@ TESTING_REVIEW_FEATURES = [
             "From the Active Transactions list, open any deal. It opens as its own full page with its own web address — not just an expanded card.",
             ("On a normal computer screen, confirm the page has two sides.", [
                 "On the left: the Velvet Elves AI assistant for this deal.",
-                "On the right: a panel with tabs across the top — Timeline, Compliance, Documents, Tasks, People, Activity, and Email.",
+                "On the right: a panel with tabs across the top — Timeline, Compliance, Documents, Tasks, Contacts, Activity, and Email.",
             ]),
             ("Look at the top of the page.", [
                 "A 'X% complete' progress bar (shown once the deal has tasks).",
@@ -2689,9 +2689,9 @@ TESTING_REVIEW_FEATURES = [
         "feature": "Point the assistant at any item, and quick commands",
         "route": "Any tab row + the assistant's message box",
         "how_to_test": [
-            "On any tab (Tasks, Compliance, Documents, Timeline, People), open a row's three-dot menu (or hover the row) and choose 'Ask AI about this'.",
+            "On any tab (Tasks, Compliance, Documents, Timeline, Contacts), open a row's three-dot menu (or hover the row) and choose 'Ask AI about this'.",
             "Confirm the item appears as a small tag in the message box and the assistant comes into focus. Type a question and send it — the answer should be about that item.",
-            "Click the '+' in the message box to open a picker with tabs (Documents, Tasks, Deadlines, Requirements, People, Emails). Pick one to add it as a tag.",
+            "Click the '+' in the message box to open a picker with tabs (Documents, Tasks, Deadlines, Requirements, Contacts, Emails). Pick one to add it as a tag.",
             "Type '/' in the message box to open the command menu (for example /scan, /readiness, /summarize, /draft-email, /request-document, /add-deadline, /move-date).",
             "Click '/readiness' and confirm the assistant reports whether the deal is ready to close and what is still in the way.",
         ],
@@ -2746,7 +2746,7 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "17.7",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "The deal tabs (Timeline, Compliance, Documents, Tasks, People, Activity)",
+        "feature": "The deal tabs (Timeline, Compliance, Documents, Tasks, Contacts, Activity)",
         "route": "The tab bar across the top of the right-hand panel",
         "how_to_test": [
             ("Click each tab in turn and confirm it shows this deal's information.", [
@@ -2754,7 +2754,7 @@ TESTING_REVIEW_FEATURES = [
                 "Compliance — the document checklist; attach or upload a document to a requirement, and the AI flags mismatches.",
                 "Documents — every document on the deal, with Upload, Manage, Print, and download.",
                 "Tasks — the deal's tasks; each task's status is a colored pill (Pending, In progress, Completed, Skipped), with 'Add Task' and a three-dot menu on each task.",
-                "People — the buyers, sellers, and other contacts, with 'Manage client access' where your role allows it.",
+                "Contacts — the buyers, sellers, and other contacts, with 'Manage client access' where your role allows it.",
                 "Activity — the deal's history (date changes, status updates, checklist edits) and a Communications button.",
             ]),
             "On the Tasks tab, change a task's status and confirm the pill changes color right away and a 'Saving…' note appears at the top while it records.",
@@ -4611,7 +4611,7 @@ TESTING_REVIEW_FEATURES = [
         "route": "/transactions/<id> (as Attorney) — opens from Review on a matter card",
         "how_to_test": [
             "Open a matter from the Matters list. Confirm a full-screen workspace with a header (property address, status, and a matter switcher to jump between matters) rather than a simple scrolling page.",
-            "Use the left section rail to move between Overview, Review, Brief, Timeline, People, Activity, and Releases. Confirm each section loads its own content.",
+            "Use the left section rail to move between Overview, Review, Brief, Timeline, Contacts, Activity, and Releases. Confirm each section loads its own content.",
             "On the Review section, work through the document review items. On the Releases section, confirm you can start a packet release.",
             "Use the matter switcher in the header to jump to a different matter without going back to the list.",
         ],

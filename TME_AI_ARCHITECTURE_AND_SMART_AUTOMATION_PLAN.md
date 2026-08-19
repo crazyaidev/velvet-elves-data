@@ -226,7 +226,7 @@ Nine (now more) engines, unified at the UI by posture + Needs You. This is the e
 
 Buyer welcome, Seller welcome, Co-op agent welcome, Loan officer welcome, Order Title, Confirm Title Order, Pending reminder (to the account holder). Review Documentation completes or drafts a signature chase — that chase does not send.
 
-Guards already in code: Active deals only; captured People emails only; connected mailbox; Manual kills send; >30 days overdue surfaces; duplicate send skipped; Confirm Title Order skipped if Order Title is done; no AI disclosure on the wire; attachment prose must match files.
+Guards already in code: Active deals only; captured Contacts emails only; connected mailbox; Manual kills send; >30 days overdue surfaces; duplicate send skipped; Confirm Title Order skipped if Order Title is done; no AI disclosure on the wire; attachment prose must match files.
 
 ### 4.3 What the UI currently calls the assistant
 

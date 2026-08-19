@@ -31,7 +31,7 @@ Documentation (velvet-elves-data):
 | TRANSACTION_CARD_TYPOGRAPHY_AUDIT.md | Jake's exacting card type scale; the card face is his territory |
 | WIZARD_TESTING_GUIDE.md | The mouse-only testing format this plan's testing guide will extend |
 | VE-ActiveTransactions.html | Jake's canonical comp for the portfolio page and the milestone bar; this plan does NOT redraw that comp |
-| jake_email_response_10.txt | TC-becomes-a-vendor direction (post-MVP); the People tab must not hard-code assumptions that block it |
+| jake_email_response_10.txt | TC-becomes-a-vendor direction (post-MVP); the Contacts tab must not hard-code assumptions that block it |
 
 Source code (both repos), with the load-bearing findings:
 
@@ -131,7 +131,7 @@ below; this log records what was wrong so reviewers can verify the fix.
 - **W5 (ghost flow).** The header quick action "Share" had no existing
   per-deal flow for internal roles: share links are FSBO-scoped
   (`milestones.py`: `/dashboard/fsbo/share-link`) and client visibility is
-  the Manage Client Access flow, which already lives in the People tab.
+  the Manage Client Access flow, which already lives in the Contacts tab.
   Corrected: Share removed from the quick actions; nothing is lost.
 - **W6 (work overstated; now cited as existing).** Compliance "full
   editing parity" needs NO new backend: `PATCH /{requirement_id}` already
@@ -253,7 +253,7 @@ grid and becomes the index that links in.
   proposals. LLM cost per page view: zero.
 - No changes to the Attorney Matter Workspace, Client portal, or FSBO
   workspace beyond leaving their routes untouched.
-- No blocking dependency on the TC-as-vendor model; the People tab is
+- No blocking dependency on the TC-as-vendor model; the Contacts tab is
   designed so that party sources can later include vendor-org links
   (jake_email_response_10) without layout changes.
 - The "drag a document anywhere on the screen" requirement is scoped to a
@@ -324,7 +324,7 @@ These extend STYLE_GUIDE v2.6 and bind every screen in section 5:
 | --- | --- | --- |
 | DocumentsModal + MissingDocumentsPanel | Documents tab + Compliance tab | A (read), B (edit) |
 | AddTaskModal | Tasks tab (same modal, launched in page context) | A |
-| AddContactModal / AssignTeamModal / ManageClientAccessModal | People tab | A |
+| AddContactModal / AssignTeamModal / ManageClientAccessModal | Contacts tab | A |
 | HistoryPanel | Activity tab | A |
 | CommunicationsPanel / ClientThreadDrawer / ComposeEmailModal | Activity tab (Communications section) + quick action | A |
 | AIChatPanel | AI rail (persistent) | A |
@@ -352,7 +352,7 @@ each step stays small and testable.
 +--------------------------------------------------------------------------+
 | DEAL BRIEF  "Cash deal, no financing contingency. Watch out: ..."  [v]   |
 +--------------------------------------------------------------------------+
-| Timeline | Compliance | Documents | Tasks | People | Activity   || AI    |
+| Timeline | Compliance | Documents | Tasks | Contacts | Activity   || AI    |
 |                                                                 || rail  |
 |  <active tab content>                                           ||       |
 |                                                                 ||       |
@@ -381,7 +381,7 @@ each step stays small and testable.
   Document, Compose Email, Print closing checklist, Sync deadlines (the
   existing `SyncDeadlinesButton` with its invite-parties checkbox).
   "Share" was removed in review (W5): no per-deal share flow exists for
-  internal roles; client visibility is Manage Client Access in the People
+  internal roles; client visibility is Manage Client Access in the Contacts
   tab, where it stays.
 - Tracking-dates strip (the renamed Key Dates): the 7 operational fields as
   compact chips; set ones show the date with the existing severity colors,
@@ -520,7 +520,7 @@ The DocumentsModal content as a page surface.
   pick a rule or a date, server resolves, mutually exclusive exactly as in
   the wizard.
 
-### 5.8 People tab
+### 5.8 Contacts tab
 
 - Party cards grouped by the existing representation-aware contact groups
   (Buyer/Seller principals, Agents, Lender, Title), with the existing
@@ -713,7 +713,7 @@ Older transactions degrade honestly per the completion bar.
 | `GET /tasks/transaction/{id}`, `PATCH /tasks/{id}`, `PUT /tasks/{id}/status`, `POST /tasks/similar` | Tasks tab |
 | `GET/PATCH /transactions/{id}/document-requirements`, `/bulk`, relink | Compliance tab |
 | `GET /documents/transaction/{id}` + upload/parse/version endpoints | Documents tab |
-| `GET /transactions/{id}/parties` + party mutations | People tab |
+| `GET /transactions/{id}/parties` + party mutations | Contacts tab |
 | `POST /ai-emails/compose` | request-document drafts |
 | `POST /dashboard/ai-chat` | AI rail |
 | `POST /ai/wizard-command` | workspace command bar |

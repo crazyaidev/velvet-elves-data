@@ -545,8 +545,8 @@ async function main() {
       text.slice(0, 200),
     )
     log(
-      /People|Jordan Buyer|Meridian Title|No people listed/i.test(text) ? 'FS-15-people' : 'FS-15-people',
-      /People|Jordan Buyer|Meridian Title|No people listed/i.test(text) ? 'PASS' : 'WARN',
+      /Contacts|Jordan Buyer|Meridian Title|No counterparties recorded/i.test(text) ? 'FS-15-contacts' : 'FS-15-contacts',
+      /Contacts|Jordan Buyer|Meridian Title|No counterparties recorded/i.test(text) ? 'PASS' : 'WARN',
       text.slice(0, 240),
     )
     log('FS-16-sharing-pane', 'PASS', 'Share is the persistent shell action, not a property rail')

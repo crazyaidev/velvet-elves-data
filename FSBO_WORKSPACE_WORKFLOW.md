@@ -115,7 +115,7 @@ There are no `/api/v1/fsbo/...` endpoints.
 | Method & path | Purpose |
 |---|---|
 | `GET /api/v1/dashboard/fsbo/overview` | Landing payload — properties, ranked next steps, upcoming deadlines, closing-timeline rollup, KPIs, recent milestones, AI guidance, support contact, boundary notice. |
-| `GET /api/v1/dashboard/fsbo/properties/{id}` | Ownership-checked deep view — milestone timeline, key dates, document board + list, share links, messages (with `seen`), **contacts ("People involved")**, AI guidance, support contact. |
+| `GET /api/v1/dashboard/fsbo/properties/{id}` | Ownership-checked deep view — milestone timeline, key dates, document board + list, share links, messages (with `seen`), **contacts ("Contacts involved")**, AI guidance, support contact. |
 | `GET /api/v1/dashboard/fsbo/documents` | Per-property document board across all owned properties + totals. |
 | `GET /api/v1/dashboard/fsbo/milestones` | Timeline + key dates per property + portal-visible coordinator messages (with `seen`). |
 | `POST /api/v1/dashboard/fsbo/messages/seen` | Mark a batch of coordinator messages as seen (idempotent, cross-owner-filtered). |
@@ -193,7 +193,7 @@ The deep view for one property. Reads its **own** ownership-checked endpoint
   - **Share links** for this property + a "Manage" link that opens the share
     modal pre-scoped to this property.
   - **Messages** from the coordinator (unread dot for `seen === false`).
-  - **People involved** — the buyer, buyer's agent, title company, attorney,
+  - **Contacts involved** — the buyer, buyer's agent, title company, attorney,
     etc., sourced from `transaction_parties` with decrypted PII. Each contact
     shows a role-coloured initials avatar, name/company, role label, and inline
     Call / Email buttons. Empty contacts (no name/email/phone/company) are

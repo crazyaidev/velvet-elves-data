@@ -94,7 +94,7 @@ When you defer a vendor's contact info, a task is created at upload — a plain 
 **Proposed answer (default):**
 
 - Task name: "Collect contact details for [Vendor Name]"
-- Description: "Get the email and phone for [Vendor] ([company]) — the [role] on this deal — and add them on the People tab."
+- Description: "Get the email and phone for [Vendor] ([company]) — the [role] on this deal — and add them on the Contacts tab."
 - It is a manual task (no auto-email, since there is no email yet), due a couple of days after contract acceptance, and it shows on the Verification summary before upload so you know it was created.
 
 **Please confirm:**

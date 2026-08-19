@@ -9,7 +9,7 @@
 **Test scope.** The per-deal workspace at `/transactions/<deal id>` for
 Agent / Transaction Coordinator / Team Lead / Admin: header, KPI strip,
 Tracking Dates, Deal Brief, the six tabs (Timeline · Compliance · Documents
-· Tasks · People · Activity), the AI rail, the command bar, and the cascade.
+· Tasks · Contacts · Activity), the AI rail, the command bar, and the cascade.
 Plus a regression pass on the portfolio page (unchanged behaviors).
 
 **Prerequisites.**
@@ -296,7 +296,7 @@ task row.
 
 ---
 
-## 8 · Documents, People, Activity
+## 8 · Documents, Contacts, Activity
 
 ### 8.1 Drag a document anywhere
 **How to test.** Drag a PDF from your desktop over any part of the
@@ -323,7 +323,7 @@ workspace (the Timeline tab, the header — anywhere).
   (rename/classify, versions, email, delete, parse-confirm, missing-docs —
   whose "Attach document" now opens the same shared modal).
 
-### 8.3 People tab
+### 8.3 Contacts tab
 **Expected result.**
 - ✅ Parties grouped Buyer / Seller / Agents / Lender / Title (unknown roles
   under "Other contacts" — nothing disappears); each group's Add button

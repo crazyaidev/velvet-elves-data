@@ -96,7 +96,7 @@ Re-seeding the same FSBO assignment crashed. Duplicate **same role** now returns
 
 `#main-content` was `flex flex-col overflow-hidden` with the `<Outlet />` as a sibling of `PendingInvitesBanner`. FSBO tool pages use `h-full overflow-hidden`. Percentage height collapsed to 0, so Playwright (and a seller at 1280×720) could not see:
 
-- Property Detail section rail (Overview / Timeline / Documents / People / Sharing / Messages)
+- Property Detail section rail (Overview / Timeline / Documents / Contacts / Sharing / Messages)
 - Documents header **Upload document**
 - “Property not found” copy (React Query also retried 404s, so the page sat on Loading…)
 
@@ -180,7 +180,7 @@ Tests: `test_fsbo_pending_omits_agent_inbox`, `test_fsbo_bell_lists_unread_coord
 
 ## 6. Checks covered (FS-01 … FS-50)
 
-Login and FSBO landing; sidebar labels; overview next-step + boundary + API payload; Ask Aime open + seller-safe greeting/chips + live **What's missing?** reply; portfolio chip; Share milestones modal; Missing-docs KPI → `/fsbo/documents`; Share Links Live KPI → Sharing modal; next-step **Upload missing documents** → Documents; both properties; Listing prep and Under contract filters; property workspace rail + Timeline / Documents / People / Sharing; unknown UUID 404; documents board + Missing tab + upload + flag; Messages (main pane) + boundary; Payments empty + FSBO shell; `/client/invoices` → `/fsbo/invoices`; create share link + public viewer + revoke; `/sharing` → `/fsbo`; Account modal; notification bell **must not** show AI drafts / outbound-on-your-behalf / Overdue tabs; staff URL bounce (`/dashboard`, `/transactions`, `/admin/users`, `/client/home`, `/ai-emails`, `/notifications`); computed type ≥ 12px; no nested buttons; no page errors / console errors / unexpected network failures.
+Login and FSBO landing; sidebar labels; overview next-step + boundary + API payload; Ask Aime open + seller-safe greeting/chips + live **What's missing?** reply; portfolio chip; Share milestones modal; Missing-docs KPI → `/fsbo/documents`; Share Links Live KPI → Sharing modal; next-step **Upload missing documents** → Documents; both properties; Listing prep and Under contract filters; property workspace rail + Timeline / Documents / Contacts / Sharing; unknown UUID 404; documents board + Missing tab + upload + flag; Messages (main pane) + boundary; Payments empty + FSBO shell; `/client/invoices` → `/fsbo/invoices`; create share link + public viewer + revoke; `/sharing` → `/fsbo`; Account modal; notification bell **must not** show AI drafts / outbound-on-your-behalf / Overdue tabs; staff URL bounce (`/dashboard`, `/transactions`, `/admin/users`, `/client/home`, `/ai-emails`, `/notifications`); computed type ≥ 12px; no nested buttons; no page errors / console errors / unexpected network failures.
 
 ---
 

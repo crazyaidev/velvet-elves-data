@@ -87,7 +87,7 @@ One larger item, Team Leads and Brokerage Owners connecting agents and assigning
 
 **Built.**
 
-- The name and description are unchanged: "Collect contact details for [Vendor]" and "Get the email and phone for [Vendor] ([company]), the [role] on this deal, and add them on the People tab."
+- The name and description are unchanged: "Collect contact details for [Vendor]" and "Get the email and phone for [Vendor] ([company]), the [role] on this deal, and add them on the Contacts tab."
 - It is now due immediately, on the upload day, not a couple of days after acceptance. It is addressed to nobody, so it can never auto-send by accident.
 
 **Waiting on you.** The AI actively working the task, emailing the vendor for a phone, asking the co-agent when there is nothing, and filling in the reply, is not switched on yet. It depends on the deal's automation setting (send on its own, or wait as a draft) and on QUESTION 5. The task exists the moment you defer; the chasing turns on once those are settled.

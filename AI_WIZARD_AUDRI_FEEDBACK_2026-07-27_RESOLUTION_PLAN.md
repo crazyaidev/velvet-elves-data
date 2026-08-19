@@ -244,7 +244,7 @@ All string/structure findings verified live this run; exact current strings quot
 2. **Execution.** Register the "Collect contact details for …" task name in the AI task executor (name-keyed like the welcome tasks):
    - Partial contact -> email the vendor directly asking for the phone number and any additional contacts they want on file.
    - Zero contact -> email the agent (account holder) and the co-op agent, asking the co-op agent for the vendor's details (their vendor, their rolodex).
-   - Both respect the deal's automation posture (Manual = draft in AI Email Review; Automated = send and complete). Replies land through the normal inbound flow; filling the People tab from a reply is phase 2 (the reply sits in AI Emails for one-click apply in phase 1).
+   - Both respect the deal's automation posture (Manual = draft in AI Email Review; Automated = send and complete). Replies land through the normal inbound flow; filling the Contacts tab from a reply is phase 2 (the reply sits in AI Emails for one-click apply in phase 1).
 3. Due-immediately stays as built.
 
 ### 6.4 Title-company welcome scripting (Q3/Q4)

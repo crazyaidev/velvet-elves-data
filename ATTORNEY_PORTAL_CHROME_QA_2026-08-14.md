@@ -105,9 +105,9 @@ The control is a **button** that opens the command palette, not a `searchbox`. A
 ### AT-08 · Attorney chrome still spoke “deals / Workflow / My Playbook”
 **Severity:** Medium · **Area:** Copy / settings / AI chat
 
-Contacts breadcrumb “Deals”; Documents / Closing Calendar “Workflow”; People empty copy pointed at the agent transaction page; Settings showed **My Playbook**; AI chat greeted about overdue tasks and active deals.
+Contacts breadcrumb “Deals”; Documents / Closing Calendar “Workflow”; Contacts empty copy pointed at the agent transaction page; Settings showed **My Playbook**; AI chat greeted about overdue tasks and active deals.
 
-**Fix:** Attorney breadcrumbs **Workspace › …**. People empty copy is attorney-safe. My Playbook hidden (same allow-list as Email Templates). Chat greeting/chips talk about sign-offs, packets, and matters. Payments config and vendor-proposal polls are disabled for Attorney (they 403’d). Flagged-document count is not fetched for Attorney.
+**Fix:** Attorney breadcrumbs **Workspace › …**. Contacts empty copy is attorney-safe. My Playbook hidden (same allow-list as Email Templates). Chat greeting/chips talk about sign-offs, packets, and matters. Payments config and vendor-proposal polls are disabled for Attorney (they 403’d). Flagged-document count is not fetched for Attorney.
 
 **Retest:** Contacts / Documents crumbs = Workspace. Settings has no My Playbook / Email Templates / Users & Invites. RBAC redirects off Task Queue, Needs You, Vendors, Payments, Clients, AI Emails, Vendor Proposals, Admin/Agent dashboards.
 

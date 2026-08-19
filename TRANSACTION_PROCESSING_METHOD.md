@@ -41,7 +41,7 @@ Every deal lives at one page you reach by clicking it in Active Transactions. Th
 | Compliance | The document checklist: what is uploaded, what is missing, what was waived and why |
 | Documents | The deal's files, with upload, and e-signature status |
 | Tasks | The task list, grouped Overdue / Due Today / Upcoming / Completed; one click changes a status |
-| People | Everyone on the deal (buyer, seller, agents, lender, title), with their contact details |
+| Contacts | Everyone on the deal (buyer, seller, agents, lender, title), with their contact details |
 | Email | The deal's correspondence: inbound mail, sent mail, and AI drafts waiting for your review |
 | Activity | The audit trail: every change, who made it, and when |
 

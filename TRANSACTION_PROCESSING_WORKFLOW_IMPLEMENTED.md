@@ -30,7 +30,7 @@ UPLOAD ─▶ AI PARSE (OCR → extract → double-check → intake intelligence
                                  │
                                  ▼
                           TRANSACTION WORKSPACE
-                          (Timeline · Compliance · Documents · Tasks · People · Activity · Email · Agent)
+                          (Timeline · Compliance · Documents · Tasks · Contacts · Activity · Email · Agent)
 ```
 
 ---
@@ -232,7 +232,7 @@ The workbench is a single panel of underline tabs:
 - **Compliance** (`ComplianceTab`) — the document requirement checklist: match/unmatch a document, waive/restore, add rows.
 - **Documents** (`DocumentsTab`) — upload, view, manage, and drag-drop-intake documents.
 - **Tasks** (`TasksTab`) — the task list with status changes.
-- **People** (`PeopleTab`) — parties and vendors.
+- **Contacts** (`ContactsTab`) — parties and vendors.
 - **Activity** (`ActivityTab`) — the audit/communication history.
 - **Email** (`EmailTab`) — AI email drafts/review (agent-enabled deals).
 - **Agent** (`AgentPane`) — on wide screens a persistent conversation pane beside the workbench; on narrow screens a tab. The AI agent proposes next actions grounded in the deal.

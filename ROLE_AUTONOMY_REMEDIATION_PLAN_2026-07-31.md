@@ -193,7 +193,7 @@ Two options; take the second.
   console in front of a member who should only add a client to their own deal.
 - **Adopted:** keep `/admin/users` at TeamLead+, and surface the existing
   `InviteUserModal` where an Agent already works — a "Invite someone" action in
-  the Clients hub and in the transaction People tab, scoped by
+  the Clients hub and in the transaction Contacts tab, scoped by
   `inviteableRolesFor(role, isOwner)`. This is the conventional pattern: admin
   console for administrators, contextual invite for practitioners.
 

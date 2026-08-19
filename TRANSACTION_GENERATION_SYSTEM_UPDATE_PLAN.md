@@ -684,7 +684,7 @@ Timeline planner rules (all honest-blank):
 - Any state + `attorney_approval_clause.present`: deadline from the
   clause's own days/basis/start. No clause, no deadline - including NC/SC/
   GA/DE (R17) and NY (R19).
-- NY title pathway (R19): no forced owner. The People/parties model
+- NY title pathway (R19): no forced owner. The Contacts/parties model
   already holds both `title_company` and `closing_attorney`; the planner
   assigns title tasks to whichever the deal actually has, and when both
   are absent on an attorney_review_mixed deal the wizard's existing
@@ -712,7 +712,7 @@ UI is built in this plan; if attorney-direct customers later need to
 CHECK OFF items, that is the separate intake workstream in Part IX Q3.
 
 **III.6.6 Guardrail (R23).** The title-provider selection surfaces (wizard
-party add, workspace People tab) get a neutral helper line on seller-side
+party add, workspace Contacts tab) get a neutral helper line on seller-side
 deals: "The buyer cannot be required to use a particular title insurance
 company (RESPA 12 U.S.C. 2608)." Copy only; no behavioral hard-block, no
 legal advice framing (consistent with 8.6 attorney guardrails).
@@ -1057,7 +1057,7 @@ six new migrations are written but not DB-applied).
   3-business-days-from-delivery clock (licensee-prepared only; undated with
   the honest reason when the delivery date is unknown), NY contract-clause
   deadline, title coverage satisfied by the attorney title family, RESPA
-  §2608 helper note on the People tab's Title group.
+  §2608 helper note on the Contacts tab's Title group.
 
 **Deliberate adjustments from the plan (with reasons):**
 1. State profiles live in CODE (`state_workflow_profiles.py`), not the

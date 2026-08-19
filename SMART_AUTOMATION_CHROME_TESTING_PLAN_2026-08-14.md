@@ -25,7 +25,7 @@ The local API talks to the **shared remote database**, not a private sandbox. Se
 | **Send** / **Send all ready** | Named recipients on screen | Only to mailboxes we control |
 | Platform `POST /internal/schedules/tick` | **Every tenant with an active user** | **Do not fire from local Chrome testing.** Use tenant Run now / Preview instead |
 
-**Rule:** before any send path, open the deal’s **People** tab and confirm buyer, seller, co-op, lender, and title emails are tester-owned (or empty, which should *surface*, not send). If a live third-party address is on the file, **do not** Run AI tasks and **do not** Send.
+**Rule:** before any send path, open the deal’s **Contacts** tab and confirm buyer, seller, co-op, lender, and title emails are tester-owned (or empty, which should *surface*, not send). If a live third-party address is on the file, **do not** Run AI tasks and **do not** Send.
 
 If Preview says `would_send > 0` to an address you do not control: **Got it** / cancel. Do not confirm Run.
 
@@ -107,14 +107,14 @@ If automating: Playwright `chromium.launch({ channel: "chrome", headless: false 
 | AI Email Review | Workflow → **AI Emails** (or similar) | `/ai-emails` |
 | Active Transactions | Deals → **Active Transactions** | `/transactions` or `/transactions/active` |
 | Deal workspace | Open a deal | `/transactions/<id>` |
-| Deal Tasks / Email / People / Activity | Workspace tabs | same URL, tab |
+| Deal Tasks / Email / Contacts / Activity | Workspace tabs | same URL, tab |
 | Notifications (digest) | Settings → **Notifications** | settings hub |
 | Task templates | Settings → task playbook | `/admin/task-templates` |
 | New deal | **+ New Transaction** | `/transactions/new` |
 
 ### 2.4 Test deals (create or reuse)
 
-Use **dedicated** deals whose party emails we control. Do not Run AI tasks on the existing book (Harness / Livefire / Koenig, etc.) until People is audited.
+Use **dedicated** deals whose party emails we control. Do not Run AI tasks on the existing book (Harness / Livefire / Koenig, etc.) until Contacts is audited.
 
 Suggested naming so artifacts stay findable:
 
@@ -182,7 +182,7 @@ Include: `findings.json`, `desktop.txt` / `mobile_390.txt` dumps, screenshots, a
 
 A case **Fails** if any of these are true:
 
-- Wrong email left a mailbox, or an email went to a party not on People.  
+- Wrong email left a mailbox, or an email went to a party not on Contacts.  
 - A Class B draft sent without Send.  
 - Class A sent on **Manual**.  
 - A second welcome/title-order for the same task.  
@@ -213,7 +213,7 @@ Smoke **W0-S-*** is re-run after every later fix.
 | W0-S-02 | Open `/needs-you`. Wait until the header pill is not “Loading”. | Pill shows `N waiting`; empty state only if N=0. Scheduler banner if unhealthy. |
 | W0-S-03 | Open `/admin/confidence`. | Posture cards + status chip + Preview / Draft due emails / Run AI tasks / digest. |
 | W0-S-04 | Open `/settings/connections`. | Gmail/Outlook/iCloud state visible; Test connection does not send mail. |
-| W0-S-05 | Open any Active deal. | Posture chip Manual/Assisted/Autopilot; Tasks / Email / People / Activity tabs. |
+| W0-S-05 | Open any Active deal. | Posture chip Manual/Assisted/Autopilot; Tasks / Email / Contacts / Activity tabs. |
 | W0-S-06 | 390px: `/needs-you`. | No horizontal overflow; Export CSV and primary actions named (`aria-label` ok). |
 
 ### 6.2 Posture and kill-switch (W0-P)
@@ -256,7 +256,7 @@ Only on `QA Auto Assisted Lane` with **tester-owned** party emails and a **conne
 | W0-B-04 | Autopilot deal: a sweep draft marked Ready. **Do not Send yet.** | Status Ready; mail not in the party inbox. |
 | W0-B-05 | **Send** one Ready draft to a tester inbox (confirm if shown). | One message; deal Email = Sent; Needs You count drops by 1. |
 | W0-B-06 | **Send all ready** with 0 ready. | Disabled or confirm “0”; no send. |
-| W0-B-07 | **Send all ready** with ≥1 ready to tester inboxes. Cancel confirm. | No send. Then confirm: recipients listed match People. |
+| W0-B-07 | **Send all ready** with ≥1 ready to tester inboxes. Cancel confirm. | No send. Then confirm: recipients listed match Contacts. |
 | W0-B-08 | Compose/send a draft whose body says a file is attached. | The send includes the file **or** the prose is rewritten; never “Attached is X” with nothing. |
 
 ### 6.5 Needs You queue (W0-N)
@@ -354,7 +354,7 @@ Mark **N/A until Sx** until the build plan phase is in the local tree. When it s
 
 | ID | Steps | Expected |
 | --- | --- | --- |
-| S2-01 | `no_recipient` welcome: add buyer email on People. **Do not** Give-back. | Next per-deal run or documented Try-now sends or surfaces a **new** honest reason. |
+| S2-01 | `no_recipient` welcome: add buyer email on Contacts. **Do not** Give-back. | Next per-deal run or documented Try-now sends or surfaces a **new** honest reason. |
 | S2-02 | `missing_document` Order Title: upload purchase agreement. | Retries without Give-back. |
 | S2-03 | `stale_overdue`: change due date to today/future. | Copy promised re-arm; task is retryable (closes A-03). |
 | S2-04 | `execution_error`: reason names a cause class; Give-back works; Try-now if shown. | No “handle it” with no button. |
@@ -507,7 +507,7 @@ These are not in the August 6 email list; they appeared while writing the build 
 | ID | Question | Why |
 | --- | --- | --- |
 | **J13** | Confirm Class A stays the **closed** named set (welcomes, title order/confirm, pending reminder) and we will **not** grow it without a written yes per template. | Testers need a freeze list. A surprise seventh unattended letter is a Blocker. |
-| **J14** | For local/demo tenants that still have third-party addresses on old deals: is it acceptable that Preview/Run AI tasks is **disabled by policy** for testers, or should we scrub those People emails? | Wave 0 cannot safely exercise Class A on the current 6-deal book. |
+| **J14** | For local/demo tenants that still have third-party addresses on old deals: is it acceptable that Preview/Run AI tasks is **disabled by policy** for testers, or should we scrub those Contacts emails? | Wave 0 cannot safely exercise Class A on the current 6-deal book. |
 | **J15** | Staging workspace default was **Autopilot** on 2026-08-14. Should every environment start **Manual** (code default) and Autopilot be opt-in only? | Changes W0-P-01 expected default; Autopilot-as-default increases Ready drafts and Class A on create. |
 | **J16** | After a Class A send, should the deal **progress %** count that AI task, or only the Automation lens / handled-today? | W0-Y / S1-04. Today progress often ignores Automated rows on purpose. |
 | **J17** | May testers use **Run now → AI tasks** on stage/prod at all, or only Preview + create-deal welcomes? | Stage/prod ticks already hourly; an extra Run now can still send. |
@@ -537,7 +537,7 @@ Wizard intake is in scope only as **create a deal to feed automation**. Extracti
 3. W0-P (posture; no send).  
 4. W0-N (queue; no send except if you already have Ready to tester inboxes).  
 5. W0-B-01 (drafts only).  
-6. People audit → only then W0-A on **new** QA deals.  
+6. Contacts audit → only then W0-A on **new** QA deals.  
 7. W0-I with Test inbound or a second mailbox.  
 8. W0-X, W0-Y, W0-M.  
 9. Fill §10. Fix Blockers/High. Re-run W0-S + failed IDs.  
