@@ -3,8 +3,9 @@
 **Prepared for:** Google Trust and Safety / Third-Party Data Safety reviewers
 **Application:** Velvet Elves
 **Legal entity:** Orange Door, LLP, doing business as Velvet Elves (Indiana, USA)
-**Date:** August 18, 2026
+**Date:** August 19, 2026
 **Environment:** Production only — `https://app.velvetelves.com`
+**Demonstration video:** https://youtu.be/RdPv_3vw6NM
 **Support:** `support@velvetelves.com`
 
 ---
@@ -28,9 +29,9 @@ Use the credentials in the table below. They open the same production workspace 
 | Item | Value |
 | --- | --- |
 | Application URL | https://app.velvetelves.com |
-| Sign-in email | Insert before sending |
-| Password | Insert before sending |
-| Demonstration video (public YouTube) | Insert before sending |
+| Sign-in email | algoforth33@gmail.com |
+| Password | G0ing4th$# |
+| Demonstration video (public YouTube) | https://youtu.be/RdPv_3vw6NM |
 
 **Authentication blockers removed**
 
