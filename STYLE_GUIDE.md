@@ -474,8 +474,11 @@ A modal is a tool surface, not a landing page. Build it flat:
 - **Footer:** pinned, hairline `border-t border-ve-border` (`px-6 py-4`),
   right-aligned: ghost Cancel + filled brand primary.
 - **Controls:** `<SegmentedControl>` for binary state (Active / Inactive),
-  `<Textarea>` for prose, `<Select>` (never native), consistent `h-10`
-  inputs. Field label is `text-[12px] font-medium text-ve-text-secondary`.
+  `<Textarea>` from `@/components/ui/textarea` for prose, `<Select>` /
+  `VeSelect` (never a native `<select>`), `<Input>` and `<Button>` from
+  `@/components/ui/*`, consistent `h-10` inputs. Field label is
+  `text-[12px] font-medium text-ve-text-secondary`. **Never drop an unstyled
+  browser widget into a form** — see § 9.3.
 - **Width:** `max-w-md` (simple create) to `max-w-xl` (multi-section
   editor); radius `rounded-2xl`; `max-h-[88vh]`.
 
@@ -594,18 +597,36 @@ or replicate its structure:
   attempted submit.
 - Inline errors: `text-[11.5px] text-ve-red-text mt-1`.
 
-### 9.3 Selects, datepickers, money inputs
+### 9.3 Selects, datepickers, money inputs — no browser-default controls
 
-- Selects: use `<Select>` from `@/components/ui/select` (Radix-based).
+**Hard rule: do not ship the browser's default form widgets.** Native
+`<select>`, native `<input type="checkbox|radio|range|color">`, an unstyled
+raw `<textarea>`, and an unstyled raw `<button>` render the OS/Chrome
+control and break the brand. Future UI must use the design-system primitives
+below — not "just this once" native markup with a Tailwind border.
+
+| Need | Use this | Never this |
+|---|---|---|
+| Pick one from a list | `<Select>` / `VeSelect` (`@/components/ui/select`, `@/components/shared/VeSelect`) | `<select>` / `<option>` |
+| Switch files or filters in-page | branded buttons, chips, or a left list | a native dropdown of those files |
+| Short text / numbers | `<Input>` (`@/components/ui/input`) | unstyled `<input>` |
+| Prose / a message | `<Textarea>` (`@/components/ui/textarea`) | a raw `<textarea>` used as the control |
+| Primary / secondary actions | `<Button>` (`@/components/ui/button`) | unstyled `<button>` as a form control (icon/hit-area rows that are *not* form fields are still `<button type="button">` with brand classes) |
+| Binary on/off | `<SegmentedControl>` | native checkbox-as-toggle, `Switch`, or a lone custom toggle |
+| File upload | hidden `<input type="file">` **behind** a branded dropzone | a visible native file picker as the UI |
+| Date | native `type="date"` (exception below) | a third-party calendar unless the product already uses one |
+
+- Selects: use `<Select>` from `@/components/ui/select` (Radix-based), or
+  the `VeSelect` wrapper when the trigger should match `brandedInputClass`.
   Canonical trigger styling is the same `brandedInputClass` as `<Input>`.
   **Never use a native `<select>`.** Native selects look archaic, don't
   match brand input styling, and break visual consistency with every
   other dropdown in the project. For filter-chip style triggers (e.g.
   the Audit Log filters), override the trigger with `h-9 rounded-full`
   and a `min-w-[160px]` so it reads as a chip, not a boxy form input.
-- Date inputs: native `type="date"`. Use the `min`/`max` HTML
-  attributes for constraints (e.g., contract acceptance has
-  `max={todayIso}`).
+- Date inputs: native `type="date"` is the **one** allowed browser
+  widget. Use the `min`/`max` HTML attributes for constraints (e.g.,
+  contract acceptance has `max={todayIso}`).
 - Money inputs: use the `<MoneyInput>` helper in
   `NewTransactionWizard.tsx` — `$` prefix + comma formatting + numeric
   internal value.
@@ -734,10 +755,13 @@ These have been explicitly rejected by the client. Don't reintroduce:
     (§ 16.1). The breadcrumb / page-title bar is for list / settings /
     admin sub-pages — not for `/dashboard/*` routes. No greeting, no
     "Customize" button, no primary CTA that duplicates the sidebar.
-15. **Native `<select>` elements.** Always use `<Select>` from
-    `@/components/ui/select` (Radix-based). A native `<select>` looks
-    archaic and breaks visual consistency with every other dropdown in
-    the project. (See § 9.3.)
+15. **Browser-default form controls.** Never a native `<select>`, never an
+    unstyled raw `<textarea>` / `<input>` / checkbox / radio as the visible
+    control. Always `<Select>` / `VeSelect`, `<Input>`, `<Textarea>`,
+    `<Button>`, `<SegmentedControl>` from `@/components/ui/*` (or the
+    documented `type="date"` exception). A native widget looks like Chrome,
+    not Velvet Elves, and it will not match the rest of the product. (See
+    § 9.3.)
 16. **Multiple card shapes on one dashboard.** Every block — section
     card, rail card, chart sub-card, KPI card — must share one card
     vocabulary (§ 16.2). Variation in importance is expressed through
@@ -1075,7 +1099,9 @@ decisions on one surface so the cognitive model stays intact.
 
 ---
 
-*Last revised: 2026-07-09 (rev 4 — layout-balance direction from the client's
+*Last revised: 2026-08-20 (rev 5 — § 9.3 / anti-pattern 15: no browser-default
+form controls; selectors and other native widgets are forbidden except
+`type="date"`). Rev 4 — 2026-07-09 layout-balance direction from the client's
 AI-wizard Step-1 feedback: § 1 defines "professional = balanced & functional,
 not decorated" (and not flat/characterless); § 4.5 "Layout balance & the
 action bar" makes the Back-left / primary-right rule, the no-lone-control rule,

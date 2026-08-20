@@ -1,363 +1,287 @@
 # FSBO Workspace — Role & Complete Workflow
 
-*As-built reference. Last reconciled against the repo: 2026-05-22.*
+*As-built reference. Last reconciled against the repo: 2026-08-20 (rev 3, seller bell + Ask Aime).*
 
-This document explains what the FSBO (For-Sale-By-Owner) workspace is, the role
-it plays in Velvet Elves, and the complete end-to-end workflow a customer moves
-through. It describes the system **as built**, not as originally mocked — where
-the two differ, the as-built is authoritative and the difference is called out.
+This document describes the For-Sale-By-Owner workspace **as shipped**. Chrome
+is `AppLayout` with `shellVariant === 'fsbo'` (`dashboardShellConfig.ts` →
+`ForSaleByOwner`). There is no separate FSBO layout and no Client concierge
+shell. Jake’s HTML is the Overview *look* (next-step hero, property switcher,
+summary cards), not a second product.
 
 ---
 
 ## 1. What the FSBO workspace is
 
-Velvet Elves is an AI-assisted real-estate transaction-coordination platform.
-Most roles (Agent, Transaction Coordinator, Team Lead, Admin, Attorney) are
-**internal** operators who run deals on behalf of clients. The FSBO workspace is
-the one surface built for an **external, unrepresented seller** — a homeowner
-selling their own property without a listing agent.
+Velvet Elves coordinates workflow for an **unrepresented seller**. The seller
+never sees the task queue, AI drafts, internal notes, other sellers’ files, or
+back-office approvals.
 
-The FSBO customer is not a Velvet Elves operator. They do not see the internal
-sidebar, the task queue, AI briefings, internal notes, other parties' data, or
-any workflow machinery. They see a calm, plain-English portal that answers three
-questions:
+The portal answers three questions:
 
 1. **What do I need to do next, and why does it matter?**
-2. **Which documents are missing, in review, or done?**
-3. **Where does my sale stand, and what's coming up?**
-
-The guiding principle is *calm external portal*: show the next action, surface
-what's missing or under review, explain milestones in plain English, and never
-leak internal workflow data.
+2. **Which documents do *I* still owe vs what Velvet is collecting?**
+3. **Where does this file stand, and what’s coming up?**
 
 ### Boundary notice (always present)
-
-Every FSBO surface carries a boundary notice:
 
 > "Velvet Elves coordinates your workflow but does not act as your agent or
 > provide legal advice."
 
-This is a legal/relationship guardrail. It renders in the shell footer on every
-tool sub-page and in the coordinator/support card on the Overview. The string is
-defined once on the backend (`FSBO_BOUNDARY_NOTICE`) and once on the frontend
-(`@/utils/copy` → `FSBO_BOUNDARY_NOTICE`); the backend value flows through the
-API and the frontend constant is only a loading-state fallback.
+Defined as `FSBO_BOUNDARY_NOTICE` on the backend and `@/utils/copy` on the
+frontend. It renders in the tool-page footer, Overview support card, and the
+public milestone viewer.
 
 ---
 
 ## 2. Who the customer is, and how their data is isolated
 
-- **Role:** `ForSaleByOwner` (enum `UserRole.FOR_SALE_BY_OWNER`).
-- **Ownership model:** an FSBO customer owns the transactions they created
-  (`transactions.created_by == user.id`) within their tenant. There is no
-  agent/assignment indirection for the seller's own access.
-- **Authorization:** every FSBO read is scoped to the customer's own
-  properties. The single guard is
-  `fsbo_workspace.assert_fsbo_transaction_access(user, transaction_id, supabase)`,
-  which raises **404 (not 403)** on any cross-owner or cross-tenant miss — the
-  portal never even confirms that another seller's property exists.
-- **PII at rest:** address, city, state, full_name, company, phone, email are
-  Fernet-encrypted in the database. Anything shown to the customer (or fed to an
-  LLM) must be decrypted via `_safe_decrypt` first. `_safe_decrypt` returns `""`
-  on failure — it never leaks ciphertext.
-- **Message visibility:** coordinator messages are filtered through
-  `is_portal_visible_message` — only real outbound coordinator→customer messages
-  on external channels (email/sms) are shown. Internal notes, AI-draft
-  internals, document-action events, system events, and inbound replies are
-  never surfaced.
+- **Role:** `ForSaleByOwner` (`UserRole.FOR_SALE_BY_OWNER`).
+- **Access union:** a seller sees a deal if **either**
+  - they created it (`transactions.created_by == user.id`), **or**
+  - they hold an active `transaction_assignments` row with
+    `role_in_transaction = for_sale_by_owner` on a tenant-owned transaction
+    (invite-to-track; the agent remains `created_by`).
+- **Guard:** `fsbo_workspace.assert_fsbo_transaction_access` raises **404**
+  (not 403) on a miss. `list_fsbo_owned_transaction_ids` is the list-side
+  union.
+- **PII:** address / city / state / party contacts are Fernet-encrypted.
+  Anything shown is decrypted via `_safe_decrypt`.
+- **Mailbox:** `is_fsbo_mailbox_message` — outbound coordinator email/sms **or**
+  `is_client_visible` notes. AI drafts, document-action, and system rows stay
+  hidden. The seller’s own inbound notes are in the thread but **do not**
+  create a reply NBA (`is_coordinator_mailbox_row` excludes `sender_user_id ==
+  seller`).
 
 ---
 
-## 3. The shell (navigation chrome)
+## 3. The shell
 
-The FSBO shell variant (`shellVariant: 'fsbo'`, see
-`layouts/dashboardShellConfig.ts`) is deliberately leaner than the internal
-shell.
+`AppLayout` + `ForSaleByOwner` capability. Keep these testids:
+`fsbo-shell`, `fsbo-next-action`, `fsbo-upload-cta`, `fsbo-nav-*`,
+`fsbo-share`, `fsbo-property-switcher`, `fsbo-message-composer`,
+`fsbo-next-action-banner`.
 
-- **Sidebar:** a standalone "Dashboard" link at the top, then a single
-  **Workspace** group — *My Properties*, *Documents*, *Milestones & Messages* —
-  then Settings. There is **no Help group**. (Earlier drafts had Ask-AI,
-  Notifications, and Sharing as sidebar entries; those were removed.)
-- **Sidebar footer CTA:** "Share milestones" — opens the share-management modal
-  (see §5.6). FSBO is the one role whose primary CTA lives in the sidebar
-  footer, not the topbar.
-- **Topbar:**
-  - Brand lockup.
-  - **Portfolio status chip** (center) — an aggregate health pill computed
-    client-side from the overview: red "Closing in N days" when the nearest
-    closing is ≤ 7 days, amber "Action needed · N docs missing" when any docs are
-    missing, else green "On track". Clicking it navigates to `/fsbo`.
-  - Notification bell (notifications scope = `fsbo`).
-  - User chip.
-- **Persistent action banner** — a second row directly below the topbar that
-  surfaces the single top critical step (`critical_next_steps[0]`) on **every**
-  FSBO page, not just the Overview. It has a primary "Open"/"Upload" button
-  (chosen by the step's `action_kind`) and a `×` dismiss. Dismissal is
-  session-scoped (`sessionStorage`, keyed on `transaction_id + title`), so a new,
-  different top step will re-surface. Implemented in `AppLayout` and gated on the
-  FSBO shell variant.
-- **No portal tabs.** The sidebar is the navigation; a tab bar would duplicate
-  it. (Two competing tab implementations were consolidated away.)
+- **Sidebar:** standalone **Home** (`/fsbo`), then Workspace — **My
+  Properties**, **Documents**, **Messages**. **Payments** is appended only when
+  `open_invoice_count > 0`.
+- **Footer CTA:** Share milestones (`fsbo-share`).
+- **Topbar:** brand, portfolio chip, notification bell, user chip. No staff
+  “New Transaction” CTA.
+- **Persistent banner:** `critical_next_steps[0]` — the most urgent seller
+  verb in the **portfolio**. Independent of which property tile is focused on
+  Home (L1).
+- **Ask Aime** is the floating button, not a nav item.
 
-Tool sub-pages use `FsboPortalShell` — a canonical header with a
-`Workspace › [Page]` breadcrumb (Property Detail extends it to
-`Workspace › My Properties › {Address}`), standard edge gutters, and the
-boundary-notice footer. The Overview is a *dashboard* and omits the page-title
-row.
+Routes that stay (no redirects):
+
+| Path | Page |
+|---|---|
+| `/fsbo` | Overview |
+| `/fsbo/properties` | Property list |
+| `/fsbo/properties/:id` | Property workspace (six-rail) |
+| `/fsbo/documents` | Document board |
+| `/fsbo/milestones` | Messages inbox (route name is historical) |
+| `/fsbo/invoices` | Payments (nav hidden when empty) |
+| `/milestones/:shareToken` | Public viewer |
 
 ---
 
 ## 4. Backend API surface
 
-All FSBO data lives under the dashboard namespace `/api/v1/dashboard/fsbo/...`.
-There are no `/api/v1/fsbo/...` endpoints.
+Dashboard namespace `/api/v1/dashboard/fsbo/...` plus shared document/invoice
+routes that **switch to FSBO asserts** when the caller’s role is
+`ForSaleByOwner`.
 
 | Method & path | Purpose |
 |---|---|
-| `GET /api/v1/dashboard/fsbo/overview` | Landing payload — properties, ranked next steps, upcoming deadlines, closing-timeline rollup, KPIs, recent milestones, AI guidance, support contact, boundary notice. |
-| `GET /api/v1/dashboard/fsbo/properties/{id}` | Ownership-checked deep view — milestone timeline, key dates, document board + list, share links, messages (with `seen`), **contacts ("Contacts involved")**, AI guidance, support contact. |
-| `GET /api/v1/dashboard/fsbo/documents` | Per-property document board across all owned properties + totals. |
-| `GET /api/v1/dashboard/fsbo/milestones` | Timeline + key dates per property + portal-visible coordinator messages (with `seen`). |
-| `POST /api/v1/dashboard/fsbo/messages/seen` | Mark a batch of coordinator messages as seen (idempotent, cross-owner-filtered). |
-| `GET /api/v1/dashboard/fsbo/share-link?transaction_id=` | List the customer's share links. |
-| `POST /api/v1/dashboard/fsbo/share-link` | Create a share link (returns the raw token exactly once). |
-| `DELETE /api/v1/dashboard/fsbo/share-link/{id}` | Revoke a share link. |
-| `GET /api/v1/milestones/shared/{token}` | **Public, unauthenticated** read-only milestone viewer. |
-| `POST /api/v1/milestones/shared/{token}/viewed` | Record a public view (drives the view count + viewer-open signal). |
+| `GET /dashboard/fsbo/overview` | Properties with per-tile `next_action`, ranked `critical_next_steps`, seller-owed missing totals, `open_invoice_count`, listing-prep checklist, support, boundary |
+| `GET /dashboard/fsbo/properties/{id}` | Seller timeline, projected docs, mailbox, contacts, `listing_go_live_date` |
+| `GET /dashboard/fsbo/documents` | Boards with `seller_owed_missing` / `velvet_collecting_missing` |
+| `GET /dashboard/fsbo/milestones` | Seller timelines + mailbox (`body`, `direction`, `seen`) |
+| `POST /dashboard/fsbo/messages` | Seller question (`subject`: “Question from the seller”). 404 if not owned. Marks coordinator rows on **that property** seen |
+| `POST /dashboard/fsbo/messages/seen` | `{ log_ids: [...] }` — only the ids the seller opened |
+| Share-link CRUD | Create / list / revoke; public resolve uses seller timeline, not `tasks.name` |
+| `GET /api/v1/fsbo/settings` | Includes `milestone_sharing_defaults.default_expiry_days` |
+| Documents download / ack / sign | `_can_access_doc` (own upload ∪ `is_client_visible`) then `assert_fsbo` |
+| `POST /documents/{id}/flag-deletion` | FSBO may flag **own uploads** on an owned tx only |
+| `GET /client/invoices` | `list_fsbo_owned_transaction_ids` (created_by ∪ invite) |
 
-Document upload reuses the shared documents endpoint via
-`useUploadDocument({ transactionId, docType, docLabel })`; there is no
-FSBO-specific upload route.
+Upload reuses `POST /documents` via `FsboUploadModal` (`listing_photos` is a
+real `DocumentType`).
 
-All projections are computed in `app/services/fsbo_workspace.py`. No LLM call is
-made at render time — `ai_guidance.next_decision` and milestone explanations are
-**deterministic** text derived from real model state.
-
----
-
-## 5. Page-by-page workflow
-
-### 5.1 Overview — `/fsbo`
-
-The dashboard landing surface. Reads `useFsboOverview()`. Composition top-to-bottom:
-
-1. **KPI strip (4 tiles):** My Properties, Missing Documents, Share Links Live,
-   Days to Closing. Each tile is clickable and routes to the relevant surface.
-2. **Closing-timeline rollup strip** (under the KPIs): for the nearest-closing
-   property, shows the address plus `Stage · {current_stage_label}` and
-   `File · {file_status_label}` chips. Derived server-side in
-   `closing_timeline_summary`.
-3. **Hero "Next step" card** (brand tone): the single top item from
-   `critical_next_steps[0]` — title, plain-English body, "why it matters",
-   deadline, and a primary action that is either "Upload missing documents" or
-   "Open this property" (chosen by the data), plus a secondary "Share
-   milestones".
-4. **"Upcoming deadlines" card:** up to 5 rows from `upcoming_deadlines[]` (next
-   ~21 days, sourced from key dates + task due dates). Each row is click-to-
-   expand and reveals a plain-English **consequence** of missing that date.
-   Hidden when empty.
-5. **"Stay on track" card:** the secondary ranked steps
-   (`critical_next_steps[1..5]`) as rows, each with its own inline action
-   (Upload / Open property) driven by the step's `action_kind`. Hidden when only
-   one step exists.
-6. **Property portfolio strip:** `FsboPropertyTile` in *select* mode — clicking
-   a tile focuses it (re-anchors the hero/next-step), it does **not** navigate.
-7. **Rail:** coordinator/support card (with boundary notice), plain-English
-   guide card (`ai_guidance.next_decision` + glossary chips, link into Ask AI),
-   and the demoted Concierge upsell strip (its CTA opens Ask AI with a
-   concierge-themed prompt — there is no `/settings#concierge` route).
-
-Empty state: a welcome card prompting the customer to wait for their coordinator
-to add the first property.
-
-### 5.2 Property portfolio — `/fsbo/properties`
-
-A tool page listing every owned property as `FsboPropertyTile` in *open* mode
-(clicking navigates to detail). A status filter (All / Listing prep / Under
-contract) narrows the list. Reads `useFsboOverview()` and filters client-side.
-
-### 5.3 Property Detail — `/fsbo/properties/:id`
-
-The deep view for one property. Reads its **own** ownership-checked endpoint
-(`useFsboProperty(id)`), so cross-owner access returns 404. Layout:
-
-- **Summary tiles:** Days to closing, Documents needed, Share links.
-- **Milestone timeline:** done / active / upcoming markers with plain-English
-  explanations, derived from tasks (falling back to key dates so an active
-  property is never blank).
-- **Key dates** list.
-- **Documents** section: the 5-column board summary + a flat list for this
-  property; flag-for-deletion is preserved.
-- **Rail:**
-  - **AI guidance** card (cached deterministic text).
-  - **Share links** for this property + a "Manage" link that opens the share
-    modal pre-scoped to this property.
-  - **Messages** from the coordinator (unread dot for `seen === false`).
-  - **Contacts involved** — the buyer, buyer's agent, title company, attorney,
-    etc., sourced from `transaction_parties` with decrypted PII. Each contact
-    shows a role-coloured initials avatar, name/company, role label, and inline
-    Call / Email buttons. Empty contacts (no name/email/phone/company) are
-    dropped server-side.
-  - **Support** card + boundary notice (the notice renders once, in the shell
-    footer).
-
-On mount, the page fires `POST /messages/seen` for any unseen visible messages.
-
-### 5.4 Documents — `/fsbo/documents`
-
-The document status board across all properties. Reads `useFsboDocuments()`.
-
-- **Totals row:** five columns — Missing, In progress, Uploaded, Verified,
-  Complete.
-- **Per-property boards:** each property's board with the same five columns and
-  a "Still needed: …" strip listing missing required doc types.
-- **Flat list:** `PortalDocumentList`, which preserves the flag-for-deletion UX.
-- **Upload:** the header "Upload document" button opens `FsboUploadModal` — a
-  modal requiring **property + doc_type + file** (label optional). It supports
-  click-to-browse and drag-and-drop. The required doc_type discipline is what
-  keeps the board's Missing/In-Progress mapping accurate; a silent default to
-  the first property is explicitly prevented.
-
-### 5.5 Milestones & Messages — `/fsbo/milestones`
-
-Reads `useFsboMilestones()`. Per-property milestone timelines (same tile pattern
-as Property Detail) with a key-dates chip strip, plus a rail panel of
-coordinator messages (unread dot for `seen === false`). Marks messages seen on
-mount.
-
-### 5.6 Sharing — modal, not a page
-
-There is no `/fsbo/share` route. Share-link management is the global
-`FsboShareManagementModal`, mounted once inside `FsboShareProvider` and opened
-via `useFsboShare().open()` from:
-
-- the sidebar-footer "Share milestones" CTA,
-- the Overview "Share links live" KPI tile,
-- the Property Detail "Manage" rail link (which seeds `defaultPropertyId`).
-
-The modal lists active links, supports revoke, and opens a nested
-`ShareMilestoneModal` for creation (recipient + expiry + one-time raw-token
-reveal). Frontend route attempts to `/sharing` by an FSBO user are redirected
-back to `/fsbo`.
-
-### 5.7 Public milestone viewer — `/milestones/:shareToken`
-
-The destination of a share link — a public, **unauthenticated**, read-only page
-showing the milestone timeline and key dates only. Shared viewers cannot edit
-tasks, delete documents, see contacts, or view any internal workflow. Opening it
-records a view (`POST /milestones/shared/{token}/viewed`), incrementing the
-owner's view count.
-
-### 5.8 Ask AI / Notifications
-
-- **Ask Velvet Elves AI** is the floating `FloatingAskAi` button on every FSBO
-  page (no `/fsbo/ask-ai` route). It opens the shared AI chat panel scoped to the
-  customer. The AI may explain steps, documents, and timelines in plain English;
-  it must not give legal advice, act as the customer's agent, or make workflow
-  decisions.
-- **Notifications** live in the topbar bell (no sidebar entry, no page).
+Staff PATCH may set `transactions.listing_go_live_date`. Null is informational
+and **does not** block the seller NBA.
 
 ---
 
-## 6. The transaction lifecycle (what the customer experiences)
+## 5. Next-action engine (L1–L3, L5, L7, L10)
 
-An FSBO property carries an `fsbo_state`:
+Per-property `derive_fsbo_next_action` kinds:
 
-- **`listing_prep`** — the seller is still assembling the listing. Required docs
-  for this state: seller's disclosure, lead-paint disclosure. The portal shows
-  prep-oriented milestones and doesn't nag about closing-only documents.
-- **`under_contract`** — an offer is accepted and the deal is moving to closing.
-  Required docs: purchase agreement, closing disclosure, settlement statement,
-  deed. The timeline shows transaction milestones (Offer accepted → Earnest
-  money → Inspection → Repair agreement → Cleared to close → Closing day).
+`upload_document | acknowledge | review | reply | pay | none`
 
-The "Missing documents" count is **absence-of-requirement**, computed per state —
-a listing-prep seller is never told their deed is missing months early.
+Rank (first match):
 
-### Document board states (per document row)
+1. First missing **seller-owed** type
+2. Acknowledge (`client_share_kind = acknowledge` and not yet acknowledged)
+3. Sign **only if** a real envelope exists (`esign_envelope_id` non-empty and
+   not `stub-client-*`). Stub envelopes render **Open**, not a Sign NBA
+4. Review (`needs_follow_up` or shared-as-review)
+5. Unseen **coordinator** mailbox rows
+6. Open invoice
+7. `none` — “You’re on track”
 
-`classify_document_board_state` maps each document to a column:
+Never auto-ranked: Share, staff `tasks.name`, inspection-as-a-fake-form,
+go-live date.
 
-- **Missing** — a *required* doc_type with no current document (computed at the
-  property level, not a row state).
-- **In progress** — still processing, or a reviewer asked for follow-up.
-- **Uploaded** — processed, awaiting first review.
-- **Verified** — content approved, but a signature is still in flight.
-- **Complete** — content approved and no signature obligation remains.
+**Banner** = `rank_portfolio_next_steps` of those actions →
+`critical_next_steps[0]`.
 
-The Verified-vs-Complete split is the explicit "signature still out" rule: a doc
-can be content-approved yet not Complete until its e-signature envelope is no
-longer pending.
+**Hero** on `/fsbo` = the **selected tile’s** `next_action`.
 
-### Next-step derivation (deterministic, ranked)
+**Stay on track** = other tiles whose `kind != none`. Do not slice
+`critical_next_steps[1:]`.
 
-`derive_next_steps` produces real, ranked actions — never hardcoded "plausible"
-guidance. Ranking priority: (1) missing required documents, (2) an active/overdue
-task, (3) closing within 7 days with nothing else flagged. Each step carries an
-`action_kind` (`upload_documents` | `open_property`) so the UI renders the right
-inline action without parsing strings.
+### Seller-owed vs file-required (L2, L14)
 
-### Support contact resolution (per-tenant)
+| Set | listing_prep | under_contract |
+|---|---|---|
+| **Seller-owed** (Upload NBA + “You still need”) | disclosures + `listing_photos` | disclosures **until present**; photos drop off |
+| **File-required** (board Missing / “Velvet is collecting”) | disclosures + photos | PA, CD, settlement, deed |
 
-`resolve_support_contact` resolves the coordinator the seller sees, in order:
-(1) the active TC/Admin assigned to the transaction via `transaction_assignments`,
-(2) the tenant's first Admin/TeamLead/TC, (3) the default constant. Earlier this
-was a single hardcoded contact for every tenant; it is now per-tenant.
+Files often skip listing-prep (Velvet Contract is created `under_contract`).
+Disclosures stay owed until they are on file.
 
-### Unread messages
-
-`communication_log_views (log_id, user_id, seen_at)` tracks which logs a user has
-seen. Property Detail and Milestones project a `seen` flag per message and render
-an orange dot for unseen ones; on mount they POST the visible log_ids to
-`/messages/seen` (idempotent, cross-owner-filtered) so the dot clears on the next
-refetch.
+Photos present but unreviewed: not an upload NBA; checklist shows “In review”.
 
 ---
 
-## 7. What is intentionally *not* in the FSBO workspace
+## 6. Page-by-page workflow
 
-- No internal sidebar, task queue, AI briefing bar, or communications panel.
-- No internal notes, audit chatter, or other parties' private data.
-- No portal tabs (sidebar is the nav).
-- No `/fsbo/share` or `/fsbo/ask-ai` pages (modal + floating widget instead).
-- No `/settings#concierge` route (the Concierge CTA opens Ask AI).
+### 6.1 Overview — `/fsbo`
 
-## 8. Source-of-truth note
+- Summary cards (property count, seller-owed missing, live share links, days
+  to close).
+- Property switcher (`fsbo-property-switcher`).
+- Hero next step for the focused file (`fsbo-next-action`).
+- Stay-on-track for other files.
+- Listing-prep checklist when that file is in `listing_prep` (disclosures,
+  photos, informational go-live).
+- Upcoming deadlines from **key dates only** (no task names).
+- Support + boundary.
 
-Jake's mockup (`VE-FSBODashboard.html`) is the visual-intent reference for the
-transaction-management surface, but it is **not** exhaustive. Two notable
-capabilities are milestone-scope deliverables (`milestones.txt`) that are absent
-from his mockup and intentionally kept:
+### 6.2 My Properties — `/fsbo/properties`
 
-- **Milestone sharing** (read-only links with expiry + viewer-open
-  notifications, the "Share milestones" CTA, the "share links live" KPI).
-- The **portfolio status chip** and **persistent action banner** are as-built
-  refinements layered on top of the mockup's intent.
+List of owned + invited files. Opens the six-rail workspace.
 
-Where Jake's design and `milestones.txt` disagree, `milestones.txt` governs the
-scope; Jake's design governs the look and feel.
+### 6.3 Property workspace — `/fsbo/properties/:id`
+
+Left rail (`aria-label="Property sections"`): Overview, Timeline, Documents,
+Contacts, Sharing, Messages.
+
+- **Timeline** = `build_seller_timeline` (listing-prep C2a stages, or
+  under-contract key-date stages). Go-live / Ready-to-list are never forced
+  `active`.
+- **Documents** = `project_fsbo_document` verbs: Open / Acknowledge / Sign (if
+  real URL) / Flag (own uploads). Unshared staff files: status only.
+- **Messages** = expand-to-read marks **that** `log_id`. Composer posts
+  `POST /dashboard/fsbo/messages` (not Client Q&A).
+
+### 6.4 Documents — `/fsbo/documents`
+
+Split missing into **You still need** (Upload) vs **Velvet is collecting**
+(no Upload). `?tx=&docType=` opens the upload modal pre-filled.
+`listing_photos` is in the type list.
+
+### 6.5 Messages — `/fsbo/milestones`
+
+One conversation **per property**. Left file list (hidden when there is only
+one file); right chronological thread with the composer pinned at the bottom
+(`fsbo-message-composer`). Opening a file's thread marks that file's unseen
+**coordinator** rows as seen. Property Messages rail reuses the same thread.
+No native `<select>` — files are branded list buttons.
+
+### 6.6 Payments — `/fsbo/invoices`
+
+Same client invoice APIs, authorized with the FSBO id union. Nav hidden when
+there are no open invoices.
+
+### 6.7 Sharing + public viewer
+
+Share-link modal default expiry comes from
+`/api/v1/fsbo/settings` → `milestone_sharing_defaults.default_expiry_days`
+(1→24h, 2→48h, 7→7d, else 30d).
+
+Public viewer shows seller timeline (Completed / InProgress / Pending), key
+dates, **document status cues** (no files), and the boundary notice. Never
+`tasks.name`. Opening a live link writes `share_link_viewed` with
+`transaction_id` so the seller bell can deep-link to that property.
+
+### 6.8 Notifications — topbar bell
+
+Seller-only feed (`GET /dashboard/fsbo/notifications`). Grouped, not a dump:
+
+| Event | Bell | Click |
+|---|---|---|
+| Unseen coordinator mailbox | One item per file | `/fsbo/milestones?tx=` |
+| Packet shared (review/ack) | `client_document_shared` | `/fsbo/documents?tx=` |
+| Signature ready | `client_signature_ready` | `/fsbo/documents?tx=` |
+| Open invoice | `client_invoice_open` | `/fsbo/invoices` |
+| Share link viewed | grouped `share_link_viewed` | `/fsbo/properties/{id}` |
+| Seller’s own inbound note | never | — |
+| Staff AI drafts / overdue tasks | never | — |
+
+**Read model:** Mark all as read dismisses bell notices (`notifications.read_at`
++ `fsbo_bell_ack`). It does **not** mark Message threads seen. Opening a
+conversation still marks that file’s coordinator rows. Clicking a packet /
+invoice / share row marks that notice read, then navigates.
+
+`notify_transaction_clients` includes `for_sale_by_owner` assignments **and**
+an `is_fsbo` file’s `created_by` seller.
+
+### 6.9 Ask Aime
+
+`POST /dashboard/ai-chat` for `ForSaleByOwner` is **rule-based**. Context loads
+this seller's properties only (`format_fsbo_chat_context`). If
+`listing_go_live_date` is missing on the database, the select retries without
+that column so the panel never 500s. Chips (what's missing, closing, coordinator,
+next step), Concierge, legal questions, and unmatched free text all return a
+seller-safe reply without calling the tenant LLM. Missing-docs uses
+**seller-owed** types plus listing-prep facts (photos in review, go-live
+informational). Never deed / CD as seller homework, never overdue / pipeline.
 
 ---
 
-## 9. Key files
+## 7. Staff loop (v1)
 
-**Backend**
-- `app/services/fsbo_workspace.py` — all projections, ownership guard,
-  next-step/deadline derivation, support-contact resolution, message filtering,
-  seen-tracking.
-- `app/api/v1/dashboard_role.py` — FSBO endpoints (overview / property /
-  documents / milestones / messages-seen).
-- `app/api/v1/milestones.py` — share-link CRUD + public viewer.
-- `app/services/share_link_service.py` — share-link auth (cross-owner denial).
-- `app/schemas/dashboard_role.py` — response models.
+- Coordinator shares packets with `client_share_kind` (`review` |
+  `acknowledge` | `sign`). Ack is **not** implied by visibility alone.
+- `notify_transaction_clients` includes `role_in_transaction in (client,
+  for_sale_by_owner)` and the FSBO file’s `created_by` seller.
+- Seller notes land on the existing staff client-thread column (`is_client_visible`
+  notes). Relabel later; do not invent a second mailbox.
+- No self-serve listing create in v1. Coordinators add properties.
 
-**Frontend**
-- `src/pages/fsbo/` — `FsboOverviewPage`, `FsboPropertiesPage`,
-  `FsboPropertyDetailPage`, `FsboDocumentsPage`, `FsboMilestonesPage`, `_shell`.
-- `src/components/fsbo/` — `FsboPropertyTile`, `FsboUploadModal`,
-  `FsboShareManagementModal`, `fsboStatus`.
-- `src/contexts/FsboShareContext.tsx` — global share-modal provider.
-- `src/hooks/useDashboard.ts` — `useFsboOverview`, `useFsboProperty`,
-  `useFsboDocuments`, `useFsboMilestones`, `useMarkFsboMessagesSeen` + types.
-- `src/layouts/AppLayout.tsx` — status chip + persistent banner.
-- `src/pages/public/MilestoneViewerPage.tsx` — public viewer.
+---
+
+## 8. What this is not
+
+- Not a clone of the Client navy concierge.
+- Not a cream/topbar-only HTML page without `AppLayout`.
+- Not Chrome-QA-complete as the whole product — the harness checks chrome
+  and journeys; the engine above is the contract.
+- Not live DocuSign in v1: `signing_url: null` / stub envelope → Open.
+- Not a place to recover deleted reconstruction plans.
+
+---
+
+## 9. Primary code
+
+**Backend:** `app/services/fsbo_workspace.py`, `app/api/v1/dashboard_role.py`,
+`app/schemas/dashboard_role.py`, `documents.py`, `client_documents.py`,
+`client_invoices.py`, `share_link_service.py`,
+`supabase/migrations/20261002090000_listing_go_live_date.sql`.
+
+**Frontend:** `AppLayout.tsx`, `dashboardShellConfig.ts`, FSBO pages under
+`src/pages/fsbo/`, `FsboDocumentActions.tsx`, `fsboNextAction.ts`,
+`ShareMilestoneModal.tsx`, `MilestoneViewerPage.tsx`.

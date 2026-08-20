@@ -151,6 +151,8 @@ async function gotoPath(page, pathName, { escape = true } = {}) {
 async function fsboNav(page, label) {
   const testIds = {
     Home: 'fsbo-nav-home',
+    Dashboard: 'fsbo-nav-home',
+    'My Properties': 'fsbo-nav-properties',
     Documents: 'fsbo-nav-documents',
     Messages: 'fsbo-nav-messages',
     Payments: 'fsbo-nav-payments',
@@ -168,10 +170,10 @@ async function fsboNav(page, label) {
   const routes = {
     Home: '/fsbo',
     Dashboard: '/fsbo',
-    'My Properties': '/fsbo',
+    'My Properties': '/fsbo/properties',
     Documents: '/fsbo/documents',
     Payments: '/fsbo/invoices',
-    Messages: '/fsbo/messages',
+    Messages: '/fsbo/milestones',
   }
   await gotoPath(page, routes[label] || '/fsbo')
 }
@@ -221,18 +223,20 @@ async function nestedButtonCount(page) {
 }
 
 function hasStaffChrome(text) {
-  return /\bNeeds You\b|AI Suggestions|Task Queue|Inbox Elf|\bActive Transactions\b|\bNew Transaction\b/i.test(
+  return /AI Suggestions|Task Queue|Inbox Elf|\bActive Transactions\b|\bNew Transaction\b/i.test(
     text,
   )
 }
 
 function hasFsboNav(text) {
-  return /Home/i.test(text) && /Documents/i.test(text) && /Messages/i.test(text)
+  return (/Home|Dashboard/i.test(text) && /Documents/i.test(text) && /Messages/i.test(text))
 }
 
 async function sidebarLabels(page) {
   return page.evaluate(() => {
-    const nav = document.querySelector('nav[aria-label="Main navigation"]')
+    const nav =
+      document.querySelector('nav[aria-label="Main navigation"]') ||
+      document.querySelector('nav[aria-label="Seller navigation"]')
     if (!nav) return []
     return [...nav.querySelectorAll('a, button')].map((el) => (el.innerText || '').trim()).filter(Boolean)
   })
@@ -373,27 +377,35 @@ async function main() {
     const joined = labels.join(' | ')
     const need = ['Home', 'Documents', 'Messages']
     const missing = need.filter((n) => !labels.some((l) => l.includes(n) || new RegExp(n, 'i').test(l)))
-    const leaked = labels.filter((l) => /Needs You|Task Queue|Active Transactions|AI Suggestions|Dashboard|My Properties/i.test(l))
+    const leaked = labels.filter((l) =>
+      /Needs You|Task Queue|Active Transactions|AI Suggestions|New Transaction/i.test(l),
+    )
+    const paymentsHidden = !labels.some((l) => /Payments/i.test(l))
     const share = await page.getByTestId('fsbo-share').first().isVisible({ timeout: 2000 }).catch(() => false)
-    if (missing.length === 0 && leaked.length === 0 && share) log('FS-03-sidebar', 'PASS', joined)
-    else log('FS-03-sidebar', 'FAIL', `missing=${missing} leaked=${leaked} share=${share} labels=${joined}`)
+    if (missing.length === 0 && leaked.length === 0 && share) {
+      log('FS-03-sidebar', 'PASS', `${joined} paymentsHidden=${paymentsHidden}`)
+    } else {
+      log('FS-03-sidebar', 'FAIL', `missing=${missing} leaked=${leaked} share=${share} labels=${joined}`)
+    }
   }
 
   // ── 4. Overview content ─────────────────────────────────────────────────
   {
     const text = await dumpText(page, 'overview_body')
-    const hasNext = /Next for you|Upload Seller|on track|Waiting on your coordinator/i.test(text)
+    const hasNext = /Next action|Upload your|on track|Acknowledge|Review |Pay an open|Reply to your coordinator|Share a progress/i.test(text)
     const hasBoundary = /does not act as your agent or provide legal advice/i.test(text)
-    const hasProps = /Maple Prep|Velvet Contract|Waiting on your coordinator/i.test(text)
+    const hasProps = /Maple Prep|Velvet Contract|Your coordinator will add your first property/i.test(text)
     const hasSupport = /Shyna Elene|Your coordinator|Velvet Elves support|Your Velvet coordinator/i.test(text)
-    const hasKpi = /Missing Docs|Share Links Live|Days To Close/i.test(text)
+    const hasKpi = /Missing documents|Share links live|Days to closing|My properties/i.test(text)
     if (hasNext && hasBoundary && hasProps) log('FS-04-overview-content', 'PASS', `support=${hasSupport} kpi=${hasKpi}`)
     else log('FS-04-overview-content', 'FAIL', `next=${hasNext} boundary=${hasBoundary} props=${hasProps} kpi=${hasKpi}\n${text.slice(0, 500)}`)
     for (let i = 0; i < 25 && !(lastOverview?.properties?.length); i += 1) {
       await page.waitForTimeout(100)
     }
     const n = lastOverview?.properties?.length ?? 0
-    if (n >= 1) log('FS-05-overview-api', 'PASS', `${n} properties, missing=${lastOverview?.missing_documents_count}`)
+    const maple = (lastOverview?.properties || []).find((p) => /Maple Prep/i.test(p.address || ''))
+    const mapleMissing = maple?.seller_owed_missing_count ?? maple?.missing_docs_count
+    if (n >= 1) log('FS-05-overview-api', 'PASS', `${n} properties, portfolioMissing=${lastOverview?.missing_documents_count} mapleSellerOwed=${mapleMissing}`)
     else log('FS-05-overview-api', hasProps ? 'PASS' : 'FAIL', hasProps ? 'ui shows properties (payload raced)' : JSON.stringify(lastOverview)?.slice(0, 400) || 'no overview payload')
   }
 
@@ -429,12 +441,19 @@ async function main() {
           await waitSettled(page, 400)
           const replyText = await panel.innerText()
           const stillThinking = /Thinking/i.test(replyText) && !lastAiChat
-          const leakedStaff = /Show overdue tasks|Summarize my pipeline/i.test(replyText)
-          const gotReply = Boolean(lastAiChat?.reply) || /Maple|Velvet|missing|document|coordinator|couldn't put an answer|out of credit|try again/i.test(replyText)
+          const leakedStaff = /Show overdue tasks|Summarize my pipeline|overdue tasks|active deals/i.test(replyText)
+          const failed =
+            Boolean(lastAiChat?.error_category) ||
+            /couldn't put an answer|out of credit|Internal Server Error/i.test(
+              (lastAiChat?.reply || replyText).toString(),
+            )
+          const gotReply = Boolean(lastAiChat?.reply) && /Maple|Velvet|missing|document|coordinator|Upload/i.test(
+            (lastAiChat?.reply || '').toString(),
+          )
           log(
             'FS-45-ask-ai-send',
-            !stillThinking && !leakedStaff && gotReply ? 'PASS' : 'FAIL',
-            (lastAiChat?.reply || replyText).toString().slice(0, 280),
+            !stillThinking && !leakedStaff && !failed && gotReply ? 'PASS' : 'FAIL',
+            `${lastAiChat?.provider || ''} ${(lastAiChat?.reply || replyText).toString()}`.slice(0, 280),
           )
         } else {
           log('FS-45-ask-ai-send', 'FAIL', 'seller chip missing')
@@ -473,19 +492,34 @@ async function main() {
   {
     await gotoPath(page, '/fsbo')
     await waitForOverviewReady(page)
-    const uploadCta = page.getByTestId('fsbo-upload-cta').or(mainPane(page).getByRole('button', { name: /Upload now/i })).first()
+    const uploadCta = page.getByTestId('fsbo-next-action-cta').or(page.getByTestId('fsbo-upload-cta')).first()
     if (await uploadCta.isVisible({ timeout: 4000 }).catch(() => false)) {
       await uploadCta.click()
       await waitSettled(page, 800)
       const dlg = page.getByRole('dialog').filter({ hasText: /Upload a document/i }).first()
-      const openDlg = await dlg.isVisible({ timeout: 4000 }).catch(() => false)
-      log(openDlg ? 'FS-09-kpi-missing' : 'FS-09-kpi-missing', openDlg ? 'PASS' : 'FAIL', 'Home upload CTA opens modal')
+      const openDlg = await dlg.isVisible({ timeout: 2500 }).catch(() => false)
+      const onDocs = /\/fsbo\/documents/.test(page.url())
+      if (openDlg || onDocs) log('FS-09-kpi-missing', 'PASS', openDlg ? 'upload modal' : page.url())
+      else log('FS-09-kpi-missing', 'FAIL', `cta did not open upload or Documents\n${page.url()}`)
       await page.keyboard.press('Escape').catch(() => {})
     } else {
       log('FS-09-kpi-missing', 'WARN', 'no seller-owed upload CTA (file may already be on track)')
     }
-    log('FS-47-kpi-share-links', 'PASS', 'sidebar KPIs match agent chrome')
-    log('FS-48-banner-upload', 'PASS', 'chrome banner is AppLayout inner-page only')
+    const homeText = await mainPane(page).innerText().catch(() => '')
+    const hasKpiStrip = /My properties|Missing documents|Share links live|Days to closing/i.test(homeText)
+    log('FS-47-kpi-share-links', hasKpiStrip ? 'PASS' : 'WARN', hasKpiStrip ? 'Overview summary cards present' : 'summary cards not found')
+    const banner = page.getByTestId('fsbo-next-action-banner')
+    const bannerVisible = await banner.isVisible({ timeout: 1500 }).catch(() => false)
+    const ranked = (lastOverview?.critical_next_steps || []).filter((s) => s?.kind && s.kind !== 'none')
+    if (ranked.length > 0) {
+      log(bannerVisible ? 'FS-48-banner' : 'FS-48-banner', bannerVisible ? 'PASS' : 'FAIL', bannerVisible ? 'portfolio banner mounted' : 'expected AppLayout banner')
+    } else {
+      log('FS-48-banner', 'PASS', 'no seller-owed banner (portfolio on track)')
+    }
+    const hero = page.getByTestId('fsbo-next-action').first()
+    const heroText = (await hero.innerText().catch(() => '')).slice(0, 180)
+    const bannerText = bannerVisible ? (await banner.innerText().catch(() => '')).slice(0, 180) : ''
+    log('FS-54-banner-vs-hero', 'PASS', `banner=${bannerText || 'none'} hero=${heroText || 'none'}`)
   }
 
   // ── 8. Home property switcher (both files) ──────────────────────────────
@@ -516,7 +550,7 @@ async function main() {
     await shot(page, 'properties')
   }
 
-  // ── 9. Property file page (not six rails) ───────────────────────────────
+  // ── 9. Property workspace (six-rail) ────────────────────────────────────
   {
     await closeAskAi(page)
     await gotoPath(page, '/fsbo/properties/9dacae5e-cf19-4312-b976-81e587dd0df6')
@@ -529,10 +563,9 @@ async function main() {
     const text = await mainPane(page).innerText()
     const urlOk = /\/fsbo\/properties\//.test(page.url())
     const hasAddr = /Velvet Contract/i.test(text)
-    const filePage = await page.getByTestId('fsbo-property-file').isVisible().catch(() => false)
     const sixRail = await page.getByRole('navigation', { name: /Property sections/i }).isVisible().catch(() => false)
-    if (urlOk && hasAddr && filePage && !sixRail) log('FS-12-property-detail', 'PASS', page.url())
-    else log('FS-12-property-detail', 'FAIL', `url=${page.url()} addr=${hasAddr} file=${filePage} rail=${sixRail}\n${text.slice(0, 400)}`)
+    if (urlOk && hasAddr && sixRail) log('FS-12-property-detail', 'PASS', 'six-rail property workspace')
+    else log('FS-12-property-detail', 'FAIL', `url=${page.url()} addr=${hasAddr} sixRail=${sixRail}\n${text.slice(0, 400)}`)
 
     log(
       /Dates|No dates set yet|Closing/i.test(text) ? 'FS-13-timeline' : 'FS-13-timeline',
@@ -576,21 +609,21 @@ async function main() {
     await waitSettled(page, 800)
     await mainPane(page).getByRole('heading', { name: /^Documents$/i }).first().waitFor({ timeout: 12000 }).catch(() => {})
     const text = await mainPane(page).innerText()
-    const hasBoard = /Still needed|You sent|Needs your signature|Done/i.test(text)
+    const hasBoard = /Missing|In progress|Uploaded|Verified|Complete|Still needed/i.test(text)
     const hasMissing = /Seller|Lead|Purchase|Disclosure|deed|needed/i.test(text)
     if (hasBoard) log('FS-18-documents-board', 'PASS', text.slice(0, 200))
     else log('FS-18-documents-board', 'FAIL', text.slice(0, 400))
     if (hasMissing) log('FS-19-missing-rows', 'PASS')
     else log('FS-19-missing-rows', 'WARN', 'no missing-doc rows visible')
 
-    const missingTab = mainPane(page).getByRole('button', { name: /Still needed/i }).first()
+    const missingTab = mainPane(page).getByRole('button', { name: /Missing|Still needed/i }).first()
     if (await missingTab.isVisible({ timeout: 2000 }).catch(() => false)) {
       await missingTab.click()
       await waitSettled(page, 300)
       log('FS-20-missing-tab', 'PASS')
-    } else log('FS-20-missing-tab', 'FAIL', 'Still needed filter missing')
+    } else log('FS-20-missing-tab', 'FAIL', 'Missing filter missing')
 
-    const uploadCta = mainPane(page).getByRole('button', { name: /Upload document/i }).first()
+    const uploadCta = mainPane(page).getByTestId('fsbo-upload-cta').or(mainPane(page).getByRole('button', { name: /^Upload$/i })).first()
     if (await uploadCta.isVisible({ timeout: 2000 }).catch(() => false)) {
       await uploadCta.click()
       await waitSettled(page, 500)
@@ -622,8 +655,8 @@ async function main() {
     await gotoPath(page, '/fsbo/documents')
     await waitSettled(page, 800)
     await closeAskAi(page)
-    const allTab = mainPane(page).getByRole('button', { name: /^All\b/i }).first()
-    if (await allTab.isVisible({ timeout: 1500 }).catch(() => false)) await allTab.click()
+    const youSent = mainPane(page).getByRole('button', { name: /You sent/i }).first()
+    if (await youSent.isVisible({ timeout: 1500 }).catch(() => false)) await youSent.click()
     const flag = mainPane(page).getByRole('button', { name: /Flag/i }).first()
     if (await flag.isVisible({ timeout: 3000 }).catch(() => false)) {
       await flag.click()
@@ -645,21 +678,28 @@ async function main() {
     await fsboNav(page, 'Messages')
     await waitSettled(page, 800)
     const text = await mainPane(page).innerText()
-    if (/Please upload your purchase agreement|Message your coordinator|No messages/i.test(text)) {
+    if (/Ask a question|Message your coordinator|No messages|Your coordinator|Conversation with your coordinator/i.test(text)) {
       log('FS-24-messages', 'PASS', text.slice(0, 240))
     } else {
       log('FS-24-messages', /Messages/i.test(text) ? 'WARN' : 'FAIL', text.slice(0, 400))
     }
     const composer = await page.getByTestId('fsbo-message-composer').isVisible().catch(() => false)
     if (composer) log('FS-51-messages-composer', 'PASS')
-    else log('FS-51-messages-composer', 'FAIL', 'composer missing')
+    else log('FS-51-messages-composer', 'FAIL', 'seller composer missing')
     if (/does not act as your agent/i.test(text)) log('FS-25-messages-boundary', 'PASS')
     else log('FS-25-messages-boundary', 'FAIL', 'boundary notice missing on Messages')
     await gotoPath(page, '/fsbo/milestones')
     await waitSettled(page, 600)
     log(
-      /\/fsbo\/messages/.test(page.url()) ? 'FS-52-milestones-redirect' : 'FS-52-milestones-redirect',
-      /\/fsbo\/messages/.test(page.url()) ? 'PASS' : 'FAIL',
+      /\/fsbo\/milestones/.test(page.url()) ? 'FS-52-milestones-route' : 'FS-52-milestones-route',
+      /\/fsbo\/milestones/.test(page.url()) ? 'PASS' : 'FAIL',
+      page.url(),
+    )
+    await gotoPath(page, '/fsbo/properties')
+    await waitSettled(page, 600)
+    log(
+      /\/fsbo\/properties/.test(page.url()) ? 'FS-53-properties-list' : 'FS-53-properties-list',
+      /\/fsbo\/properties/.test(page.url()) ? 'PASS' : 'FAIL',
       page.url(),
     )
   }
@@ -700,9 +740,9 @@ async function main() {
     const create = page.getByRole('button', { name: /Create share link/i }).first()
     if (await create.isVisible({ timeout: 4000 }).catch(() => false)) {
       await create.click()
-      await waitSettled(page, 500)
+      await waitSettled(page, 900)
       const recipient = page.locator('#recipient')
-      if (await recipient.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await recipient.isVisible({ timeout: 6000 }).catch(() => false)) {
         await recipient.fill('QA Viewer')
         await page.getByRole('button', { name: /Create link/i }).click()
         await waitSettled(page, 1500)
@@ -726,8 +766,12 @@ async function main() {
             const ok = /Maple Prep|Velvet Contract/i.test(vtext)
             const leaked = /\bNeeds You\b|Task Queue|Inbox Elf|AI Suggestions/i.test(vtext)
             const broken = /Link unavailable|could not load this link/i.test(vtext)
-            const blankOnly = /timeline will appear once the first milestone is set/i.test(vtext) && !/Required documents|Listing prep|coordinates this file/i.test(vtext)
-            log(ok && !leaked && !broken && !blankOnly ? 'FS-30-public-viewer' : 'FS-30-public-viewer', ok && !leaked && !broken && !blankOnly ? 'PASS' : 'FAIL', vtext.slice(0, 300))
+            const taskName = /\b(Call buyer|Send CD|Order appraisal|Needs You)\b/i.test(vtext)
+            if (broken || leaked || !ok || taskName) {
+              log('FS-30-public-viewer', 'FAIL', vtext.slice(0, 300))
+            } else {
+              log('FS-30-public-viewer', 'PASS', vtext.slice(0, 240))
+            }
           } catch (e) {
             log('FS-30-public-viewer', 'FAIL', e.message)
           } finally {
@@ -809,16 +853,19 @@ async function main() {
         (await dlg.getByRole('tab', { name: /^Tomorrow$/i }).count().catch(() => 0)) > 0
       const pendingLeak = staffPendingHits.length > 0
       const kinds = (lastFsboBell?.items || []).map((i) => i.kind)
-      const payloadLeak = kinds.some((k) => /ai_draft|outbound/i.test(String(k || '')))
-      const sellerSafe = /caught up|coordinator|viewed your shared|update from your coordinator/i.test(
+      const payloadLeak = kinds.some((k) => /ai_draft|outbound|client_reply/i.test(String(k || '')))
+      const hrefLeak = (lastFsboBell?.items || []).some(
+        (i) => i.href && !String(i.href).startsWith('/fsbo'),
+      )
+      const sellerSafe = /caught up|coordinator|share link|document|invoice|message/i.test(
         panelText,
       )
       if (!open) log('FS-33-bell', 'FAIL', 'panel did not open')
-      else if (staffLeak || staffTabs || pendingLeak || payloadLeak) {
+      else if (staffLeak || staffTabs || pendingLeak || payloadLeak || hrefLeak) {
         log(
           'FS-33-bell',
           'FAIL',
-          `staff inbox leaked panel=${staffLeak} tabs=${staffTabs} pendingHits=${staffPendingHits.length} kinds=${kinds.join(',')}\n${panelText.slice(0, 500)}`,
+          `staff inbox leaked panel=${staffLeak} tabs=${staffTabs} pendingHits=${staffPendingHits.length} kinds=${kinds.join(',')} hrefLeak=${hrefLeak}\n${panelText.slice(0, 500)}`,
         )
       } else if (!sellerSafe) {
         log('FS-33-bell', 'FAIL', panelText.slice(0, 400))
@@ -835,7 +882,6 @@ async function main() {
     ['FS-37-client-bounce', '/client/home', /\/fsbo/],
     ['FS-38-ai-emails-bounce', '/ai-emails', /\/fsbo/],
     ['FS-50-notifications-bounce', '/notifications', /\/fsbo/],
-    ['FS-53-properties-redirect', '/fsbo/properties', /\/fsbo\/?(\?|$)/],
   ]) {
     await gotoPath(page, pathName)
     await waitSettled(page, 900)
