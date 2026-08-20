@@ -46,6 +46,8 @@ let lastUpload = null
 let lastFlag = null
 let lastAiChat = null
 let lastFsboBell = null
+let lastContent = null
+const popups = []
 const staffPendingHits = []
 let shotIdx = 0
 
@@ -274,6 +276,9 @@ async function main() {
   )
   const page = await context.newPage()
   page.setDefaultTimeout(12000)
+  page.on('popup', (p) => {
+    popups.push(p.url())
+  })
   console.log(
     `browser=${CHANNEL || 'chromium'} headless=${headless} viewport=1280x720 shots=${SHOTS} app=${APP}`,
   )
@@ -298,6 +303,13 @@ async function main() {
   page.on('response', async (res) => {
     try {
       const url = res.url()
+      if (/\/documents\/[^/]+\/content(?:\?|$)/.test(url)) {
+        lastContent = {
+          ok: res.ok(),
+          status: res.status(),
+          mime: res.headers()['content-type'] || '',
+        }
+      }
       if (!url.includes('/api/v1/')) return
       if (!res.ok()) {
         if (failedRequests.length < 40) {
@@ -505,6 +517,8 @@ async function main() {
     } else {
       log('FS-09-kpi-missing', 'WARN', 'no seller-owed upload CTA (file may already be on track)')
     }
+    await gotoPath(page, '/fsbo')
+    await waitForOverviewReady(page)
     const homeText = await mainPane(page).innerText().catch(() => '')
     const hasKpiStrip = /My properties|Missing documents|Share links live|Days to closing/i.test(homeText)
     log('FS-47-kpi-share-links', hasKpiStrip ? 'PASS' : 'WARN', hasKpiStrip ? 'Overview summary cards present' : 'summary cards not found')
@@ -519,7 +533,11 @@ async function main() {
     const hero = page.getByTestId('fsbo-next-action').first()
     const heroText = (await hero.innerText().catch(() => '')).slice(0, 180)
     const bannerText = bannerVisible ? (await banner.innerText().catch(() => '')).slice(0, 180) : ''
-    log('FS-54-banner-vs-hero', 'PASS', `banner=${bannerText || 'none'} hero=${heroText || 'none'}`)
+    log(
+      'FS-54-banner-vs-hero',
+      heroText ? 'PASS' : 'WARN',
+      `banner=${bannerText || 'none'} hero=${heroText || 'none'}`,
+    )
   }
 
   // ── 8. Home property switcher (both files) ──────────────────────────────
@@ -577,11 +595,30 @@ async function main() {
       /Documents|Still needed|Nothing seller-owed/i.test(text) ? 'PASS' : 'WARN',
       text.slice(0, 200),
     )
-    log(
-      /Contacts|Jordan Buyer|Meridian Title|No counterparties recorded/i.test(text) ? 'FS-15-contacts' : 'FS-15-contacts',
-      /Contacts|Jordan Buyer|Meridian Title|No counterparties recorded/i.test(text) ? 'PASS' : 'WARN',
-      text.slice(0, 240),
-    )
+    const contactsNav = page.getByRole('navigation', { name: /Property sections/i }).getByRole('button', { name: /^Contacts$/i })
+    if (await contactsNav.isVisible().catch(() => false)) {
+      await contactsNav.click()
+      await waitSettled(page, 400)
+      const ctext = await mainPane(page).innerText()
+      const jordan = (ctext.match(/Jordan Buyer/g) || []).length
+      const pat = (ctext.match(/Pat Title/g) || []).length
+      if (/No counterparties recorded/i.test(ctext)) {
+        log('FS-15-contacts', 'WARN', 'no counterparties on this file')
+      } else if (jordan === 1 && pat === 1) {
+        log('FS-15-contacts', 'PASS', 'one Buyer + one Title')
+      } else if (jordan > 0 || pat > 0 || /Buyer|Title/i.test(ctext)) {
+        log('FS-15-contacts', jordan > 1 || pat > 1 ? 'FAIL' : 'PASS', `jordan=${jordan} pat=${pat}`)
+      } else {
+        log('FS-15-contacts', 'WARN', ctext.slice(0, 240))
+      }
+      await page.getByRole('navigation', { name: /Property sections/i }).getByRole('button', { name: /^Overview$/i }).click().catch(() => {})
+    } else {
+      log(
+        /Contacts|Jordan Buyer|Meridian Title|No counterparties recorded/i.test(text) ? 'FS-15-contacts' : 'FS-15-contacts',
+        /Contacts|Jordan Buyer|Meridian Title|No counterparties recorded/i.test(text) ? 'PASS' : 'WARN',
+        text.slice(0, 240),
+      )
+    }
     log('FS-16-sharing-pane', 'PASS', 'Share is the persistent shell action, not a property rail')
     await shot(page, 'property_detail')
   }
@@ -615,8 +652,20 @@ async function main() {
     else log('FS-18-documents-board', 'FAIL', text.slice(0, 400))
     if (hasMissing) log('FS-19-missing-rows', 'PASS')
     else log('FS-19-missing-rows', 'WARN', 'no missing-doc rows visible')
+    const sellerOwedRow = /Seller.?s disclosure|Lead.?paint|Listing photos/i.test(text)
+    const velvetBucket = /Velvet is collecting/i.test(text)
+    log(
+      'FS-55-seller-owed-missing',
+      sellerOwedRow ? 'PASS' : 'FAIL',
+      sellerOwedRow ? 'seller-owed missing rows on the board' : text.slice(0, 280),
+    )
+    log(
+      'FS-56-velvet-collecting',
+      velvetBucket ? 'PASS' : 'WARN',
+      velvetBucket ? 'Velvet is collecting bucket visible' : 'no Velvet is collecting section',
+    )
 
-    const missingTab = mainPane(page).getByRole('button', { name: /Missing|Still needed/i }).first()
+    const missingTab = mainPane(page).getByRole('button', { name: /Missing|Still needed|You still need/i }).first()
     if (await missingTab.isVisible({ timeout: 2000 }).catch(() => false)) {
       await missingTab.click()
       await waitSettled(page, 300)
@@ -657,6 +706,42 @@ async function main() {
     await closeAskAi(page)
     const youSent = mainPane(page).getByRole('button', { name: /You sent/i }).first()
     if (await youSent.isVisible({ timeout: 1500 }).catch(() => false)) await youSent.click()
+    const openBtn = mainPane(page).getByRole('button', { name: /^Open$/i }).first()
+    if (await openBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      const beforePopups = popups.length
+      lastContent = null
+      await openBtn.click()
+      await waitSettled(page, 1500)
+      const preview = page
+        .getByRole('dialog')
+        .filter({ has: page.getByRole('button', { name: /Download/i }) })
+        .first()
+      const previewOpen = await preview.isVisible({ timeout: 6000 }).catch(() => false)
+      const previewText = previewOpen ? await preview.innerText().catch(() => '') : ''
+      const stillOnApp = /127\.0\.0\.1:5173|localhost:5173/.test(page.url()) && !/supabase\.co/i.test(page.url())
+      const supabasePopup = popups.slice(beforePopups).some((u) => /supabase\.co/i.test(String(u)))
+      const loaded = /Loading preview/i.test(previewText) || lastContent?.ok || /Download/i.test(previewText)
+      if (!previewOpen) log('FS-57-in-app-preview', 'FAIL', `no preview dialog url=${page.url()}`)
+      else if (!stillOnApp || supabasePopup) {
+        log(
+          'FS-57-in-app-preview',
+          'FAIL',
+          `left app url=${page.url()} supabasePopup=${supabasePopup} popups=${popups.slice(beforePopups).join(',')}`,
+        )
+      } else if (!loaded && /Preview not available|Could not/i.test(previewText)) {
+        log('FS-57-in-app-preview', 'FAIL', previewText.slice(0, 300))
+      } else {
+        log(
+          'FS-57-in-app-preview',
+          'PASS',
+          `content=${lastContent?.status || 'n/a'} mime=${lastContent?.mime || 'n/a'}`,
+        )
+      }
+      await page.keyboard.press('Escape').catch(() => {})
+    } else {
+      log('FS-57-in-app-preview', 'WARN', 'no Open button on You sent')
+    }
+
     const flag = mainPane(page).getByRole('button', { name: /Flag/i }).first()
     if (await flag.isVisible({ timeout: 3000 }).catch(() => false)) {
       await flag.click()
@@ -828,6 +913,53 @@ async function main() {
     const dlg = page.getByRole('dialog').first()
     const open = await dlg.isVisible({ timeout: 4000 }).catch(() => false)
     log(open ? 'FS-32-settings' : 'FS-32-settings', open ? 'PASS' : 'FAIL', open ? 'Account modal' : page.url())
+    if (open) {
+      const rail = ['Profile', 'Notifications', 'Sharing', 'Security', 'Help & tour']
+      const missing = []
+      for (const label of rail) {
+        const btn = dlg.getByRole('button', { name: label }).first()
+        if (!(await btn.isVisible().catch(() => false))) missing.push(label)
+      }
+      log(
+        'FS-58-settings-rail',
+        missing.length === 0 ? 'PASS' : 'FAIL',
+        missing.length === 0 ? rail.join(', ') : `missing ${missing.join(', ')}`,
+      )
+      const notif = dlg.getByRole('button', { name: 'Notifications' }).first()
+      await notif.click().catch(() => {})
+      await waitSettled(page, 800)
+      const ntext = await dlg.innerText().catch(() => '')
+      const staffCats = /Task assignment|AI email sent|Daily summary|Closed-transaction/i.test(ntext)
+      const sellerCats = /Documents|Messages from your coordinator|Dates on your sale|Share-link views/i.test(ntext)
+      log(
+        'FS-59-seller-notifications',
+        !staffCats && sellerCats ? 'PASS' : 'FAIL',
+        staffCats ? `staff categories leaked\n${ntext.slice(0, 400)}` : ntext.slice(0, 280),
+      )
+      const help = dlg.getByRole('button', { name: 'Help & tour' }).first()
+      await help.click().catch(() => {})
+      await waitSettled(page, 500)
+      const htext = await dlg.innerText().catch(() => '')
+      log(
+        'FS-60-help',
+        /Help Center|Start tour/i.test(htext) ? 'PASS' : 'FAIL',
+        htext.slice(0, 240),
+      )
+      const security = dlg.getByRole('button', { name: 'Security' }).first()
+      await security.click().catch(() => {})
+      await waitSettled(page, 400)
+      const stext = await dlg.innerText().catch(() => '')
+      log(
+        'FS-61-security',
+        /Email reset link|Password/i.test(stext) ? 'PASS' : 'FAIL',
+        stext.slice(0, 240),
+      )
+    } else {
+      log('FS-58-settings-rail', 'FAIL', 'modal not open')
+      log('FS-59-seller-notifications', 'FAIL', 'modal not open')
+      log('FS-60-help', 'FAIL', 'modal not open')
+      log('FS-61-security', 'FAIL', 'modal not open')
+    }
     await page.keyboard.press('Escape').catch(() => {})
   }
 
