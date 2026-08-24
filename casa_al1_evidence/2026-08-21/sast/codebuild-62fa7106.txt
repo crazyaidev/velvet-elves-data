@@ -1,0 +1,94 @@
+﻿b/39858645262319706359096648185050023712448026072259493890/s	f/39858645893051682809138262531296921628522974723525443601/s
+EVENTS	1787323468679	Status: Downloaded newer image for fluidattacks/sast:latest
+	1787323468677
+EVENTS	1787323468679	docker.io/fluidattacks/sast:latest
+	1787323468677
+EVENTS	1787323468679	
+	1787323468677
+EVENTS	1787323468679	[Container] 2026/08/21 14:44:26.844668 Phase complete: PRE_BUILD State: SUCCEEDED
+	1787323468677
+EVENTS	1787323468679	[Container] 2026/08/21 14:44:26.844682 Phase context status code:  Message: 
+	1787323468677
+EVENTS	1787323468679	[Container] 2026/08/21 14:44:26.873306 Entering phase BUILD
+	1787323468677
+EVENTS	1787323468679	[Container] 2026/08/21 14:44:26.874044 Running command echo Scanning velvet-elves-backend
+	1787323468677
+EVENTS	1787323468679	Scanning velvet-elves-backend
+	1787323468677
+EVENTS	1787323468679	
+	1787323468677
+EVENTS	1787323468679	[Container] 2026/08/21 14:44:26.879636 Running command docker run --rm -v "$CODEBUILD_SRC_DIR":/src fluidattacks/sast:latest sast scan /src/config.yaml
+	1787323468677
+EVENTS	1787323472695	2026-08-21 14:44:32,492 [INFO] [skims.core.cli] Official documentation: https://docs.fluidattacks.com/find-security-vulnerabilities/use-the-cli
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,495 [INFO] [skims.core.scan] Scan started at 2026-08-21 14:44:32 (UTC+00:00)
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,495 [INFO] [skims.core.scan] Namespace: velvet-elves-backend
+	1787323472692
+EVENTS	1787323472695	[33;1m2026-08-21 14:44:32,496 [WARNING] [skims.utils.repositories] Unable to find commit HEAD on analyzed directory[0m
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,496 [INFO] [skims.core.scan] Startup directory is: /src
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,496 [INFO] [skims.core.scan] Moving working dir to: /src
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,496 [INFO] [skims.core.analyze] Starting SAST analysis
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,506 [INFO] [skims.lib_path.analyze] Performing basic SAST analysis on 135 paths
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,545 [INFO] [skims.lib_path.analyze] Basic SAST analysis completed!
+	1787323472692
+EVENTS	1787323472695	2026-08-21 14:44:32,545 [INFO] [skims.core.analyze_root] Performing advanced SAST analysis on 551 paths
+	1787323472692
+EVENTS	1787323496728	2026-08-21 14:44:55,946 [INFO] [skims.core.analyze_root] Advanced SAST analysis completed!
+	1787323496715
+EVENTS	1787323496728	2026-08-21 14:44:55,947 [INFO] [skims.core.analyze] SAST analysis completed!
+	1787323496715
+EVENTS	1787323496728	2026-08-21 14:44:55,947 [INFO] [skims.core.scan] Analysis finished, writing results
+	1787323496715
+EVENTS	1787323496728	2026-08-21 14:44:55,949 [INFO] [skims.core.results] An output file has been written: /src/Fluid-Attacks-Results.csv
+	1787323496715
+EVENTS	1787323496728	2026-08-21 14:44:55,949 [INFO] [skims.core.scan] Scan finished at 2026-08-21 14:44:55 (UTC+00:00). Duration:  23 sec.
+	1787323496715
+EVENTS	1787323496728	2026-08-21 14:44:55,949 [INFO] [skims.core.cli] Summary: 4 vulnerabilities were found in your targets.
+	1787323496715
+EVENTS	1787323496728	
+	1787323496715
+EVENTS	1787323496728	[Container] 2026/08/21 14:44:56.538349 Running command echo "---- result head ----"
+	1787323496715
+EVENTS	1787323496728	---- result head ----
+	1787323496715
+EVENTS	1787323496728	
+	1787323496715
+EVENTS	1787323496728	[Container] 2026/08/21 14:44:56.546167 Running command wc -l "$CODEBUILD_SRC_DIR/Fluid-Attacks-Results.csv" || true
+	1787323496715
+EVENTS	1787323496728	79 /codebuild/output/src3790938416/src/Fluid-Attacks-Results.csv
+	1787323496715
+EVENTS	1787323496728	
+	1787323496715
+EVENTS	1787323496728	[Container] 2026/08/21 14:44:56.578539 Running command head -n 20 "$CODEBUILD_SRC_DIR/Fluid-Attacks-Results.csv" || true
+	1787323496715
+EVENTS	1787323496728	title,cwe,description,cvss_v4,cvss_v4_score,cvss_v4_severity,finding,kind,where,snippet,method
+
+	1787323496715
+EVENTS	1787323496728	266. Excessive Privileges - Docker,CWE-250,"No command found to create a group or user, make sure the container is running as non-root in velvet-elves-backend/Dockerfile",CVSS:4.0/AV:L/AC:L/AT:P/PR:L/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N/E:U,4.4,Medium,https://db.fluidattacks.com/wek/266,SAST,20,"
+	1787323496715
+EVENTS	1787323496728	   9 | WORKDIR /app
+	1787323496715
+EVENTS	1787323496728	  10 |
+	1787323496715
+EVENTS	1787323496728	  11 | # Install OS-level build deps (needed for cryptography / bcrypt)
+	1787323496715
+EVENTS	1787323496728	  12 | RUN apt-get update && apt-get install -y --no-install-recommends \
+	1787323496715
+EVENTS	1787323496728	  13 |     build-essential libffi-dev \
+	1787323496715
+EVENTS	1787323496728	  14 |     && rm -rf /var/lib/apt/lists/*
+	1787323496715
+EVENTS	1787323496728	  15 |
+	1787323496715
+EVENTS	1787323496728	  16 | COPY requirements.txt .
+	1787323496715
+EVENTS	1787323496728	  17 | RUN pip install --no-cache-dir -r requirements.txt
+	1787323496715
+EVENTS	1787323496728	  18 |
+	1787323496715

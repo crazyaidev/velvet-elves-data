@@ -1,0 +1,173 @@
+Subject: Re: Updated Task List
+
+Hi Audri,
+
+Thank you for this. This is the spreadsheet Jake said we should wait for before adding any more automatic letters. I compared it to the previous list, Jake’s file-logic answers, and what is actually running in Aime today.
+
+Short version: I will treat this file as the source of truth for how each task should behave. I am not going to delete the current task library and start over. Those IDs are already on live files, due dates, emails, attachments, and Aime. Wiping them would mix up existing deals. I will update the library in place, keep the IDs that already exist, and add only what is genuinely new.
+
+Below is the comparison, then the questions I need before I finish the cutover.
+
+
+WHAT ALREADY MATCHES
+The engine is already built around this model, not the old ASP.NET one:
+
+- Tasks are generated from a master library when a deal is created, filtered by Buy/Sell and Financed/Cash.
+- Due dates use FS/SS, a parent task or closing date, and the float you specified, including wizard values such as HOA delivery days, insurance commitment days, and inspection-response days.
+- Review Documentation (8), the welcomes (10, 20, 30, 60), Order Title (70), Confirm Title Order (80), Pending Reminder (50), and Inspection Response Reminder (240/245) already run as named letters. On Assisted they are drafted for Send. On Autopilot they may send when confidence is high enough. Manual never sends on its own.
+- Review Documentation finishes with no email when the packet is signed. If signatures are missing, it drafts a chase — that chase still waits for Send.
+- Loan Officer welcome and Order Title already withhold amendments and addenda (personal property / monetary agreements). Confirm Title Order currently still attaches them — see question 2.
+- HOA, home warranty, inspection, and cash-appraisal tasks already hide when the wizard / parsed contract says they do not apply.
+- Who orders title / who orders the home warranty already controls Order vs Confirm.
+- Cash Appraisal Ordered / Completed already email the buyer on Buy-Cash (agent on copy) and the co-op agent on Sell-Cash (assigned TC on copy). That matches 265 / 267 in your sheet without needing new IDs yet.
+- Aime already has Manual, Assisted, and Autopilot. Manual is a real kill-switch.
+- Closing-information letters never attach the Closing Disclosure (Jake’s rule on the live IDs 420 / 430 / 440 / 450).
+- Seller-side extras from earlier notes are already in the library: Inspection Completed for the seller (235), Pick Up Sign and Lockbox (453), Update MLS to Sold (455).
+- Attorney-closing tasks (900s) stay for attorney states. This spreadsheet is the title/escrow path.
+
+So this is a correction pass, not a rebuild.
+
+
+WHAT I WILL CHANGE TO MATCH THE NEW LIST
+These are real differences. I will apply them unless you tell me otherwise.
+
+1. Names, descriptions, targets, CCs, milestones, and “how to complete” text will be rewritten from this file.
+
+2. Dual-agency extras. The old list had Both-only IDs (95, 115, 135, 155, 215, 305, 375, 505). You dropped those. The product already has a dual-agency filter, so I can stop generating those extra rows. I still need you to confirm what a Both file should look like (question 1).
+
+3. Inspection Negotiated becomes two tasks: 250 buyer-side, 255 seller-side. Today 250 still covers all four use cases and 257 is the seller twin. I will split it the way you wrote, if 255 is meant to replace 257.
+
+4. Closing Gift becomes one task for all four use cases instead of buyer / both / seller variants.
+
+5. TC on copy. You now put the TC on almost every CC list. Today that is only true on a handful of tasks. I will add the TC wherever the new list names them, and only when a TC is actually on the deal.
+
+6. Request → Deliver chaining. HOA and utilities already work this way. I will make “when the request is completed, create/complete the deliver task from the documents we received” explicit, including Assisted drafting vs Autopilot sending — after you confirm which of those delivers may leave without a tap (question 3).
+
+7. Call-first language is already being replaced with email-first on appraisal, clear-to-close, and CD. I will finish that for the rest of the sheet.
+
+8. New work that is not in the product yet:
+   - 1010 End of Year Exemption Reminder (December blast to buyers in the current year)
+   - Title-cloud summary in the Deliver Title emails (parse liens/judgments into the body)
+   - Next-day 10am follow-up on unanswered request emails
+   - Three-day “step in” nags before a request is due
+
+9. Post-closing copy. You restored Request Referrals on 410/420 and a sales purpose on the internal thank-yous (10% off / first file free). Today those live as Request Testimonials (460/470) and feedback emails (500/510). I will follow this new list only after you confirm (question 6).
+
+
+WHAT I WILL NOT DELETE
+These exist in the product and are not in the new spreadsheet. I will keep them unless you say to remove them.
+
+- Attorney-closing library (900–970)
+- 235 Inspection Completed (seller follow-up)
+- 271 Appraisal Completed for cash (your sheet has 275 for Sell-Cash only and no Buy-Cash completed row)
+- 453 Pick Up Sign and Lockbox
+- 455 Update MLS to Sold
+
+If any of those should come out, say so.
+
+
+WHY I AM NOT RENUMBERING FROM 360 ONWARD
+From Contract Acceptance through Title to the Loan Officer, your new IDs match the current ones (5 through 350). After that, the new file reuses old numbers for different tasks.
+
+Examples:
+- Today 370 is Closing Gift. In the new file 370 is Buyer Closing Information.
+- Today 420 is Buyer Closing Information. In the new file 420 is Request Referrals (seller).
+- Today 460 is Request Testimonials. In the new file 460 is Internal Thank You.
+
+Those numbers are how the software finds a task: due dates, emails, attachment rules, and Aime all key off them. If I adopt the new numbers, a live Closing Gift becomes a closing-information letter, and the “no Closing Disclosure” rule lands on the wrong emails.
+
+So I will keep the current IDs for anything that already exists, and add 1010 (and 267/275 only if you want them as separate library rows). Function follows your new list. The numbers on screen can stay as they are.
+
+
+HOW I READ THE “AI USER TYPES” COLUMN
+I will not treat “Manual, Assisted & Autopilot” as “this letter sends on Manual.” Manual never sends on its own.
+
+Working read, unless you correct it:
+- Manual: Aime may still create the task and show the plan. Nothing leaves until the agent sends or completes it.
+- Assisted: Aime may draft. The agent taps Send.
+- Autopilot: only the authorized named letters may send without a tap. Everything else is drafted.
+
+Your sheet lists Inspection Negotiated as Assisted & Autopilot. We already agreed with you and Jake that inspection *reminders* may send and inspection *negotiation* never sends on its own. I will keep negotiation human unless you explicitly override that (question 4).
+
+
+QUESTIONS I NEED FROM YOU
+
+1. Dual agency (“Both”).
+The rule at the bottom says: if Both is selected, this task instance does not populate. In the old list that rule was per-task, not global. A global skip would leave a dual-agency file with almost no tasks.
+My read: you removed the extra Both-only IDs, and a dual-agency file should still get the buyer-side and seller-side tasks that apply, with one instance of shared tasks such as Order Title.
+Is that right? Or should some specific tasks truly disappear on Both?
+
+2. Confirm Title Order (80) vs Order Title (70).
+The new completion notes for 70 and 80 are the same letter: send the title company the fully executed agreement. Today 80 is a follow-up (“has title been ordered?”), and it currently attaches amendments — the opposite of the new “do not deliver personal-property / monetary amendments” rule.
+Should 80 stay a follow-up, still withhold those amendments, and not re-send the full package unless title was never ordered?
+
+3. Which additional letters may send on Autopilot?
+Until this sheet, the only unattended letters were welcomes, Order Title / Confirm Title Order, Pending Reminder, and inspection reminders.
+This sheet says Autopilot should deliver HOA docs and utility info once the request is done. If that is the grant, I will add those to the authorized list. I will not add Clear to Close, Closing Disclosure Delivered, closing-information, referrals, or thank-yous to unattended send unless you name them.
+
+4. Inspection Negotiated (250 / 255).
+Keep this as a human complete (no automatic email), matching the earlier reminder-vs-negotiation split?
+
+5. Order Home Warranty (170).
+Old list: target is the home warranty company; send them the order and send the invoice to title.
+New list: target is Agent/TC; send the invoice to title and the co-op agent. AI User Types is blank.
+Today this is drafted for Send; it does not send on its own.
+Is this now an internal reminder for us to place the order, not an email to the warranty company? And should it stay draft-only?
+
+6. Confirm Home Warranty (180).
+New target is “Co-op Agent/TC”. Is the TC the recipient, or on copy? Today the target is the co-op agent.
+
+7. Cash Appraisal Completed.
+You added 275 for Sell-Cash to the co-op agent. There is no Buy-Cash completed row. Today 271 covers cash on both sides (buyer on Buy-Cash, co-op + TC on Sell-Cash).
+Should I keep 271 as that pair, add a Buy-Cash completed task to the buyer, or is cash-buyer completed intentionally omitted?
+
+8. Referrals vs testimonials, and internal thank-yous.
+New 410/420 say Request Referrals (social and online). Earlier direction was Request Testimonials and “do not ask for referrals in this letter.”
+New 450/460 are sales emails (discount / first file free). Today those are feedback and rating emails (500/510).
+Which version should ship?
+
+9. Year-end exemption reminder (1010).
+Confirm:
+- Send date is December 1 each year
+- Recipients are every buyer on a file that closed in that calendar year
+- It is not a per-deal closing task
+- Copy uses the current year’s December 31 deadline, not a hard-coded 2026
+- Manual still does not send it unattended
+
+10. Title clouds on Deliver Title (300 / 310 / 320).
+Parsing the title policy for liens, judgments, and other clouds is not built yet. Do you want that in this pass, or should delivery go out with the title commitment attached and the cloud summary as a follow-on?
+
+11. Request follow-up timers.
+You specified:
+- No reply by 10am local the next day → Aime sends a follow-up and CCs the agent and TC
+- Still open 3 days before due → the user is notified each of those 3 days, on all three settings
+Neither timer exists yet. Are those in scope for this cutover?
+
+12. Always-CC rules.
+You wrote: the transaction agent is CCd on all communication, and a TC on the file is CCd on all communication. Some tasks already list Agent or TC in the CC column. Should I treat the sheet CC column as the extra people, and always add Agent + TC on top, or only CC who is listed on that row?
+
+13. Tasks 235, 453, and 455.
+Keep them? They are not in the new sheet, but they came from earlier notes from you.
+
+
+ITEMS IN THE SPREADSHEET THAT LOOK LIKE TYPOS
+I will not code these as written until you confirm.
+
+- 150 development notes say “deliver the HOA docs it received by completing task 130.” I believe that should be utility info, not HOA.
+- 160 target is Seller; the completion notes say email the docs to the buyer’s agent. Which is it?
+- 255 depends on 240 (buyer-side reminder) instead of 245 (seller-side reminder). I think it should depend on 245. Completion notes also say “notify the buyer” on a sell-side task.
+- 255, 265, 267, 275, 310 use cases are missing a hyphen (“Sell Cash” vs “Sell-Cash”). I will treat them as Sell-Cash / Buy-Cash.
+- 267 and 275 have no Deprel / Task Dependent / Float. I will keep today’s cash pair (ordered from contract acceptance +3; completed from ordered) unless you specify otherwise.
+- 170 has no AI User Types.
+- The global “If Both is selected, this task instance does not populate” line looks like leftover per-task language. See question 1.
+- Co-op Agent Welcome says if Review Documentation needs signatures or contacts, include those asks in the welcome and CC the agent and TC. Today the welcome is the named letter and missing items surface on Needs You / Add contact. Do you want those asks merged into the welcome, or kept separate?
+
+
+HOW I WILL PROCEED
+I will not touch live deals until these answers are in. Existing open tasks keep their current IDs and history. New deals, and a targeted refresh of templates, pick up the updated library.
+
+If you want, I can send a one-page map of old ID → kept ID → new behavior before I apply it, so you can scan it in five minutes.
+
+Thank you for tightening this to the current system. The new columns (AI User Types, attachments, AI logic, how to complete) are exactly what the engine needs.
+
+Jan

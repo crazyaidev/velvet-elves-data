@@ -1,0 +1,45 @@
+{
+  "name": "velvet-elves-casa-zap-dast",
+  "description": "CASA AL1 official ZAP DAST of staging SPA/API. XML artifact only. Unauthenticated.",
+  "source": {
+    "type": "S3",
+    "location": "velvet-elves-stage-codebuild-source-388482955098/casa-al1/zap-casa-scan.zip",
+    "buildspec": "buildspec.yml"
+  },
+  "artifacts": {
+    "type": "S3",
+    "location": "velvet-elves-stage-codebuild-source-388482955098",
+    "path": "casa-al1/results",
+    "namespaceType": "BUILD_ID",
+    "name": "zap-dast-results",
+    "packaging": "ZIP",
+    "encryptionDisabled": true
+  },
+  "environment": {
+    "type": "LINUX_CONTAINER",
+    "image": "aws/codebuild/standard:7.0",
+    "computeType": "BUILD_GENERAL1_MEDIUM",
+    "privilegedMode": true,
+    "imagePullCredentialsType": "CODEBUILD",
+    "environmentVariables": [
+      {
+        "name": "SCAN_TARGET",
+        "value": "spa",
+        "type": "PLAINTEXT"
+      }
+    ]
+  },
+  "serviceRole": "arn:aws:iam::388482955098:role/velvet-elves-casa-codebuild-role",
+  "timeoutInMinutes": 360,
+  "queuedTimeoutInMinutes": 30,
+  "logsConfig": {
+    "cloudWatchLogs": {
+      "status": "ENABLED",
+      "groupName": "/aws/codebuild/velvet-elves-casa-zap-dast"
+    }
+  },
+  "tags": [
+    { "key": "project", "value": "velvet-elves" },
+    { "key": "purpose", "value": "casa-al1" }
+  ]
+}
