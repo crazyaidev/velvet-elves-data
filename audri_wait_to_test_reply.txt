@@ -1,0 +1,14 @@
+Subject: Re: Aime testing — please wait for the updated environment
+
+Hi Audri,
+
+Please wait to continue testing. The library from your answers is going in now, and emails / automation will not match the updated task list until that work is on staging.
+
+I am proceeding from your ticks and the updated spreadsheet. Live files are not being wiped, and we are not renumbering the IDs already on deals.
+
+Once that work is complete, I will retest and update the Aime and AI Automation Testing guidelines, then share them in Google Docs.
+
+I plan to finish today so you can pick testing back up tomorrow morning on the updated environment.
+
+Thank you,
+Jan

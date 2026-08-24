@@ -34,4 +34,4 @@ Draft for the lab packet. Facts below are as of 21 Aug 2026. Do not claim scans 
 
 ## AWS AI / OpenAI training
 
-- AWS Organizations `AISERVICES_OPT_OUT_POLICY` enabled org-wide 20 Aug 2026 (includes Textract). OpenAI Data-controls screenshot **still outstanding** (no `OPENAI_ADMIN_API_KEY` in prod).
+- AWS Organizations `AISERVICES_OPT_OUT_POLICY` enabled org-wide 20 Aug 2026 (includes Textract). OpenAI **Sharing** tab screenshot **still outstanding** (no `OPENAI_ADMIN_API_KEY` in prod): Settings → Data controls → Sharing, all three share radios Disabled. Do not claim ZDR from the Data retention tab.

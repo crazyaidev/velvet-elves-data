@@ -1,0 +1,25 @@
+Subject: Re: Updated Task List — answers recorded
+
+Hi Audri,
+
+Thank you. I have your ticks and the resend spreadsheet. I am treating those as the source of truth for behavior. I am not deleting the live task library, and I am not renumbering from 360 onward — those IDs are already on live files.
+
+Short version of what I recorded:
+
+- Dual agency: no global skip. Title and Loan Officer once. Buyer and seller both.
+- 70 and 80 are the same package with different scripts (we order vs courtesy when the co-op orders). Not a “has title been ordered?” follow-up.
+- Autopilot may send request letters, and deliver only after the attachment or info is in. CTC, closing disclosure check, closing-information, and testimonials may send on Autopilot if we explain them. Low confidence still drafts for a tap.
+- Inspection Negotiated is Aime as intermediary (parse responses). Aime does not negotiate terms.
+- Order Home Warranty is an internal reminder to the agent and TC.
+- Cash appraisal splits by target (Buy-Cash vs Sell-Cash).
+- Request Testimonials and feedback emails stay. You will send scripts.
+- December 1 exemption reminder to buyers on files that closed that year.
+- Title commitment now; cloud summary later.
+- Next-day 10am follow-up and the 3-day “step in” nags are in this cutover.
+- Library emails use the CC column on the row. Agent/TC CC on tasks someone adds later, if applicable.
+- Drop seller Inspection Completed (235). Keep lockbox and MLS Sold under the IDs already on live files.
+
+I will apply this to new files and a targeted template refresh. Existing open tasks keep their current IDs and history.
+
+Thank you,
+Jan

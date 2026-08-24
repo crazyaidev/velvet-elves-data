@@ -15,6 +15,6 @@ Folder: `casa_al1_evidence/m9/`. Fluid Attacks SAST CSV and official ZAP CASA XM
 | M9g | `M9g_logging.md` | draft — `_mask_email`; no token/body log claim beyond code inspection |
 | M9h | `M9h_scan_process.md` | draft — Fluid CSV + official ZAP SPA/API unauth + API auth XML |
 | M9i | `M9i_incident_response.md` | draft — notify Google; 30-day public SLA; code gaps on token wipe |
-| M9j | `M9j_subprocessors_ai.md` | draft — AWS opt-out live; OpenAI Data-controls screenshot **not captured** |
+| M9j | `M9j_subprocessors_ai.md` | draft — AWS opt-out live; OpenAI **Sharing** tab screenshot **not captured** (production org; all three share radios Disabled) |
 
 Also: `self_attestation_draft.md`.

@@ -23,10 +23,25 @@ Privacy copy: providers are prohibited from training on our data. API terms defa
 
 ### Capture (owner / org admin on the production OpenAI org)
 
-1. Sign in at [platform.openai.com](https://platform.openai.com) as the Velvet Elves API org owner (the org that owns the live `OPENAI_API_KEY`, not ChatGPT.com).
-2. Open **Settings → Organization → Data controls**. Direct: [https://platform.openai.com/settings/organization/data-controls](https://platform.openai.com/settings/organization/data-controls)
-3. Confirm **Improve the model for everyone** (or equivalent “share data to train”) is **off**. Do not turn on Zero Data Retention unless we actually have that contract — we do not claim ZDR.
-4. Save a PNG that shows the org name, the toggle/state, and the URL/date. Drop it here as `openai-data-controls.png` (no API keys in frame).
-5. Anthropic: API Commercial Terms already say no training on Customer Content. Screenshot only if the lab asks.
+There is **no** single control named “Improve the model for everyone.” Platform **Settings → Data controls** has four tabs. Only **Sharing** is the no-training evidence. Do not screenshot Visibility, Hosted tools, or Data retention for this claim.
 
-Until that PNG is in this folder, M9j is not lab-complete.
+1. Sign in at [platform.openai.com](https://platform.openai.com) as the Velvet Elves **API** org owner (the org that owns the live `OPENAI_API_KEY`). Not ChatGPT.com. The org name in the sidebar must be the production org, not a personal playground org.
+2. Open **Settings → Data controls**, then click the **Sharing** tab. Direct: [https://platform.openai.com/settings/organization/data-controls](https://platform.openai.com/settings/organization/data-controls)
+3. On **Sharing**, all three radios must be **Disabled** (API default is off unless someone opted in):
+   - **Enable sharing of model feedback from the Platform** — Playground thumbs-down / chat feedback used to train models.
+   - **Share evaluation and fine-tuning data with OpenAI** — eval/fine-tune prompts, completions, grading.
+   - **Share inputs and outputs with OpenAI** — general API inputs/outputs used to improve services and models. This is the one that used to be described as “Improve the model.”
+4. Click **Save** if you changed anything. Leave them Disabled.
+5. Save a PNG that shows: sidebar org name, **Sharing** tab selected, all three **Disabled**, and the URL. Drop it here as `openai-data-controls.png`. No API keys in frame.
+
+**Do not treat these other tabs as the training proof:**
+
+| Tab | What it actually is |
+| --- | --- |
+| Visibility | Who inside the org can see Threads / Usage / Logs. Not training. |
+| Hosted tools | Whether Responses API tools (MCP, web search, file search, image gen, code interpreter) are allowed. Not training. |
+| Data retention | **Your** audit log + API call logging in the OpenAI dashboard (`Disabled` / `Enabled per call` / `Enabled for all projects`). Not Zero Data Retention. We have no ZDR contract — do not claim ZDR even if logging is disabled. |
+
+Anthropic: API Commercial Terms already say no training on Customer Content. Screenshot only if the lab asks.
+
+Until the **Sharing** PNG from the **production** org is in this folder, M9j is not lab-complete. Do not file a personal-account screenshot as evidence.

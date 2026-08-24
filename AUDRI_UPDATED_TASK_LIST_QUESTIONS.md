@@ -5,6 +5,7 @@
 **Date:** August 24, 2026
 **About:** The updated `AI_Task_List.csv` compared with how Aime works today
 **What I need from you:** Tick one box under each question. If the recommendation is wrong, use **Different** and write the rule you want.
+**Audri answered:** August 24, 2026 — ticks recorded from the shared Google Doc; resend spreadsheet is `Updated_AI_Task_List.csv`. Working reading: `AUDRI_UPDATED_TASK_LIST_ANSWERS.md`.
 
 ---
 
@@ -22,22 +23,22 @@ Already decided — not re-asked here: Manual never sends on its own; Assisted d
 
 ## At a glance
 
-| # | Question | Blocking? | My recommendation |
+| # | Question | Blocking? | Recorded answer |
 | --- | --- | --- | --- |
-| 1 | Dual agency (“Both”) | Yes | Keep buyer-side and seller-side tasks. One instance of shared tasks such as Order Title. Do not skip the whole file. |
-| 2 | Confirm Title Order (80) vs Order Title (70) | Yes | Keep 80 as a follow-up. Withhold personal-property / monetary amendments. Do not re-send the full package unless title was never ordered. |
-| 3 | Extra Autopilot letters | Yes | Add HOA deliver and utility deliver only if you grant them. Do not add CTC, CD, closing-information, referrals, or thank-yous to unattended send. |
-| 4 | Inspection Negotiated | Yes | Keep it human. Reminders may send. Negotiation does not. |
-| 5 | Order Home Warranty (170) | Yes | Internal reminder for us. Drafted for Send. Not an email to the warranty company. |
-| 6 | Confirm Home Warranty (180) | Yes | To = co-op agent. TC on copy when a TC is on the file. |
-| 7 | Cash Appraisal Completed | Yes | Keep live 271 for both cash sides (buyer on Buy-Cash; co-op + TC on Sell-Cash). Do not add 267/275 as new IDs. |
-| 8 | Referrals vs testimonials | Yes | Keep Request Testimonials. Do not ask for referrals. Keep internal thank-yous as feedback, not sales emails. |
-| 9 | Year-end exemption reminder (1010) | Yes | December 1 blast to buyers on files that closed that year. Year-aware deadline. Manual does not send it unattended. |
-| 10 | Title clouds on Deliver Title | No | Ship the title commitment now. Cloud summary as a follow-on. |
-| 11 | Request follow-up timers | Yes | Confirm whether next-day 10am follow-up and the 3-day “step in” nags are in this cutover. |
-| 12 | Always-CC | Yes | CC only who is listed on that row, plus Agent and TC when they are listed or already on the file as assigned TC. |
-| 13 | Tasks 235, 453, 455 | Yes | Keep them. They came from earlier notes from you. |
-| 14–21 | Spreadsheet typos | Yes | Confirm the readings in Section 2. |
+| 1 | Dual agency (“Both”) | Yes | Drop the global skip. Vendor targets once. Buyer or seller targets both. |
+| 2 | Confirm Title Order (80) vs Order Title (70) | Yes | Same package, different script (we order vs courtesy when co-op orders). |
+| 3 | Extra Autopilot letters | Yes | Request tasks may send. Deliver after the file/info is in. CTC, CD, closing-information, testimonials on Autopilot. |
+| 4 | Inspection Negotiated | Yes | Intermediary: parse responses. Aime does not negotiate terms. |
+| 5 | Order Home Warranty (170) | Yes | Internal reminder to the agent and TC. |
+| 6 | Confirm Home Warranty (180) | Yes | To = co-op agent. TC on copy when assigned. |
+| 7 | Cash Appraisal Completed | Yes | Split by target. Keep 271 Buy-Cash. Add 267 / 275 Sell-Cash. |
+| 8 | Referrals vs testimonials | Yes | Keep Request Testimonials and feedback emails. Scripts to follow. |
+| 9 | Year-end exemption reminder (1010) | Yes | December 1 blast to buyers on files that closed that year. |
+| 10 | Title clouds on Deliver Title | No | Title commitment now. Cloud summary later. |
+| 11 | Request follow-up timers | Yes | Both timers in this cutover. |
+| 12 | Always-CC | Yes | Do not invent extra CCs on library rows. Agent/TC on user-added tasks. |
+| 13 | Tasks 235, 453, 455 | Yes | Drop 235. Keep lockbox / MLS as live 453 / 455. |
+| 14–21 | Spreadsheet typos | Yes | Confirmed. Resend spreadsheet is the corrected file. |
 
 ---
 
@@ -55,7 +56,7 @@ You dropped the extra Both-only IDs (95, 115, 135, 155, 215, 305, 375, 505). The
 
 - [ ] Yes — buyer-side + seller-side tasks, one instance of shared tasks
 - [ ] These specific tasks should disappear on Both: ________________________________
-- [ ] Different: ________________________________
+- [x] Different: Disregard and remove this rule. If the target is a vendor (Title and Loan Officer) then only one instance of the task populates. If the target is buyer or seller both instances of the task populates.
 
 ---
 
@@ -68,7 +69,7 @@ You dropped the extra Both-only IDs (95, 115, 135, 155, 215, 305, 375, 505). The
 **Your answer:**
 
 - [ ] Yes — 80 stays a follow-up, withhold those amendments, no second full package
-- [ ] 70 and 80 should send the same full package
+- [x] 70 and 80 should send the same full package — The only difference is scripting. For example task 70 is the task for the transaction agent to order title. Task 80 is for when the co-op agent is ordering title. E.g. “As a courtesy to \<co-op agent name\> would like to engage you as the escrow agent....”
 - [ ] Different: ________________________________
 
 ---
@@ -91,7 +92,11 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 - [ ] Add HOA deliver and utility deliver only
 - [ ] Stop after the current named list (no new Autopilot letters)
 - [ ] Add these as well, in this order: ________________________________
-- [ ] Different: ________________________________
+- [x] Different: Request task types should send on autopilot. They are scripts sent to the target asking for information. E.g., Clear to Close - “Hi \<loan officer name\>, have you received the CTC from the underwriter yet? If not, when do you expect to receive it?” Then, if the loan officer responds with “Yes, we have the CTC” the AI completes the task. If the answer is no, AI should respond with “when do you expect the CTC?” If the answer is no, it should be by 27-aug. Then the AI should reschedule the task for 27-aug and run a follow up script to ensure they have received the CTC.
+
+So, Clear to Close, Closing Disclosure Delivered, closing-information, referrals tasks can all run on Auto if we explain to our agent the nature of these tasks. The Thank You task is simply a delivered email from VE thanking the targets for using the app and requesting them to do so in the future.
+
+Also, to be clear, the deliver tasks only happen if AI has parsed an email and finds an attachment or information in the email that matches the requested information. (Utilities can be attached or included in an email, HOA documents will always be an attachment like title work is.) Once the request task goes out and the response is received AI will upload any attachment in the Document Center and complete the delivery task. (Deliver Title, HOA Docs, Utility Info, etc.) If the information isn’t an attachment, it will copy and paste the information (Utility Info) in a script to the target (buyer) and complete the task. So, the “request is done” when the app receives the requested information. If the confidence is low (on autopilot) then it treats the task like Assisted and drafts the email and notifies the transaction agent and/or TC (the user(s)) that manual intervention/review is required to complete the task. (then the learning agent continues to learn how to complete this task for future iterations in our overnight review process).
 
 ---
 
@@ -105,7 +110,7 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 
 - [ ] Keep it human (no automatic email). Split 250 / 255 as written
 - [ ] Autopilot may send a negotiation letter
-- [ ] Different: ________________________________
+- [x] Different: The Inspection negotiated task is not AI negotiating terms/inspection requests. This task is asking the transaction agent and parsing the inspection responses for any new requests, buyer & sellers responses and any accepted responses signed by both the buyer and seller. So AI is only acting as an intermediary for the transaction agent, not negotiating any terms.
 
 ---
 
@@ -119,7 +124,7 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 
 - [ ] Internal reminder. Drafted for Send. Not an email to the warranty company
 - [ ] Email the warranty company, as in the old list
-- [ ] Different: ________________________________
+- [x] Different: This is an internal reminder to the transaction agent and TC to order the home warranty.
 
 ---
 
@@ -131,7 +136,7 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 
 **Your answer:**
 
-- [ ] To = co-op agent. TC on copy when assigned
+- [x] To = co-op agent. TC on copy when assigned
 - [ ] To = TC
 - [ ] Different: ________________________________
 
@@ -148,7 +153,7 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 - [ ] Keep 271 for both cash sides (no new IDs)
 - [ ] Add a Buy-Cash completed task to the buyer, and 275 for Sell-Cash
 - [ ] Omit cash-buyer completed on purpose
-- [ ] Different: ________________________________
+- [x] Different: We added 271 (Buy-Cash) because the target is different.
 
 ---
 
@@ -160,10 +165,12 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 
 **Your answer:**
 
-- [ ] Keep testimonials + feedback emails (current product)
+- [x] Keep testimonials + feedback emails (current product)
 - [ ] Switch to Request Referrals + sales emails (new sheet)
 - [ ] Testimonials for clients, sales emails for internals
 - [ ] Different: ________________________________
+
+These will be sent to the target and we will provide scripts for clarity.
 
 ---
 
@@ -180,7 +187,7 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 
 **Your answer:**
 
-- [ ] Yes — as written above
+- [x] Yes — as written above
 - [ ] Recipients are every buyer on any file in that year, including open files
 - [ ] Do not add 1010
 - [ ] Different: ________________________________
@@ -195,7 +202,7 @@ This sheet says Autopilot should deliver HOA docs and utility info once the requ
 
 **Your answer:**
 
-- [ ] Title commitment now. Cloud summary later
+- [x] Title commitment now. Cloud summary later
 - [ ] Block this pass until the cloud summary is in the email
 - [ ] Different: ________________________________
 
@@ -214,7 +221,7 @@ Neither timer exists yet.
 
 **Your answer:**
 
-- [ ] Both timers in this cutover
+- [x] Both timers in this cutover
 - [ ] Next-day 10am follow-up only
 - [ ] 3-day “step in” nags only
 - [ ] Neither in this cutover
@@ -233,7 +240,7 @@ Neither timer exists yet.
 - [ ] Row CC + assigned TC when present
 - [ ] Always Agent + TC on top of the row, on every email
 - [ ] Only who is listed on that row
-- [ ] Different: ________________________________
+- [x] Different: We agree, do not invent extra CCs. The rule exists so when/if a user or AI adds additional tasks then the agent/TC would be CC’d on those task communications, if applicable.
 
 ---
 
@@ -253,7 +260,10 @@ They came from earlier notes from you. Attorney-closing tasks (900s) also stay; 
 
 - [ ] Keep 235, 453, and 455
 - [ ] Remove these: ________________________________
-- [ ] Different: ________________________________
+- [x] Different:
+  - 235 Inspection Completed (seller follow-up) — Task is not necessary because sellers do not have inspections.
+  - 453 Pick Up Sign and Lockbox — This has been added back in and is now task 470 with a dependency of −5 days.
+  - 455 Update MLS to Sold — This has been added back in and is now task 480.
 
 ---
 
@@ -267,7 +277,7 @@ I will not code these as written until you confirm.
 
 **Your answer:**
 
-- [ ] That should say utility info, not HOA
+- [x] That should say utility info, not HOA (updated spreadsheet and will resend)
 - [ ] Leave it as written
 - [ ] Different: ________________________________
 
@@ -279,7 +289,7 @@ I will not code these as written until you confirm.
 
 **Your answer:**
 
-- [ ] To = co-op / buyer’s agent (notes win)
+- [x] To = co-op / buyer’s agent (notes win)
 - [ ] To = Seller (target column wins)
 - [ ] Different: ________________________________
 
@@ -291,7 +301,7 @@ I will not code these as written until you confirm.
 
 **Your answer:**
 
-- [ ] Depend on 245. Notify the seller
+- [x] Depend on 245. Notify the seller
 - [ ] Leave it as written
 - [ ] Different: ________________________________
 
@@ -303,7 +313,7 @@ I will not code these as written until you confirm.
 
 **Your answer:**
 
-- [ ] Treat them as Sell-Cash / Buy-Cash
+- [x] Treat them as Sell-Cash / Buy-Cash (spreadsheet is updated and will resend)
 - [ ] Different: ________________________________
 
 ---
@@ -316,7 +326,7 @@ I will not code these as written until you confirm.
 
 - [ ] Keep today’s cash pair (ordered from contract acceptance +3; completed from ordered). No new IDs
 - [ ] Use these date rules: ________________________________
-- [ ] Different: ________________________________
+- [x] Different: Updated spreadsheet and will resend.
 
 ---
 
@@ -326,7 +336,7 @@ I will not code these as written until you confirm.
 
 - [ ] Draft-only (Assisted and Autopilot draft; Manual does not send)
 - [ ] Manual only
-- [ ] Different: ________________________________
+- [x] Different: Updated spreadsheet. Will resend.
 
 ---
 
@@ -336,7 +346,7 @@ I will not code these as written until you confirm.
 
 **Your answer:**
 
-- [ ] Ignore the global line. Question 1 is the rule
+- [x] Ignore the global line. Question 1 is the rule
 - [ ] Different: ________________________________
 
 ---
@@ -348,13 +358,11 @@ I will not code these as written until you confirm.
 **Your answer:**
 
 - [ ] Keep them separate (welcome is the welcome; missing items stay on Needs You)
-- [ ] Merge those asks into the welcome
+- [x] Merge those asks into the welcome
 - [ ] Different: ________________________________
 
 ---
 
 ## How I will proceed
 
-I will not touch live deals until these answers are in. Existing open tasks keep their current IDs and history. New deals, and a targeted refresh of templates, pick up the updated library.
-
-If you want, I can send a one-page map of old ID → kept ID → new behavior before I apply it.
+Answers are in. Existing open tasks keep their current IDs and history. New deals, and a targeted refresh of templates, pick up the updated library. Working reading and ID map: `AUDRI_UPDATED_TASK_LIST_ANSWERS.md`.
