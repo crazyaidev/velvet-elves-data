@@ -2,11 +2,12 @@
 
 ## Features Currently Complete — Client Feedback Requested
 
-**Last Updated:** August 19, 2026  
+**Last Updated:** August 25, 2026  
 **Test Environment:** https://app.stage.velvetelves.com  
 **Recommended Browsers:** Chrome (please allow pop-ups)  
 **Reviewer:** Jake and Audri — please fill in the Feedback block under each feature  
-**Sign in:** with your own Velvet Elves account, in your own workspace
+**Sign in:** with your own Velvet Elves account, in your own workspace  
+**This round:** the updated task library is on staging. Create **new** files for Features 14 and 27–32. Open tasks on older files keep their old names, targets, and history until you complete them.
 
 ---
 
@@ -17,9 +18,10 @@
 This is the testing pass for Aime and AI automation as the product runs today. It covers:
 
 - How the live file is set: Manual / Assisted / Autopilot, and intake **Fast intake**
-- Named letters (welcomes, title order, pending reminder, inspection deadline reminder)
+- Named letters that may send on Autopilot (welcomes, title order, pending reminder, inspection deadline reminder)
+- The updated task library on **new** files: Dual (Both), Order Title vs Confirm Title Order, cash appraisal split, Deliver Utility Info to the buyer’s agent, Order Home Warranty as an internal reminder, Closing Gift, no seller Inspection Completed
 - Needs You, drafts, inbound mail, money, dates
-- Closing Disclosure on closing-information letters, Terminated vs Closed, cash appraisal recipients
+- Closing Disclosure on closing-information letters, Terminated vs Closed
 
 Each feature has a page address, numbered steps, a concrete example you can copy, what you should see, and a Feedback block.
 
@@ -65,8 +67,10 @@ Create these in **your** workspace. Put **only addresses you control** on the **
 | 400 Test Cedar St | Buyer, financed, **buyer email left blank** | Autopilot | Feature 18 — no guessed address |
 | 500 Test Elm Dr | Buyer, cash, **Appraisal On This Cash Deal? = Yes** | Assisted | Feature 14 Buy-Cash |
 | 600 Test Birch Way | Seller, cash, co-op + TC on Contacts, appraisal = Yes | Assisted | Feature 14 Sell-Cash |
+| 700 Test Dual Ave | Buyer **and** seller (Both), financed, Contacts has emails you own | Assisted | Feature 28 Dual |
+| 800 Test Utility Ln | Seller, financed, utility information uploaded on Documents | Assisted | Feature 30 Deliver Utility Info |
 
-You do not have to create all six on day one. Create 100 Test Oak Lane first. Add the others when you reach that feature.
+You do not have to create every file on day one. Create 100 Test Oak Lane first. Add Dual, cash, and listing files when you reach those features.
 
 **Worked example — one send-safe path vs one send path**
 
@@ -77,11 +81,15 @@ You do not have to create all six on day one. Create 100 Test Oak Lane first. Ad
 
 Do not hunt for these in the product, and do not report them as misses.
 
-- Extra named letters beyond welcome, title-order, and inspection-reminder. Do not invent new letters that should send without a tap.
+- Request / deliver / Clear to Close / Closing Disclosure check / closing-information / Request Testimonials sending **without a tap**. Those Autopilot letters are not authorized yet. Welcomes, title-order, pending reminder, and inspection **deadline** reminder still may send on Autopilot.
+- Next-day 10am follow-up, or daily “step in” nags three days before a request is due. Not built.
+- A December 1 year-end exemption blast (1010). Not built.
+- A lien / judgment “cloud summary” in Deliver Title. The title commitment may still go out; the cloud list is later.
 - Buyers and sellers talking to Aime. Clients keep asking the team. A client-facing Aime chat is a fail if you see one.
 - A later amendment changing a date ("the file used to say X; this later signed document says Y"). Not shipped.
 - A countdown that then sends mail. Not built.
 - Listing or marketing after a fallen-through deal.
+- Spreadsheet numbers from 360 onward on the screen. The work follows the updated list; the **number on the task stays the live ID** (for example Closing Gift stays **370**, lockbox / MLS Sold stay **453** / **455**, seller Inspection Negotiated stays **257**).
 
 ### Accounts you will need
 
@@ -106,8 +114,8 @@ Do not hunt for these in the product, and do not report them as misses.
 1. Mailbox, then (Admin / owner) Settings → AI & Automation
 2. Needs You, Fast intake on Confirm Details, and (optional) Register / onboarding cards
 3. 100 Test Oak Lane — posture, Contacts, Email, Complete this task, Closing Disclosure, Completed / Terminated
-4. Cash files (500 / 600) for appraisal recipients
-5. Named letters on 200 / 300 / 400 (Manual, Autopilot, missing email)
+4. **New** files for the updated library: Dual (700), title 70 vs 80, listing utility (800), Order Home Warranty, cash appraisal (500 / 600)
+5. Named letters on 200 / 300 / 400 (Manual, Autopilot, missing email) — still only the authorized Autopilot set
 6. Drafts, blocked tasks, inbound wire mail, dates, and copy that should not appear
 
 ---
@@ -586,14 +594,14 @@ After create: Tasks → kebab → **Email transaction party**
 2. On **Contacts**, under **Agents**, **Add agent** with `you+coop@gmail.com` (or another inbox you own). Use **Assign team** for a **transaction coordinator** with an inbox you own.
 3. Open Appraisal Ordered / Completed the same way. Note To and Cc.
 
-**Both-Cash (optional):** represent Buyer & Seller, cash, appraisal Yes. Expect the same To as Buy-Cash.
+**Both-Cash (optional):** represent Buyer & Seller, cash, appraisal Yes. Expect the same To as Buy-Cash (buyer). Do **not** expect a co-op appraisal letter on Dual — there is no co-op on a Both file.
 
 **Expected Result**
 
-- Buy-Cash and Both-Cash: **To:** the Buyer (example: `you+buyer@gmail.com`). Not the loan officer. The agent may be on Cc.
-- Sell-Cash: **To:** the co-op agent. **Cc:** includes the assigned transaction coordinator. Not To the buyer. Not To the loan officer.
+- Buy-Cash: **Appraisal Ordered** and **Appraisal Completed** (live IDs 265 / 271). **To:** the Buyer (example: `you+buyer@gmail.com`). Not the loan officer. The agent may be on Cc.
+- Sell-Cash: the same **names** on Tasks, live IDs **267** / **275**. **To:** the co-op agent. **Cc:** includes the assigned transaction coordinator. Not To the buyer. Not To the loan officer.
 - These tasks are not automatic sends. Closing the dialog sends nothing.
-- Fail: To is empty; To is the other side’s client on a listing; the task is missing even though you chose Yes — buyer is appraising.
+- Fail: To is empty; To is the other side’s client on a listing; Buy-Cash still emails the co-op; Sell-Cash still emails the buyer; the task is missing even though you chose Yes — buyer is appraising.
 
 **Feedback**
 
@@ -615,13 +623,13 @@ Letters that may send without a tap — **Autopilot only**, Named letters **Allo
 | --- | --- | --- |
 | Buyer / seller / co-op welcome | That party | Their email on Contacts |
 | Loan officer welcome | Lender | Email and the purchase agreement |
-| Order Title / Confirm Title Order | Title company or title rep | Email and the purchase agreement. If title is already ordered, Confirm Title Order marks done — it does not mail twice |
+| Order Title / Confirm Title Order | Title company or title rep | Email and the purchase agreement. Wizard chooses **Order Title** when your side orders title, **Confirm Title Order** when the co-op orders. Confirm Title Order is the courtesy-order letter (“as a courtesy to … engage you as the escrow agent”), not a “has title been ordered?” follow-up. Both withhold personal-property and monetary addenda / amendments. |
 | Pending reminder | You (the account holder), not a client | MLS pending nudge |
 | Inspection response reminder | You (the account holder) | Inspection reminders **Allowed**. Deadline only. No repair or negotiation language |
 
 Review Documentation completes with no email when the packet is signed. If signatures are missing, it drafts a chase — that chase waits for Send.
 
-Order Home Warranty is drafted for you to send. It does not send on its own.
+Order Home Warranty is an **internal reminder** to the transaction agent (TC on copy when assigned). It is drafted for you to send. It does not email a warranty company, and it does not send on its own.
 
 ### 15. Manual — named letters do not send
 
@@ -706,7 +714,8 @@ Admin: Preview next tick, then **Run AI tasks (sends deal email)** only if would
 
 - Welcomes for parties you captured may send and complete.
 - Loan officer welcome and Order Title wait without the purchase agreement; they may send if the contract is on the file.
-- At most one of each letter. Confirm Title Order does not mail again if title is already ordered.
+- Order Title / Confirm Title Order must not attach personal-property or monetary addenda / amendments even when those files are on Documents.
+- At most one of each letter. The wizard picks Order Title **or** Confirm Title Order, not both.
 - Automatic named letters sign as **Aime, Assistant to the agent** when Aime signature is On.
 - Fail: second welcome; letter to someone not on Contacts; Order Title sent with no purchase agreement.
 - Paused / Terminated / Completed / Closed files are not in would-send.
@@ -781,7 +790,8 @@ A file with an inspection response deadline → Tasks
 
 - To is you (account holder), not the buyer or seller.
 - Deadline only. Fail examples in the body: “please send repair requests,” “accept or reject the inspection,” negotiation language.
-- Inspection Negotiated (or similar) does not send on its own.
+- **Inspection Negotiated** does not send on its own in this round (Aime is an intermediary when you open the plan — it does not propose repair terms).
+- On a Dual (Both) **new** file you should see **both** the buyer and seller Inspection Response Reminder and Inspection Negotiated rows (Feature 28). A listing-only file gets the seller pair; a buyer-only file gets the buyer pair.
 - If you leave the switch Paused, the task is flagged that inspection response reminders are paused. That is not a Fail.
 
 **Feedback**
@@ -845,7 +855,7 @@ Page title is **Email**, not “AI Emails.”
 - Cancel on Send all ready sends nothing.
 - After a real Send: one message; the row leaves Ready; deal Email → Sent shows it.
 - Fail: a non-named draft left with no Send; body says “Attached is the inspection report” with nothing attached.
-- Order Home Warranty may appear as a draft; it must not auto-send.
+- Order Home Warranty may appear as a draft; it must not auto-send. To should be the transaction agent (you), not a warranty company.
 
 **Feedback**
 
@@ -1010,11 +1020,11 @@ _Please note: Status (Pass / Fail / Needs Work), and any comments or issues you 
 
 **Route / Location**
 
-The surfaces you already opened: Settings → AI & Automation, Needs You, Confirm Details, 100 Test Oak Lane Email and Tasks
+The surfaces you already opened: Settings → AI & Automation, Needs You, Confirm Details, 100 Test Oak Lane Email and Tasks, plus any Dual / title / warranty files from Section 6
 
 **How To Test**
 
-1. You do not need a special hunt. While you work Features 1–25, jot anything that matches the fail list.
+1. You do not need a special hunt. While you work Features 1–32, jot anything that matches the fail list.
 2. Extra glance: Confirm Details banner (Feature 6), How it runs cards (Feature 2), Email tab sentence (Feature 10).
 
 **Expected Result**
@@ -1029,6 +1039,181 @@ Fail if you see any of these in the product:
 - “Written by AI” on an outbound body
 - Wire / funds treated as a Ready draft
 - Fallen-through deals filed as Closed with no Terminated path
+- Confirm Title Order still written as “has title been ordered?” instead of a courtesy order when the co-op is ordering
+- Dual (Both) new file missing the seller Inspection Response Reminder or Inspection Negotiated, or still generating a co-op welcome
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+
+---
+
+## Section 6 — Updated task library (new files)
+
+Use a **new** transaction for each of these. Older open tasks can still show yesterday’s target and copy — that is expected. The number on the row is the live ID (not the spreadsheet number from 360 onward).
+
+### 27. Live IDs stay; Closing Gift is one row
+
+**Route / Location**
+
+New Buyer financed file and new Seller financed file → **Tasks**
+
+**How To Test**
+
+1. Create a new Buy-Fin file (100 Test Oak Lane is fine if you created it **after** this round went live). Open Tasks. Find **Closing Gift**. Note any ID shown on the row or in Complete this task.
+2. Create a new Sell-Fin file. Find **Closing Gift** again. Also find **Schedule Pick Up of Sign and Lockbox** and **Change MLS Listing Status to Sold** if those names are on the listing.
+3. Confirm you do **not** have extra Closing Gift rows that exist only because the file is Dual or listing-only.
+
+**Expected Result**
+
+- One **Closing Gift** on buyer files and on seller files (live **370**). It is an agent reminder, not an Autopilot client email.
+- On a listing, lockbox and MLS Sold stay under live **453** / **455** if an ID is visible. Do not Fail because they are not numbered 470 / 480.
+- Fail: no Closing Gift on a new listing; two Closing Gift rows on a Dual file; the screen renumbered Closing Gift to spreadsheet 360.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+
+---
+
+### 28. Dual agency (Both)
+
+**Route / Location**
+
+Create **700 Test Dual Ave**. Represent **Buyer and Seller**. Financed. Contract uploaded. Contacts you control. Pin Assisted.
+
+**How To Test**
+
+1. Finish the wizard. Open **Tasks**.
+2. Confirm **Buyer Welcome** and **Seller Welcome** both exist. Confirm **Co-op Agent Welcome** does **not**.
+3. Confirm **one** Order Title **or** one Confirm Title Order (not both), and **one** Loan Officer Welcome.
+4. Confirm **both** Inspection Scheduled (buyer and seller), **both** Inspection Response Reminder, and **both** Inspection Negotiated.
+5. If you answered HOA = Yes in the wizard: Request HOA from the **seller**, Deliver HOA to the **buyer**. No request/deliver HOA to a co-op.
+6. Open Co-op-target letters only to confirm they are absent (Deliver Utility Info to the buyer’s agent, Confirm Home Warranty, Buyer’s Agent Closing Information).
+
+**Expected Result**
+
+- Title and Loan Officer once. Buyer and seller party work both populate. No co-op letters (a Both file has no co-op).
+- Fail: Co-op Agent Welcome on Dual; only the buyer inspection reminder; extra Dual-only copies of Deliver Title, Closing Gift, or Internal Thank You that exist only because the file is Both.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+
+---
+
+### 29. Order Title vs Confirm Title Order
+
+**Route / Location**
+
+Two **new** Buyer financed files → Contract Details (who orders title) → Tasks → kebab → **Email transaction party**  
+Do not Send unless To is an inbox you own.
+
+**How To Test**
+
+1. File A: wizard says **your side** orders title. Tasks should show **Order Title**, not Confirm Title Order.
+2. File B: wizard says the **other side / co-op** orders title. Tasks should show **Confirm Title Order**, not Order Title.
+3. On each, Email transaction party. Read the body. On Confirm Title Order, look for courtesy-order language (example: as a courtesy to the co-op agent, engage the escrow agent). It must **not** read as “has title been ordered?”
+4. If Documents has a personal-property or monetary addendum / amendment, confirm it is **not** listed under the plan. The executed agreement package may still be there.
+
+**Expected Result**
+
+- Same document package on both letters. Difference is the script and which wizard answer created the row.
+- Fail: both 70 and 80 on one file; Confirm Title Order is still a follow-up “was it ordered?”; addenda listed on the plan.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+
+---
+
+### 30. Deliver Utility Info on a listing (160)
+
+**Route / Location**
+
+Create **800 Test Utility Ln**. Represent **Seller**. Financed. Upload a utility-information document on **Documents**. Pin Assisted.
+
+**How To Test**
+
+1. Open Tasks. Find **Deliver Utility Info**.
+2. Kebab → Email transaction party. Note **To:**.
+3. Close without sending if To is not yours.
+
+**Expected Result**
+
+- **To:** the co-op / buyer’s agent, not your seller.
+- Fail: To is the seller; To is the buyer client; the letter is missing on a new listing that has utility info.
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+
+---
+
+### 31. Order Home Warranty is an internal reminder
+
+**Route / Location**
+
+New file where the wizard says **your side** orders the home warranty → Tasks → **Order Home Warranty** → Email transaction party
+
+**How To Test**
+
+1. Create a financed file with home warranty = yes, ordered by us.
+2. Open Order Home Warranty. Read To, Cc, and the body.
+3. If the wizard says the **other side** orders warranty, expect **Confirm Home Warranty** instead (To = co-op; TC on copy when a TC is assigned).
+
+**Expected Result**
+
+- Order Home Warranty: **To:** the transaction agent (you). TC on copy when assigned. Body is an internal reminder to place the order and send the invoice to title and the co-op. Not a letter to a warranty company.
+- It waits for Send (or stays a draft). It does not send unattended.
+- Fail: To is a warranty company; Autopilot already sent it; Dual still created a co-op Confirm Home Warranty (no co-op).
+
+**Feedback**
+
+_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit._
+
+> _Status:_ 
+> 
+> _Comments:_ 
+
+---
+
+### 32. No seller Inspection Completed on new listings
+
+**Route / Location**
+
+New Sell-Fin or Dual file → Tasks
+
+**How To Test**
+
+1. On a **new** listing, search Tasks for **Inspection Completed**.
+2. You should still see seller **Inspection Scheduled** (notify the seller) and seller **Inspection Response Reminder** / **Inspection Negotiated**.
+3. On a Dual new file, buyer Inspection Completed may still exist (the buyer has the inspection). The extra seller Inspection Completed row must not.
+
+**Expected Result**
+
+- New files do not get seller Inspection Completed (old live ID 235). Open 235 rows on **old** files can stay until someone completes them.
+- Fail: a new listing generates Inspection Completed for the seller.
 
 **Feedback**
 
