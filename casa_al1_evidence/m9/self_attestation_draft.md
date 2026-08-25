@@ -26,7 +26,7 @@ Draft for the lab packet. Facts below are as of 21 Aug 2026. Do not claim scans 
 
 ## Session cookies vs localStorage
 
-- SPA session is localStorage JWT (not HttpOnly cookie). Compensating: HTTPS, CSP `connect-src` to the API, logout clears keys, Supabase JWT expiry. Cookie migration is the preferred fix if the lab’s session-management CWE is a fail.
+- SPA session is localStorage JWT (not HttpOnly cookie). Compensating: HTTPS, CSP `connect-src` to the API, logout clears keys, Supabase JWT expiry. Full write-up: `compensating_controls.md`. Cookie migration is the preferred fix if the lab’s session-management CWE is a fail.
 
 ## OAuth popup
 
@@ -34,4 +34,4 @@ Draft for the lab packet. Facts below are as of 21 Aug 2026. Do not claim scans 
 
 ## AWS AI / OpenAI training
 
-- AWS Organizations `AISERVICES_OPT_OUT_POLICY` enabled org-wide 20 Aug 2026 (includes Textract). OpenAI **Sharing** tab screenshot **still outstanding** (no `OPENAI_ADMIN_API_KEY` in prod): Settings → Data controls → Sharing, all three share radios Disabled. Do not claim ZDR from the Data retention tab.
+- AWS Organizations `AISERVICES_OPT_OUT_POLICY` enabled org-wide 20 Aug 2026 (includes Textract). OpenAI Sharing tab **captured 24 Aug 2026** (`openai-data-controls.png`): Velvetelves Organization, all three share radios Disabled. Do not claim ZDR from the Data retention tab.

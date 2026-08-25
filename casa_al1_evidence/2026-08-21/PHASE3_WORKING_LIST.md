@@ -1,18 +1,18 @@
 # Phase 3 working list — 21 Aug 2026
 
-CWE / finding, where it lives, fix vs compensating control. Official CASA XML packet exists (SPA + unauth API + auth API). Leftover pip-audit and compensating Mediums remain.
+CWE / finding, where it lives, fix vs compensating control. Official CASA XML packet exists (SPA + unauth API + auth API). Lab write-up for residuals: `../m9/compensating_controls.md` (24 Aug 2026).
 
 ## Closed or in this pass
 
 | Item | CWE / scanner | Where | Status |
 | --- | --- | --- | --- |
-| API HSTS / nosniff / XFO / Referrer / Permissions-Policy / no `Server` | CWE-16, CWE-200 | FastAPI `SecurityHeadersMiddleware` | **Staging live** 21 Aug. Prod still old. |
-| Swagger public | CWE-200 | `/api/docs` gated when `APP_ENV=production` | **Code on staging**; prod still public until prod deploy. Staging keeps docs on purpose. |
+| API HSTS / nosniff / XFO / Referrer / Permissions-Policy / no `Server` | CWE-16, CWE-200 | FastAPI `SecurityHeadersMiddleware` | **Staging live** 21 Aug. **Production live** 22 Aug (`velvet-elves-prod-backend:44`). Rechecked 24 Aug. |
+| Swagger public | CWE-200 | `/api/docs` gated when `APP_ENV=production` | **Production 404** 22 Aug (rechecked 24 Aug). Staging keeps docs on purpose (`/api/docs` 200). |
 | FastAPI / multipart / jose / cryptography / Pillow | pip-audit Highs | `requirements.txt` | **Staging live** 21 Aug (login + Gmail/Calendar authorize-url smoke passed). |
 | `react-router-dom` 7.13.1 | npm audit | SPA | **Staging live** 21 Aug, pin 7.18.2. |
 | pytest/ruff in prod image | PYSEC-2026-1845 | `requirements.txt` | **Staging live** 21 Aug — split to `requirements-dev.txt`. |
 | OAuth popup `postMessage(..., "*")` | CWE-346 | Gmail/Outlook/DocuSign + Calendar callback HTML; SPA listeners | **Staging live** 21 Aug — target `FRONTEND_URL`; SPA ignores other origins. **Browser smoke passed:** Gmail + Calendar popups connected. |
-| Dockerfile as root | F266 / CWE-250 | `Dockerfile` | **Staging live** 21 Aug (`velvet-elves-stage-backend:108`, image `main-e2d6989` / PR #276). `USER appuser`. Prod still old. |
+| Dockerfile as root | F266 / CWE-250 | `Dockerfile` | **Staging live** 21 Aug. **Production image** after 22 Aug `main`→`prod` merge includes `USER appuser`. |
 | OAuth callback reflected/DOM XSS | CWE-79 | Five HTML callbacks (`error`, `error_description`) | **Staging live** 21 Aug (`velvet-elves-stage-backend:109`). Unauth re-scan `a9d78f05-…` **0 High**. Auth re-scan `33afa2aa-…` also **0 XSS High**. |
 | Authenticated ZAP API | CWE-89 / CWE-22 (Low confidence Highs) | Staging OpenAPI with Bearer (platform-admin, user-requested) | **Done** 21 Aug, build `33afa2aa-…`. Highs are false positives — see DAST_SUMMARY. Send/DELETE excluded. |
 

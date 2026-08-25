@@ -33,7 +33,7 @@ flowchart LR
 | Piece | Role |
 | --- | --- |
 | SPA | React/Vite on CloudFront. Session JWT in `localStorage`. No Google tokens in the browser. |
-| API | FastAPI. Verifies Supabase JWT, encrypts Google tokens with Fernet, calls Google/AI. Production `APP_ENV=production` hides Swagger **once that image is on prod** (staging still serves docs). |
+| API | FastAPI. Verifies Supabase JWT, encrypts Google tokens with Fernet, calls Google/AI. Production `APP_ENV=production` hides Swagger (`/api/docs` `/api/redoc` `/api/openapi.json` **404** as of 22 Aug 2026). Staging still serves docs. |
 | Supabase | Auth (GoTrue) + Postgres. App-layer `tenant_id` is the isolation claim; RLS is defense in depth. |
 | EventBridge | Hourly tick. Renews Gmail `users.watch` for **idle** mailboxes, plus digests/auto-drafts. Do not write “renews daily” as a separate job. |
 | Google | OAuth (PKCE) + Gmail + Calendar + Pub/Sub. Project `velvet-vles` / `538509143953`. Do not change Console scopes. |

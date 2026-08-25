@@ -44,4 +44,4 @@ There is **no** single control named “Improve the model for everyone.” Platf
 
 Anthropic: API Commercial Terms already say no training on Customer Content. Screenshot only if the lab asks.
 
-Until the **Sharing** PNG from the **production** org is in this folder, M9j is not lab-complete. Do not file a personal-account screenshot as evidence.
+**Captured 24 Aug 2026:** `openai-data-controls.png` from **Velvetelves Organization**, Sharing tab, all three radios **Disabled**. No API keys in frame. Do not treat the remaining “eligible for free daily usage on traffic shared with OpenAI” banner as enrollment; sharing is off. Do not claim ZDR.

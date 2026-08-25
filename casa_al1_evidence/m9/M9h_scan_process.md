@@ -22,6 +22,6 @@ ADA wants CASA-mapped SAST (Fluid Attacks `checks:`) and DAST (ZAP with `zap-cas
 3. ZAP API: same project, `SCAN_TARGET=api`, filtered OpenAPI (no cron tick / inbound webhooks) + `zap-casa-api-config.conf`.
 4. ZAP API authenticated: `SCAN_TARGET=api-auth`, Bearer via Replacer (`SCAN_BEARER` env, never committed). Extra path drops + strip DELETE.
 5. Export **one** of CSV or XML into `casa_al1_evidence/` (gitignored dumps).
-6. Close CASA-mapped High/Critical or write a compensating control (`../2026-08-21/PHASE3_WORKING_LIST.md`).
+6. Close CASA-mapped High/Critical or write a compensating control (`compensating_controls.md` + `../2026-08-21/PHASE3_WORKING_LIST.md`).
 
 Do not scan production with `algoforth33@gmail.com`. The one authenticated staging API scan used platform-admin **because the user asked**; do not repeat that on production.

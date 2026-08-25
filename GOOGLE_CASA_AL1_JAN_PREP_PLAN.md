@@ -133,7 +133,7 @@ Work in this order. Do not skip to the lab until the gate in Phase 6 is green.
 - [x] Re-record headers — **CONFIRMED 20 Aug 2026 (GET, not HEAD).** SPA `app.velvetelves.com` (CloudFront): HSTS `max-age=31536000`, `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-XSS-Protection: 1; mode=block`. **Missing CSP and Permissions-Policy.** Staging app matches. API `api.prod.velvetelves.com` `/api/v1/health`: **no security headers**; `server: uvicorn` + `x-request-id` only. Staging API matches. (Marketing and help CloudFront distributions have the same SPA header set; also no CSP.)
 - [x] Confirm whether EventBridge actually POSTs `/api/v1/internal/schedules/tick` in production — **CONFIRMED 20 Aug 2026.** Rule `velvet-elves-prod-hourly-tick` is ENABLED (`rate(1 hour)`). Target is API destination `velvet-elves-prod-schedule-tick` → `POST https://api.prod.velvetelves.com/api/v1/internal/schedules/tick` with connection `velvet-elves-prod-cron` (`X-VE-Cron-Secret`). EventBridge Scheduler (the v2 service) has no schedules; classic EventBridge is what fires. CloudWatch logs `/ecs/velvet-elves/prod/backend` show a completed `schedule tick:` every hour (e.g. 14:13–19:13 UTC today), including `gmail_watches=0/4(fail=1)` so idle `renew-due` **does run**. EventBridge `FailedInvocations` is also 1/hour: the tick is synchronous (`VE_TICK_ASYNC` is not set on the task) and API destinations time out before the ~25s tick returns; retries are 0 so it does not double-run. Attest hourly tick + renew-due as live. Do not claim EventBridge “succeeds”; claim the backend completes.
 - [x] List subprocessors actually used in prod — **INVENTORIED 20 Aug 2026** from live ECS task `velvet-elves-prod-backend:43` plus presence (not values) of keys in `/velvet-elves/prod/backend`. See table below. Privacy page (`velvetelves.com/privacy` sharing section) lists AWS, Supabase, Stripe, SendGrid, OpenAI or Anthropic, Google APIs. It does **not** name DocuSign, Microsoft, Textract, or Google Cloud Pub/Sub — fix in M9 / privacy copy later, not now.
-- [x] Confirm AI provider contracts/API settings: no training on customer data — **UPDATED 20 Aug 2026.** OpenAI and Anthropic **API terms** default to no training. AWS Textract is now **opted out** org-wide (`p-90qm6ijnvl`). Do not claim Zero Data Retention. OpenAI **Sharing** tab screenshot still needed for M9j (three “share with OpenAI” radios Disabled). There is no “Improve the model for everyone” control.
+- [x] Confirm AI provider contracts/API settings: no training on customer data — **UPDATED 24 Aug 2026.** OpenAI and Anthropic **API terms** default to no training. AWS Textract is **opted out** org-wide (`p-90qm6ijnvl`). OpenAI Sharing screenshot captured (`casa_al1_evidence/m9/openai-data-controls.png`): Velvetelves org, all three radios Disabled. Do not claim Zero Data Retention. There is no “Improve the model for everyone” control.
 
 Production subprocessors (what is actually configured, 20 Aug 2026):
 
@@ -155,7 +155,7 @@ AI / ML training (20 Aug 2026):
 
 | Processor | Trains on Velvet Elves customer content by default? | What we verified | Gap |
 | --- | --- | --- | --- |
-| OpenAI API (`chat.completions` in `openai_provider.py`; default prod provider) | **No**, unless the org explicitly opts in. API data is not used to train as of 1 Mar 2023. Code does not fine-tune and does not set `store=true`. | Terms + code path. Privacy page claim matches. | No dashboard screenshot yet that Improve-the-model opt-in is off. Not Zero Data Retention (30-day abuse monitoring still applies). |
+| OpenAI API (`chat.completions` in `openai_provider.py`; default prod provider) | **No**, unless the org explicitly opts in. API data is not used to train as of 1 Mar 2023. Code does not fine-tune and does not set `store=true`. | Terms + code path. Sharing PNG 24 Aug 2026 (`casa_al1_evidence/m9/openai-data-controls.png`): all three radios Disabled. Privacy page claim matches. | Not Zero Data Retention (30-day abuse monitoring still applies). |
 | Anthropic API (`messages.create` in `anthropic_provider.py`; tenant-selectable) | **No.** Commercial Terms: Anthropic may not train on Customer Content from Services. | Terms + code path. | No ZDR agreement. Consumer Claude.ai terms do **not** apply (we use the API). |
 | Amazon Textract (all uploaded PDF/image parse) | **Opted out 20 Aug 2026.** AWS org root policy `velvet-elves-ai-services-opt-out` (`p-90qm6ijnvl`) sets `default.opt_out_policy=optOut`. Effective policy on the prod account confirms it. | `describe-effective-policy` → `{"services":{"default":{"opt_out_policy":"optOut"}}}`. | Privacy page still does not mention Textract. Screenshot not required for AWS. |
 
@@ -170,7 +170,7 @@ Deploy to **staging first**, then production.
 - [x] Disable `/api/docs`, `/api/redoc`, `/api/openapi.json` when `is_production` — **PRODUCTION LIVE 22 Aug 2026** (all three 404). Staging keeps docs on purpose (`APP_ENV=staging`). Tests: `app/tests/test_openapi_docs.py`.
 - [x] Stop returning raw exception strings from `/api/v1/health/ready` — **STAGING HEALTHY 21 Aug 2026; production not redeployed.** Happy path on staging is `200 {"status":"ready","db":true}` with the new security headers. 503 hide-details was covered in tests (`test_readiness_ok`, `test_readiness_hides_exception_details`), not forced against live staging.
 - [x] Confirm `app_debug` cannot be true in production (assert in startup) — **CODE DEPLOYED TO STAGING 21 Aug 2026; production image not updated yet.** Settings validator rejects `APP_ENV=production` + `APP_DEBUG=true` at load. Startup raises `RuntimeError` if those flags are mutated after load. Live staging health is `env=staging` (guard does not apply). Live prod already has `APP_DEBUG=false` on the task definition (Phase 0) and will pick up the guard on the next prod backend deploy. Tests: `app/tests/test_production_debug_guard.py`.
-- [x] Enable AWS Organizations AI services opt-out for Textract (and other AWS AI) — **LIVE 20 Aug 2026.** Enabled `AISERVICES_OPT_OUT_POLICY` on org root `r-07ts`. Created policy `velvet-elves-ai-services-opt-out` (`p-90qm6ijnvl`), attached to the root, locked so child policies cannot override. Effective policy for account `388482955098`: `default.opt_out_policy = optOut` (covers Textract and future AWS AI services). OpenAI **Sharing** screenshot is **not done**: `OPENAI_ADMIN_API_KEY` is empty in prod. Capture Settings → Data controls → Sharing (all three Disabled) in Phase 4 M9j. Do not claim ZDR from the Data retention tab.
+- [x] Enable AWS Organizations AI services opt-out for Textract (and other AWS AI) — **LIVE 20 Aug 2026.** Enabled `AISERVICES_OPT_OUT_POLICY` on org root `r-07ts`. Created policy `velvet-elves-ai-services-opt-out` (`p-90qm6ijnvl`), attached to the root, locked so child policies cannot override. Effective policy for account `388482955098`: `default.opt_out_policy = optOut` (covers Textract and future AWS AI services). OpenAI Sharing screenshot **captured 24 Aug 2026** (`casa_al1_evidence/m9/openai-data-controls.png`). Do not claim ZDR from the Data retention tab.
 
 Do **not** change OAuth scopes, redirect URIs, or consent-screen branding. Google froze those for the verification case.
 
@@ -215,15 +215,15 @@ Store all reports in `velvet-elves-data/casa_al1_evidence/` (do not commit secre
 - [x] Open a working list: CWE, where it is, fix or compensating control — `casa_al1_evidence/2026-08-21/PHASE3_WORKING_LIST.md`.
 - [x] Split pytest/ruff out of the production image (`requirements-dev.txt`). **Staging live 21 Aug 2026.**
 - [x] OAuth popup `postMessage` target `*` → `FRONTEND_URL` origin; SPA ignores other origins. **Staging live 21 Aug 2026.** Browser smoke: Gmail + Calendar popups connected; PDF preview worked. Maps autocomplete not tested (feature stopped).
-- [x] Dockerfile non-root `USER appuser` (F266 / CWE-250). **Staging live 21 Aug 2026** (`velvet-elves-stage-backend:108`, image `main-e2d6989`). Fluid re-scan `5999aab9-…` is 0 Medium. Prod still old.
+- [x] Dockerfile non-root `USER appuser` (F266 / CWE-250). **Staging live** 21 Aug; **production image** after 22 Aug `main`→`prod` merge.
 - [x] OAuth callback HTML XSS (CWE-79). **Staging live** 21 Aug (`velvet-elves-stage-backend:109`). Re-scan `a9d78f05-…` is 0 High.
-- [ ] CSP `img-src https:` — smoke is done; keep the wildcard as a **compensating control** unless we can close the host list (tenant logos / signed thumbs). Do not tighten on a guess.
-- [ ] `style-src 'unsafe-inline'` and leftover Maps SRI in the CSP allowlist — written compensating controls (same working list).
-- [ ] `pydantic-ai-slim` / `PyPDF2`→`pypdf` leftover pip-audit.
-- [ ] Fix remaining items, deploy staging, re-scan
-- [ ] Repeat until the CASA-mapped set is pass (or residual items have a written justification a lab will accept)
-- [ ] Decide on `localStorage` JWT: cookie migration **or** compensating-control write-up. Prefer the cookie fix before paying the lab if the CASA session-management case will fail without it
-- [ ] Re-run isolation tests after any auth/session change
+- [x] CSP `img-src https:` — **compensating control written** 24 Aug 2026 (`casa_al1_evidence/m9/compensating_controls.md`). Do not drop `https:` without a closed host list.
+- [x] `style-src 'unsafe-inline'` and Maps SRI — **compensating control written** 24 Aug 2026 (same file).
+- [x] `pydantic-ai-slim` / `PyPDF2` / `ecdsa` leftover pip-audit — **documented, not remediating in this pass** (same file + `DEPS_SUMMARY.md`).
+- [ ] Fix remaining items, deploy staging, re-scan — **not required for the accepted residuals**; re-scan only if we change CSP or bump those packages.
+- [x] Residual CASA-mapped High/Critical closed or written (ZAP Low-confidence SQLi/path-traversal treated as false positives in DAST_SUMMARY + compensating_controls).
+- [x] `localStorage` JWT: **compensating-control write-up** 24 Aug 2026 (cookie migration deferred unless a lab fails session-management without HttpOnly).
+- [ ] Re-run isolation tests after any auth/session change — N/A until a cookie migration.
 
 Typical first-scan pile besides CSP: cookie flags, information disclosure (Swagger, stack traces, `server: uvicorn`), mixed content, CORS, outdated JS libs.
 
@@ -242,14 +242,14 @@ One folder, honest against production. Short statements, not novels.
 | M9g | Logging — **draft** `m9/M9g_logging.md` |
 | M9h | Scan process — **draft** `m9/M9h_scan_process.md` (Fluid CSV + official ZAP SPA/API unauth + API auth XML) |
 | M9i | Incident response + retention/deletion — **draft** `m9/M9i_incident_response.md` |
-| M9j | Subprocessors + AI no-training — **draft** `m9/M9j_subprocessors_ai.md` (OpenAI screenshot outstanding) |
+| M9j | Subprocessors + AI no-training — **draft** `m9/M9j_subprocessors_ai.md` (Sharing PNG captured 24 Aug 2026) |
 
-Also write a one-page **self-attestation draft** covering non-scannable items: access control, key rotation, backup encryption, employee access to mailboxes (there should be none except the connected user), deletion SLA (30 days). **Started:** `casa_al1_evidence/m9/self_attestation_draft.md`.
+Also write a one-page **self-attestation draft** covering non-scannable items: access control, key rotation, backup encryption, employee access to mailboxes (there should be none except the connected user), deletion SLA (30 days). **Started:** `casa_al1_evidence/m9/self_attestation_draft.md`. Residuals: `casa_al1_evidence/m9/compensating_controls.md`.
 
 ### Phase 5 — Production smoke after hardening
 
 - [x] Sign in and post-CSP smoke **22 Aug 2026** as dedicated testing account `crazyaidev20500519@gmail.com` (Gmail Test connection healthy; Calendar Add my closings; Ask AI; PDF preview). Do not use this account in the Trust and Safety reviewer guidelines.
-- [ ] Google reviewer account `algoforth33@gmail.com` — Gmail grant was **expired** on 22 Aug; reconnect before a reviewer follows `GOOGLE_REVIEWER_TESTING_GUIDELINES.md`. Unverified-app warning still expected.
+- [x] Google reviewer account `algoforth33@gmail.com` — Gmail **healthy** and Google Calendar **connected as `algoforth33@gmail.com`** (verified 24 Aug 2026). Unverified-app warning still expected.
 - [ ] Inbound match + Approve & send (optional; not required for CASA headers). Not run in the 22 Aug API smoke.
 - [x] Calendar Add my closings — **PASSED** on the testing account after CSP.
 - [ ] Disconnect still works (not re-tested 22 Aug; skip unless a reviewer needs a fresh consent screen).
