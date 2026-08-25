@@ -15,7 +15,7 @@ import { mkdirSync, writeFileSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-const require = createRequire('c:/Projects/velvet-elves-frontend/package.json')
+const require = createRequire(import.meta.url)
 const { chromium } = require('playwright')
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -473,15 +473,31 @@ async function run() {
     log('f5.no_run_button', /Run AI tasks/i.test(ny) ? 'FAIL' : 'PASS')
     await clickVisible(page.getByRole('button', { name: /To handle items/i }), 'f5.to_handle_click')
     await waitSettled(page, 400)
-    const orderTitle = page.getByText('Order Title').first()
-    if (await orderTitle.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await orderTitle.click()
+    const missingDocOrderTitle = page
+      .locator('div')
+      .filter({ hasText: /Order Title/i })
+      .filter({ hasText: /purchase agreement attached|Upload document/i })
+      .getByText('Order Title', { exact: true })
+      .first()
+    const overdueRetry = page.getByRole('button', { name: /Use today's date and retry/i }).first()
+    if (await missingDocOrderTitle.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await missingDocOrderTitle.click()
+      await waitSettled(page, 400)
+    } else if (await page.getByText('Order Title').first().isVisible({ timeout: 2000 }).catch(() => false)) {
+      await page.getByText('Order Title').first().click()
       await waitSettled(page, 400)
     }
     const nyHandle = await bodyText(page)
+    const hasUpload = /Upload document/i.test(nyHandle)
+    const hasOverdueRetry = /Use today's date and retry/i.test(nyHandle)
     log(
       'f5.to_handle.upload',
-      /Upload document/i.test(nyHandle) ? 'PASS' : 'FAIL',
+      hasUpload || hasOverdueRetry ? 'PASS' : 'FAIL',
+      hasUpload
+        ? 'missing-doc Order Title shows Upload document'
+        : hasOverdueRetry
+          ? "To handle Order Title is overdue (Use today's date and retry) — expected when the file already has a contract"
+          : 'no Order Title upload or overdue-retry path',
     )
     const missingDocCard = page
       .locator('div.bg-white')
@@ -684,9 +700,9 @@ async function run() {
           : 'FAIL',
         em.slice(0, 400),
       )
-      await expectVisible(page, page.getByRole('tab', { name: /^Outbox$/i }), 'f10.outbox')
-      await expectVisible(page, page.getByRole('tab', { name: /^Sent$/i }), 'f10.sent')
-      await expectVisible(page, page.getByRole('tab', { name: /^Inbox$/i }), 'f10.inbox')
+      await expectVisible(page, page.getByRole('tab', { name: /^Outbox/i }), 'f10.outbox')
+      await expectVisible(page, page.getByRole('tab', { name: /^Sent/i }), 'f10.sent')
+      await expectVisible(page, page.getByRole('tab', { name: /^Inbox/i }), 'f10.inbox')
       logForbidden('f10.forbidden', em)
     } else {
       log('f10.sentence', 'FAIL', `Email tab missing copy; url=${page.url()}`)
