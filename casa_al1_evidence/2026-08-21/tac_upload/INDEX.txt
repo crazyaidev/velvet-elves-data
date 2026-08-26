@@ -1,0 +1,33 @@
+Velvet Elves — ADA-CASA AL1 scan packet
+Date: 26 Aug 2026
+GCP project: velvet-vles / 538509143953
+App: https://app.velvetelves.com (production URL on LOV)
+Scans were run against staging: https://app.stage.velvetelves.com and https://api.stage.velvetelves.com
+Contact: jan@velvetelves.com
+
+This zip is Scan Source = FILE for TAC ESOF. Upload Evidence (architecture, IR, AI controls) is separate.
+
+Files
+-----
+01-sast-fluid-attacks.csv
+  Fluid Attacks SAST, official CASA checks, backend only (not the TypeScript SPA).
+  Build: velvet-elves-casa-fluid-sast:5999aab9-ffb9-4653-840c-069d192e97c9
+  Result: 0 High / 0 Critical / 0 Medium, 3 Low.
+
+02-dast-spa-zap.xml
+  OWASP ZAP 2.17.0, official zap-casa-config.conf, unauthenticated SPA.
+  Build: velvet-elves-casa-zap-dast:10f54abf-974d-4372-aa2a-1051aeb7ff46
+  Result: 0 High, 3 Medium (CSP / SRI residuals with compensating controls).
+
+03-dast-api-unauth-zap.xml
+  ZAP official zap-casa-api-config.conf, unauthenticated API (OpenAPI).
+  Build: velvet-elves-casa-zap-dast:a9d78f05-362d-44f0-9481-60fab6dd7c21
+  Result: 0 High. OAuth callback XSS closed on this build.
+
+04-dast-api-auth-zap.xml
+  Same API conf, authenticated staging platform-admin. Send/DELETE excluded.
+  Build: velvet-elves-casa-zap-dast:33afa2aa-875e-4b18-a848-c13a790562ee
+  Result: two High alerts, both Low confidence, treated as false positives (SQL injection evidence is HTTP 500 only; path traversal evidence empty). Replay notes are in DAST_SUMMARY.md for Upload Evidence.
+
+Do not use discarded builds: SAST 83f9509e / 62fa7106; DAST c13e9c57 / 2fe02778 / fb752d1f.
+ADA format: SAST is CSV only; DAST is XML only.
