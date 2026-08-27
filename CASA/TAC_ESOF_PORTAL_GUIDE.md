@@ -245,10 +245,9 @@ Do not attach the M9 folder. Do not say the assessment is complete.
 
 ## 10. Checklist
 
-- [x] Login as `jan@velvetelves.com`. LOV complete. Assessment **Velvet Elves** / Web / FILE submitted 26 Aug. Status **In Progress**.
+- [x] Login as `jan@velvetelves.com`. LOV complete. Assessment **Velvet Elves** / Web / FILE submitted 26 Aug. Dashboard 27 Aug: step 2 **Completed**, step 3 **Assessment Review / In Progress**, **Upload Evidence** is live.
 - [ ] Ignore SOC 2 / Policy template downloads / CRQ / AL2. Do **not** click **SUBMIT CASA ASSESSMENT** again.
-- [ ] Open the bell (badge **1**) and the blue **eye** on the Velvet Elves row. Screenshot both.
-- [ ] If **Upload Evidence** / questionnaire is there, fill the 48 checks from Section 6 / `casa_al1_evidence/m9/`.
-- [ ] If the row only says **In Progress** with no upload UI, wait for TAC to ingest the zip (or ticket `casasupport@tacsecurity.com` after a business day).
+- [ ] Click **Upload Evidence** under step 3 (or the cloud **Upload** on the Velvet Elves row). Screenshot the check list before attaching files.
+- [ ] Fill every required check from Section 6 / `casa_al1_evidence/m9/`. Use live privacy URLs, not TAC Policy downloads.
 - [ ] Edit LOV email typo if Edit still works (`jake@velvetelves.com.com`).
 - [ ] After a clean TAC report, email `casasupport@tacsecurity.com`. Wait for TAC to send the LOV to Google, then reply-all on the Trust and Safety thread.

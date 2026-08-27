@@ -47,6 +47,7 @@ let lastRequest = null
 let lastCompletion = null
 let lastUndo = null
 let lastNote = null
+let lastBell = null
 let shotIdx = 0
 
 function log(id, result, details = '') {
@@ -127,12 +128,31 @@ async function waitForJson(page, predicate, ms = 25000) {
 }
 
 async function waitForVendorShell(page) {
-  await page.getByRole('navigation', { name: 'Vendor navigation' }).waitFor({ timeout: 25000 })
+  await page
+    .locator('nav[aria-label="Main navigation"], nav[aria-label="Vendor navigation"]')
+    .first()
+    .waitFor({ timeout: 25000 })
+}
+
+async function vendorNav(page) {
+  return page.locator('nav[aria-label="Main navigation"], nav[aria-label="Vendor navigation"]').first()
+}
+
+async function clickVendorNav(page, label) {
+  const nav = await vendorNav(page)
+  const link = nav.getByRole('link', { name: new RegExp(label, 'i') }).first()
+  if (await link.count()) {
+    await link.click()
+    return
+  }
+  await nav.getByRole('button', { name: new RegExp(label, 'i') }).first().click()
 }
 
 async function sidebarLabels(page) {
   return page.evaluate(() => {
-    const nav = document.querySelector('nav[aria-label="Vendor navigation"]')
+    const nav = document.querySelector(
+      'nav[aria-label="Main navigation"], nav[aria-label="Vendor navigation"]',
+    )
     if (!nav) return []
     return [...nav.querySelectorAll('button, a')].map((el) => (el.innerText || '').trim()).filter(Boolean)
   })
@@ -182,7 +202,7 @@ async function main() {
   })
   page.on('requestfailed', (req) => {
     const err = req.failure()?.errorText || ''
-    if (/ERR_ABORTED|NS_BINDING_ABORTED|fonts\.gstatic|\.woff2|logo-removebg|favicon/i.test(`${req.url()} ${err}`)) return
+    if (/ERR_ABORTED|NS_BINDING_ABORTED|fonts\.gstatic|\.woff2|logo-removebg|favicon|logo\.png|\/brand\/.*\.png/i.test(`${req.url()} ${err}`)) return
     if (failedRequests.length < 40) failedRequests.push(`${req.method()} ${req.url()} ${err}`.trim().slice(0, 300))
   })
   page.on('response', async (res) => {
@@ -203,9 +223,15 @@ async function main() {
       const json = await res.json().catch(() => null)
       if (!json) return
       if (url.includes('/vendor-portal/overview')) lastOverview = json
+      else if (url.includes('/vendor-portal/notifications') && res.request().method() === 'GET') lastBell = json
       else if (url.includes('/vendor-portal/tasks') && res.request().method() === 'GET') lastTasks = json
       else if (url.includes('/vendor-portal/documents/request')) lastRequest = json
-      else if (url.includes('/vendor-portal/documents') && res.request().method() === 'GET') lastDocuments = json
+      else if (
+        url.includes('/vendor-portal/documents') &&
+        res.request().method() === 'GET' &&
+        !url.includes('/content') &&
+        !url.includes('/download')
+      ) lastDocuments = json
       else if (/\/vendor-portal\/files\/[^/]+$/.test(url) && res.request().method() === 'GET') lastFile = json
       else if (url.includes('/documents/upload') && res.request().method() === 'POST') lastUpload = { ok: true, id: json.id, tx: json.transaction_id }
       else if (url.includes('/completion-request')) lastCompletion = json
@@ -237,6 +263,7 @@ async function main() {
     await page.waitForURL(/\/portal\/vendor/, { timeout: 25000 })
     await waitForVendorShell(page)
     await waitForJson(page, () => lastOverview?.greeting_name, 35000)
+    await waitForJson(page, () => lastBell != null, 15000)
     await page.getByRole('heading', { name: /Good day, Tessa/i }).waitFor({ timeout: 20000 })
     await dismissOverlays(page)
     log('VP-02 lands on vendor portal', 'PASS', page.url())
@@ -271,6 +298,12 @@ async function main() {
     'VP-06 assigned Meadowridge file is listed',
     /4567 Meadowridge/i.test(homeText) ? 'PASS' : 'FAIL',
   )
+  const crumbCount = await page.locator('nav[aria-label="Breadcrumb"]').count()
+  log(
+    'VP-06b files page has no breadcrumb bar',
+    crumbCount === 0 ? 'PASS' : 'FAIL',
+    `breadcrumbNavs=${crumbCount}`,
+  )
   log(
     'VP-07 boundary notice present',
     /You only see requests addressed to you/i.test(homeText) ? 'PASS' : 'FAIL',
@@ -280,6 +313,73 @@ async function main() {
     lastOverview?.scope_family === 'mortgage' && lastOverview?.stats?.files === 1 ? 'PASS' : 'FAIL',
     JSON.stringify(lastOverview?.stats),
   )
+  {
+    const stats = lastOverview?.stats || {}
+    const actionList = lastOverview?.needs_action || []
+    const waitingList = lastOverview?.waiting_on_team || []
+    const filesList = lastOverview?.files || []
+    log(
+      'VP-08b stats equal list lengths',
+      stats.needs_action === actionList.length
+        && stats.waiting_on_team === waitingList.length
+        && stats.files === filesList.length
+        ? 'PASS'
+        : 'FAIL',
+      JSON.stringify({
+        stats,
+        action: actionList.length,
+        waiting: waitingList.length,
+        files: filesList.length,
+      }),
+    )
+    log(
+      'VP-08c no vanity open_documents / needs_attention',
+      stats.open_documents == null && stats.needs_attention == null ? 'PASS' : 'FAIL',
+      JSON.stringify(stats),
+    )
+    log(
+      'VP-08g vendor bell API is the partner feed',
+      Array.isArray(lastBell?.items) && typeof lastBell?.unread_count === 'number' ? 'PASS' : 'FAIL',
+      JSON.stringify({ unread: lastBell?.unread_count, items: lastBell?.items?.length }),
+    )
+    try {
+      await page.getByRole('button', { name: /^Notifications/i }).click()
+      const panel = page.getByRole('dialog', { name: /notifications/i })
+      await panel.waitFor({ timeout: 8000 })
+      const empty = /all caught up|couldn't load notifications/i.test(
+        (await panel.innerText()).slice(0, 400),
+      )
+      const listed = await panel.locator('[data-testid="vendor-bell-item"]').count()
+      log(
+        'VP-08h vendor bell panel opens',
+        listed > 0 || empty ? 'PASS' : 'FAIL',
+        `listed=${listed} unread=${lastBell?.unread_count ?? 'n/a'}`,
+      )
+      await page.keyboard.press('Escape')
+    } catch (err) {
+      log('VP-08h vendor bell panel opens', 'FAIL', err.message)
+    }
+    const actionRows = await page.locator('#needs-action li').count()
+    log(
+      'VP-08d needs-action rows match the badge',
+      actionRows === (stats.needs_action || 0) ? 'PASS' : 'FAIL',
+      `rows=${actionRows} stat=${stats.needs_action}`,
+    )
+    await page.getByRole('button', { name: /waiting/i }).first().click()
+    await waitSettled(page, 400)
+    const waitingRows = await page.locator('#waiting li').count()
+    log(
+      'VP-08e waiting rows match the badge',
+      waitingRows === (stats.waiting_on_team || 0) ? 'PASS' : 'FAIL',
+      `rows=${waitingRows} stat=${stats.waiting_on_team}`,
+    )
+    const file0 = filesList[0] || {}
+    log(
+      'VP-08f loan card does not claim own uploads are shared',
+      file0.docs_shared != null && file0.open_documents == null ? 'PASS' : 'FAIL',
+      JSON.stringify({ docs_shared: file0.docs_shared, docs_uploaded: file0.docs_uploaded }),
+    )
+  }
   const badge = lastOverview?.files?.[0]?.milestone_label
   log(
     'VP-09 file badge is a real stage, not "1"',
@@ -333,6 +433,57 @@ async function main() {
       'VP-15 coordinator tasks are not on the expanded card',
       /Deliver HOA|Internal Thank You|Buyer Welcome|Closing Gift/i.test(expanded) ? 'FAIL' : 'PASS',
     )
+    log(
+      'VP-11b no AI next-step banner on loan card',
+      /Next step/i.test(expanded) && /Found in the contract|Buyer shall make/i.test(expanded)
+        ? 'FAIL'
+        : 'PASS',
+    )
+    const overflow = await page.evaluate(() => {
+      const card = document.querySelector('article')
+      if (!card) return { missing: true }
+      const style = getComputedStyle(card)
+      return {
+        scrollH: card.scrollHeight,
+        clientH: card.clientHeight,
+        overflowY: style.overflowY,
+        clipped: card.scrollHeight > card.clientHeight + 24,
+      }
+    })
+    log(
+      'VP-11c expanded loan card is not height-clipped',
+      overflow.missing ? 'FAIL' : overflow.clipped ? 'FAIL' : 'PASS',
+      JSON.stringify(overflow),
+    )
+    await shot(page, 'file_expanded')
+    const docBtn = page.locator('button[title="Open document"]').first()
+    if (await docBtn.count()) {
+      const contentWait = page.waitForResponse(
+        (res) =>
+          /\/vendor-portal\/documents\/[^/]+\/content/.test(res.url()) &&
+          res.request().method() === 'GET',
+        { timeout: 20000 },
+      )
+      await docBtn.click()
+      const contentRes = await contentWait.catch(() => null)
+      const dialog = page.getByRole('dialog')
+      await dialog.waitFor({ timeout: 15000 })
+      await waitSettled(page, 1200)
+      const previewText = await dialog.innerText()
+      const hasViewer = (await dialog.locator('iframe, pre, img').count()) > 0
+      log(
+        'VP-11d loan-card document opens in-app preview',
+        contentRes?.ok() && !/coming next/i.test(previewText) && (hasViewer || /Download|Loading preview/i.test(previewText))
+          ? 'PASS'
+          : 'FAIL',
+        `status=${contentRes?.status?.() ?? 'none'} viewer=${hasViewer} ${previewText.slice(0, 220)}`,
+      )
+      await shot(page, 'loan_card_preview')
+      await page.keyboard.press('Escape').catch(() => {})
+      await waitSettled(page, 300)
+    } else {
+      log('VP-11d loan-card document opens in-app preview', 'WARN', 'no Open document buttons')
+    }
   } catch (err) {
     log('VP-11 expand file shows contacts / tasks / documents panels', 'FAIL', err.message)
   }
@@ -348,24 +499,88 @@ async function main() {
 
   // ── 4. Documents ────────────────────────────────────────────────────────
   try {
-    await page.getByRole('button', { name: /^Documents$/i }).click()
+    await clickVendorNav(page, 'Documents')
     await page.waitForURL(/\/portal\/vendor\/documents/, { timeout: 12000 })
-    await waitSettled(page, 600)
+    await waitForJson(page, () => Array.isArray(lastDocuments?.documents), 20000)
+    await waitSettled(page, 400)
     const docsText = await dumpText(page, 'documents')
     log(
       'VP-17 documents page loads',
-      /Documents/i.test(docsText) && /Today's briefing/i.test(docsText) ? 'PASS' : 'FAIL',
+      /Documents/i.test(docsText) && /Upload/i.test(docsText) ? 'PASS' : 'FAIL',
       docsText.slice(0, 240),
     )
     log('VP-18 documents page has no staff chrome', hasStaffChrome(docsText) ? 'FAIL' : 'PASS')
-    for (const tab of ['Needs attention', 'All', 'Shared with you', 'Your uploads', 'Awaiting']) {
-      const btn = page.getByRole('button', { name: new RegExp(tab, 'i') }).first()
+    for (const tab of ['Needs attention', 'All', 'Shared with you', 'Your uploads']) {
+      const btn = page.getByRole('tab', { name: new RegExp(tab, 'i') }).first()
       const visible = await btn.isVisible().catch(() => false)
       log(`VP-19 tab "${tab}" present`, visible ? 'PASS' : 'FAIL')
-      if (visible) {
-        await btn.click()
-        await waitSettled(page, 250)
-      }
+    }
+    const awaitingTab = page.getByRole('tab', { name: /awaiting/i })
+    log(
+      'VP-19b no separate Awaiting tab',
+      (await awaitingTab.count()) === 0 ? 'PASS' : 'FAIL',
+    )
+    log(
+      'VP-19c no briefing sidebar',
+      !/Today's briefing/i.test(docsText) ? 'PASS' : 'FAIL',
+    )
+    const tabCounts = {}
+    for (const [key, name] of [
+      ['attention', 'Needs attention'],
+      ['all', 'All'],
+      ['shared', 'Shared with you'],
+      ['uploads', 'Your uploads'],
+    ]) {
+      await page.getByRole('tab', { name: new RegExp(name, 'i') }).first().click()
+      await waitSettled(page, 400)
+      await shot(page, `docs_tab_${key}`)
+      tabCounts[key] = await page.locator('article').count()
+    }
+    log(
+      'VP-19e All has at least as many cards as Shared',
+      tabCounts.all >= tabCounts.shared ? 'PASS' : 'FAIL',
+      JSON.stringify(tabCounts),
+    )
+    log(
+      'VP-19f All has at least as many cards as Your uploads',
+      tabCounts.all >= tabCounts.uploads ? 'PASS' : 'FAIL',
+      JSON.stringify(tabCounts),
+    )
+    const distinct = new Set(Object.values(tabCounts)).size
+    log(
+      'VP-19g filter tabs actually slice the list',
+      tabCounts.all === 0 || distinct > 1 ? 'PASS' : 'WARN',
+      JSON.stringify(tabCounts),
+    )
+    await page.getByRole('tab', { name: /^all/i }).first().click()
+    await waitSettled(page, 300)
+    const pdfRow = page.locator('article').filter({ hasText: /\.pdf/i }).first()
+    if (await pdfRow.count()) {
+      const contentWait = page.waitForResponse(
+        (res) =>
+          /\/vendor-portal\/documents\/[^/]+\/content/.test(res.url()) &&
+          res.request().method() === 'GET',
+        { timeout: 20000 },
+      )
+      await pdfRow.getByRole('button', { name: /^Open$/i }).click()
+      const contentRes = await contentWait.catch(() => null)
+      const dialog = page.getByRole('dialog')
+      await dialog.waitFor({ timeout: 15000 })
+      await dialog.getByText(/loading preview/i).waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {})
+      await waitSettled(page, 400)
+      const previewText = await dialog.innerText()
+      const iframeCount = await dialog.locator('iframe').count()
+      log(
+        'VP-19h shared PDF opens in-app iframe',
+        contentRes?.ok() && iframeCount > 0 && !/coming next/i.test(previewText)
+          ? 'PASS'
+          : 'FAIL',
+        `status=${contentRes?.status?.() ?? 'none'} iframes=${iframeCount} ${previewText.slice(0, 220)}`,
+      )
+      await shot(page, 'shared_pdf_preview')
+      await page.keyboard.press('Escape').catch(() => {})
+    } else {
+      log('VP-19h shared PDF opens in-app iframe', 'WARN', 'no .pdf row on Shared tab')
     }
   } catch (err) {
     log('VP-17 documents page loads', 'FAIL', err.message)
@@ -375,18 +590,69 @@ async function main() {
     await page.getByRole('button', { name: /request a document/i }).click()
     await page.getByPlaceholder(/e\.g\. Appraisal report|What do you need/i).waitFor({ timeout: 5000 })
     await page.getByRole('button', { name: /pre-approval letter/i }).click()
+    const reqWait = page.waitForResponse(
+      (res) => res.url().includes('/vendor-portal/documents/request') && res.request().method() === 'POST',
+      { timeout: 25000 },
+    )
     await page.getByRole('button', { name: /send request/i }).click()
-    await waitSettled(page, 900)
+    const reqRes = await reqWait
+    const reqBody = await reqRes.json().catch(() => null)
+    if (reqBody) lastRequest = reqBody
+    await page.getByText(/request sent to the team|already have this request open/i).waitFor({ timeout: 8000 }).catch(() => {})
+    await waitSettled(page, 400)
+
+    await page.getByRole('button', { name: /request a document/i }).click()
+    await page.getByPlaceholder(/e\.g\. Appraisal report|What do you need/i).waitFor({ timeout: 5000 })
+    await page.getByRole('button', { name: /pre-approval letter/i }).click()
+    const reqWait2 = page.waitForResponse(
+      (res) => res.url().includes('/vendor-portal/documents/request') && res.request().method() === 'POST',
+      { timeout: 25000 },
+    )
+    await page.getByRole('button', { name: /send request/i }).click()
+    const reqRes2 = await reqWait2
+    const reqBody2 = await reqRes2.json().catch(() => null)
+    await page.getByText(/already have this request open|request sent to the team/i).waitFor({ timeout: 8000 }).catch(() => {})
+    await waitSettled(page, 300)
+    const awaitingCards = page.locator('#awaiting li').filter({ hasText: /pre-approval letter/i })
+    const awaitingCount = await awaitingCards.count()
     log(
-      'VP-20 request a document',
-      lastRequest?.status === 'awaiting' || /Request sent|Awaiting/i.test(await dumpText(page, 'after_request'))
+      'VP-20 request a document is idempotent',
+      reqRes.ok() && reqRes2.ok() && awaitingCount === 1 && (reqBody2?.deduped === true || reqBody?.id === reqBody2?.id)
         ? 'PASS'
         : 'FAIL',
-      JSON.stringify(lastRequest),
+      `first=${reqRes.status()} second=${reqRes2.status()} cards=${awaitingCount} ${JSON.stringify(reqBody2)}`,
     )
+    const attentionTab = page.getByRole('tab', { name: /needs attention/i }).first()
+    const attentionLabel = await attentionTab.innerText()
+    log(
+      'VP-20b attention tab does not count awaiting requests',
+      !/needs attention\s*1\b/i.test(attentionLabel.replace(/\s+/g, ' ')) || awaitingCount === 0
+        ? 'PASS'
+        : /needs attention/i.test(attentionLabel) && !attentionLabel.includes(String(awaitingCount))
+          ? 'PASS'
+          : 'WARN',
+      attentionLabel.replace(/\s+/g, ' '),
+    )
+    const cancelBtn = awaitingCards.getByRole('button', { name: /^cancel$/i }).first()
+    if (await cancelBtn.count()) {
+      const cancelWait = page.waitForResponse(
+        (res) => res.url().includes('/vendor-portal/documents/request/') && res.request().method() === 'DELETE',
+        { timeout: 15000 },
+      )
+      await cancelBtn.click()
+      const cancelRes = await cancelWait.catch(() => null)
+      await page.getByText(/request cancelled/i).waitFor({ timeout: 8000 }).catch(() => {})
+      log(
+        'VP-20c cancel awaiting request',
+        cancelRes?.ok() ? 'PASS' : 'FAIL',
+        `status=${cancelRes?.status?.() ?? 'none'}`,
+      )
+    } else {
+      log('VP-20c cancel awaiting request', 'WARN', 'no Cancel button')
+    }
     await page.keyboard.press('Escape').catch(() => {})
   } catch (err) {
-    log('VP-20 request a document', 'FAIL', err.message)
+    log('VP-20 request a document is idempotent', 'FAIL', err.message)
     await page.keyboard.press('Escape').catch(() => {})
   }
 
@@ -418,21 +684,38 @@ async function main() {
       lastUpload.ok && lastUpload.tx ? 'PASS' : 'FAIL',
       JSON.stringify(lastUpload),
     )
-    await page.getByRole('button', { name: /your uploads/i }).click()
+    await page.getByRole('tab', { name: /your uploads/i }).click()
     await page.getByText(uniqueUploadName).first().waitFor({ timeout: 15000 })
     const uploadsText = await dumpText(page, 'uploads')
     log(
-      'VP-22 uploaded file appears under Your uploads',
+      'VP-22 uploaded file appears in the documents list',
       uploadsText.includes(uniqueUploadName) ? 'PASS' : 'FAIL',
       uploadsText.slice(0, 280),
     )
+    const row = page.locator('article').filter({ hasText: uniqueUploadName }).first()
+    await row.getByRole('button', { name: /^Open$/i }).click()
+    const dialog = page.getByRole('dialog')
+    await dialog.waitFor({ timeout: 15000 })
+    await dialog.getByText(/loading preview/i).waitFor({ state: 'hidden', timeout: 15000 }).catch(() => {})
+    await waitSettled(page, 300)
+    const previewText = await dialog.innerText()
+    log(
+      'VP-19d Open shows in-app preview',
+      /coming next/i.test(previewText) || /Loading preview/i.test(previewText)
+        ? 'FAIL'
+        : /Preview not available|Download|qa-upload/i.test(previewText)
+          ? 'PASS'
+          : 'FAIL',
+      previewText.slice(0, 280),
+    )
+    await page.keyboard.press('Escape').catch(() => {})
   } catch (err) {
     log('VP-21 upload attaches to the assigned file', 'FAIL', err.message)
   }
 
   // ── 5. Tasks ────────────────────────────────────────────────────────────
   try {
-    await page.getByRole('button', { name: /^Tasks$/i }).click()
+    await clickVendorNav(page, 'Tasks')
     await page.waitForURL(/\/portal\/vendor\/tasks/, { timeout: 12000 })
     await page.getByText(/Appraisal Completed|Loan application due/i).first().waitFor({ timeout: 15000 })
     await waitForJson(page, () => Array.isArray(lastTasks?.tasks) && lastTasks.tasks.length > 0, 20000)
@@ -513,8 +796,8 @@ async function main() {
     try {
       await page.goto(`${APP}/portal/vendor/files/${txId}`, { waitUntil: 'domcontentloaded' })
       await waitForVendorShell(page)
-      await page.getByText(/Back to files/i).waitFor({ timeout: 10000 })
-      await page.getByText(/4567 Meadowridge/i).waitFor({ timeout: 20000 })
+      await page.getByRole('link', { name: /back to files/i }).waitFor({ timeout: 10000 })
+      await page.getByRole('heading', { name: /4567 Meadowridge/i }).first().waitFor({ timeout: 20000 })
       const detail = await dumpText(page, 'file_detail')
       log(
         'VP-28 file detail deep link',
@@ -541,8 +824,10 @@ async function main() {
   try {
     await page.goto(`${APP}/portal/vendor`, { waitUntil: 'domcontentloaded' })
     await waitForVendorShell(page)
-    await page.getByRole('button', { name: /tessa grant/i }).click()
-    await page.getByRole('button', { name: /profile/i }).click()
+    await page.locator('[data-tour="account-menu"]').click()
+    const settingsItem = page.getByRole('menuitem', { name: /settings/i }).first()
+    await settingsItem.waitFor({ timeout: 5000 })
+    await settingsItem.click()
     await waitSettled(page, 500)
     const profile = await dumpText(page, 'profile')
     log(
