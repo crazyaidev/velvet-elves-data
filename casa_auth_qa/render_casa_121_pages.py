@@ -89,14 +89,9 @@ def page1():
         y,
         [
             (
-                "Source: ADA Web App Test Guide v1.0 / ASVS 2.5.4. Portal accepts PNG only.",
+                "Source: ADA Web App Test Guide v1.0 / ASVS 2.5.4.",
                 F_SMALL,
                 MUTED,
-            ),
-            (
-                "Do not claim: ADA-approved IdP for Supabase; that we fuzzed every default pair in published lists; that operator QA accounts do not exist (they are created by operators, not shipped).",
-                F_SMALL,
-                WARN,
             ),
         ],
     )

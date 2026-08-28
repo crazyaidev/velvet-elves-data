@@ -17,7 +17,7 @@
 
 | ID | What to check |
 | --- | --- |
-| 2.2.2 | Does Supabase revoke other sessions on password change/reset? Check project auth settings; attest what is true. |
+| 2.2.2 | **Verified 28 Aug 2026.** Not a dashboard toggle. Password change is reset/recovery (`POST /users/password-reset/confirm`). GoTrue `User.UpdatePassword` then `LogoutAllExceptMe` (recovery session) or `Logout` all sessions (admin password update, `sessionID` nil). Packed in `CASA_PORTAL_PACK.md`. Do not claim a live two-device reset. |
 | 2.2.3 | Access-JWT expiry in Supabase dashboard (default 1 h, well under 24 h). Screenshot. |
 | 1.3.x | Supabase OTP/reset token expiry + single use. Screenshot the auth settings page. |
 | 4.1.1/4.1.2 | Run Qualys SSL Labs on `app.velvetelves.com` and `api.prod.velvetelves.com`; screenshot grades. The test guide names SSL Labs explicitly. |

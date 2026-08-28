@@ -103,14 +103,9 @@ def page1():
         y,
         [
             (
-                "Source: ADA Web App Test Guide v1.0 / ASVS 2.4.1. Portal accepts PNG only.",
+                "Source: ADA Web App Test Guide v1.0 / ASVS 2.4.1.",
                 F_SMALL,
                 MUTED,
-            ),
-            (
-                "Do not claim: ADA-approved IdP for Supabase; that Velvet Elves hashes passwords in app code; that we dumped production hash values.",
-                F_SMALL,
-                WARN,
             ),
         ],
     )

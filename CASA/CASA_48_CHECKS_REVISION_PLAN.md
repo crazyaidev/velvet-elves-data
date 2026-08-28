@@ -70,7 +70,7 @@ All Velvet Elves screenshots go to `casa_al1_evidence/m9/tac_images/<check-id>/`
 | S1 | Auth rate limits page | Supabase dashboard → Authentication → Rate Limits (production project) | 1 |
 | S2 | Access-token expiry (default 1 h < 24 h) | Supabase → Authentication → Sessions/JWT settings | 12 |
 | S3 | OTP / reset token expiry + single-use | Supabase → Authentication → Email settings | 5–8 |
-| S4 | Password change revokes other sessions? Check the actual GoTrue behavior/setting; attest what is true | Supabase auth settings | 11 |
+| S4 | Password change revokes other sessions — **done 28 Aug 2026** via GoTrue source (`UpdatePassword` → LogoutAllExceptMe / Logout), not a dashboard toggle. Packed as 2.2.2. | GoTrue public source + confirm code | 11 |
 | S5 | SSL Labs grade `app.velvetelves.com` | ssllabs.com/ssltest | 27, 28 |
 | S6 | SSL Labs grade `api.prod.velvetelves.com` | ssllabs.com/ssltest | 27, 28 |
 | S7 | Register 429 after 6 rapid signups | staging, DevTools network tab | 1, 22 |
@@ -155,7 +155,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 8 | 1.3.4 | Ready | attest + S3 | [ ] |
 | 9 | 2.1.1 | Ready | M9d + dast | [ ] |
 | 10 | 2.2.1 | Code landed → deploy + S10 | CASA_2_2_1 + S10 | [ ] |
-| 11 | 2.2.2 | Verify S4 | attest + S4 | [ ] |
+| 11 | 2.2.2 | Ready (GoTrue default terminate-others; no live two-device reset) | CASA_2_2_2 | [ ] |
 | 12 | 2.2.3 | Ready | comp + S2 | [ ] |
 | 13 | 2.3.1 | Ready (honest N/A) | comp | [ ] |
 | 14 | 2.3.2 | Ready (honest N/A) | comp | [ ] |

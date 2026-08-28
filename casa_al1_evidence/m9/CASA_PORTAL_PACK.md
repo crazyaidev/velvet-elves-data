@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 28 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -10,7 +10,7 @@
 
 Do not check “I confirm…” or click Evidence **Submit** until all 48 rows are filled.
 
-**Screenshot rule:** agent captures Velvet Elves only (`app.` / `api.` staging or production, plus our own write-up PNGs). Screenshots of other products (Supabase dashboard, supabase.com docs, SSL Labs, AWS, Google Cloud) are owner-captured. If one is needed, the agent will ask and give guidelines — it will not take the shot.
+**Screenshot rule:** agent captures Velvet Elves only (`app.` / `api.` staging or production, plus our own write-up PNGs). Screenshots of other products (Supabase dashboard, supabase.com docs, SSL Labs, AWS, Google Cloud) are owner-captured. If one is needed, the agent will ask and give guidelines — it will not take the shot. Write-up PNGs are for TAC: cite ADA/ASVS, state what the product does. Keep internal “do not claim” / portal-process notes in this markdown only — never on images the lab will see.
 
 ---
 
@@ -29,6 +29,13 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 2 | 1.1.2 | Initial passwords / activation codes expire | 5 | `CASA_1_1_2_activation.md` |
 | 3 | 1.1.3 | Passwords stored resistant to offline attacks | 4 | `CASA_1_1_3_password_storage.md` |
 | 4 | 1.2.1 | Default credentials shall not be present | 5 | `CASA_1_2_1_default_credentials.md` |
+| 5 | 1.3.1 | Out of band verifier shall expire | 6 | `CASA_1_3_1_oob_expiry.md` |
+| 6 | 1.3.2 | Out of band verifier shall only be used once | 4 | `CASA_1_3_2_oob_single_use.md` |
+| 7 | 1.3.3 | Out of band verifier shall be securely random | 7 | `CASA_1_3_3_oob_random.md` |
+| 8 | 1.3.4 | Out of band verifier shall be resistant to brute force attacks | 6 | `CASA_1_3_4_oob_bruteforce.md` |
+| 9 | 2.1.1 | URLs shall not expose authentication material | 5 | `CASA_2_1_1_no_tokens_in_url.md` |
+| 10 | 2.2.1 | Logout invalidates stateful session tokens | 6 | `CASA_2_2_1_logout.md` |
+| 11 | 2.2.2 | Terminate other sessions after password change | 7 | `CASA_2_2_2_password_change_sessions.md` |
 
 ---
 
@@ -166,6 +173,247 @@ Velvet Elves does not ship default accounts or predefined username/password pair
 
 ---
 
+## 1.3.1 — Out of band verifier shall expire
+
+**ADA:** list external auth services + written expiry process. If not an ADA-approved IdP: password-reset links expire within **7 days**; MFA verifiers within **30 minutes**.
+
+**Claimed controls**
+
+- Reset is GoTrue `reset_password_email`. Auth Email OTP expiration is **3600 seconds (1 hour)**. App copy matches.
+- `/reset-password` without a token → Invalid or expired link.
+- TOTP uses a 30-second time step (under the 30-minute MFA cap).
+- No SMS OTP. Invite TTL stays on row 1.1.2.
+
+**Helpers:** `casa_auth_qa/render_casa_131_pages.py`, `casa_131_shots.mjs` (Velvet Elves staging only).
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/1.3.1/CASA_1_3_1_page1.png`](tac_images/1.3.1/CASA_1_3_1_page1.png) | Written evidence page 1 of 2. External services, GoTrue recovery email, 3600-second OTP expiry, TOTP 30-second step. |
+| [`tac_images/1.3.1/CASA_1_3_1_page2.png`](tac_images/1.3.1/CASA_1_3_1_page2.png) | Written evidence page 2 of 2. AL1 mapping vs 7-day reset cap and 30-minute MFA cap. |
+| [`tac_images/1.3.1/CASA_1_3_1_forgot_password.png`](tac_images/1.3.1/CASA_1_3_1_forgot_password.png) | Live staging `/forgot-password`: user requests a reset email. |
+| [`tac_images/1.3.1/CASA_1_3_1_expires_1h.png`](tac_images/1.3.1/CASA_1_3_1_expires_1h.png) | Live staging after submit: **Link expires in 1 hour**. |
+| [`tac_images/1.3.1/CASA_1_3_1_reset_expired.png`](tac_images/1.3.1/CASA_1_3_1_reset_expired.png) | Live staging `/reset-password` with no token: **Invalid or expired link**. |
+| [`tac_images/1.3.1/CASA_1_3_1_supabase_email_otp.png`](tac_images/1.3.1/CASA_1_3_1_supabase_email_otp.png) | **Owner-captured** Auth Email settings: Email OTP expiration **3600** seconds (1 hour). Same setting covers recovery links. |
+
+### Portal comment
+
+```
+Password reset uses a Supabase Auth recovery email. Auth Email OTP expiration is 3600 seconds (1 hour), matching the app copy. Opening /reset-password without a valid token shows Invalid or expired link and cannot set a password. TOTP MFA codes use a 30-second time step, under ADA's 30-minute MFA verifier limit. We do not send SMS OTPs.
+```
+
+This dashboard shot also shows GoTrue min password length 6 and HaveIBeenPwned off. Do not use it to claim HIBP or that GoTrue’s minimum is 8. Row 1.1.1 already states our API requires 8 + digit + a static denylist.
+
+---
+
+## 1.3.2 — Out of band verifier shall only be used once
+
+**ADA:** list external auth services + written process. If not an ADA-approved IdP, the OOB verifier can be used only once.
+
+**Claimed controls**
+
+- Recovery email is GoTrue; we do not store a reusable reset code.
+- Confirm without a valid token → 400 Invalid or expired reset token.
+- SPA `/reset-password` with no token cannot set a password; user must request a new link.
+- Staging: same invalid token posted twice, both 400.
+
+**Helpers:** `casa_auth_qa/render_casa_132_pages.py`, `casa_132_shots.mjs`, `casa_132_confirm.py` (Velvet Elves staging only).
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/1.3.2/CASA_1_3_2_page1.png`](tac_images/1.3.2/CASA_1_3_2_page1.png) | Written evidence page 1 of 2. GoTrue recovery is single-use; 400 on invalid token. |
+| [`tac_images/1.3.2/CASA_1_3_2_page2.png`](tac_images/1.3.2/CASA_1_3_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/1.3.2/CASA_1_3_2_reset_expired.png`](tac_images/1.3.2/CASA_1_3_2_reset_expired.png) | Live staging `/reset-password` with no token: Invalid or expired link; Request a new link. |
+| [`tac_images/1.3.2/CASA_1_3_2_confirm_rejected.png`](tac_images/1.3.2/CASA_1_3_2_confirm_rejected.png) | Staging API: same invalid recovery token twice, both HTTP 400. |
+
+### Portal comment
+
+```
+Password reset recovery links are issued by Supabase Auth and cannot be reused. Confirm requires a valid recovery token from the email. A missing, used, or invalid token returns Invalid or expired reset token and cannot set a password. The reset page with no token shows Invalid or expired link and asks the user to request a new one. TOTP MFA is verified through a GoTrue challenge; codes rotate every 30 seconds. We do not send SMS OTPs.
+```
+
+---
+
+## 1.3.3 — Out of band verifier shall be securely random
+
+**ADA:** list external auth services + written generation algorithm. If not an ADA-approved IdP, codes must be generated so an attacker cannot predict or manipulate them.
+
+**Claimed controls**
+
+- Reset is GoTrue `reset_password_email`. The app does not mint or store a reset OTP.
+- Auth Email OTP length is **8 digits**. Recovery emails carry a hashed GoTrue token, not a sequential app counter.
+- Invite tokens the app mints: `uuid.uuid4().hex` (32 hex; CPython uses `os.urandom`).
+- TOTP shared secret comes from GoTrue factor enroll.
+
+**Do not claim:** a specific GoTrue CSPRNG source file; ADA-approved IdP; that Email OTP length 8 is ≥64 bits (that is 1.3.4). This dashboard shot also shows GoTrue min password 6 and HIBP off — do not use it to claim HIBP or that GoTrue’s minimum is 8.
+
+**Helpers:** `casa_auth_qa/render_casa_133_pages.py`, `casa_133_shots.mjs` (Velvet Elves staging only). Owner Email OTP shot is copied from 1.3.1 — do not recapture supabase.com.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/1.3.3/CASA_1_3_3_page1.png`](tac_images/1.3.3/CASA_1_3_3_page1.png) | Written evidence page 1 of 2. Vendor reset codes; uuid4 invite tokens; GoTrue TOTP secret. |
+| [`tac_images/1.3.3/CASA_1_3_3_page2.png`](tac_images/1.3.3/CASA_1_3_3_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/1.3.3/CASA_1_3_3_code.png`](tac_images/1.3.3/CASA_1_3_3_code.png) | Application code: reset delegates to GoTrue; invite token is uuid4 hex; TOTP secret from GoTrue enroll. |
+| [`tac_images/1.3.3/CASA_1_3_3_forgot_password.png`](tac_images/1.3.3/CASA_1_3_3_forgot_password.png) | Live staging `/forgot-password`: user requests a reset **link**. No app-generated code is shown. |
+| [`tac_images/1.3.3/CASA_1_3_3_expires_1h.png`](tac_images/1.3.3/CASA_1_3_3_expires_1h.png) | Live staging after submit: check inbox; link expires in 1 hour. Still no displayed OTP. |
+| [`tac_images/1.3.3/CASA_1_3_3_reset_expired.png`](tac_images/1.3.3/CASA_1_3_3_reset_expired.png) | Live staging `/reset-password` with no token: Invalid or expired link. |
+| [`tac_images/1.3.3/CASA_1_3_3_supabase_email_otp.png`](tac_images/1.3.3/CASA_1_3_3_supabase_email_otp.png) | **Owner-captured** Auth Email settings: Email OTP length **8** digits (same panel as 1.3.1). |
+
+### Portal comment
+
+```
+Password-reset recovery links are issued by Supabase Auth. The app does not generate or store a reset code. Email OTP length is 8 digits. Recovery uses a hashed vendor token in the email link, not a sequential number. Invite tokens the app mints are 32-character uuid4 hex. TOTP secrets are generated by GoTrue. We do not send SMS OTPs.
+```
+
+---
+
+## 1.3.4 — Out of band verifier shall be resistant to brute force attacks
+
+**ADA:** list external auth services + written generation and rate-limiting. If not an ADA-approved IdP: ≥**20 bits** of entropy; if **<64 bits**, a rate-limiting mechanism is required.
+
+**Claimed controls**
+
+- Email OTP is **8 digits** (~26.6 bits): meets 20 bits, under 64 bits → rate limit required.
+- Recovery link is a hashed GoTrue token (**>64 bits**). Guessed confirm tokens return **400** and cannot set a password.
+- Invite token is uuid4 hex (**>64 bits**).
+- TOTP is 6 digits (~20 bits, ADA’s typical example), under 64 bits → rate limit required.
+- GoTrue Auth Rate Limits (production, owner-captured): **token verifications 30 / 5 min / IP**; **emails 30 / hour**.
+- GoTrue MFA challenge/verify: **15 / hour / IP** per official docs (not a customizable dashboard field). App does **not** add a second limiter on confirm or `/users/mfa/verify`.
+
+**Do not claim:** an in-app limiter on password-reset confirm or MFA verify; that we live-hit a 429 on OTP verify; ADA-approved IdP; SMS OTP; live HIBP (same Email settings panel still shows HIBP off and GoTrue min 6).
+
+**Helpers:** `casa_auth_qa/render_casa_134_pages.py`, `casa_134_confirm.py`, `casa_134_shots.mjs`. Rate Limits and Email OTP shots are copies of owner captures from 1.1.1 / 1.3.1 — do not recapture supabase.com.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/1.3.4/CASA_1_3_4_page1.png`](tac_images/1.3.4/CASA_1_3_4_page1.png) | Written evidence page 1 of 2. Entropy of Email OTP, recovery token, invite uuid4, and TOTP. |
+| [`tac_images/1.3.4/CASA_1_3_4_page2.png`](tac_images/1.3.4/CASA_1_3_4_page2.png) | Written evidence page 2 of 2. Rate limits for secrets under 64 bits; AL1 mapping. |
+| [`tac_images/1.3.4/CASA_1_3_4_confirm_guesses.png`](tac_images/1.3.4/CASA_1_3_4_confirm_guesses.png) | Staging API: five guessed recovery tokens, all HTTP 400. None set a password. |
+| [`tac_images/1.3.4/CASA_1_3_4_reset_expired.png`](tac_images/1.3.4/CASA_1_3_4_reset_expired.png) | Live staging `/reset-password` with no token: Invalid or expired link. |
+| [`tac_images/1.3.4/CASA_1_3_4_supabase_rate_limits.png`](tac_images/1.3.4/CASA_1_3_4_supabase_rate_limits.png) | **Owner-captured** Auth Rate Limits: token verifications 30 / 5 min / IP; emails 30 / hour. |
+| [`tac_images/1.3.4/CASA_1_3_4_supabase_email_otp.png`](tac_images/1.3.4/CASA_1_3_4_supabase_email_otp.png) | **Owner-captured** Auth Email: OTP length **8** digits (entropy source). |
+
+### Portal comment
+
+```
+Out-of-band reset codes meet ADA's 20-bit entropy floor. Email OTP is 8 digits (about 27 bits). Recovery links use a hashed GoTrue token with well over 64 bits. Because the 8-digit OTP is under 64 bits, GoTrue rate-limits OTP and magic-link verifications to 30 requests per 5 minutes per IP. Password-reset emails are capped at 30 per hour. TOTP is 6 digits (ADA's typical 20-bit example) and GoTrue limits MFA challenge and verify to 15 requests per hour per IP. Guessing a reset token returns 400 and cannot set a password. We do not send SMS OTPs.
+```
+
+---
+
+## 2.1.1 — URLs shall not expose authentication material
+
+**ADA:** DAST results. Scan must not find password-via-GET, password in query string, or session token in URL. Secrets go in the body or headers.
+
+**Claimed controls**
+
+- Login is `POST /users/login` with password in the form body. Staging GET with password in the query does **not** authenticate (401).
+- Session JWT is `Authorization: Bearer` (`apiFetch` / `OAuth2PasswordBearer`). `GET /users/me?access_token=` is ignored.
+- SPA `/login` address is `https://app.stage.velvetelves.com/login` (no token query).
+- Google OAuth: code + PKCE; callback `postMessage`. Reset confirm is POST JSON body.
+- Official ZAP (SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa`): plugins 3 and 10024 are FAIL in the CASA config and were **not** reported.
+
+**Do not claim:** that *no* token ever appears in any URL. Invite accept and public invoice links may include a one-time **capability** token in the query; those are not the session JWT. GoTrue recovery may use a URL **fragment**. Session is still `localStorage` JWT, not cookies.
+
+**Helpers:** `casa_auth_qa/render_casa_211_pages.py`, `casa_211_probe.py`, `casa_211_shots.mjs`.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.1.1/CASA_2_1_1_page1.png`](tac_images/2.1.1/CASA_2_1_1_page1.png) | Written evidence page 1 of 2. Password POST body; JWT Bearer; OAuth postMessage; capability tokens called out. |
+| [`tac_images/2.1.1/CASA_2_1_1_page2.png`](tac_images/2.1.1/CASA_2_1_1_page2.png) | Written evidence page 2 of 2. DAST mapping + live GET probes. |
+| [`tac_images/2.1.1/CASA_2_1_1_code.png`](tac_images/2.1.1/CASA_2_1_1_code.png) | Login POST body; apiFetch Authorization header; OAuth2PasswordBearer. |
+| [`tac_images/2.1.1/CASA_2_1_1_query_rejected.png`](tac_images/2.1.1/CASA_2_1_1_query_rejected.png) | Staging: GET login with password query, GET /me with access_token query, GET /me — all 401. |
+| [`tac_images/2.1.1/CASA_2_1_1_login.png`](tac_images/2.1.1/CASA_2_1_1_login.png) | Live staging `/login`. Address bar: `https://app.stage.velvetelves.com/login` (no token query). |
+
+### Portal comment
+
+```
+Login is POST /users/login with the password in the request body, never as a GET query parameter. The session JWT is sent as Authorization Bearer, not in the URL. Official ADA ZAP scans of the SPA and API did not report Session ID in URL or Sensitive Information in URL. Google OAuth returns tokens to a popup via postMessage. Password-reset confirm posts the recovery token in the JSON body. Invite accept and public invoice links may include a one-time capability token in the query; those are not the user session JWT.
+```
+
+---
+
+## 2.2.1 — Logout invalidates stateful session tokens
+
+**ADA:** code or docs showing logout/expiration invalidate session tokens, including refresh tokens. Server-side invalidation on logout and expiration.
+
+**Claimed controls**
+
+- App menu **Log Out** (and MFA gate **Sign out**) call `AuthContext.logout()`.
+- `POST /users/logout` → GoTrue `admin.sign_out(token, "local")` then **204**.
+- SPA clears `velvet_elves_token` / `velvet_elves_refresh_token` and goes to `/login`.
+- Staging: login 200 → logout 204 → refresh replay **401**.
+- Access JWT is stateless and expires on its own (2.2.3). Scope `local` is this session, not every device.
+
+**Do not claim:** HttpOnly cookies; that the access JWT is killed instantly; global logout of all devices.
+
+**Helpers:** `casa_auth_qa/render_casa_221_pages.py`, `casa_221_replay.py` (`QA_PASSWORD`), `casa_221_shots.mjs`.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.2.1/CASA_2_2_1_page1.png`](tac_images/2.2.1/CASA_2_2_1_page1.png) | Written evidence page 1 of 2. Logout flow, GoTrue sign_out, staging replay. |
+| [`tac_images/2.2.1/CASA_2_2_1_page2.png`](tac_images/2.2.1/CASA_2_2_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/2.2.1/CASA_2_2_1_code.png`](tac_images/2.2.1/CASA_2_2_1_code.png) | Logout endpoint + AuthContext fetch and clearTokens. |
+| [`tac_images/2.2.1/CASA_2_2_1_refresh_replay.png`](tac_images/2.2.1/CASA_2_2_1_refresh_replay.png) | Staging API: login 200, logout 204, refresh replay 401. Tokens not shown. |
+| [`tac_images/2.2.1/CASA_2_2_1_logout_menu.png`](tac_images/2.2.1/CASA_2_2_1_logout_menu.png) | Live staging admin dashboard with **Log Out**. |
+| [`tac_images/2.2.1/CASA_2_2_1_after_logout.png`](tac_images/2.2.1/CASA_2_2_1_after_logout.png) | After Log Out: staging `/login`. |
+
+### Portal comment
+
+```
+Users can log out from the app menu. Logout calls POST /users/logout, which revokes this Supabase session (GoTrue admin sign_out) and then clears browser storage. Replaying the refresh token after logout returns 401. The short-lived access JWT expires on its own (under 24 hours).
+```
+
+---
+
+## 2.2.2 — Terminate other sessions after password change
+
+**ADA:** after a successful password change (including reset/recovery), terminate all **other** active sessions including refresh tokens, **or** give the user an option. AL1: code **or** documentation.
+
+**Claimed controls**
+
+- Password change is **Forgot password** / recovery. There is no logged-in current-password form.
+- Confirm is `POST /users/password-reset/confirm`. Success: “Please sign in.” SPA redirects to `/login`.
+- Confirm updates the password in GoTrue. GoTrue **by default** deletes other `auth.sessions` rows:
+  - recovery session present → `LogoutAllExceptMe`;
+  - `admin.update_user_by_id({password})` → `Logout` of all sessions (`sessionID` is nil).
+- Public source: `github.com/supabase/auth` `User.UpdatePassword`. Not a dashboard toggle.
+
+**Do not claim:** that app code calls `sign_out(others)`; a live two-device reset of a production account; that leftover access JWTs die instantly (2.2.3); that Gmail/Calendar mailbox tokens are login sessions; that “Secure password change” OFF is the session-kill switch; HttpOnly cookies.
+
+**Helpers:** `casa_auth_qa/render_casa_222_pages.py`, `casa_222_shots.mjs` (Velvet Elves staging only). Do **not** recapture supabase.com.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.2.2/CASA_2_2_2_page1.png`](tac_images/2.2.2/CASA_2_2_2_page1.png) | Written evidence page 1 of 2. Reset/recovery path; GoTrue LogoutAllExceptMe vs Logout all; access JWT vs federated mailbox tokens. |
+| [`tac_images/2.2.2/CASA_2_2_2_page2.png`](tac_images/2.2.2/CASA_2_2_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. Attested from confirm code + public GoTrue source, not a live two-device reset. |
+| [`tac_images/2.2.2/CASA_2_2_2_code.png`](tac_images/2.2.2/CASA_2_2_2_code.png) | Confirm: `update_user({password})` or `admin.update_user_by_id({password})`; then sign in. |
+| [`tac_images/2.2.2/CASA_2_2_2_gotrue.png`](tac_images/2.2.2/CASA_2_2_2_gotrue.png) | Public GoTrue `UpdatePassword` excerpt. Pillow write-up of source, not a supabase.com screenshot. |
+| [`tac_images/2.2.2/CASA_2_2_2_login.png`](tac_images/2.2.2/CASA_2_2_2_login.png) | Live staging `/login` with **Forgot password?** |
+| [`tac_images/2.2.2/CASA_2_2_2_forgot_password.png`](tac_images/2.2.2/CASA_2_2_2_forgot_password.png) | Live staging forgot-password form. |
+| [`tac_images/2.2.2/CASA_2_2_2_reset_expired.png`](tac_images/2.2.2/CASA_2_2_2_reset_expired.png) | Live staging `/reset-password` with no token: **Invalid or expired link**. |
+
+### Portal comment
+
+```
+Password change is through password reset (Forgot password), not an in-app current-password form. Confirm updates the password in Supabase Auth. GoTrue then terminates other sessions by default: a recovery session logs out every other session; an admin password update logs out all sessions for that user. After a successful reset the app sends the user to sign in. Short-lived access JWTs expire on their own (under 24 hours).
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -176,5 +424,12 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 1.1.2 | `python render_casa_112_pages.py` then `node casa_112_shots.mjs` |
 | 1.1.3 | `python render_casa_113_pages.py` only. Do **not** recapture supabase.com. |
 | 1.2.1 | `python render_casa_121_pages.py` then `node casa_121_shots.mjs` (Velvet Elves staging only). |
+| 1.3.1 | `python render_casa_131_pages.py` then `node casa_131_shots.mjs` (Velvet Elves staging only). Owner Email OTP shot is already on disk. |
+| 1.3.2 | `python render_casa_132_pages.py` then `python casa_132_confirm.py` and `node casa_132_shots.mjs` (staging only). |
+| 1.3.3 | `python render_casa_133_pages.py` then `node casa_133_shots.mjs` (staging only). Owner Email OTP shot is copied from 1.3.1 — do **not** recapture supabase.com. |
+| 1.3.4 | `python render_casa_134_pages.py` then `python casa_134_confirm.py` and `node casa_134_shots.mjs` (staging only). Rate Limits and Email OTP shots are copies of owner captures — do **not** recapture supabase.com. |
+| 2.1.1 | `python render_casa_211_pages.py` then `python casa_211_probe.py` and `node casa_211_shots.mjs` (staging only). Re-run the render script after the login shot so the address bar is stamped. Do not upload `login_raw.png`. |
+| 2.2.1 | `python render_casa_221_pages.py` then `python casa_221_replay.py` and `node casa_221_shots.mjs` (staging; needs `QA_PASSWORD`). |
+| 2.2.2 | `python render_casa_222_pages.py` then `node casa_222_shots.mjs` (staging only). Do **not** reset a live account and do **not** recapture supabase.com. |
 
 Eyeball every PNG for cut-off text before re-upload.

@@ -1,0 +1,195 @@
+"""Render CASA 1.3.4 write-up pages as portal-ready PNGs."""
+from pathlib import Path
+
+from PIL import Image, ImageDraw, ImageFont
+
+OUT = Path(r"c:\Projects\velvet-elves-data\casa_al1_evidence\m9\tac_images\1.3.4")
+OUT.mkdir(parents=True, exist_ok=True)
+
+W, H = 1400, 1800
+MARGIN = 56
+BG = (248, 248, 246)
+INK = (24, 24, 24)
+MUTED = (80, 80, 80)
+RULE = (200, 80, 70)
+OK = (20, 90, 50)
+LINE = (220, 218, 214)
+
+
+def font(size: int, bold: bool = False):
+    name = "segoeuib.ttf" if bold else "segoeui.ttf"
+    for p in (
+        rf"C:\Windows\Fonts\{name}",
+        r"C:\Windows\Fonts\arialbd.ttf" if bold else r"C:\Windows\Fonts\arial.ttf",
+        r"C:\Windows\Fonts\calibri.ttf",
+    ):
+        if Path(p).exists():
+            return ImageFont.truetype(p, size)
+    return ImageFont.load_default()
+
+
+F_H = font(22, True)
+F_SUB = font(14)
+F_SEC = font(16, True)
+F_BODY = font(15)
+F_SMALL = font(13)
+F_FOOT = font(12)
+
+
+def wrap(draw, text, fnt, width):
+    words = text.split()
+    lines = []
+    cur = ""
+    for w in words:
+        trial = f"{cur} {w}".strip()
+        if draw.textlength(trial, font=fnt) <= width:
+            cur = trial
+        else:
+            if cur:
+                lines.append(cur)
+            cur = w
+    if cur:
+        lines.append(cur)
+    return lines or [""]
+
+
+def new_page(title: str, page_no: int):
+    im = Image.new("RGB", (W, H), BG)
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, W, 10), fill=RULE)
+    d.text((MARGIN, 36), "Velvet Elves  |  ADA-CASA AL1 evidence", font=F_SUB, fill=MUTED)
+    d.text((MARGIN, 64), title, font=F_H, fill=INK)
+    d.text(
+        (MARGIN, 98),
+        "GCP 538509143953  |  production app.velvetelves.com  |  28 Aug 2026",
+        font=F_SMALL,
+        fill=MUTED,
+    )
+    d.line((MARGIN, 124, W - MARGIN, 124), fill=LINE, width=1)
+    d.text((MARGIN, H - 42), f"Page {page_no} of 2", font=F_FOOT, fill=MUTED)
+    d.text((W - MARGIN - 280, H - 42), "CASA_1_3_4_oob_bruteforce", font=F_FOOT, fill=MUTED)
+    return im, d, 144
+
+
+def paint(d, y, lines):
+    max_w = W - 2 * MARGIN
+    for text, fnt, color in lines:
+        for part in wrap(d, text, fnt, max_w):
+            d.text((MARGIN, y), part, font=fnt, fill=color)
+            y += 22 if fnt is F_SMALL else 24
+        y += 4
+    return y
+
+
+def page1():
+    im, d, y = new_page("1.3.4 Out of band verifier brute-force resistance", 1)
+    y = paint(
+        d,
+        y,
+        [
+            (
+                "Source: ADA Web App Test Guide v1.0 / ASVS 2.7.6.",
+                F_SMALL,
+                MUTED,
+            ),
+        ],
+    )
+    y += 8
+    d.text((MARGIN, y), "1. External user authentication services", font=F_SEC, fill=INK)
+    y += 32
+    y = paint(
+        d,
+        y,
+        [
+            (
+                "Supabase Auth (GoTrue) issues password-reset recovery emails, Email OTP, and TOTP MFA. It is not claimed as an ADA-approved identity provider. Google OAuth is not an email or SMS login verifier. Velvet Elves does not send SMS one-time codes.",
+                F_BODY,
+                INK,
+            ),
+        ],
+    )
+    y += 10
+    d.text((MARGIN, y), "2. Entropy (ADA: at least 20 bits)", font=F_SEC, fill=INK)
+    y += 32
+    rows = [
+        (
+            "Email OTP — 8 digits",
+            "Auth Email OTP length 8. log2(10^8) is about 26.6 bits. Meets 20 bits. Under 64 bits, so rate limiting is required.",
+        ),
+        (
+            "Recovery link — hashed GoTrue token",
+            "Confirm uses the vendor recovery token or PKCE code from the email, not an app-stored short code. Entropy is well over 64 bits.",
+        ),
+        (
+            "Invite token — uuid4 hex",
+            "InvitationRepository.create uses uuid.uuid4().hex (32 hex, 122 random bits). Over 64 bits.",
+        ),
+        (
+            "TOTP — 6 digits / 30-second step",
+            "RFC 6238. ADA states a six-digit random number is typically sufficient for 20 bits. Under 64 bits, so rate limiting is required.",
+        ),
+    ]
+    for title, detail in rows:
+        d.text((MARGIN, y), title, font=F_BODY, fill=OK)
+        y += 24
+        y = paint(d, y, [(detail, F_SMALL, MUTED)])
+        y += 6
+    im.save(OUT / "CASA_1_3_4_page1.png", "PNG")
+    print("wrote", OUT / "CASA_1_3_4_page1.png")
+
+
+def page2():
+    im, d, y = new_page("1.3.4 AL1 verification mapping", 2)
+    d.text((MARGIN, y), "Rate limiting where entropy is under 64 bits", font=F_SEC, fill=INK)
+    y += 32
+    y = paint(
+        d,
+        y,
+        [
+            (
+                "Email OTP and magic-link verification: production Auth Rate Limits set token verifications to 30 requests per 5 minutes per IP (360 per hour). Password-reset emails are capped at 30 per hour on the same page.",
+                F_BODY,
+                INK,
+            ),
+            (
+                "TOTP: POST /users/mfa/verify calls GoTrue factor challenge then verify. Official GoTrue docs rate-limit those endpoints at 15 requests per hour per IP (not a customizable dashboard field). Velvet Elves does not add a second in-app limiter on confirm or MFA verify.",
+                F_BODY,
+                INK,
+            ),
+            (
+                "Guessing a recovery token: POST /users/password-reset/confirm with an invalid token returns HTTP 400 Invalid or expired reset token and cannot set a password. The SPA /reset-password page without a token cannot set a password.",
+                F_BODY,
+                INK,
+            ),
+        ],
+    )
+    y += 10
+    d.text((MARGIN, y), "AL1 verification", font=F_SEC, fill=INK)
+    y += 32
+    rows = [
+        ("ADA-approved IdP", "Not claimed for Supabase.", False),
+        (
+            "At least 20 bits of entropy",
+            "Email OTP 8 digits (26.6 bits). TOTP 6 digits (ADA typical). Recovery token and invite uuid4 are far above 20 bits.",
+            True,
+        ),
+        (
+            "Rate limit if under 64 bits",
+            "Email OTP: GoTrue 30 verify requests / 5 min / IP. TOTP: GoTrue MFA 15 / hour / IP. Recovery and invite tokens exceed 64 bits.",
+            True,
+        ),
+        ("SMS OTP", "Not used.", True),
+    ]
+    for title, detail, ok in rows:
+        color = OK if ok else INK
+        d.text((MARGIN, y), title, font=F_BODY, fill=color)
+        y += 24
+        y = paint(d, y, [(detail, F_SMALL, MUTED)])
+        y += 8
+    im.save(OUT / "CASA_1_3_4_page2.png", "PNG")
+    print("wrote", OUT / "CASA_1_3_4_page2.png")
+
+
+if __name__ == "__main__":
+    page1()
+    page2()

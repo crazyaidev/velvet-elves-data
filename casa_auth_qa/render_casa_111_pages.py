@@ -98,14 +98,9 @@ def page1() -> None:
         y,
         [
             (
-                "Source: ADA Web App Test Guide v1.0 / ASVS 2.2.1. Portal accepts PNG only, so this page is the AL1 written description.",
+                "Source: ADA Web App Test Guide v1.0 / ASVS 2.2.1.",
                 F_SMALL,
                 MUTED,
-            ),
-            (
-                "Do not claim: ADA-approved IdP for Supabase; CAPTCHA; MFA default for all users; a live HIBP API.",
-                F_SMALL,
-                NO,
             ),
         ],
     )

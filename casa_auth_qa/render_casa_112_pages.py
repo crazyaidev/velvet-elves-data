@@ -89,14 +89,9 @@ def page1():
         y,
         [
             (
-                "Source: ADA Web App Test Guide v1.0 / ASVS 2.3.1. Portal accepts PNG only.",
+                "Source: ADA Web App Test Guide v1.0 / ASVS 2.3.1.",
                 F_SMALL,
                 MUTED,
-            ),
-            (
-                "Do not claim: ADA-approved IdP for Supabase; a generated initial password; that invite links expire within 48 hours.",
-                F_SMALL,
-                WARN,
             ),
         ],
     )
