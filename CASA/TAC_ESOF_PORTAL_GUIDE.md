@@ -3,10 +3,11 @@
 **Date:** 26 August 2026  
 **Portal:** https://casa.tacsecurity.com/  
 **Official TAC PDF:** `CASA/ESOF_AppSec_ADA_CASA_User_Guide_Ver.2.0.pdf` (12 pages, 2026)  
+**ADA test cases:** [Web App Test Guide v1.0](https://github.com/appdefensealliance/ASA-WG/blob/v1.0/Web%20App%20Profile/Web%20App%20Test%20Guide.md) (this is what TAC **View Details** quotes). AL1 = written evidence + screenshots; AL2 tests are not ours.  
 **Login:** `jan@velvetelves.com` (alternate email on Jake’s account; same password as Jake’s TAC login)  
 **Google due date:** 18 November 2026  
 **GCP:** `velvet-vles` / **538509143953**  
-**Companion:** `GOOGLE_CASA_AL1_NEXT_STEPS.md`, `casa_al1_evidence/m9/`
+**Companion:** `GOOGLE_CASA_AL1_NEXT_STEPS.md`, `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` (row comments + image descriptions), `casa_al1_evidence/m9/`
 
 This is the lab portal for **ADA-CASA AL1 only**. It is not SOC 2.  
 Support: `casasupport@tacsecurity.com`  
@@ -81,6 +82,7 @@ Still wrong on the recorded LOV, if Edit is still open: email `jake@velvetelves.
 5. Do **not** paste API keys, JWTs, or Fernet keys into the portal or into tickets.
 6. One CASA license = this one web app (SPA + API together). Do not buy a second license for the API.
 7. Do **not** follow the PDF’s AL2 path (TAC testers schedule and run the assessment).
+8. Do **not** capture screenshots of other companies’ products (Supabase dashboard or docs, SSL Labs, AWS, Google Cloud, etc.). Those shots must be taken by the owner. If a vendor screenshot is needed, the agent asks first and gives capture guidelines. Agent screenshots are limited to Velvet Elves (`app.` / `api.` / write-up PNGs of our own code).
 
 ---
 
@@ -199,24 +201,80 @@ If the portal only allows one DAST file, ask TAC which XML they want, or zip wit
 
 ---
 
-## 7. The 48 checks (after Upload Evidence appears)
+## 7. The 48 checks (Evidence page — 27 Aug screenshots)
 
-Fill every required check. Typical mapping:
+This is the official ADA CASA web AL1 list (Authentication → Configuration). Rows 1–48. Tester Comment / Remediation / Status stay empty until TAC reviews.
 
-| Theme | Use |
+**Do not** check “I confirm that all checklist items have been reviewed and verified” and **do not** click Evidence **Submit** until every required row has a comment and an upload.
+
+Comments may include English letters and symbols (punctuation is allowed). Keep claims honest. Do not paste API keys, JWTs, or secrets. Uploads carry the real filenames and URLs. Canonical paste list: `casa_al1_evidence/m9/CASA_PORTAL_PACK.md`.
+
+Click **View Details** on row 1 (`1.1.1`) first. Per-row **Upload Evidences** accepts **PNG, JPG, JPEG only** (max 10 images). Do **not** upload `.md` or `.zip` there. Keep markdown in `casa_al1_evidence/m9/` as our source; upload PNGs from `casa_al1_evidence/m9/tac_images/<check-id>/` (one folder per row).
+
+Honest gaps the lab may fail or ask to compensate:
+
+| ID | Do not over-claim |
 | --- | --- |
-| Auth / session | M9d + compensating JWT-in-`localStorage` write-up. Do not claim HttpOnly cookies. |
-| Access control / tenancy | M9f + isolation tests. |
-| TLS / headers | Production API HSTS / nosniff / XFO DENY; SPA CSP. Staging docs stay on; prod `/api/docs` is 404. |
-| Input validation | ZAP XML + false-positive SQLi / path-traversal notes. |
-| Secrets / encryption | M9d, M9e. Fernet. No keys in git. |
-| Logging | M9g. No tokens or full mail bodies. |
-| OAuth / Google data | M9b, M9c. PKCE. Disconnect is soft-deactivate. |
-| Deletion / IR | M9i. 30-day public SLA. Notify Google of a Google-data incident. |
-| Subprocessors / AI | M9j + Sharing PNG. |
-| SAST / DAST | Section 6 files. |
+| 2.3.1 / 2.3.2 | Session is SPA `localStorage` JWT, not cookies |
+| 3.3.1 | ~~No in-app MFA~~ Fixed 27 Aug: TOTP MFA enforced on platform routes (deploy before claiming) |
+| 6.1.1 | pip-audit residuals after 27 Aug upgrades: `ecdsa` (no fix exists), `pytest` (dev-only) |
+| 6.7.1 / Disconnect | Encrypted Google tokens remain on the row until wipe |
+| 5.1.7 | CSP Medium residuals (compensating) |
+| 5.1.8 / 5.1.10 | Auth-API ZAP Highs are false positives — say so |
 
-Where a ZAP Medium remains, paste the compensating-control paragraph. Do not mark Highs as pass if they are still open. The two auth-API Highs are **false positives** with replay notes in `DAST_SUMMARY.md`.
+Comments (punctuation allowed) and files:
+
+| # | ID | Upload | Comment to paste |
+| --- | --- | --- | --- |
+| 1 | 1.1.1 brute force | `tac_images/1.1.1/` — `CASA_1_1_1_page1.png`, `page2.png`, `login_429.png`, `register_429.png`, `password_rules.png`, `supabase_rate_limits.png` | Login is rate-limited to 10 requests/minute/IP and locked after 20 failed attempts per account per hour. Passwords require min 8 characters, a digit, and reject common passwords (static denylist, not a live HIBP API). Register is rate-limited to 5/minute. TOTP MFA is enforced for platform admins (not all users). CAPTCHA is not used; ADA 1.1.1 is met via options 2.1 and 2.4. Supabase vendor limits apply on top (30 sign-in requests / 5 min / IP). |
+| 2 | 1.1.2 initial passwords expire | `tac_images/1.1.2/` — `CASA_1_1_2_page1.png`, `page2.png`, `invite_expired.png`, `forgot_password.png`, `reset_expired.png` | Velvet Elves does not issue system-generated initial passwords. Users choose their own password on register, invite accept, and password reset. Invite activation tokens are 32-character hex (uuid4), single-use, and cannot become the account password. Used, revoked, or unknown tokens return 410/404. Invite links currently expire after 72 hours (ADA 1.1.2 recommends 24h and caps at 48h; we do not claim the 48h cap). Password reset uses a one-time Supabase recovery link; a missing/expired link cannot set a password. |
+| 3 | 1.1.3 password storage | `tac_images/1.1.3/` — `CASA_1_1_3_page1.png`, `page2.png`, `users_schema.png`, `supabase_docs.png` | User passwords are not stored in Velvet Elves tables. Login and register call Supabase Auth (GoTrue). GoTrue stores a salted bcrypt hash in auth.users.encrypted_password (hash, not reversible encryption; see supabase.com/docs/guides/auth/password-security). public.users is a profile row with no password column. We do not operate a custom password hasher. Google OAuth tokens are Fernet-encrypted separately and are not login passwords. |
+| 4 | 1.2.1 no default credentials | `tac_images/1.2.1/` — `CASA_1_2_1_page1.png`, `page2.png`, `login_empty.png`, `register.png`, `default_rejected.png` | Velvet Elves does not ship default accounts or predefined username/password pairs on public interfaces (no Admin/Admin). Accounts are created only by self-register or invite accept; the user always chooses the password. Login and register forms start empty. A classic default pair is rejected. Google Sign-in is the user's Google account via OAuth, not a shared Velvet Elves password. SQL seeds do not insert passwords. |
+| 5–8 | 1.3.1–1.3.4 out of band verifiers | `self_attestation_draft.md` | Email verifiers are one time random and expire Supabase Auth issues them |
+| 9 | 2.1.1 no tokens in URL | `M9d_token_storage.md` | Session JWT is Authorization header not query string OAuth uses popup postMessage |
+| 10 | 2.2.1 logout invalidates | new `CASA_2_2_1` page (render after deploy) + S10 screenshot | Logout revokes the Supabase session server side and clears browser storage Refresh token replay after logout returns 401 Access JWT expires within the hour |
+| 11 | 2.2.2 other sessions on password change | `self_attestation_draft.md` | Password change is Supabase Auth Compensating refresh rotation |
+| 12 | 2.2.3 stateless token under 24h | `compensating_controls.md` | Supabase access JWT is short lived under 24 hours Refresh is separate |
+| 13 | 2.3.1 cookie Secure | `compensating_controls.md` | Session is not a cookie SPA stores JWT in localStorage HTTPS only compensating writeup attached |
+| 14 | 2.3.2 cookie HttpOnly | `compensating_controls.md` | Same as 2 3 1 Do not claim HttpOnly cookies |
+| 15 | 2.3.3 session tokens not static API keys | `M9d_token_storage.md` | User session is JWT Google API uses per user OAuth tokens not a shared user API key |
+| 16 | 2.3.4 signed stateless tokens | `M9d_token_storage.md` | Supabase JWT is signed Google tokens encrypted at rest |
+| 17 | 2.4.1 reauth for sensitive changes | `self_attestation_draft.md` | Account changes require a valid login session Email change is restricted |
+| 18 | 3.1.1 least privilege | `M9f_tenant_isolation.md` | API enforces tenant scope Platform admin is a separate console |
+| 19 | 3.1.2 users cannot alter policy attrs | `M9f_tenant_isolation.md` | Tenant and role come from the server JWT not from client fields |
+| 20 | 3.1.3 fail securely | `M9f_tenant_isolation.md` | Missing auth returns 401 Forbidden returns 403 |
+| 21 | 3.1.4 IDOR | `M9f_tenant_isolation.md` | Isolation tests cover cross tenant reads See M9f |
+| 22 | 3.1.5 CSRF | `compensating_controls.md` | API uses Bearer JWT not cookie session SPA origin locked by CORS |
+| 23 | 3.1.6 directory browsing | `M9a_architecture.md` | SPA is hashed CloudFront assets API has no directory index |
+| 24 | 3.2.1 OAuth code plus PKCE | `M9c_scope_to_google_api.md` | Google OAuth is authorization code with PKCE No implicit flow |
+| 25 | 3.2.2 redirect uri and state | `M9b_data_flow.md` | redirect uri is allowlisted FRONTEND URL state is used Callback postMessage origin locked |
+| 26 | 3.3.1 admin MFA | new `CASA_3_3_1` page (render after deploy) | Platform admin routes require TOTP MFA The session JWT must carry aal2 Admins enroll an authenticator app by QR code and enter a code at every login Non admin users may also enroll |
+| 27 | 4.1.1 TLS 1 2 plus | `M9a_architecture.md` | HTTPS only ALB and CloudFront HSTS on production API |
+| 28 | 4.1.2 trusted certs | `M9a_architecture.md` | Public ACM certificates No self signed on app velvetelves com |
+| 29 | 4.1.3 no weak crypto on secrets | `M9e_pii_encryption.md` | Tokens and PII at rest use Fernet AES SHA1 is only a short proposal id Low |
+| 30 | 4.1.4 crypto fail securely | `M9e_pii_encryption.md` | Fernet decrypt failures do not return plaintext |
+| 31 | 5.1.1 HTTP parameter pollution | `DAST_SUMMARY.md` | FastAPI typed params Official ZAP XML in the scan zip |
+| 32 | 5.1.2 open redirect | `M9b_data_flow.md` | OAuth callback does not echo untrusted redirects FRONTEND URL only |
+| 33 | 5.1.3 no eval | `SAST_SUMMARY.md` | No user driven eval SAST CSV 0 High |
+| 34 | 5.1.4 template injection | `SAST_SUMMARY.md` | Server templates are not user controlled SAST CSV 0 High |
+| 35 | 5.1.5 SSRF | `DAST_SUMMARY.md` | No user controlled server fetch of arbitrary URLs ZAP XML attached in scan zip |
+| 36 | 5.1.6 XML injection | `DAST_SUMMARY.md` | JSON APIs not XML parsers for user input |
+| 37 | 5.1.7 XSS | `compensating_controls.md` | OAuth XSS closed on rescan CSP Mediums are compensating residuals |
+| 38 | 5.1.8 SQLi | `DAST_SUMMARY.md` | SQLAlchemy parameterized Auth ZAP SQLi High is false positive replay 422 or generic 500 |
+| 39 | 5.1.9 OS command injection | `SAST_SUMMARY.md` | No shelling user input SAST CSV 0 High |
+| 40 | 5.1.10 file inclusion | `DAST_SUMMARY.md` | Auth ZAP path traversal High is false positive path segment only |
+| 41 | 5.2.1 malicious uploads | `self_attestation_draft.md` | Uploads go to object storage not executed as code |
+| 42 | 6.1.1 no known exploitable components | `DEPS_SUMMARY.md` (refresh) + S12 | npm production 0 pip audit clean after upgrades pydantic ai and pypdf upgraded 27 Aug Remaining notes ecdsa has no released fix and pytest is dev only not shipped |
+| 43 | 6.2.1 debug off in production | `M9a_architecture.md` | Production APP DEBUG false docs redoc openapi are 404 |
+| 44 | 6.3.1 Origin not used as auth | `M9f_tenant_isolation.md` | Auth is JWT not Origin header |
+| 45 | 6.4.1 subdomain takeover | `M9a_architecture.md` | Live hosts are CloudFront and ALB No dangling review CNAMEs in use |
+| 46 | 6.5.1 do not log credentials | `M9g_logging.md` | Logs mask emails No tokens or mail bodies |
+| 47 | 6.6.1 clear browser storage on logout | `compensating_controls.md` | Logout clears velvet elves token keys in localStorage |
+| 48 | 6.7.1 server secrets | `M9d_token_storage.md` | Secrets in AWS Secrets Manager Google tokens Fernet encrypted Disconnect is soft deactivate |
+
+File paths under `casa_al1_evidence/m9/` except `DAST_SUMMARY.md` / `SAST_SUMMARY.md` / `DEPS_SUMMARY.md` in `casa_al1_evidence/2026-08-21/`. AI screenshot `openai-data-controls.png` is extra for any secrets/subprocessor question; do not call it ZDR.
+
+If a row upload rejects `.md`, zip that one markdown (letters-only name like `M9d token storage.zip`) and retry.
 
 ---
 
