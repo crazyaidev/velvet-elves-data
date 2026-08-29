@@ -18,7 +18,7 @@
 | ID | What to check |
 | --- | --- |
 | 2.2.2 | **Verified 28 Aug 2026.** Not a dashboard toggle. Password change is reset/recovery (`POST /users/password-reset/confirm`). GoTrue `User.UpdatePassword` then `LogoutAllExceptMe` (recovery session) or `Logout` all sessions (admin password update, `sessionID` nil). Packed in `CASA_PORTAL_PACK.md`. Do not claim a live two-device reset. |
-| 2.2.3 | Access-JWT expiry in Supabase dashboard (default 1 h, well under 24 h). Screenshot. |
+| 2.2.3 | **Verified 28 Aug 2026.** Staging access JWT `exp − iat` = **28800 s (8.00 hours)**, under 24 h. Packed in `CASA_PORTAL_PACK.md`. Do not claim the 1-hour GoTrue default. Owner Sessions/JWT dashboard shot (S2) is optional backup. |
 | 1.3.x | Supabase OTP/reset token expiry + single use. Screenshot the auth settings page. |
 | 4.1.1/4.1.2 | Run Qualys SSL Labs on `app.velvetelves.com` and `api.prod.velvetelves.com`; screenshot grades. The test guide names SSL Labs explicitly. |
 | 6.4.1 | Quick Route 53 review: no dangling CNAMEs to dead services. Attest. |
@@ -28,8 +28,11 @@
 
 - **1.1.2, 1.1.3, 1.2.1, 1.3.1–1.3.4** — Supabase Auth issues hashed passwords, one-time expiring verifiers; no default credentials. (`self_attestation_draft.md`, M9d)
 - **2.1.1** — Bearer header, no tokens in URLs (ZAP XML supports).
-- **2.3.1 / 2.3.2** — Honest **N/A**: the requirement is conditional on *cookie-based* session tokens; we use header-borne JWT. Attach the localStorage compensating write-up; do not claim cookies.
-- **2.3.3 / 2.3.4 / 2.4.1** — Session JWTs (signed), not static keys; sensitive changes need a valid session.
+- **2.3.1** — **Verified 28 Aug 2026.** Honest N/A: requirement is cookie-based session tokens. Staging login Set-Cookie none; Bearer + localStorage. Official ZAP did not report plugin 10011. Packed in `CASA_PORTAL_PACK.md`. Do not claim a Secure session cookie.
+- **2.3.2** — **Verified 28 Aug 2026.** Honest N/A: same architecture as 2.3.1. Staging login Set-Cookie none. Official ZAP did not report plugin 10010. Packed in `CASA_PORTAL_PACK.md`. Do not claim HttpOnly cookies or that localStorage equals HttpOnly.
+- **2.3.3** — **Verified 28 Aug 2026.** User session is a GoTrue JWT minted after login (two staging `iat` values differed). Packed in `CASA_PORTAL_PACK.md`. Inbound CRM `X-API-Key` is a separate machine path, not the human session. Do not claim the product has no API keys anywhere.
+- **2.3.4** — **Verified 28 Aug 2026.** Session JWT verified by `jose.jwt.decode` (staging ES256). Official ZAP lists did not report JWT signature-not-verified / none-algorithm. Packed in `CASA_PORTAL_PACK.md`. Do not claim ZAP ran Burp plugins 2099456/2099457.
+- **2.4.1** — **Verified 28 Aug 2026.** Profile/email via `PATCH /users/me` + `get_current_user` (staging unsigned PATCH/GET 401; valid JWT GET 200). Password change is recovery email, not in-session current-password. MFA disable requires a current TOTP. Packed in `CASA_PORTAL_PACK.md`. Do **not** claim a password re-prompt on every save, or that email change is restricted.
 - **3.1.1–3.1.6** — Tenant isolation tests, server-side role/tenant from JWT, 401/403 fail-secure, IDOR covered by M9f + auth ZAP, CSRF N/A for Bearer APIs + register limiter, no directory listing (CloudFront OAC / no static API).
 - **3.2.1 / 3.2.2** — PKCE code flow; `redirect_uri` fixed, `state` validated (test: "Invalid or expired OAuth state").
 - **4.1.3 / 4.1.4** — Fernet for tokens/PII; SHA-1 is a non-security proposal id (Fluid Low, compensating); decrypt failures return generic errors.

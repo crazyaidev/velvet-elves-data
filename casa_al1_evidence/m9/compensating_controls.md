@@ -41,7 +41,7 @@ Compensating for AL1:
 - App and API are HTTPS-only.
 - CSP `connect-src` locked to the env API (`api.prod.velvetelves.com` / `api.stage.velvetelves.com`) plus listed SaaS hosts.
 - Logout clears the keys.
-- Supabase JWT expiry + refresh rotation.
+- Supabase JWT expiry + refresh rotation. Staging access JWT measured 28 Aug 2026: `exp − iat` = 8 hours (under 24 h). Refresh is stateful and revocable.
 - XSS on OAuth callbacks closed (CWE-79 re-scan 0 High).
 
 If a lab maps “no HttpOnly session cookie” as fail-without-fix, cookie migration is the follow-up. Do not tell the lab the session is a cookie today.

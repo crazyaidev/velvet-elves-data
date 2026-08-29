@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 28 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -10,7 +10,7 @@
 
 Do not check “I confirm…” or click Evidence **Submit** until all 48 rows are filled.
 
-**Screenshot rule:** agent captures Velvet Elves only (`app.` / `api.` staging or production, plus our own write-up PNGs). Screenshots of other products (Supabase dashboard, supabase.com docs, SSL Labs, AWS, Google Cloud) are owner-captured. If one is needed, the agent will ask and give guidelines — it will not take the shot. Write-up PNGs are for TAC: cite ADA/ASVS, state what the product does. Keep internal “do not claim” / portal-process notes in this markdown only — never on images the lab will see.
+**Screenshot rule:** agent captures Velvet Elves only (`app.` / `api.` staging or production, plus our own write-up PNGs). Screenshots of other products (Supabase dashboard, supabase.com docs, SSL Labs, AWS, Google Cloud) are owner-captured. If one is needed, the agent will ask and give guidelines — it will not take the shot. Write-up PNGs are for TAC: cite ADA/ASVS, state what the product does. Keep internal “do not claim” / portal-process notes in this markdown only — never on images the lab will see. Do **not** attach `/login` unless that screen is the evidence for the check (today: 2.1.1 address bar, 2.2.2 Forgot password).
 
 ---
 
@@ -36,6 +36,12 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 9 | 2.1.1 | URLs shall not expose authentication material | 5 | `CASA_2_1_1_no_tokens_in_url.md` |
 | 10 | 2.2.1 | Logout invalidates stateful session tokens | 6 | `CASA_2_2_1_logout.md` |
 | 11 | 2.2.2 | Terminate other sessions after password change | 7 | `CASA_2_2_2_password_change_sessions.md` |
+| 12 | 2.2.3 | Stateless authentication tokens expire within 24 hours | 4 | `CASA_2_2_3_stateless_expiry.md` |
+| 13 | 2.3.1 | Cookie-based session tokens shall have the Secure attribute | 5 | `CASA_2_3_1_cookie_secure.md` |
+| 14 | 2.3.2 | Cookie-based session tokens shall have the HttpOnly attribute | 5 | `CASA_2_3_2_cookie_httponly.md` |
+| 15 | 2.3.3 | Session tokens rather than static API secrets and keys | 4 | `CASA_2_3_3_session_not_static_key.md` |
+| 16 | 2.3.4 | Stateless session tokens shall use digital signatures | 5 | `CASA_2_3_4_signed_jwt.md` |
+| 17 | 2.4.1 | Full login session or re-auth before sensitive account changes | 5 | `CASA_2_4_1_sensitive_changes.md` |
 
 ---
 
@@ -414,6 +420,203 @@ Password change is through password reset (Forgot password), not an in-app curre
 
 ---
 
+## 2.2.3 — Stateless authentication tokens expire within 24 hours
+
+**ADA:** non-revocable **stateless** authentication tokens must expire **within 24 hours** of issue. AL1: code, screenshot, or documentation of the validity period.
+
+**Claimed controls**
+
+- Access JWT is the stateless session token. Refresh is a separate, stateful GoTrue session (2.2.1 / 2.2.2).
+- Staging 28 Aug 2026: `POST /users/login` then decode `iat` / `exp` — **28800 seconds (8.00 hours)**, ES256. Token not shown.
+- `decode_access_token` verifies the JWT; expired tokens raise `JWTError` → 401.
+- SPA reads `exp` (`getTokenExpirationMs`) and silent-refreshes ~60 s before expiry.
+
+**Do not claim:** a 1-hour access JWT (this project issues **8 hours**); that the refresh token expires within 24 hours; HttpOnly cookies; invite/reset/mailbox tokens as the session JWT; pasting JWTs.
+
+**Helpers:** `casa_auth_qa/render_casa_223_pages.py`, `casa_223_exp.py` (`QA_PASSWORD`). Do **not** recapture supabase.com. Owner JWT-settings dashboard shot is optional backup (S2).
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.2.3/CASA_2_2_3_page1.png`](tac_images/2.2.3/CASA_2_2_3_page1.png) | Written evidence page 1 of 2. Access JWT vs refresh; staging 8-hour lifetime; API and SPA exp handling. |
+| [`tac_images/2.2.3/CASA_2_2_3_page2.png`](tac_images/2.2.3/CASA_2_2_3_page2.png) | Written evidence page 2 of 2. AL1 mapping. Measured from live staging login. |
+| [`tac_images/2.2.3/CASA_2_2_3_code.png`](tac_images/2.2.3/CASA_2_2_3_code.png) | `decode_access_token` verifies `exp`; SPA `getTokenExpirationMs` and silent refresh 60 s before expiry. |
+| [`tac_images/2.2.3/CASA_2_2_3_exp.png`](tac_images/2.2.3/CASA_2_2_3_exp.png) | Staging API: login 200, JWT `exp − iat` = 28800 s (8.00 hours), under 24 hours. Token not shown. |
+
+### Portal comment
+
+```
+The user session access token is a signed JWT. On staging (28 Aug 2026) exp minus iat is 28800 seconds (8 hours), under ADA's 24-hour cap. The API rejects expired JWTs. The app reads exp and refreshes about a minute before expiry. The refresh token is a separate, revocable session token (see 2.2.1), not the stateless token this row covers.
+```
+
+---
+
+## 2.3.1 — Cookie-based session tokens shall have the Secure attribute
+
+**ADA:** cookie-based session tokens must have the **Secure** attribute. AL1 evidence is ADA DAST. Verification: scan must not identify Burp 5243392 (TLS cookie without secure flag). ZAP plugin **10011**.
+
+**Claimed controls**
+
+- Session is **not a cookie**. Login JSON body has `access_token`; SPA stores `velvet_elves_token` in `localStorage`; API uses `Authorization: Bearer`.
+- Staging 28 Aug 2026: `POST /users/login` **Set-Cookie names: none**. HTTPS. HSTS present.
+- Official ZAP SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa`: Cookie Without Secure Flag **not** reported. SPA CASA conf maps 10011 to FAIL.
+
+**Do not claim:** that the JWT is a cookie with Secure; HttpOnly session cookies (that is 2.3.2); that localStorage equals HttpOnly.
+
+**Helpers:** `casa_auth_qa/render_casa_231_pages.py`, `casa_231_headers.py` (`QA_PASSWORD`). Do **not** recapture ZAP UI or supabase.com.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.3.1/CASA_2_3_1_page1.png`](tac_images/2.3.1/CASA_2_3_1_page1.png) | Written evidence page 1 of 2. Not a cookie session; staging Set-Cookie none; DAST 10011 not raised. |
+| [`tac_images/2.3.1/CASA_2_3_1_page2.png`](tac_images/2.3.1/CASA_2_3_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. Secure attribute N/A because there is no session cookie. |
+| [`tac_images/2.3.1/CASA_2_3_1_code.png`](tac_images/2.3.1/CASA_2_3_1_code.png) | localStorage persistTokens; Authorization Bearer; OAuth2PasswordBearer; HSTS. |
+| [`tac_images/2.3.1/CASA_2_3_1_zap.png`](tac_images/2.3.1/CASA_2_3_1_zap.png) | Official CASA ZAP config 10011 FAIL; scan IDs; alert not listed. Not a ZAP product screenshot. |
+| [`tac_images/2.3.1/CASA_2_3_1_headers.png`](tac_images/2.3.1/CASA_2_3_1_headers.png) | Staging login 200, Set-Cookie none, HSTS yes, session keys in JSON. Token values not shown. |
+
+### Portal comment
+
+```
+Session tokens are not cookies. Login returns a JWT in the JSON body and the app stores it in localStorage, then sends Authorization Bearer. Staging POST /users/login sets no Set-Cookie and is HTTPS with HSTS. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Cookie Without Secure Flag. There is no session cookie for the Secure attribute to apply to.
+```
+
+---
+
+## 2.3.2 — Cookie-based session tokens shall have the HttpOnly attribute
+
+**ADA:** cookie-based session tokens must have the **HttpOnly** attribute. AL1 evidence is ADA DAST. Verification: scan must not identify Burp 500600 (Cookie without HttpOnly flag). ZAP plugin **10010**.
+
+**Claimed controls**
+
+- Session is **not a cookie**. Login JSON body has `access_token`; SPA stores `velvet_elves_token` in `localStorage`; API uses `Authorization: Bearer`.
+- Staging 28 Aug 2026: `POST /users/login` **Set-Cookie names: none**.
+- Official ZAP SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa`: Cookie No HttpOnly Flag **not** reported. SPA CASA conf maps 10010 to FAIL.
+- `localStorage` is readable by JavaScript. This row does **not** claim HttpOnly.
+
+**Do not claim:** HttpOnly session cookies; that localStorage equals HttpOnly; that the JWT is a Secure cookie (2.3.1).
+
+**Helpers:** `casa_auth_qa/render_casa_232_pages.py`, `casa_232_headers.py` (`QA_PASSWORD`). Do **not** recapture ZAP UI or supabase.com.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.3.2/CASA_2_3_2_page1.png`](tac_images/2.3.2/CASA_2_3_2_page1.png) | Written evidence page 1 of 2. Not a cookie session; localStorage is not HttpOnly; DAST 10010 not raised. |
+| [`tac_images/2.3.2/CASA_2_3_2_page2.png`](tac_images/2.3.2/CASA_2_3_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. HttpOnly N/A because there is no session cookie. |
+| [`tac_images/2.3.2/CASA_2_3_2_code.png`](tac_images/2.3.2/CASA_2_3_2_code.png) | localStorage persistTokens / clearTokens; Authorization Bearer; OAuth2PasswordBearer. |
+| [`tac_images/2.3.2/CASA_2_3_2_zap.png`](tac_images/2.3.2/CASA_2_3_2_zap.png) | Official CASA ZAP config 10010 FAIL; scan IDs; alert not listed. Not a ZAP product screenshot. |
+| [`tac_images/2.3.2/CASA_2_3_2_headers.png`](tac_images/2.3.2/CASA_2_3_2_headers.png) | Staging login 200, Set-Cookie none, session keys in JSON. Token values not shown. |
+
+### Portal comment
+
+```
+Session tokens are not cookies. Login returns a JWT in the JSON body and the app stores it in localStorage, then sends Authorization Bearer. Staging POST /users/login sets no Set-Cookie. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Cookie No HttpOnly Flag. There is no session cookie for the HttpOnly attribute to apply to.
+```
+
+---
+
+## 2.3.3 — Session tokens rather than static API secrets and keys
+
+**ADA:** use session tokens rather than static API secrets, except legacy implementations. AL1: code or docs of dynamically generated tokens. Verification: session tokens generated after user authentication.
+
+**Claimed controls**
+
+- After password login, GoTrue `sign_in_with_password` mints a new `access_token` / `refresh_token`. SPA sends `Authorization: Bearer`.
+- Staging 28 Aug 2026: two logins → `iat` 1787941282 then 1787941285 (different). Tokens not shown.
+- Gmail/Calendar: per-user OAuth tokens in `integrations` (Fernet), not a shared mailbox key, not the login session.
+- Tenant inbound CRM keys (`X-API-Key`) are a machine contact-push path. Creating them requires an admin JWT. They are not the human session.
+
+**Do not claim:** that the product has no API keys anywhere; that inbound CRM keys are the user session; HttpOnly cookies; pasting JWTs or key values.
+
+**Helpers:** `casa_auth_qa/render_casa_233_pages.py`, `casa_233_dyn.py` (`QA_PASSWORD`).
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.3.3/CASA_2_3_3_page1.png`](tac_images/2.3.3/CASA_2_3_3_page1.png) | Written evidence page 1 of 2. GoTrue JWT after login; per-user Google tokens; inbound CRM keys called out as not the session. |
+| [`tac_images/2.3.3/CASA_2_3_3_page2.png`](tac_images/2.3.3/CASA_2_3_3_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/2.3.3/CASA_2_3_3_code.png`](tac_images/2.3.3/CASA_2_3_3_code.png) | `sign_in_with_password` returns session JWT; inbound `vek_` key generation. |
+| [`tac_images/2.3.3/CASA_2_3_3_dyn.png`](tac_images/2.3.3/CASA_2_3_3_dyn.png) | Two staging logins, different `iat`. Tokens not shown. |
+
+### Portal comment
+
+```
+User login does not use a static API key. After a correct password, Supabase Auth issues a new JWT and refresh token for that session. Two successive staging logins produced different iat values. The app sends Authorization Bearer. Gmail and Calendar use that user's OAuth tokens, not a shared mailbox key. Tenant inbound CRM keys (X-API-Key) are a separate machine path for contact push; they are not the user session.
+```
+
+---
+
+## 2.3.4 — Stateless session tokens shall use digital signatures
+
+**ADA:** stateless session tokens must use signatures / encryption against tampering and `alg=none`. AL1 evidence is ADA DAST. Verification: scan must not identify Burp 2099456 (JWT signature not verified) or 2099457 (JWT none algorithm supported).
+
+**Claimed controls**
+
+- `decode_access_token` uses `jose.jwt.decode`. Staging alg **ES256** (2.2.3). HS256 uses `algorithms=["HS256"]`; otherwise JWKS by `kid` (ES256/RS256). `aud` must be `authenticated`.
+- `JWTError` → 401 from `get_current_user`.
+- Unit tests reject invalid, tampered, expired, wrong audience, and wrong secret.
+- Official ZAP SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa`: DAST_SUMMARY does not list JWT signature-not-verified or none-algorithm. Those Burp IDs are not ZAP plugin IDs in the CASA conf.
+- Staging: `GET /users/me` with no Authorization, and with `Bearer not-a-jwt`, both **401**. No forged JWT was sent.
+
+**Do not claim:** that ZAP ran Burp plugins 2099456/2099457; an explicit `alg == "none"` denylist line; HttpOnly cookies; pasting JWTs or `SUPABASE_JWT_SECRET`.
+
+**Helpers:** `casa_auth_qa/render_casa_234_pages.py`, `casa_234_reject.py`. Do **not** recapture ZAP/Burp UI.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.3.4/CASA_2_3_4_page1.png`](tac_images/2.3.4/CASA_2_3_4_page1.png) | Written evidence page 1 of 2. jose verify; DAST; Google tokens not the session JWT. |
+| [`tac_images/2.3.4/CASA_2_3_4_page2.png`](tac_images/2.3.4/CASA_2_3_4_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/2.3.4/CASA_2_3_4_code.png`](tac_images/2.3.4/CASA_2_3_4_code.png) | `decode_access_token` + 401 on `JWTError`. |
+| [`tac_images/2.3.4/CASA_2_3_4_zap.png`](tac_images/2.3.4/CASA_2_3_4_zap.png) | Burp JWT IDs vs official ZAP scans; alerts not listed. Not a ZAP/Burp screenshot. |
+| [`tac_images/2.3.4/CASA_2_3_4_reject.png`](tac_images/2.3.4/CASA_2_3_4_reject.png) | Staging GET /users/me: no Authorization 401; Bearer not-a-jwt 401. |
+
+### Portal comment
+
+```
+The user session is a signed JWT. Staging issues ES256. The API verifies the signature with jose (HS256 secret or JWKS for ES256/RS256) and rejects invalid, expired, or tampered tokens with 401. Official ADA ZAP scans did not report JWT signature-not-verified or JWT none-algorithm findings. Gmail and Calendar tokens are Fernet-encrypted at rest and are not the session JWT.
+```
+
+---
+
+## 2.4.1 — Full login session or re-auth before sensitive account changes
+
+**ADA:** a **full, valid login session** or **re-authentication / secondary verification** before sensitive transactions or account modifications. AL1 evidence is code or documentation. Verification is the same **or**.
+
+**Claimed controls**
+
+- `PATCH /users/me` (profile and sign-in email) uses `Depends(get_current_user)`. JWT must verify; inactive users 403.
+- Staging 28 Aug 2026: `PATCH /users/me` no Authorization **401**; `Bearer not-a-jwt` **401**; `GET /users/me` no Authorization **401**; valid session JWT **200**.
+- SPA Settings → Profile (`/settings/account`) is behind `ProtectedRoute`.
+- Password change is Forgot password / recovery email (OOB), not an in-session current-password form.
+- `POST /users/mfa/disable` requires a current TOTP. A leftover `aal2` JWT is not enough. Platform admin APIs also need `aal2` (3.3.1).
+
+**Do not claim:** password re-prompt before every profile save; that self-service email change is restricted or waits for a new-inbox confirm (`email_confirm=True` applies it immediately); MFA for all users; HttpOnly cookies.
+
+**Helpers:** `casa_auth_qa/render_casa_241_pages.py`, `casa_241_reject.py` (`QA_PASSWORD`), `casa_241_shots.mjs` (staging Settings Profile only). Do **not** attach `/login`. Do **not** change the QA email or turn MFA off.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/2.4.1/CASA_2_4_1_page1.png`](tac_images/2.4.1/CASA_2_4_1_page1.png) | Written evidence page 1 of 2. Session gate on PATCH /me; password via recovery email; MFA disable needs current TOTP. |
+| [`tac_images/2.4.1/CASA_2_4_1_page2.png`](tac_images/2.4.1/CASA_2_4_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. Email change is not claimed as restricted. |
+| [`tac_images/2.4.1/CASA_2_4_1_code.png`](tac_images/2.4.1/CASA_2_4_1_code.png) | `get_current_user`; `PATCH /me`; password-reset request; `mfa/disable`. |
+| [`tac_images/2.4.1/CASA_2_4_1_reject.png`](tac_images/2.4.1/CASA_2_4_1_reject.png) | Staging: unsigned PATCH/GET 401; garbage Bearer 401; valid JWT GET 200. Email redacted on 200. |
+| [`tac_images/2.4.1/CASA_2_4_1_profile.png`](tac_images/2.4.1/CASA_2_4_1_profile.png) | Live staging Settings → Profile while signed in. Personal information (name, sign-in email, phone). Save is PATCH /users/me. Not a login page. |
+
+### Portal comment
+
+```
+Profile and sign-in email changes require a valid JWT session (PATCH /users/me). Staging calls without Authorization, or with Bearer not-a-jwt, return 401. Password change uses a recovery email, not an in-session current-password form. Disabling MFA requires a current authenticator code. Platform admin routes require AAL2. We do not claim a password re-prompt on every profile save.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -431,5 +634,11 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 2.1.1 | `python render_casa_211_pages.py` then `python casa_211_probe.py` and `node casa_211_shots.mjs` (staging only). Re-run the render script after the login shot so the address bar is stamped. Do not upload `login_raw.png`. |
 | 2.2.1 | `python render_casa_221_pages.py` then `python casa_221_replay.py` and `node casa_221_shots.mjs` (staging; needs `QA_PASSWORD`). |
 | 2.2.2 | `python render_casa_222_pages.py` then `node casa_222_shots.mjs` (staging only). Do **not** reset a live account and do **not** recapture supabase.com. |
+| 2.2.3 | `python render_casa_223_pages.py` then `python casa_223_exp.py` (`QA_PASSWORD`). Do **not** recapture supabase.com. |
+| 2.3.1 | `python render_casa_231_pages.py` then `python casa_231_headers.py` (`QA_PASSWORD`). Do **not** recapture ZAP UI or supabase.com. |
+| 2.3.2 | `python render_casa_232_pages.py` then `python casa_232_headers.py` (`QA_PASSWORD`). Do **not** recapture ZAP UI or supabase.com. |
+| 2.3.3 | `python render_casa_233_pages.py` then `python casa_233_dyn.py` (`QA_PASSWORD`). |
+| 2.3.4 | `python render_casa_234_pages.py` then `python casa_234_reject.py`. Do **not** recapture ZAP or Burp UI. |
+| 2.4.1 | `python render_casa_241_pages.py` then `python casa_241_reject.py` (`QA_PASSWORD`) and `node casa_241_shots.mjs` (staging Settings Profile only). Do **not** attach `/login`. Do **not** change the QA email or disable MFA. |
 
 Eyeball every PNG for cut-off text before re-upload.

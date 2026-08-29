@@ -68,7 +68,7 @@ All Velvet Elves screenshots go to `casa_al1_evidence/m9/tac_images/<check-id>/`
 | # | What | Where | Feeds rows |
 | --- | --- | --- | --- |
 | S1 | Auth rate limits page | Supabase dashboard → Authentication → Rate Limits (production project) | 1 |
-| S2 | Access-token expiry (default 1 h < 24 h) | Supabase → Authentication → Sessions/JWT settings | 12 |
+| S2 | Access-token expiry — **done 28 Aug 2026** via live staging JWT `exp − iat` = 8 h (not the 1 h default). Packed as 2.2.3. Owner Sessions/JWT dashboard shot is optional backup. | Staging login decode + `decode_access_token` | 12 |
 | S3 | OTP / reset token expiry + single-use | Supabase → Authentication → Email settings | 5–8 |
 | S4 | Password change revokes other sessions — **done 28 Aug 2026** via GoTrue source (`UpdatePassword` → LogoutAllExceptMe / Logout), not a dashboard toggle. Packed as 2.2.2. | GoTrue public source + confirm code | 11 |
 | S5 | SSL Labs grade `app.velvetelves.com` | ssllabs.com/ssltest | 27, 28 |
@@ -156,12 +156,12 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 9 | 2.1.1 | Ready | M9d + dast | [ ] |
 | 10 | 2.2.1 | Code landed → deploy + S10 | CASA_2_2_1 + S10 | [ ] |
 | 11 | 2.2.2 | Ready (GoTrue default terminate-others; no live two-device reset) | CASA_2_2_2 | [ ] |
-| 12 | 2.2.3 | Ready | comp + S2 | [ ] |
-| 13 | 2.3.1 | Ready (honest N/A) | comp | [ ] |
-| 14 | 2.3.2 | Ready (honest N/A) | comp | [ ] |
-| 15 | 2.3.3 | Ready | M9d | [ ] |
-| 16 | 2.3.4 | Ready | M9d | [ ] |
-| 17 | 2.4.1 | Ready | attest | [ ] |
+| 12 | 2.2.3 | Ready (staging JWT 8 h < 24 h) | CASA_2_2_3 | [ ] |
+| 13 | 2.3.1 | Ready (honest N/A — not a cookie session) | CASA_2_3_1 | [ ] |
+| 14 | 2.3.2 | Ready (honest N/A — not a cookie session) | CASA_2_3_2 | [ ] |
+| 15 | 2.3.3 | Ready (GoTrue JWT minted per login) | CASA_2_3_3 | [ ] |
+| 16 | 2.3.4 | Ready (jose verifies JWT; ZAP lists no JWT-sig/none alerts) | CASA_2_3_4 | [ ] |
+| 17 | 2.4.1 | Ready (valid session on PATCH /me; password via recovery email; MFA disable needs TOTP) | CASA_2_4_1 | [ ] |
 | 18 | 3.1.1 | Ready | M9f | [ ] |
 | 19 | 3.1.2 | Ready | M9f | [ ] |
 | 20 | 3.1.3 | Ready | M9f | [ ] |

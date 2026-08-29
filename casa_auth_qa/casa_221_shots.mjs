@@ -40,12 +40,12 @@ async function shot(name) {
 }
 
 try {
-  await page.goto(`${APP}/login`, { waitUntil: 'domcontentloaded', timeout: 45000 })
+  await page.goto(`${APP}/login?nocache=${Date.now()}`, { waitUntil: 'domcontentloaded', timeout: 45000 })
   await page.locator('#login-email').waitFor({ timeout: 20000 })
   await page.locator('#login-email').fill(EMAIL)
   await page.locator('#login-password').fill(PASSWORD)
   await page.getByRole('button', { name: /^sign in$/i }).click()
-  await page.waitForTimeout(1500)
+  await page.waitForTimeout(2500)
 
   const stillLogin = page.url().includes('/login')
   const signOutBtn = page.getByRole('button', { name: /sign out/i })
@@ -56,6 +56,11 @@ try {
     await shot('CASA_2_2_1_logout_menu.png')
     throw new Error(`still on login: ${page.url()}`)
   } else {
+    // Let TenantThemeSync apply so a bad logo_url would already have swapped src.
+    await page.locator('header img').first().waitFor({ timeout: 15000 })
+    await page.waitForTimeout(2500)
+    const logoSrc = await page.locator('header img').first().getAttribute('src')
+    console.log('header logo src', logoSrc)
     const name = page.locator('p').filter({ hasText: /@|Admin|Owner/ }).first()
     await name.click({ timeout: 15000 })
     await page.getByRole('menuitem', { name: /log out/i }).waitFor({ timeout: 10000 })
