@@ -71,7 +71,7 @@ def new_page(title: str, page_no: int):
     d.text((MARGIN, 64), title, font=F_H, fill=INK)
     d.text(
         (MARGIN, 98),
-        "GCP 538509143953  |  production app.velvetelves.com  |  28 Aug 2026",
+        "GCP 538509143953  |  production app.velvetelves.com  |  31 Aug 2026",
         font=F_SMALL,
         fill=MUTED,
     )
@@ -119,14 +119,14 @@ def page1():
         ],
     )
     y += 10
-    d.text((MARGIN, y), "2. Staging lifetime is 8 hours", font=F_SEC, fill=INK)
+    d.text((MARGIN, y), "2. Staging and production lifetime is 1 hour", font=F_SEC, fill=INK)
     y += 32
     y = paint(
         d,
         y,
         [
             (
-                "On 28 Aug 2026, POST /users/login on api.stage.velvetelves.com issued an ES256 access JWT. exp minus iat is 28800 seconds (8.00 hours). The ADA cap is 86400 seconds (24 hours). The issued lifetime is 8 hours, still under the cap. The token itself is not shown.",
+                "On 31 Aug 2026, VelvetElves Stage and production GoTrue Authentication, Sessions both set Access token expiry time to 3600 seconds (1 hour). The same day, POST /users/login on api.stage.velvetelves.com issued an ES256 access JWT with exp minus iat of 3600 seconds (1.00 hour). The ADA cap is 86400 seconds (24 hours). The token itself is not shown.",
                 F_BODY,
                 INK,
             ),
@@ -162,7 +162,7 @@ def page2():
         ),
         (
             "Expires within 24 hours of issue",
-            "Staging 28 Aug 2026: exp minus iat = 28800 seconds (8.00 hours).",
+            "Staging 31 Aug 2026: exp minus iat = 3600 seconds (1.00 hour). GoTrue Sessions on staging and production: 3600 seconds.",
             True,
         ),
         (
@@ -172,7 +172,7 @@ def page2():
         ),
         (
             "Validity period documented",
-            "Live iat/exp decode (token not shown) plus decode_access_token and SPA exp handling.",
+            "Live iat/exp decode (token not shown), GoTrue Sessions 3600 s on staging and production, plus decode_access_token and SPA exp handling.",
             True,
         ),
     ]
@@ -190,7 +190,7 @@ def page2():
         y,
         [
             (
-                "The Velvet Elves session access token is a signed JWT that expires 8 hours after issue on staging, under ADA’s 24-hour cap. Expired tokens are rejected by JWT verification. This was measured from a live staging login without pasting the token.",
+                "The Velvet Elves session access token is a signed JWT that expires 1 hour after issue on staging and production, under ADA’s 24-hour cap. Expired tokens are rejected by JWT verification. This was measured from a live staging login without pasting the token.",
                 F_BODY,
                 INK,
             ),

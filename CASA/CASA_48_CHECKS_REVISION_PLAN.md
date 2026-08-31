@@ -68,7 +68,7 @@ All Velvet Elves screenshots go to `casa_al1_evidence/m9/tac_images/<check-id>/`
 | # | What | Where | Feeds rows |
 | --- | --- | --- | --- |
 | S1 | Auth rate limits page | Supabase dashboard → Authentication → Rate Limits (production project) | 1 |
-| S2 | Access-token expiry — **done**. Staging live JWT 8 h (28 Aug and 31 Aug). Production Sessions PNG: 3600 s (31 Aug). Packed as 2.2.3. | Staging decode + prod Sessions shot | 12 |
+| S2 | Access-token expiry — **done**. Staging live JWT **3600 s** (31 Aug after owner Sessions change; was 8 h earlier that day). Production and VelvetElves Stage Sessions PNGs: 3600 s. Packed as 2.2.3. | Staging decode + prod/stage Sessions shots | 12 |
 | S3 | OTP / reset token expiry + single-use | Supabase → Authentication → Email settings | 5–8 |
 | S4 | Password change revokes other sessions — **done 28 Aug 2026** via GoTrue source (`UpdatePassword` → LogoutAllExceptMe / Logout), not a dashboard toggle. Packed as 2.2.2. | GoTrue public source + confirm code | 11 |
 | S5 | SSL Labs grade `app.velvetelves.com` — **done 31 Aug 2026**, A+ all endpoints | ssllabs.com/ssltest | 27, 28 |
@@ -156,7 +156,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 9 | 2.1.1 | Ready | M9d + dast | [ ] |
 | 10 | 2.2.1 | Code landed → deploy + S10 | CASA_2_2_1 + S10 | [ ] |
 | 11 | 2.2.2 | Ready (GoTrue default terminate-others; no live two-device reset) | CASA_2_2_2 | [ ] |
-| 12 | 2.2.3 | Packed (staging JWT 8 h; prod Sessions 3600 s; both < 24 h) | CASA_2_2_3 | [ ] |
+| 12 | 2.2.3 | Packed (staging + prod JWT 3600 s; both < 24 h) | CASA_2_2_3 | [ ] |
 | 13 | 2.3.1 | Ready (honest N/A — not a cookie session) | CASA_2_3_1 | [ ] |
 | 14 | 2.3.2 | Ready (honest N/A — not a cookie session) | CASA_2_3_2 | [ ] |
 | 15 | 2.3.3 | Ready (GoTrue JWT minted per login) | CASA_2_3_3 | [ ] |

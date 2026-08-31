@@ -37,7 +37,7 @@ API CASA conf maps 10010 to **WARN** (not FAIL). SPA conf maps it to **FAIL**. N
 
 ## Compensating (not an HttpOnly claim)
 
-HTTPS-only app and API, CSP `connect-src` locked to the env API, OAuth callback XSS closed, logout clears the localStorage keys, access JWT expires in 8 hours (2.2.3). Cookie migration would be the follow-up if a lab requires HttpOnly session cookies.
+HTTPS-only app and API, CSP `connect-src` locked to the env API, OAuth callback XSS closed, logout clears the localStorage keys, access JWT expires in 1 hour (2.2.3). Cookie migration would be the follow-up if a lab requires HttpOnly session cookies.
 
 ## Do not claim
 

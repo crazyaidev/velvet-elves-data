@@ -63,7 +63,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner | 5 |
 | P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner | 5 each |
 | P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner | 8 |
-| P3 | [2.2.3](#223--stateless-tokens-expire-within-24-hours) | Supabase JWT expiry (optional) | Owner — **done 31 Aug** | 5 |
+| P3 | [2.2.3](#223--stateless-tokens-expire-within-24-hours) | Supabase JWT expiry (optional) | Owner — **done 31 Aug** | 6 |
 | P3 | [Scanner UI](#scanner-ui--zap--burp-all-dast-rows) | ZAP / Burp product UI | Owner | — |
 
 ---
@@ -88,11 +88,12 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 2.2.3 — Stateless tokens expire within 24 hours
 
-**Packed:** staging `exp − iat` = 8 hours (`CASA_2_2_3_exp.png`). Production Sessions: access token expiry **3600 s** (`CASA_2_2_3_supabase_jwt.png`). Both under 24 hours.
+**Packed:** staging live `exp − iat` = **3600 s** (`CASA_2_2_3_exp.png`). Production Sessions **3600 s** (`CASA_2_2_3_supabase_jwt.png`). VelvetElves Stage Sessions **3600 s** (`CASA_2_2_3_supabase_jwt_stage.png`). All under 24 hours.
 
-**Done 31 Aug 2026.** Do not recapture supabase.com. Do not treat Inactivity timeout 0 / Time-box 0 as this row.
+**Done 31 Aug 2026.** Do not recapture supabase.com. Do not treat Inactivity timeout 0 / Time-box 0 as this row. The Stage project's **PRODUCTION** badge is the primary-branch label, not `app.velvetelves.com`.
 
 - [x] Production Supabase Authentication → Sessions PNG (`CASA_2_2_3_supabase_jwt.png`)
+- [x] VelvetElves Stage Authentication → Sessions PNG (`CASA_2_2_3_supabase_jwt_stage.png`)
 
 ---
 

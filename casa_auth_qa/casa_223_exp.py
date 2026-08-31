@@ -89,7 +89,7 @@ def render(*, alg: str, iat: int, exp: int, lifetime_s: int, login_status: int) 
         y += 44
     d.text(
         (48, H - 48),
-        "api.stage.velvetelves.com  |  CASA_2_2_3_exp  |  28 Aug 2026",
+        "api.stage.velvetelves.com  |  CASA_2_2_3_exp  |  31 Aug 2026",
         font=font(12),
         fill=(80, 80, 80),
     )

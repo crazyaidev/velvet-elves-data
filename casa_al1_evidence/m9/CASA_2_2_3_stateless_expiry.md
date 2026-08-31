@@ -2,7 +2,7 @@
 
 **Source:** ADA Web App Test Guide v1.0 (10 Oct 2024), AL1 evidence + verification.  
 **ASVS:** 3.3.4  
-**Date:** 28 Aug 2026  
+**Date:** 31 Aug 2026  
 
 ## ADA AL1 evidence
 
@@ -21,16 +21,20 @@ The Velvet Elves login session is two tokens:
 
 `TokenResponse` returns `access_token` and `refresh_token`. Lifetime is in the JWT `iat` / `exp` claims, not an `expires_in` field on that schema.
 
-## Staging measurement (28 Aug 2026)
+## Staging and production measurement (31 Aug 2026)
 
-`POST /users/login` on `api.stage.velvetelves.com`, then decode the access JWT payload (token never printed or screenshotted):
+GoTrue **Authentication → Sessions**: **Access token expiry time = 3600 seconds** on both VelvetElves Stage and production.
+
+`POST /users/login` on `api.stage.velvetelves.com` after that staging change, then decode the access JWT payload (token never printed or screenshotted):
 
 - Algorithm: **ES256**
-- `exp − iat` = **28800 seconds (8.00 hours)**
+- `exp − iat` = **3600 seconds (1.00 hour)**
 - ADA cap: 86400 seconds (24 hours)
 - Under 24 hours: **yes**
 
-Do not claim the GoTrue **default** of 1 hour. This project’s issued access JWT is **8 hours**.
+Earlier on 31 Aug (and on 28 Aug) the same staging login issued **28800 seconds (8 hours)**. Do not paste that older lifetime into the portal comment.
+
+The Stage project's orange **PRODUCTION** badge is the primary-branch label, not the production app host.
 
 ## How expiry is enforced
 
@@ -44,15 +48,16 @@ Do not claim the GoTrue **default** of 1 hour. This project’s issued access JW
 - Password-reset recovery links — OOB verifiers (1.3.1).
 - Gmail / Calendar mailbox OAuth tokens — not login sessions.
 - Refresh-token lifetime — stateful; covered by 2.2.1 / 2.2.2.
+- **Inactivity timeout** / **Time-box user sessions** (both 0 = never on the Sessions PNGs) — not the access JWT `exp`.
 
 ## Do not claim
 
-- A 1-hour access JWT (measured 8 hours).
+- That staging still issues an 8-hour access JWT (owner set 3600 s on 31 Aug).
 - That the refresh token expires within 24 hours.
 - HttpOnly session cookies; MFA for all users; pasting JWTs or secrets.
 
 ## Portal comment
 
 ```
-The user session access token is a signed JWT. On staging (28 Aug 2026) exp minus iat is 28800 seconds (8 hours), under ADA's 24-hour cap. The API rejects expired JWTs. The app reads exp and refreshes about a minute before expiry. The refresh token is a separate, revocable session token (see 2.2.1), not the stateless token this row covers.
+The user session access token is a signed JWT. Production and staging GoTrue Sessions both set access token expiry to 3600 seconds (1 hour). Staging login on 31 Aug 2026 issued tokens with exp minus iat of 3600 seconds. Both environments are under ADA's 24-hour cap. The API rejects expired JWTs. The app reads exp and refreshes about a minute before expiry. The refresh token is a separate, revocable session token (see 2.2.1), not the stateless token this row covers.
 ```
