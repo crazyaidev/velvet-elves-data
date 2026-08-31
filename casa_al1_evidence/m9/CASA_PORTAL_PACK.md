@@ -911,7 +911,7 @@ OAuth redirect_uri and state are validated to prevent open redirect and OAuth CS
 
 **Do not claim:** MFA for all users or all tenant Admins; GCP/AWS MFA; that the emergency env flag cannot be turned off.
 
-**Helpers:** `casa_auth_qa/render_casa_331_pages.py`, `casa_331_deny.py`. Folder contains **only** the 10 upload files. Enroll/login/off/setup/unlocked shots were deleted (enroll PNGs contained a TOTP setup key). Do **not** recapture production MFA UI while MFA is turned off; re-enable TOTP on production before TAC review, then recapture `prod_mfa_prompt` / `prod_security_on` if those screens changed.
+**Helpers:** `casa_auth_qa/render_casa_331_pages.py`, `casa_331_deny.py`, `casa_331_prod_enroll_shots.mjs` (production recapture only; does not write enroll/login extras). Folder contains **only** the 10 upload files. Production `prod_mfa_prompt` / `prod_security_on` recaptured 31 Aug 2026 after a temporary TOTP enroll; the QA authenticator was then turned off so password login still works. Re-enroll in your own authenticator app before TAC reviews production live.
 
 ### Images
 
@@ -967,6 +967,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.6 | `python render_casa_316_pages.py` then `python casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console. |
 | 3.2.1 | `python render_casa_321_pages.py` then `python casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
-| 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Folder is the upload set only. Do **not** recapture production MFA while it is disabled. |
+| 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Prod UI: `node casa_331_prod_enroll_shots.mjs` (`QA_PASSWORD`). Folder is the upload set only. |
 
 Eyeball every PNG for cut-off text before re-upload.

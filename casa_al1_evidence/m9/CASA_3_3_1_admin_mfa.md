@@ -20,11 +20,13 @@ Login of an enrolled account returns `mfa_required=true`, an AAL1 access token, 
 
 **Tenant Admin** is a workspace role, not this interface. Ordinary users may enroll TOTP; they are not required to.
 
-## Staging and production UI (already captured; not recaptured this session)
+## Staging and production UI
 
 See `CASA_3_3_1_stage_mfa_prompt.png` / `CASA_3_3_1_prod_mfa_prompt.png` (login two-step).  
 See `CASA_3_3_1_stage_platform_code.png` (console code gate).  
 See `CASA_3_3_1_*_security_on.png` (Security: authenticator app is on).
+
+Production UI recaptured 31 Aug 2026 (`casa_331_prod_enroll_shots.mjs`): temporary TOTP enroll, then authenticator turned off so the QA account can password-login again. The platform console still requires a verified factor (`PlatformMfaGate`). Enroll in your own authenticator before a live TAC review of production.
 
 ## Staging API (31 Aug 2026)
 
@@ -39,9 +41,7 @@ See `CASA_3_3_1_deny.png`. Unsigned `GET /platform/users`, `GET /platform/regist
 
 ## Folder contents
 
-`tac_images/3.3.1/` holds only the 10 TAC upload files. Login, enroll (QR + setup key), security-off, setup, unlocked, and extra prod platform-code shots were deleted.
-
-Do not recapture production MFA UI while production MFA is turned off. Re-enable TOTP on production before TAC review.
+`tac_images/3.3.1/` holds only the 10 TAC upload files. Production two-step and Security-on shots were recaptured 31 Aug 2026; the temporary authenticator was then removed so password login still works.
 
 ## Do not claim
 
