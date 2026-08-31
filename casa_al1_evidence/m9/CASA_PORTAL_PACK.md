@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3, 4.1.4, 5.1.1  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3, 4.1.4, 5.1.1, 5.1.2  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -56,6 +56,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 29 | 4.1.3 | No weak crypto on secrets | 6 | `CASA_4_1_3_crypto.md` |
 | 30 | 4.1.4 | Crypto fail securely | 6 | `CASA_4_1_4_fail_closed.md` |
 | 31 | 5.1.1 | HTTP parameter pollution | 5 | `CASA_5_1_1_hpp.md` |
+| 32 | 5.1.2 | Open redirect / allowlisted URLs | 6 | `CASA_5_1_2_redirect.md` |
 
 ---
 
@@ -1114,6 +1115,40 @@ Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) di
 
 ---
 
+## 5.1.2 — URL redirects limited to allowlisted URLs
+
+**ADA:** AL1 evidence is ADA DAST. Verification: scan shall **not** identify Burp **5243136**, **5243137**, **5243152**, **5243153**, or **5243154** (open redirection). WSTG-CLNT-04 is AL2.
+
+**Claimed controls**
+
+- Official ADA ZAP (SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa`): plugin **20019** External Redirect is FAIL on the SPA conf and WARN on the API conf. Alert lists did not include it.
+- OAuth `redirect_to` origin allowlist (`CORS_ORIGINS`). Foreign origin **400**.
+- Password-reset disallowed `redirect_to` is ignored (**202**, no foreign Location).
+- Ad click 302 uses a stored `click_url`; unknown hook **404**. SPA `?next=` to a foreign host has no `Location`.
+
+**Do not claim:** that Burp 5243136–5243154 ran; WSTG-CLNT-04; that password-reset foreign `redirect_to` is 400; that ad click URLs are CORS origins.
+
+**Helpers:** `casa_auth_qa/render_casa_512_pages.py`, `casa_512_deny.py`
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/5.1.2/CASA_5_1_2_page1.png`](tac_images/5.1.2/CASA_5_1_2_page1.png) | Written evidence page 1 of 2. Official ZAP 20019, allowlists, ad click, SPA restore, staging measurements. |
+| [`tac_images/5.1.2/CASA_5_1_2_page2.png`](tac_images/5.1.2/CASA_5_1_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. Burp not run. SPA spider limited to /, robots, sitemap. |
+| [`tac_images/5.1.2/CASA_5_1_2_code.png`](tac_images/5.1.2/CASA_5_1_2_code.png) | validate_redirect_to 400; postMessage FRONTEND_URL; ad click stored URL; SPA paths must start with /. |
+| [`tac_images/5.1.2/CASA_5_1_2_zap.png`](tac_images/5.1.2/CASA_5_1_2_zap.png) | Official ADA ZAP 20019 FAIL/WARN; DAST_SUMMARY alert lists did not include External Redirect. Pillow summary, not ZAP UI. |
+| [`tac_images/5.1.2/CASA_5_1_2_tests.png`](tac_images/5.1.2/CASA_5_1_2_tests.png) | Named tests plus live 400/202/404/200 notes. |
+| [`tac_images/5.1.2/CASA_5_1_2_deny.png`](tac_images/5.1.2/CASA_5_1_2_deny.png) | Staging: foreign OAuth redirect_to 400; password-reset 202 no Location; unknown ad click 404; SPA ?next= 200 no Location. |
+
+### Portal comment
+
+```
+Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report External Redirect (ZAP plugin 20019; SPA conf FAIL, API conf WARN). We did not run Burp 5243136, 5243137, 5243152, 5243153, or 5243154. OAuth sign-in redirect_to must match a CORS origin; a foreign origin is 400. Password-reset redirect_to that is not allowlisted is ignored. Ad click 302 uses a stored click_url, not a query parameter; an unknown hook is 404. OAuth callback postMessage targets FRONTEND_URL, not *. SPA return URLs must start with /. Staging: POST /users/oauth/google/start with https://evil.example/steal is 400 with no Location; GET /ads/{uuid}/click is 404 with no Location; SPA GET ?next=https://evil.example is 200 with no Location to that host. WSTG-CLNT-04 is AL2 and was not run.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -1151,5 +1186,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.3 | `python render_casa_413_pages.py` then `python casa_413_fernet.py`. Do **not** print or attach ENCRYPTION_KEY. |
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 | 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |
+| 5.1.2 | `python render_casa_512_pages.py` then `python casa_512_deny.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or Google Cloud Console. Do **not** complete OAuth. |
 
 Eyeball every PNG for cut-off text before re-upload.
