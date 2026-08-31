@@ -71,7 +71,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 43 | 6.2.1 | Debug off in production | 6 | pack 6.2.1 |
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 5 | pack 6.4.1 |
-| 46 | 6.5.1 | No credential logs | 5 | pack 6.5.1 — payment log missing |
+| 46 | 6.5.1 | No credential logs | 7 | pack 6.5.1 |
 | 47 | 6.6.1 | Logout clears storage | 5 | pack 6.6.1 |
 | 48 | 6.7.1 | Server secrets | 3 | pack 6.7.1 — no AWS console |
 
@@ -1565,9 +1565,9 @@ Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resol
 
 **ADA:** Written description PLUS a login log sample PLUS a payment log sample.
 
-**Claimed:** Code does not log passwords; emails masked; Stripe holds PAN. Staging CloudWatch login event logs user id + request_id only.
+**Claimed:** Code does not log passwords; emails masked; Stripe holds PAN. Staging CloudWatch login event logs user id + request_id only. Staging CloudWatch after Buy one deal: Stripe SDK POST /v1/checkout/sessions and response 200; no PAN/CVV/secret.
 
-**Missing (ADA-named):** Sample from a real payment. Login sample is obtained.
+**Missing:** Webhook dispatcher line (`Dispatching Stripe event type= id=evt_`) was not in this 15-minute Stripe filter. Not required once a payment-process sample exists.
 
 ### Images
 
@@ -1578,11 +1578,13 @@ Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resol
 | [`tac_images/6.5.1/CASA_6_5_1_logs_code.png`](tac_images/6.5.1/CASA_6_5_1_logs_code.png) | _mask_email; Login user id logger |
 | [`tac_images/6.5.1/CASA_6_5_1_mask.png`](tac_images/6.5.1/CASA_6_5_1_mask.png) | Mask helper |
 | [`tac_images/6.5.1/CASA_6_5_1_login_log.png`](tac_images/6.5.1/CASA_6_5_1_login_log.png) | Staging Insights: Login user id, no password |
+| [`tac_images/6.5.1/CASA_6_5_1_payment_log.png`](tac_images/6.5.1/CASA_6_5_1_payment_log.png) | Staging Insights: Stripe checkout/sessions 200 |
+| [`tac_images/6.5.1/CASA_6_5_1_payment_request.png`](tac_images/6.5.1/CASA_6_5_1_payment_request.png) | Staging Insights: Stripe POST checkout/sessions |
 
 ### Portal comment
 
 ```
-Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. A payment-process log extract was not obtained.
+Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. The same log group after a staging Buy one deal checkout recorded stripe logger INFO POST https://api.stripe.com/v1/checkout/sessions and Stripe API response path=https://api.stripe.com/v1/checkout/sessions response_code=200. Those events have no PAN, CVV, or Stripe secret key.
 ```
 
 ---

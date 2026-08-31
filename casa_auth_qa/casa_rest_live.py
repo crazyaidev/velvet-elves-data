@@ -278,7 +278,7 @@ def probe_651_mask():
         out("6.5.1"),
         "CASA_6_5_1_mask.png",
         "6.5.1  Email mask helper (not a CloudWatch login log)",
-        "Staging CloudWatch login sample obtained 31 Aug 2026. Payment sample still missing.",
+        "Staging CloudWatch login and Stripe checkout-session samples obtained 31 Aug 2026.",
         [(f"mask(agent.name@example.com) = {sample}", "not a live log extract", ok)],
     )
     return ok

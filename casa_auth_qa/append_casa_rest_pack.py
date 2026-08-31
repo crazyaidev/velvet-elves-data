@@ -349,9 +349,9 @@ Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resol
 
 **ADA:** Written description PLUS a login log sample PLUS a payment log sample.
 
-**Claimed:** Code does not log passwords; emails masked; Stripe holds PAN. Staging CloudWatch login event logs user id + request_id only.
+**Claimed:** Code does not log passwords; emails masked; Stripe holds PAN. Staging CloudWatch login event logs user id + request_id only. Staging CloudWatch after Buy one deal: Stripe SDK POST /v1/checkout/sessions and response 200; no PAN/CVV/secret.
 
-**Missing (ADA-named):** Sample from a real payment. Login sample is obtained.
+**Missing:** Webhook dispatcher line (`Dispatching Stripe event type= id=evt_`) was not in this 15-minute Stripe filter. Not required once a payment-process sample exists.
 
 ### Images
 
@@ -362,11 +362,13 @@ Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resol
 | [`tac_images/6.5.1/CASA_6_5_1_logs_code.png`](tac_images/6.5.1/CASA_6_5_1_logs_code.png) | _mask_email; Login user id logger |
 | [`tac_images/6.5.1/CASA_6_5_1_mask.png`](tac_images/6.5.1/CASA_6_5_1_mask.png) | Mask helper |
 | [`tac_images/6.5.1/CASA_6_5_1_login_log.png`](tac_images/6.5.1/CASA_6_5_1_login_log.png) | Staging Insights: Login user id, no password |
+| [`tac_images/6.5.1/CASA_6_5_1_payment_log.png`](tac_images/6.5.1/CASA_6_5_1_payment_log.png) | Staging Insights: Stripe checkout/sessions 200 |
+| [`tac_images/6.5.1/CASA_6_5_1_payment_request.png`](tac_images/6.5.1/CASA_6_5_1_payment_request.png) | Staging Insights: Stripe POST checkout/sessions |
 
 ### Portal comment
 
 ```
-Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. A payment-process log extract was not obtained.
+Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. The same log group after a staging Buy one deal checkout recorded stripe logger INFO POST https://api.stripe.com/v1/checkout/sessions and Stripe API response path=https://api.stripe.com/v1/checkout/sessions response_code=200. Those events have no PAN, CVV, or Stripe secret key.
 ```
 
 ---
@@ -445,7 +447,7 @@ def main():
 | 43 | 6.2.1 | Debug off in production | 5 | pack 6.2.1 |
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 4 | pack 6.4.1 |
-| 46 | 6.5.1 | No credential logs | 5 | pack 6.5.1 — payment log missing |
+| 46 | 6.5.1 | No credential logs | 7 | pack 6.5.1 |
 | 47 | 6.6.1 | Logout clears storage | 4 | pack 6.6.1 |
 | 48 | 6.7.1 | Server secrets | 3 | pack 6.7.1 — no AWS console |
 
@@ -529,7 +531,7 @@ def main():
         ),
         (
             "| 46 | 6.5.1 do not log credentials | `M9g_logging.md` | Logs mask emails No tokens or mail bodies |",
-            "| 46 | 6.5.1 do not log credentials | `tac_images/6.5.1/` — `CASA_6_5_1_logs_page1.png`, `logs_page2.png`, `logs_code.png`, `mask.png`, `login_log.png` | Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. A payment-process log extract was not obtained. |",
+            "| 46 | 6.5.1 do not log credentials | `tac_images/6.5.1/` — `CASA_6_5_1_logs_page1.png`, `logs_page2.png`, `logs_code.png`, `mask.png`, `login_log.png`, `payment_log.png`, `payment_request.png` | Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. The same log group after a staging Buy one deal checkout recorded stripe logger INFO POST https://api.stripe.com/v1/checkout/sessions and Stripe API response path=https://api.stripe.com/v1/checkout/sessions response_code=200. Those events have no PAN, CVV, or Stripe secret key. |",
         ),
         (
             "| 47 | 6.6.1 clear browser storage on logout | `compensating_controls.md` | Logout clears velvet elves token keys in localStorage |",
@@ -562,7 +564,7 @@ def main():
         "| 43 | 6.2.1 | Ready | M9a + S11 | [ ] |": "| 43 | 6.2.1 | Packed 31 Aug (prod docs 404; staging docs 200) | CASA_6_2_1 | [ ] |",
         "| 44 | 6.3.1 | Ready | M9f | [ ] |": "| 44 | 6.3.1 | Packed 31 Aug (foreign Origin /users/me 401) | CASA_6_3_1 | [ ] |",
         "| 45 | 6.4.1 | Verify S9 | M9a + S9 | [ ] |": "| 45 | 6.4.1 | Packed 31 Aug (live DNS). Route 53 console NOT captured | CASA_6_4_1 | [ ] |",
-        "| 46 | 6.5.1 | Ready | M9g | [ ] |": "| 46 | 6.5.1 | Packed 31 Aug (code mask + staging CloudWatch login). Payment log NOT captured | CASA_6_5_1 | [ ] |",
+        "| 46 | 6.5.1 | Ready | M9g | [ ] |": "| 46 | 6.5.1 | Packed 31 Aug (code mask + staging CloudWatch login + Stripe checkout/sessions 200) | CASA_6_5_1 | [ ] |",
         "| 47 | 6.6.1 | Ready (verified 27 Aug) | comp | [ ] |": "| 47 | 6.6.1 | Packed 31 Aug (clearTokens; after_logout copy from 2.2.1) | CASA_6_6_1 | [ ] |",
         "| 48 | 6.7.1 | Ready | M9d | [ ] |": "| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager + Fernet). AWS console NOT captured | CASA_6_7_1 | [ ] |",
     }
@@ -582,7 +584,7 @@ def main():
 - **6.2.1** — Packed. Prod docs 404; staging docs 200.
 - **6.3.1** — Packed. Foreign Origin /users/me 401.
 - **6.4.1** — Packed live DNS. Route 53 console NOT captured.
-- **6.5.1** — Packed code mask + staging CloudWatch login sample (user id only). Payment log sample NOT captured (ADA-named gap).
+- **6.5.1** — Packed code mask + staging CloudWatch login (user id) + Stripe checkout-session POST/200 (no PAN).
 - **6.6.1** — Packed. after_logout copied from 2.2.1.
 - **6.7.1** — Packed write-up. AWS Secrets Manager console NOT captured."""
     if old not in gap:

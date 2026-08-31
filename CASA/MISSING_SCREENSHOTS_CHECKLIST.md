@@ -14,7 +14,7 @@ Already on disk (do **not** recapture): SSL Labs A+ (4.1.1 / 4.1.2), Supabase Ra
 
 ## How to use this file
 
-1. Work **by ID**, top to bottom in the index. **6.5.1 is first** — ADA names those two samples; the pack is incomplete without them.
+1. Work **by ID**, top to bottom in the index. **6.7.1 is next** — Secrets Manager console and CloudTrail `GetSecretValue` (no secret values).
 2. Follow that ID’s **Capture** steps. If the frame does not match **Must show**, do not save it.
 3. Save as PNG. Suggested names are below. Folder: `casa_al1_evidence/m9/tac_images/<id>/`.
 4. Tick the checkbox here. Add the file to that row’s image table in `CASA_PORTAL_PACK.md` and drop it from **Missing**.
@@ -46,8 +46,8 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 
 | Pri | ID | Missing shot | Who | Folder count now |
 | --- | --- | --- | --- | ---: |
-| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Login log sample | Owner — **done 31 Aug** | 5 |
-| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Payment log sample | Owner (CloudWatch or Stripe) | 5 |
+| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Login log sample | Owner — **done 31 Aug** | 7 |
+| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Payment log sample | Owner — **done 31 Aug** | 7 |
 | P1 | [6.4.1](#641--subdomain-takeover) | Route 53 hosted zone | Owner — **done 31 Aug** | 5 |
 | P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner | 3 |
 | P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
@@ -315,7 +315,7 @@ Do not scan production. Do not write a new exploit.
 
 ## 6.5.1 — Do not log credentials or payment details
 
-**ADA AL1 requires all three:** written description (already packed) **+ login log sample + payment log sample**. This row is **not** complete until both samples exist.
+**ADA AL1 requires all three:** written description **+ login log sample + payment log sample**. All three are packed (31 Aug 2026).
 
 Log group: `/ecs/velvet-elves/stage/backend` (prefer) or `/ecs/velvet-elves/prod/backend`. Region **us-east-2**.
 
@@ -344,9 +344,9 @@ Log group: `/ecs/velvet-elves/stage/backend` (prefer) or `/ecs/velvet-elves/prod
 **Must not show:** full card, bank account, webhook signing secret.  
 **Save as:** `tac_images/6.5.1/CASA_6_5_1_payment_log.png`
 
-- [ ] Payment log sample PNG
+- [x] Payment log sample PNG (`CASA_6_5_1_payment_log.png`, `CASA_6_5_1_payment_request.png`)
 
-After the payment sample exists: edit `CASA_PORTAL_PACK.md` 6.5.1 **Missing** and the portal comment so they no longer say the payment sample was not obtained.
+Packed 31 Aug 2026: staging Insights `filter @message like /Stripe/` after Buy one deal. Stripe SDK INFO POST `/v1/checkout/sessions` and response 200. No PAN/CVV/secret. Webhook `Dispatching Stripe event` line was not in that 15-minute window.
 
 ---
 

@@ -52,7 +52,7 @@
 - **6.2.1** — Packed. Prod docs 404; staging docs 200. ECS prod-backend rev 52 APP_DEBUG=false APP_ENV=production.
 - **6.3.1** — Packed. Foreign Origin /users/me 401.
 - **6.4.1** — Packed live DNS + Route 53 console (app/help CloudFront, api ALB). Filtered view does not include zone apex.
-- **6.5.1** — Packed code mask + staging CloudWatch login sample (user id only). Payment log sample NOT captured (ADA-named gap).
+- **6.5.1** — Packed code mask + staging CloudWatch login (user id) + Stripe checkout-session POST/200 (no PAN).
 - **6.6.1** — Packed. Staging Log Out: token keys gone; velvet_elves_return_location remains. DevTools Application panel not captured.
 - **6.7.1** — Packed write-up. AWS Secrets Manager console NOT captured.
 
