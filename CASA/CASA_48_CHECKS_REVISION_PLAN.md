@@ -164,7 +164,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 17 | 2.4.1 | Ready (valid session on PATCH /me; password via recovery email; MFA disable needs TOTP) | CASA_2_4_1 | [ ] |
 | 18 | 3.1.1 | Ready (API RBAC + tenant/assignment guards; staging unsigned 401) | CASA_3_1_1 | [ ] |
 | 19 | 3.1.2 | Ready (server profile attrs; register/OAuth ignore client tenant_id) | CASA_3_1_2 | [ ] |
-| 20 | 3.1.3 | Ready | M9f | [ ] |
+| 20 | 3.1.3 | Ready (fail closed 401/403; cron secret unset is unreachable; generic 500) | CASA_3_1_3 | [ ] |
 | 21 | 3.1.4 | Ready | M9f | [ ] |
 | 22 | 3.1.5 | Ready | comp + S7 | [ ] |
 | 23 | 3.1.6 | Ready | M9a | [ ] |

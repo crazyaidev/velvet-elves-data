@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -44,6 +44,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 17 | 2.4.1 | Full login session or re-auth before sensitive account changes | 5 | `CASA_2_4_1_sensitive_changes.md` |
 | 18 | 3.1.1 | Least privilege access control on a trusted service layer | 5 | `CASA_3_1_1_least_privilege.md` |
 | 19 | 3.1.2 | Users cannot manipulate access-control attributes | 5 | `CASA_3_1_2_policy_attrs.md` |
+| 20 | 3.1.3 | Access controls fail securely | 5 | `CASA_3_1_3_fail_secure.md` |
 
 ---
 
@@ -687,6 +688,40 @@ Role, tenant, platform-admin, and active flags used for access control come from
 
 ---
 
+## 3.1.3 — Access controls fail securely
+
+**ADA:** access controls shall fail securely, including when an exception occurs (ASVS 4.1.5). AL1 shares the 3.1.1–3.1.3 written description (`CASA_3_1_1_least_privilege.md`). Verification: missing or bad credentials deny; authorization misses deny; exceptions do not return the resource.
+
+**Claimed controls**
+
+- Missing `Authorization` → FastAPI OAuth2 bearer **401**. Invalid / expired / garbage JWT (`JWTError`) or missing profile → **401**. Inactive user and suspended tenant → **403**.
+- `require_role` / `require_tenant_access` raise **403**; they do not return 200 with data. Some cross-owner reads return **404** (still deny).
+- Scheduler `POST /internal/schedules/tick` requires `X-VE-Cron-Secret` and **fails closed** if the secret is unset (`require_cron_secret`).
+- Unhandled exceptions → generic **500** `"An internal server error occurred."` (`APP_DEBUG` must be false in production).
+- Staging 31 Aug 2026: `GET /users/me` no auth and `Bearer not-a-jwt` → **401**; `POST /internal/schedules/tick` without the cron header → **403**. The tick was not run.
+
+**Do not claim:** every deny is 403 (missing auth is 401); stack traces in API JSON; a live DB-exception probe; MFA for all users; HttpOnly cookies.
+
+**Helpers:** `casa_auth_qa/render_casa_313_pages.py`, `casa_313_fail.py`. Do **not** attach `/login`. Do **not** call the tick with a valid secret.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.1.3/CASA_3_1_3_page1.png`](tac_images/3.1.3/CASA_3_1_3_page1.png) | Written evidence page 1 of 2. Missing/bad credentials 401; authz 403; exceptions do not grant access. |
+| [`tac_images/3.1.3/CASA_3_1_3_page2.png`](tac_images/3.1.3/CASA_3_1_3_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.1.3/CASA_3_1_3_code.png`](tac_images/3.1.3/CASA_3_1_3_code.png) | JWTError → 401; cron secret fail-closed; generic 500. |
+| [`tac_images/3.1.3/CASA_3_1_3_tests.png`](tac_images/3.1.3/CASA_3_1_3_tests.png) | Named tests for 401, role 403, cron fail-closed. |
+| [`tac_images/3.1.3/CASA_3_1_3_fail.png`](tac_images/3.1.3/CASA_3_1_3_fail.png) | Staging: GET /users/me no auth and Bearer not-a-jwt → 401; POST tick without secret → 403. |
+
+### Portal comment
+
+```
+Access control fails closed. Missing Authorization returns 401. An invalid JWT raises JWTError and returns 401; it does not load a user. Role, tenant, and assignment misses return 403 (some cross-owner reads return 404). The scheduler tick requires X-VE-Cron-Secret and fails closed if the secret is unset. Unhandled exceptions return a generic 500, not the resource. Staging: GET /users/me without Authorization and with Bearer not-a-jwt both 401; POST /internal/schedules/tick without the cron header returns 403.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -712,5 +747,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 2.4.1 | `python render_casa_241_pages.py` then `python casa_241_reject.py` (`QA_PASSWORD`) and `node casa_241_shots.mjs` (staging Settings Profile only). Do **not** attach `/login`. Do **not** change the QA email or disable MFA. |
 | 3.1.1 | `python render_casa_311_pages.py` then `python casa_311_deny.py`. Do **not** attach `/login`. Do **not** query another tenant. |
 | 3.1.2 | `python render_casa_312_pages.py` then `python casa_312_ignore.py`. Do **not** attach `/login`. Do **not** register a staging user to prove tenant_id ignore. |
+| 3.1.3 | `python render_casa_313_pages.py` then `python casa_313_fail.py`. Do **not** attach `/login`. Do **not** call the tick with a valid secret. |
 
 Eyeball every PNG for cut-off text before re-upload.
