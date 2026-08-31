@@ -162,8 +162,8 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 15 | 2.3.3 | Ready (GoTrue JWT minted per login) | CASA_2_3_3 | [ ] |
 | 16 | 2.3.4 | Ready (jose verifies JWT; ZAP lists no JWT-sig/none alerts) | CASA_2_3_4 | [ ] |
 | 17 | 2.4.1 | Ready (valid session on PATCH /me; password via recovery email; MFA disable needs TOTP) | CASA_2_4_1 | [ ] |
-| 18 | 3.1.1 | Ready | M9f | [ ] |
-| 19 | 3.1.2 | Ready | M9f | [ ] |
+| 18 | 3.1.1 | Ready (API RBAC + tenant/assignment guards; staging unsigned 401) | CASA_3_1_1 | [ ] |
+| 19 | 3.1.2 | Ready (server profile attrs; register/OAuth ignore client tenant_id) | CASA_3_1_2 | [ ] |
 | 20 | 3.1.3 | Ready | M9f | [ ] |
 | 21 | 3.1.4 | Ready | M9f | [ ] |
 | 22 | 3.1.5 | Ready | comp + S7 | [ ] |

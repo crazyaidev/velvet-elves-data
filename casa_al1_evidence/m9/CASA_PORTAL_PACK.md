@@ -1,8 +1,8 @@
 # CASA AL1 — portal pack (comments and image descriptions)
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
-**Updated:** 28 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1  
+**Updated:** 31 Aug 2026  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -42,6 +42,8 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 15 | 2.3.3 | Session tokens rather than static API secrets and keys | 4 | `CASA_2_3_3_session_not_static_key.md` |
 | 16 | 2.3.4 | Stateless session tokens shall use digital signatures | 5 | `CASA_2_3_4_signed_jwt.md` |
 | 17 | 2.4.1 | Full login session or re-auth before sensitive account changes | 5 | `CASA_2_4_1_sensitive_changes.md` |
+| 18 | 3.1.1 | Least privilege access control on a trusted service layer | 5 | `CASA_3_1_1_least_privilege.md` |
+| 19 | 3.1.2 | Users cannot manipulate access-control attributes | 5 | `CASA_3_1_2_policy_attrs.md` |
 
 ---
 
@@ -617,6 +619,74 @@ Profile and sign-in email changes require a valid JWT session (PATCH /users/me).
 
 ---
 
+## 3.1.1 — Least privilege access control on a trusted service layer
+
+**ADA:** enforce least privilege on a **trusted service layer**. AL1 is documentation of authn/authz, roles, and that users only reach authorized functions. Verification: rules run on that layer. ADA says **3.1.1–3.1.3 share one written description** (`CASA_3_1_1_least_privilege.md`).
+
+**Claimed controls**
+
+- Enforcement is FastAPI: `get_current_user`, `require_role`, `require_tenant_access`, `require_transaction_access`. SPA `RoleRoute` is UX.
+- Roles: Agent, TransactionCoordinator, TeamLead, Attorney, Admin, Client, ForSaleByOwner, Vendor. Admin satisfies all role checks; Agent satisfies Agent only. `is_platform_admin` is a separate flag.
+- Tenant Admin is not cross-tenant. Platform `/api/v1/platform/*` needs the flag plus AAL2.
+- Staging 31 Aug 2026: unsigned `GET /users/` and `GET /platform/users` → **401**.
+- Tests: `test_rbac.py` (Client cannot create transactions; Agent cannot GET another user) plus M9f isolation tests.
+
+**Do not claim:** RLS as the primary control (service-role can bypass it); a live Agent-vs-Admin probe on staging this session; MFA for all users; HttpOnly cookies.
+
+**Helpers:** `casa_auth_qa/render_casa_311_pages.py`, `casa_311_deny.py`. Do **not** attach `/login`.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.1.1/CASA_3_1_1_page1.png`](tac_images/3.1.1/CASA_3_1_1_page1.png) | Written evidence page 1 of 2. API as trusted layer; roles; least-privilege examples. |
+| [`tac_images/3.1.1/CASA_3_1_1_page2.png`](tac_images/3.1.1/CASA_3_1_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.1.1/CASA_3_1_1_code.png`](tac_images/3.1.1/CASA_3_1_1_code.png) | ROLE_HIERARCHY, require_role, require_tenant_access, platform admin. |
+| [`tac_images/3.1.1/CASA_3_1_1_tests.png`](tac_images/3.1.1/CASA_3_1_1_tests.png) | Named RBAC and isolation tests. Not a pytest product screenshot. |
+| [`tac_images/3.1.1/CASA_3_1_1_deny.png`](tac_images/3.1.1/CASA_3_1_1_deny.png) | Staging unsigned GET /users/ and GET /platform/users both 401. |
+
+### Portal comment
+
+```
+Access control is enforced on the API (FastAPI), not only in the browser. Roles are Agent, TransactionCoordinator, TeamLead, Attorney, Admin, Client, ForSaleByOwner, and Vendor. Endpoints use get_current_user plus require_role, require_tenant_access, and require_transaction_access. Tenant Admin is not cross-tenant. Platform /api/v1/platform/* requires is_platform_admin and AAL2. Staging unsigned GET /users/ and GET /platform/users return 401. Postgres RLS is defense in depth; the API is the trusted layer.
+```
+
+---
+
+## 3.1.2 — Users cannot manipulate access-control attributes
+
+**ADA:** attributes used by access controls must not be manipulated by the end user unless specifically authorized. AL1 shares the 3.1.1–3.1.3 written description. Verification: those attributes are not client-set.
+
+**Claimed controls**
+
+- `get_current_user` loads `role`, `tenant_id`, `is_platform_admin`, `is_active` from the profile after JWT `sub`.
+- Register ignores client `tenant_id` and mints a new tenant. OAuth ignores `user_metadata.tenant_id` (and OAuth role).
+- `UserUpdateRequest` has no `role` / `tenant_id` / `is_platform_admin` / `is_active`. Extra `is_active` is ignored.
+- After signup, role changes are `PUT /users/{id}/role` in the same tenant. No self-service `is_platform_admin`.
+- Staging 31 Aug 2026: unsigned `PATCH /users/me` with those extras → **401**.
+
+**Do not claim:** register ignores role entirely (founder may pick a self-signup role on the **new** tenant); `X-Workspace-Id` is ignored (membership-checked); a live authenticated extras probe this session (`QA_PASSWORD` was not set).
+
+**Helpers:** `casa_auth_qa/render_casa_312_pages.py`, `casa_312_ignore.py`. Do **not** attach `/login`. Do **not** register a staging user to prove tenant_id ignore.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.1.2/CASA_3_1_2_page1.png`](tac_images/3.1.2/CASA_3_1_2_page1.png) | Written evidence page 1 of 2. Server profile; tenant_id ignored at signup; PATCH /me has no policy fields. |
+| [`tac_images/3.1.2/CASA_3_1_2_page2.png`](tac_images/3.1.2/CASA_3_1_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.1.2/CASA_3_1_2_code.png`](tac_images/3.1.2/CASA_3_1_2_code.png) | Register/OAuth ignore tenant_id; UserUpdateRequest; get_current_user from DB. |
+| [`tac_images/3.1.2/CASA_3_1_2_tests.png`](tac_images/3.1.2/CASA_3_1_2_tests.png) | Named tests for ignored tenant_id, OAuth, self-deactivate, onboarding role. |
+| [`tac_images/3.1.2/CASA_3_1_2_ignore.png`](tac_images/3.1.2/CASA_3_1_2_ignore.png) | Staging unsigned PATCH /users/me with role, tenant_id, is_platform_admin, is_active → 401. |
+
+### Portal comment
+
+```
+Role, tenant, platform-admin, and active flags used for access control come from the server profile after JWT verification, not from client JSON. Register ignores client tenant_id and mints a new tenant. OAuth ignores user_metadata tenant_id. PATCH /users/me has no role, tenant_id, is_platform_admin, or is_active fields; extra is_active is ignored. Role changes after signup go through PUT /users/{id}/role in the same tenant. Staging unsigned PATCH /users/me with those extra fields returns 401.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -640,5 +710,7 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 2.3.3 | `python render_casa_233_pages.py` then `python casa_233_dyn.py` (`QA_PASSWORD`). |
 | 2.3.4 | `python render_casa_234_pages.py` then `python casa_234_reject.py`. Do **not** recapture ZAP or Burp UI. |
 | 2.4.1 | `python render_casa_241_pages.py` then `python casa_241_reject.py` (`QA_PASSWORD`) and `node casa_241_shots.mjs` (staging Settings Profile only). Do **not** attach `/login`. Do **not** change the QA email or disable MFA. |
+| 3.1.1 | `python render_casa_311_pages.py` then `python casa_311_deny.py`. Do **not** attach `/login`. Do **not** query another tenant. |
+| 3.1.2 | `python render_casa_312_pages.py` then `python casa_312_ignore.py`. Do **not** attach `/login`. Do **not** register a staging user to prove tenant_id ignore. |
 
 Eyeball every PNG for cut-off text before re-upload.
