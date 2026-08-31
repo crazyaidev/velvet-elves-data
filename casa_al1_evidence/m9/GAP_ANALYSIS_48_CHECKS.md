@@ -20,7 +20,7 @@
 | 2.2.2 | **Verified 28 Aug 2026.** Not a dashboard toggle. Password change is reset/recovery (`POST /users/password-reset/confirm`). GoTrue `User.UpdatePassword` then `LogoutAllExceptMe` (recovery session) or `Logout` all sessions (admin password update, `sessionID` nil). Packed in `CASA_PORTAL_PACK.md`. Do not claim a live two-device reset. |
 | 2.2.3 | **Verified 28 Aug 2026.** Staging access JWT `exp − iat` = **28800 s (8.00 hours)**, under 24 h. Packed in `CASA_PORTAL_PACK.md`. Do not claim the 1-hour GoTrue default. Owner Sessions/JWT dashboard shot (S2) is optional backup. |
 | 1.3.x | Supabase OTP/reset token expiry + single use. Screenshot the auth settings page. |
-| 4.1.1/4.1.2 | **4.1.1 packed 31 Aug 2026** including Qualys SSL Labs PNGs: **A+** on `app.velvetelves.com` and `api.prod.velvetelves.com` (TLS 1.3/1.2 Yes; 1.1/1.0 No). API ALB HTTP:80 still serves FastAPI (`GET /api/v1/health` **200**); set it to redirect to HTTPS. 4.1.2 reuses the same SSL Labs shots plus Amazon ACM issuer. |
+| 4.1.1/4.1.2 | **Packed 31 Aug 2026.** Qualys SSL Labs **A+** on both production hosts. 4.1.2 live peer certs are public Amazon ACM (SPA SAN covers stage+prod names; API is api.prod.velvetelves.com). API ALB HTTP:80 still serves FastAPI (`GET /api/v1/health` **200**) — that is a 4.1.1 note, not a cert-trust fail. |
 | 6.4.1 | Quick Route 53 review: no dangling CNAMEs to dead services. Attest. |
 | 1.1.1/3.1.5 | Staging register 429 screenshot (6 signups in a minute) + register password-rules UI. |
 

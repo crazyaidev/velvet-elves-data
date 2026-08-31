@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -52,6 +52,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
 | 27 | 4.1.1 | TLS 1.2+ | 9 | `CASA_4_1_1_tls.md` |
+| 28 | 4.1.2 | Trusted TLS certificates | 8 | `CASA_4_1_2_certs.md` |
 
 ---
 
@@ -973,6 +974,43 @@ The production SPA (app.velvetelves.com) and API (api.prod.velvetelves.com) term
 
 ---
 
+## 4.1.2 — Trusted TLS certificates
+
+**ADA:** connections to and from the server shall use trusted TLS certificates. AL1 named evidence is the same Qualys SSL Labs PDF as 4.1.1 (grade B or higher).
+
+**Claimed controls**
+
+- Qualys SSL Labs 31 Aug 2026: **A+** on `app.velvetelves.com` and `api.prod.velvetelves.com`. Chain is Amazon RSA 2048 + Amazon Root CA 1.
+- Live OS trust store verified both hostnames. Not self-signed.
+- SPA SAN includes `app.velvetelves.com` (CN is `app.stage.velvetelves.com`; one ACM cert covers both SPA names). API CN/SAN is `api.prod.velvetelves.com`.
+- Currently valid (SPA through 13 Jan 2027, API through 14 Jan 2027). Wrong SNI/name does not complete a trusted handshake.
+- Backend has no `verify=False` / `CERT_NONE`.
+
+**Do not claim:** a production-only SPA certificate; SSL Labs of outbound hosts; AWS ACM console shots; that the API is HTTPS-only on port 80.
+
+**Helpers:** `casa_auth_qa/render_casa_412_pages.py`, `casa_412_certs.py` (copies Qualys PNGs from 4.1.1).
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/4.1.2/CASA_4_1_2_page1.png`](tac_images/4.1.2/CASA_4_1_2_page1.png) | Written evidence page 1 of 2. Qualys A+, live ACM peer certs, no private CA. |
+| [`tac_images/4.1.2/CASA_4_1_2_page2.png`](tac_images/4.1.2/CASA_4_1_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/4.1.2/CASA_4_1_2_code.png`](tac_images/4.1.2/CASA_4_1_2_code.png) | Live cert fields; no verify=False; ACM on CloudFront/ALB. |
+| [`tac_images/4.1.2/CASA_4_1_2_cert.png`](tac_images/4.1.2/CASA_4_1_2_cert.png) | Live production handshake: Amazon ACM, SAN match, currently valid, not self-signed. |
+| [`tac_images/4.1.2/CASA_4_1_2_ssllabs_app.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_app.png) | Qualys: app.velvetelves.com all endpoints A+ (same scan as 4.1.1). |
+| [`tac_images/4.1.2/CASA_4_1_2_ssllabs_app_chain.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_app_chain.png) | Qualys SPA chain: Amazon RSA 2048 M01, Amazon Root CA 1. |
+| [`tac_images/4.1.2/CASA_4_1_2_ssllabs_api.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_api.png) | Qualys: api.prod.velvetelves.com both endpoints A+. |
+| [`tac_images/4.1.2/CASA_4_1_2_ssllabs_api_chain.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_api_chain.png) | Qualys API chain: Amazon RSA 2048 M04, Amazon Root CA 1. |
+
+### Portal comment
+
+```
+Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. The SPA certificate SAN includes app.velvetelves.com (CN is app.stage.velvetelves.com; one cert covers both SPA names). The API certificate CN and SAN are api.prod.velvetelves.com. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -1006,5 +1044,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Prod UI: `node casa_331_prod_enroll_shots.mjs` (`QA_PASSWORD`). Folder is the upload set only. |
 | 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. SSL Labs: `node casa_411_ssllabs.mjs app` then `node casa_411_ssllabs.mjs api`, then `python casa_411_caption_ssllabs.py` once. |
+| 4.1.2 | `python render_casa_412_pages.py` then `python casa_412_certs.py` (copies Qualys PNGs from 4.1.1; do not recapture ssllabs.com). |
 
 Eyeball every PNG for cut-off text before re-upload.
