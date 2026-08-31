@@ -14,7 +14,7 @@ Already on disk (do **not** recapture): SSL Labs A+ (4.1.1 / 4.1.2), Supabase Ra
 
 ## How to use this file
 
-1. Work **by ID**, top to bottom in the index. **6.7.1 is next** — Secrets Manager console and CloudTrail `GetSecretValue` (no secret values).
+1. Work **by ID**, top to bottom in the index. **6.7.1 CloudTrail** is next — `GetSecretValue` or `DescribeSecret`, no secret values.
 2. Follow that ID’s **Capture** steps. If the frame does not match **Must show**, do not save it.
 3. Save as PNG. Suggested names are below. Folder: `casa_al1_evidence/m9/tac_images/<id>/`.
 4. Tick the checkbox here. Add the file to that row’s image table in `CASA_PORTAL_PACK.md` and drop it from **Missing**.
@@ -49,8 +49,8 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Login log sample | Owner — **done 31 Aug** | 7 |
 | P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Payment log sample | Owner — **done 31 Aug** | 7 |
 | P1 | [6.4.1](#641--subdomain-takeover) | Route 53 hosted zone | Owner — **done 31 Aug** | 5 |
-| P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner | 3 |
-| P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
+| P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner — **done 31 Aug** | 5 |
+| P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 5 |
 | P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner — **done 31 Aug** (linux/amd64 child of prod-latest) | 7 |
 | P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner — **done 31 Aug** | 6 |
 | P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
@@ -373,9 +373,9 @@ Packed 31 Aug 2026: staging Insights `filter @message like /Stripe/` after Buy o
 
 ## 6.7.1 — Server-side secrets
 
-**Already packed:** write-up + code comments (no secret values). Disconnect is **soft deactivate** (ciphertext remains).
+**Already packed:** write-up + code comments (no secret values). Disconnect is **soft deactivate** (ciphertext remains). Secrets Manager overview + rotation (Disabled); Retrieve secret value was not used.
 
-**Still missing:** Secrets Manager console + CloudTrail access log.
+**Still missing:** CloudTrail access log.
 
 ### A. Secrets Manager
 
@@ -387,7 +387,7 @@ Packed 31 Aug 2026: staging Insights `filter @message like /Stripe/` after Buy o
 **Must not show:** plaintext `ENCRYPTION_KEY`, JWT secret, provider keys.  
 **Save as:** `tac_images/6.7.1/CASA_6_7_1_sm.png`
 
-- [ ] Secrets Manager console PNG (no values)
+- [x] Secrets Manager console PNG (no values) — `CASA_6_7_1_sm.png`, `CASA_6_7_1_sm_rotation.png`
 
 ### B. CloudTrail
 
