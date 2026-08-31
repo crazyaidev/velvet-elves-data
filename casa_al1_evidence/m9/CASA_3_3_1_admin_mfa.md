@@ -37,11 +37,11 @@ See `CASA_3_3_1_deny.png`. Unsigned `GET /platform/users`, `GET /platform/regist
 `test_platform_route_rejects_stale_aal2_after_unenroll` — 403 after factor removal.  
 `test_login_returns_mfa_required_for_enrolled_account`.
 
-## Do not attach (on disk, not for TAC)
+## Folder contents
 
-- `*_security_enroll.png` — QR + setup key (TOTP secret in frame).
-- `*_login.png` — generic password form; MFA evidence is the two-step prompt.
-- `*_security_off.png`, `*_platform_unlocked.png`, `*_platform_setup.png`.
+`tac_images/3.3.1/` holds only the 10 TAC upload files. Login, enroll (QR + setup key), security-off, setup, unlocked, and extra prod platform-code shots were deleted.
+
+Do not recapture production MFA UI while production MFA is turned off. Re-enable TOTP on production before TAC review.
 
 ## Do not claim
 
