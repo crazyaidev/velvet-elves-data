@@ -71,8 +71,8 @@ All Velvet Elves screenshots go to `casa_al1_evidence/m9/tac_images/<check-id>/`
 | S2 | Access-token expiry — **done 28 Aug 2026** via live staging JWT `exp − iat` = 8 h (not the 1 h default). Packed as 2.2.3. Owner Sessions/JWT dashboard shot is optional backup. | Staging login decode + `decode_access_token` | 12 |
 | S3 | OTP / reset token expiry + single-use | Supabase → Authentication → Email settings | 5–8 |
 | S4 | Password change revokes other sessions — **done 28 Aug 2026** via GoTrue source (`UpdatePassword` → LogoutAllExceptMe / Logout), not a dashboard toggle. Packed as 2.2.2. | GoTrue public source + confirm code | 11 |
-| S5 | SSL Labs grade `app.velvetelves.com` | ssllabs.com/ssltest | 27, 28 |
-| S6 | SSL Labs grade `api.prod.velvetelves.com` | ssllabs.com/ssltest | 27, 28 |
+| S5 | SSL Labs grade `app.velvetelves.com` — **done 31 Aug 2026**, A+ all endpoints | ssllabs.com/ssltest | 27, 28 |
+| S6 | SSL Labs grade `api.prod.velvetelves.com` — **done 31 Aug 2026**, A+ both endpoints | ssllabs.com/ssltest | 27, 28 |
 | S7 | Register 429 after 6 rapid signups | staging, DevTools network tab | 1, 22 |
 | S8 | Register password-rules UI (8+, upper, lower, digit, symbol) | staging register page | 1, 2 |
 | S9 | Route 53 hosted zone review — no dangling CNAMEs | AWS console | 45 |
@@ -171,7 +171,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 24 | 3.2.1 | Ready (authorization code + PKCE S256; no implicit/ROPC; staging start 200) | CASA_3_2_1 | [ ] |
 | 25 | 3.2.2 | Ready (redirect_to origin allowlist; Fernet state TTL; staging 400s) | CASA_3_2_2 | [ ] |
 | 26 | 3.3.1 | Ready (platform TOTP aal2; staging/prod UI; unsigned 401) | CASA_3_3_1 | [ ] |
-| 27 | 4.1.1 | Packed 31 Aug (live TLS 1.3/1.2 + HSTS; API HTTP still 200). Needs S5/S6 Qualys PNGs + ALB HTTP→HTTPS redirect | CASA_4_1_1 + SSL Labs | [ ] |
+| 27 | 4.1.1 | Packed 31 Aug (Qualys A+ both hosts; live TLS 1.3/1.2 + HSTS; API HTTP still 200). ALB HTTP→HTTPS redirect still recommended | CASA_4_1_1 + SSL Labs | [ ] |
 | 28 | 4.1.2 | Ready + S5/S6 | M9a + SSL Labs | [ ] |
 | 29 | 4.1.3 | Ready | M9e | [ ] |
 | 30 | 4.1.4 | Ready | M9e | [ ] |

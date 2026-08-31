@@ -99,7 +99,7 @@ def page1():
         y,
         [
             (
-                "Source: ADA Web App Test Guide v1.0. AL1 named evidence is a Qualys SSL Labs PDF with grade B or higher (NIST SP.800-52r2). This page records a live TLS handshake against Velvet Elves production hosts.",
+                "Source: ADA Web App Test Guide v1.0. AL1 named evidence is a Qualys SSL Labs PDF with grade B or higher (NIST SP.800-52r2). Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+.",
                 F_SMALL,
                 MUTED,
             ),
@@ -127,7 +127,7 @@ def page1():
         y,
         [
             (
-                "Default negotiation on both hosts was TLS 1.3, cipher TLS_AES_128_GCM_SHA256. A forced TLS 1.2 handshake succeeded (ECDHE-RSA-AES128-GCM-SHA256). TLS 1.0 and 1.1 from this client were rejected. HTTPS GET returned 200 with Strict-Transport-Security: max-age=31536000; includeSubDomains on the SPA (CloudFront SecurityHeadersPolicy) and the API (FastAPI SecurityHeadersMiddleware).",
+                "Qualys SSL Labs (31 Aug 2026) graded every tested endpoint A+. Protocols: TLS 1.3 Yes, TLS 1.2 Yes, TLS 1.1 No, TLS 1.0 No, SSL 3 No, SSL 2 No. Default Python handshake on both hosts was TLS 1.3 TLS_AES_128_GCM_SHA256; forced TLS 1.2 succeeded. HTTPS GET returned 200 with Strict-Transport-Security: max-age=31536000; includeSubDomains on the SPA (CloudFront) and the API (FastAPI SecurityHeadersMiddleware).",
                 F_BODY,
                 INK,
             ),
@@ -186,6 +186,11 @@ def page2():
             True,
         ),
         (
+            "Qualys SSL Labs",
+            "31 Aug 2026: app.velvetelves.com A+ on all CloudFront IPs. api.prod.velvetelves.com A+ on both ALB IPs. TLS 1.3 and 1.2 Yes; TLS 1.1, 1.0, SSL 3, SSL 2 No.",
+            True,
+        ),
+        (
             "API HTTP listener",
             "Port 80 still reaches FastAPI (GET /api/v1/health returned 200 JSON). Not claimed as HTTPS-only.",
             False,
@@ -210,7 +215,7 @@ def page2():
         y,
         [
             (
-                "Velvet Elves production 443 defaults to TLS 1.3, accepts TLS 1.2, and sends HSTS. The SPA upgrades HTTP to HTTPS. The API HTTP listener still forwards to FastAPI on port 80. A Qualys SSL Labs PDF of both hostnames is the ADA-named AL1 evidence for the full protocol and cipher matrix.",
+                "Velvet Elves production 443 defaults to TLS 1.3, accepts TLS 1.2, and sends HSTS. Qualys SSL Labs graded both production hostnames A+ (TLS 1.3 and 1.2 enabled; TLS 1.1 and 1.0 disabled). The SPA upgrades HTTP to HTTPS. The API HTTP listener still forwards to FastAPI on port 80.",
                 F_BODY,
                 INK,
             ),
@@ -268,7 +273,8 @@ test_security_headers_on_not_found
   GET /api/v1/does-not-exist still sends nosniff and X-Frame-Options
 
 Live 31 Aug 2026 (production, not these unit tests):
-  TLS 1.3 default, TLS 1.2 accepted, TLS 1.0/1.1 rejected
+  Qualys SSL Labs A+ on app.velvetelves.com and api.prod.velvetelves.com
+  TLS 1.3 and 1.2 Yes; TLS 1.1 / 1.0 / SSL 3 / SSL 2 No
   SPA HTTP 301 to HTTPS
   API HTTP /api/v1/health 200 (ALB does not redirect yet)"""
     lines = snippet.split("\n")

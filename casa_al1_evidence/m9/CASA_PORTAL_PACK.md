@@ -51,7 +51,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
 | 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
-| 27 | 4.1.1 | TLS 1.2+ | 5 | `CASA_4_1_1_tls.md` |
+| 27 | 4.1.1 | TLS 1.2+ | 9 | `CASA_4_1_1_tls.md` |
 
 ---
 
@@ -943,31 +943,32 @@ The application administrative interface is the platform console (/api/v1/platfo
 
 **Claimed controls**
 
-- SPA CloudFront `app.velvetelves.com`: TLS 1.3 default, TLS 1.2 accepted, HTTP **301** to HTTPS, HSTS `max-age=31536000; includeSubDomains`.
-- API ALB `api.prod.velvetelves.com`: TLS 1.3 default, TLS 1.2 accepted, HTTPS HSTS from `SecurityHeadersMiddleware`.
-- Certificates: Amazon ACM (public).
-- Live 31 Aug 2026 handshake: `TLS_AES_128_GCM_SHA256` (1.3); forced 1.2 `ECDHE-RSA-AES128-GCM-SHA256`. TLS 1.0/1.1 rejected by this client.
+- Qualys SSL Labs 31 Aug 2026: **A+** on every tested endpoint of `app.velvetelves.com` and `api.prod.velvetelves.com`. TLS 1.3 and 1.2 Yes; TLS 1.1, TLS 1.0, SSL 3, SSL 2 No.
+- SPA CloudFront: HTTP **301** to HTTPS, HSTS `max-age=31536000; includeSubDomains`.
+- API ALB: HTTPS HSTS from `SecurityHeadersMiddleware`. Certificates: Amazon ACM (public).
 
-**Do not claim:** a Qualys letter grade until S5/S6 PNGs are in the folder; that the API is HTTPS-only (HTTP `GET /api/v1/health` returned **200** JSON on 31 Aug 2026); full NIST cipher matrix from this handshake; HttpOnly session cookies.
+**Do not claim:** that the API is HTTPS-only (HTTP `GET /api/v1/health` returned **200** JSON); that the API has no Qualys-flagged weak ciphers (two TLS 1.2 CBC suites are WEAK; grade is still A+); HttpOnly session cookies.
 
-**Owner (S5/S6):** screenshot finished Qualys scans of `app.velvetelves.com` and `api.prod.velvetelves.com` as `CASA_4_1_1_ssllabs_app.png` / `CASA_4_1_1_ssllabs_api.png`. Copy the same two into `tac_images/4.1.2/` for the next row. Do not ask the agent to open ssllabs.com. Also set the API ALB HTTP:80 listener to redirect to HTTPS (already in the production deploy plan).
-
-**Helpers:** `casa_auth_qa/render_casa_411_pages.py`, `casa_411_tls.py`
+**Helpers:** `casa_auth_qa/render_casa_411_pages.py`, `casa_411_tls.py`, `casa_411_ssllabs.mjs` (one host at a time), `casa_411_caption_ssllabs.py` (run once after a fresh protocol shot).
 
 ### Images
 
 | File | Description |
 | --- | --- |
-| [`tac_images/4.1.1/CASA_4_1_1_page1.png`](tac_images/4.1.1/CASA_4_1_1_page1.png) | Written evidence page 1 of 2. TLS termination, live handshake, HTTP port 80, HSTS. |
+| [`tac_images/4.1.1/CASA_4_1_1_page1.png`](tac_images/4.1.1/CASA_4_1_1_page1.png) | Written evidence page 1 of 2. TLS termination, Qualys A+, HTTP port 80, HSTS. |
 | [`tac_images/4.1.1/CASA_4_1_1_page2.png`](tac_images/4.1.1/CASA_4_1_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. API HTTP listener not claimed as HTTPS-only. |
 | [`tac_images/4.1.1/CASA_4_1_1_code.png`](tac_images/4.1.1/CASA_4_1_1_code.png) | FastAPI HSTS middleware; CloudFront TLSv1.2_2021; ALB TLS 1.3/1.2 policy. |
-| [`tac_images/4.1.1/CASA_4_1_1_tests.png`](tac_images/4.1.1/CASA_4_1_1_tests.png) | Named HSTS tests plus live TLS/HTTP notes. |
+| [`tac_images/4.1.1/CASA_4_1_1_tests.png`](tac_images/4.1.1/CASA_4_1_1_tests.png) | Named HSTS tests plus live TLS/Qualys notes. |
 | [`tac_images/4.1.1/CASA_4_1_1_tls.png`](tac_images/4.1.1/CASA_4_1_1_tls.png) | Live production handshake: TLS 1.3/1.2, HSTS, SPA 301, API HTTP health 200. |
+| [`tac_images/4.1.1/CASA_4_1_1_ssllabs_app.png`](tac_images/4.1.1/CASA_4_1_1_ssllabs_app.png) | Qualys SSL Labs: app.velvetelves.com, all endpoints A+. |
+| [`tac_images/4.1.1/CASA_4_1_1_ssllabs_app_protocols.png`](tac_images/4.1.1/CASA_4_1_1_ssllabs_app_protocols.png) | Qualys: SPA TLS 1.3/1.2 Yes; TLS 1.1/1.0 and SSL 3/2 No. |
+| [`tac_images/4.1.1/CASA_4_1_1_ssllabs_api.png`](tac_images/4.1.1/CASA_4_1_1_ssllabs_api.png) | Qualys SSL Labs: api.prod.velvetelves.com, both endpoints A+. |
+| [`tac_images/4.1.1/CASA_4_1_1_ssllabs_api_protocols.png`](tac_images/4.1.1/CASA_4_1_1_ssllabs_api_protocols.png) | Qualys: API TLS 1.3/1.2 Yes; TLS 1.1/1.0 and SSL 3/2 No. |
 
 ### Portal comment
 
 ```
-The production SPA (app.velvetelves.com) and API (api.prod.velvetelves.com) terminate TLS on CloudFront and an ALB. On 31 Aug 2026 a live handshake negotiated TLS 1.3 (TLS_AES_128_GCM_SHA256) on both hosts; TLS 1.2 was also accepted. HTTPS responses send Strict-Transport-Security: max-age=31536000; includeSubDomains. HTTP on the SPA returns 301 to HTTPS. HTTP on the API currently reaches FastAPI (GET /api/v1/health returned 200 JSON); that listener is not claimed as HTTPS-only. Certificates are Amazon ACM.
+The production SPA (app.velvetelves.com) and API (api.prod.velvetelves.com) terminate TLS on CloudFront and an ALB. Qualys SSL Labs on 31 Aug 2026 graded every tested endpoint A+ (TLS 1.3 and 1.2 enabled; TLS 1.1, TLS 1.0, SSL 3, and SSL 2 disabled). HTTPS responses send Strict-Transport-Security: max-age=31536000; includeSubDomains. HTTP on the SPA returns 301 to HTTPS. HTTP on the API currently reaches FastAPI (GET /api/v1/health returned 200 JSON); that listener is not claimed as HTTPS-only. Certificates are Amazon ACM.
 ```
 
 ---
@@ -1004,6 +1005,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.2.1 | `python render_casa_321_pages.py` then `python casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Prod UI: `node casa_331_prod_enroll_shots.mjs` (`QA_PASSWORD`). Folder is the upload set only. |
-| 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. Do **not** recapture ssllabs.com. Owner drops `CASA_4_1_1_ssllabs_app.png` / `ssllabs_api.png` when captured. |
+| 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. SSL Labs: `node casa_411_ssllabs.mjs app` then `node casa_411_ssllabs.mjs api`, then `python casa_411_caption_ssllabs.py` once. |
 
 Eyeball every PNG for cut-off text before re-upload.
