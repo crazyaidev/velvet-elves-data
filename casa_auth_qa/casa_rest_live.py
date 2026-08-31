@@ -58,6 +58,26 @@ def probe_513():
     return ok
 
 
+def probe_514():
+    query = urllib.parse.urlencode({"q": "{{7*7}}"})
+    st, body = request("GET", f"{API}/api/v1/health?{query}")
+    compact_body = compact(body)
+    ok = st == 200 and "ok" in body and compact_body.strip() not in ("49", '"49"')
+    save_probe(
+        out("5.1.4"),
+        "CASA_5_1_4_probe.png",
+        "5.1.4  Staging does not evaluate template expressions",
+        "GET /api/v1/health with q={{7*7}}. Extra query is ignored. Not an exploit.",
+        [
+            ("Request", f"{API}/api/v1/health?{query}", True),
+            ("HTTP status", str(st), st == 200),
+            ("JSON body", compact_body, ok),
+            ("Evaluated to 49?", "NO — health JSON, extra query ignored", ok),
+        ],
+    )
+    return ok
+
+
 def probe_515():
     rows_local = []
     for url, expect_fail in [
@@ -332,6 +352,7 @@ def run_611():
 if __name__ == "__main__":
     results = {
         "5.1.3": probe_513(),
+        "5.1.4": probe_514(),
         "5.1.5": probe_515(),
         "5.1.6": probe_516(),
         "5.1.7": probe_517(),

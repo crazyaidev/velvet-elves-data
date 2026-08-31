@@ -178,7 +178,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 31 | 5.1.1 | Packed 31 Aug (ZAP 20014 not in alerts; staging last-wins 422/200; unsigned teams 401) | CASA_5_1_1 | [ ] |
 | 32 | 5.1.2 | Packed 31 Aug (ZAP 20019 not in alerts; staging OAuth evil redirect_to 400; SPA ?next= no Location) | CASA_5_1_2 | [ ] |
 | 33 | 5.1.3 | Packed 31 Aug (ZAP 90019 not in alerts; no eval) | CASA_5_1_3 | [ ] |
-| 34 | 5.1.4 | Packed 31 Aug (no Jinja; ZAP no SSTI plugin) | CASA_5_1_4 | [ ] |
+| 34 | 5.1.4 | Packed 31 Aug (no Jinja; ZAP no SSTI plugin; health {{7*7}} ignored) | CASA_5_1_4 | [ ] |
 | 35 | 5.1.5 | Packed 31 Aug (assert_safe_url; unsigned 401; authed metadata 400) | CASA_5_1_5 | [ ] |
 | 36 | 5.1.6 | Packed 31 Aug (no XML parser; XML login rejected) | CASA_5_1_6 | [ ] |
 | 37 | 5.1.7 | Packed 31 Aug (XSS closed a9d78f05; CSP Mediums residual) | CASA_5_1_7 | [ ] |

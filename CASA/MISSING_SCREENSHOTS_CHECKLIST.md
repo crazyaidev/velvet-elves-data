@@ -53,7 +53,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
 | P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner | 5 |
 | P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner | 5 |
-| P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API | 4 |
+| P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA | 5 |
 | P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API | 5 |
 | P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API | 4 |
@@ -139,19 +139,11 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 5.1.4 — Template injection
 
-**Already packed:** code (`mapping.get`, not Jinja). No live SSTI PNG.
+**Packed:** code (`mapping.get`, not Jinja) + staging `GET /api/v1/health?q={{7*7}}` → 200 JSON health, not 49 (`CASA_5_1_4_probe.png`).
 
-### Capture
+**Done 31 Aug 2026.** Do not recapture. Do not claim this probed email Jinja. Do not claim Burp 1052800 ran.
 
-1. Staging, no auth needed: `GET https://api.stage.velvetelves.com/api/v1/health?q={{7*7}}` (or any public JSON query the API ignores).
-2. Screenshot the response: **200** JSON health (or 422), body is **not** `49`, and the raw `{{7*7}}` is not evaluated as a template.
-
-**Must show:** request URL (or query), status, JSON body with no template evaluation.  
-**Must not show:** Bearer tokens. This is not an exploit write-up — one ignored query is enough.  
-**Save as:** `tac_images/5.1.4/CASA_5_1_4_probe.png`  
-**Who:** owner or agent on Velvet Elves staging only.
-
-- [ ] Live SSTI-ignored probe PNG
+- [x] Live SSTI-ignored probe PNG
 
 ---
 

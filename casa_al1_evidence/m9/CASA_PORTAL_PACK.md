@@ -59,7 +59,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 31 | 5.1.1 | HTTP parameter pollution | 5 | `CASA_5_1_1_hpp.md` |
 | 32 | 5.1.2 | Open redirect / allowlisted URLs | 6 | `CASA_5_1_2_redirect.md` |
 | 33 | 5.1.3 | No eval / code injection | 5 | pack 5.1.3 |
-| 34 | 5.1.4 | Template injection | 4 | pack 5.1.4 |
+| 34 | 5.1.4 | Template injection | 5 | pack 5.1.4 |
 | 35 | 5.1.5 | SSRF | 6 | pack 5.1.5 |
 | 36 | 5.1.6 | XML / XPath | 5 | pack 5.1.6 |
 | 37 | 5.1.7 | XSS | 5 | pack 5.1.7 |
@@ -1215,9 +1215,13 @@ Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) di
 
 **ADA:** AL1 DAST. Burp 1052800 shall not be identified.
 
-**Claimed:** No Jinja of user templates; {{name}} mapping only. ZAP has no SSTI rule; 90025 WARN not in alerts.
+**Claimed:** No Jinja of user templates; {{name}} mapping only. ZAP has no SSTI rule; 90025 WARN not in alerts. Staging `GET /api/v1/health?q={{7*7}}` → **200** JSON health (`status ok`); body is **not** `49`.
 
-**Missing:** Burp 1052800; WSTG-INPV-18; live SSTI probe PNG (code-only extra).
+**Missing:** Burp 1052800; WSTG-INPV-18.
+
+**Do not claim:** that this probe tested email/vendor Jinja rendering (health ignores extra query); that Burp 1052800 ran.
+
+**Helpers:** `casa_auth_qa/casa_514_probe.py` (also `casa_rest_live.py` `probe_514`). Do **not** attach `/login`.
 
 ### Images
 
@@ -1227,11 +1231,12 @@ Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) di
 | [`tac_images/5.1.4/CASA_5_1_4_ssti_page2.png`](tac_images/5.1.4/CASA_5_1_4_ssti_page2.png) | AL1 mapping |
 | [`tac_images/5.1.4/CASA_5_1_4_ssti_code.png`](tac_images/5.1.4/CASA_5_1_4_ssti_code.png) | _substitute mapping.get |
 | [`tac_images/5.1.4/CASA_5_1_4_ssti_zap.png`](tac_images/5.1.4/CASA_5_1_4_ssti_zap.png) | No SSTI plugin; 90025 WARN |
+| [`tac_images/5.1.4/CASA_5_1_4_probe.png`](tac_images/5.1.4/CASA_5_1_4_probe.png) | Staging GET /health?q={{7*7}} → 200 JSON health, not 49. |
 
 ### Portal comment
 
 ```
-Official ADA ZAP scans did not report template injection or expression-language injection. The ADA ZAP conf has no dedicated SSTI rule (90025 EL is WARN). APIs return JSON. Email and vendor copy replace named {{token}} keys from a mapping; unknown keys are empty. We do not render user Jinja. We did not run Burp 1052800. WSTG-INPV-18 is AL2 and was not run.
+Official ADA ZAP scans did not report template injection or expression-language injection. The ADA ZAP conf has no dedicated SSTI rule (90025 EL is WARN). APIs return JSON. Email and vendor copy replace named {{token}} keys from a mapping; unknown keys are empty. We do not render user Jinja. Staging GET /api/v1/health with q={{7*7}} returned 200 JSON health (status ok); the body is not 49 and the extra query is ignored. We did not run Burp 1052800. WSTG-INPV-18 is AL2 and was not run.
 ```
 
 ---
@@ -1632,6 +1637,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 | 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |
 | 5.1.2 | `python render_casa_512_pages.py` then `python casa_512_deny.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or Google Cloud Console. Do **not** complete OAuth. |
-| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
+| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
 
 Eyeball every PNG for cut-off text before re-upload.
