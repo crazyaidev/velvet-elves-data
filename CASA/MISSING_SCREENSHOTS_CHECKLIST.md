@@ -48,7 +48,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | --- | --- | --- | --- | ---: |
 | P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Login log sample | Owner (CloudWatch) | 4 |
 | P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Payment log sample | Owner (CloudWatch or Stripe) | 4 |
-| P1 | [6.4.1](#641--subdomain-takeover) | Route 53 hosted zone | Owner | 4 |
+| P1 | [6.4.1](#641--subdomain-takeover) | Route 53 hosted zone | Owner — **done 31 Aug** | 5 |
 | P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner | 3 |
 | P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
 | P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner — **done 31 Aug** (linux/amd64 child of prod-latest) | 7 |
@@ -294,9 +294,9 @@ Do not scan production. Do not write a new exploit.
 
 ## 6.4.1 — Subdomain takeover
 
-**Already packed:** live DNS A/AAAA for app / api / help / apex → CloudFront or ALB.
+**Already packed:** live DNS A/AAAA for app / api / help / apex → CloudFront or ALB. Route 53 console (`CASA_6_4_1_route53.png`): app/help → CloudFront; api → ALB. Apex row is not in the filtered console shot.
 
-**Still missing:** Route 53 hosted-zone console (ADA: names you control).
+**Still missing:** none for this capture (optional CNAME-only leftover; full unused-name audit not required).
 
 ### Capture
 
@@ -309,7 +309,7 @@ Do not scan production. Do not write a new exploit.
 **Save as:** `tac_images/6.4.1/CASA_6_4_1_route53.png`  
 **Who:** owner.
 
-- [ ] Route 53 hosted-zone PNG
+- [x] Route 53 hosted-zone PNG
 
 ---
 

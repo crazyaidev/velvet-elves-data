@@ -70,7 +70,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 42 | 6.1.1 | Dependency scan | 7 | pack 6.1.1 |
 | 43 | 6.2.1 | Debug off in production | 6 | pack 6.2.1 |
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
-| 45 | 6.4.1 | Subdomain takeover | 4 | pack 6.4.1 |
+| 45 | 6.4.1 | Subdomain takeover | 5 | pack 6.4.1 |
 | 46 | 6.5.1 | No credential logs | 4 | pack 6.5.1 — log samples missing |
 | 47 | 6.6.1 | Logout clears storage | 5 | pack 6.6.1 |
 | 48 | 6.7.1 | Server secrets | 3 | pack 6.7.1 — no AWS console |
@@ -1537,9 +1537,11 @@ Access control is the JWT plus require_role / require_tenant_access. The Origin 
 
 **ADA:** AL1 DNS evidence that names point at resources you control.
 
-**Claimed:** Live DNS for app/api/help/apex to CloudFront or ALB IPs.
+**Claimed:** Live DNS for app/api/help/apex to CloudFront or ALB. Route 53 hosted zone `velvetelves.com`: `app` / `app.stage` / `help` / `help.stage` alias to CloudFront; `api.prod` alias to prod API ALB; `api.stage` CNAME to stage API ALB. Underscore CNAMEs are ACM DNS validation (Amazon), not abandoned SaaS.
 
-**Missing:** Route 53 hosted-zone console screenshot (AWS, owner). Full dangling-CNAME audit of unused names.
+**Missing:** Full dangling-CNAME audit of all unused names in the 46-record zone. Zone apex row is not in this filtered console shot (live DNS PNG already covers `velvetelves.com`).
+
+**Do not claim:** that this PNG shows the zone apex record; that every one of the 46 records was reviewed; that zone id `Z04016973TWW2D0EKIMFB` is visible in the frame.
 
 ### Images
 
@@ -1549,11 +1551,12 @@ Access control is the JWT plus require_role / require_tenant_access. The Origin 
 | [`tac_images/6.4.1/CASA_6_4_1_dns_page2.png`](tac_images/6.4.1/CASA_6_4_1_dns_page2.png) | AL1 mapping |
 | [`tac_images/6.4.1/CASA_6_4_1_dns_code.png`](tac_images/6.4.1/CASA_6_4_1_dns_code.png) | Name list |
 | [`tac_images/6.4.1/CASA_6_4_1_dns.png`](tac_images/6.4.1/CASA_6_4_1_dns.png) | Live A/AAAA answers |
+| [`tac_images/6.4.1/CASA_6_4_1_route53.png`](tac_images/6.4.1/CASA_6_4_1_route53.png) | Route 53 app/api/help → CloudFront or ALB |
 
 ### Portal comment
 
 ```
-Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resolve to CloudFront addresses; api.prod.velvetelves.com and api.stage.velvetelves.com resolve to ALB addresses; help.velvetelves.com and velvetelves.com resolve. A Route 53 hosted-zone console screenshot was not taken. WSTG-CONF-10 is AL2 and was not run.
+Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resolve to CloudFront addresses; api.prod.velvetelves.com and api.stage.velvetelves.com resolve to ALB addresses; help.velvetelves.com and velvetelves.com resolve. Route 53 hosted zone velvetelves.com shows app, app.stage, help, and help.stage as alias A/AAAA to CloudFront; api.prod as alias A to the prod API ALB; api.stage as CNAME to the stage API ALB. Underscore CNAMEs are ACM certificate validation at Amazon, not abandoned Heroku, GitHub, or S3 website endpoints. This filtered view does not include the zone apex row. WSTG-CONF-10 is AL2 and was not run.
 ```
 
 ---

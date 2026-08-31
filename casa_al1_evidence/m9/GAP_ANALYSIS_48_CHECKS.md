@@ -51,7 +51,7 @@
 - **6.1.1** — Packed lockfile scans. npm 0. pip-audit ecdsa CVSS 7.4 no fix. Production ECR linux/amd64 child of prod-latest scanned 29 Aug 2026: 48 Critical, 174 High (OS/base layer). Image index itself is not scannable.
 - **6.2.1** — Packed. Prod docs 404; staging docs 200. ECS prod-backend rev 52 APP_DEBUG=false APP_ENV=production.
 - **6.3.1** — Packed. Foreign Origin /users/me 401.
-- **6.4.1** — Packed live DNS. Route 53 console NOT captured.
+- **6.4.1** — Packed live DNS + Route 53 console (app/help CloudFront, api ALB). Filtered view does not include zone apex.
 - **6.5.1** — Packed code mask. CloudWatch login/payment log samples NOT captured (ADA-named gap).
 - **6.6.1** — Packed. Staging Log Out: token keys gone; velvet_elves_return_location remains. DevTools Application panel not captured.
 - **6.7.1** — Packed write-up. AWS Secrets Manager console NOT captured.
