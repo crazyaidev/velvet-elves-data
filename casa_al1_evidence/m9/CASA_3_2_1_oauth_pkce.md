@@ -27,6 +27,8 @@ See `CASA_3_2_1_pkce.png`.
 
 Do not recapture Google Cloud Console or accounts.google.com. Do not attach `/login`.
 
+Production Google Cloud client **Velvet Elves API – production** (31 Aug 2026): type **Web application**; redirect URIs are production Gmail, Calendar, and Supabase Auth callbacks. Client secret redacted on the packed PNG.
+
 ## Tests (names to cite)
 
 `test_oauth_state_is_stateless_and_roundtrips` — PKCE verifier is inside Fernet `state`, not plaintext.  
@@ -37,10 +39,11 @@ Do not recapture Google Cloud Console or accounts.google.com. Do not attach `/lo
 - Implicit flow or Google ROPC.
 - That Google Sign-in is out of scope (it is an OAuth code+PKCE login path; Gmail/Calendar are separate).
 - A live completed consent this session.
+- That the GCP Web-client shot proves PKCE (PKCE is in the start URL).
 - HttpOnly cookies; MFA for all users.
 
 ## Portal comment
 
 ```
-Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft sign-in start at POST /users/oauth/{provider}/start and pass code_challenge to Supabase /auth/v1/authorize. Gmail, Outlook, Calendar, and DocuSign authorize URLs set response_type=code plus code_challenge_method=S256. There is no implicit flow and no resource-owner password grant to those providers. Staging POST /users/oauth/google/start returned a PKCE authorize URL (s256); the flow was not completed. Unsigned POST /integrations/gmail/authorize-url returns 401.
+Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft sign-in start at POST /users/oauth/{provider}/start and pass code_challenge to Supabase /auth/v1/authorize. Gmail, Outlook, Calendar, and DocuSign authorize URLs set response_type=code plus code_challenge_method=S256. There is no implicit flow and no resource-owner password grant to those providers. The production Google Cloud OAuth client is a Web application with HTTPS Gmail, Calendar, and Supabase Auth callback URIs. Staging POST /users/oauth/google/start returned a PKCE authorize URL (s256); the flow was not completed. Unsigned POST /integrations/gmail/authorize-url returns 401.
 ```

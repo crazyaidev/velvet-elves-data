@@ -49,8 +49,8 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 21 | 3.1.4 | Sensitive resources protected against IDOR | 5 | `CASA_3_1_4_idor.md` |
 | 22 | 3.1.5 | Anti-CSRF / anti-automation | 6 | `CASA_3_1_5_csrf.md` |
 | 23 | 3.1.6 | Directory browsing disabled | 6 | `CASA_3_1_6_directory.md` |
-| 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
-| 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
+| 24 | 3.2.1 | OAuth authorization code + PKCE | 6 | `CASA_3_2_1_oauth_pkce.md` |
+| 25 | 3.2.2 | OAuth redirect_uri and state | 6 | `CASA_3_2_2_redirect_state.md` |
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
 | 27 | 4.1.1 | TLS 1.2+ | 9 | `CASA_4_1_1_tls.md` |
 | 28 | 4.1.2 | Trusted TLS certificates | 8 | `CASA_4_1_2_certs.md` |
@@ -869,8 +869,9 @@ Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin v
 - Gmail, Outlook, Google Calendar, DocuSign: `response_type=code` + `code_challenge_method=S256`.
 - Email/password login is Supabase `sign_in_with_password`, not an OAuth password grant to Google.
 - Staging 31 Aug 2026: `POST /users/oauth/google/start` → **200** with `s256` (flow not completed). Unsigned `POST /integrations/gmail/authorize-url` → **401**.
+- Production Google Cloud OAuth client **Velvet Elves API – production** (31 Aug 2026, owner-captured, secret redacted): type **Web application**; authorized redirect URIs are production Gmail callback, Google Calendar callback, and Supabase Auth `/auth/v1/callback`. Authorized JavaScript origins are empty.
 
-**Do not claim:** implicit flow; Google ROPC; a completed consent this session; Google Cloud Console screenshots.
+**Do not claim:** implicit flow; Google ROPC; a completed consent this session; that this GCP shot proves PKCE (PKCE is in the app/Supabase start URL); that the client secret is shown.
 
 **Helpers:** `casa_auth_qa/render_casa_321_pages.py`, `casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console or accounts.google.com. Do **not** complete an OAuth exchange.
 
@@ -883,11 +884,12 @@ Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin v
 | [`tac_images/3.2.1/CASA_3_2_1_code.png`](tac_images/3.2.1/CASA_3_2_1_code.png) | oauth_service.py and gmail_provider.py PKCE params. |
 | [`tac_images/3.2.1/CASA_3_2_1_tests.png`](tac_images/3.2.1/CASA_3_2_1_tests.png) | Named tests for encrypted PKCE state and tampered-state 400. |
 | [`tac_images/3.2.1/CASA_3_2_1_pkce.png`](tac_images/3.2.1/CASA_3_2_1_pkce.png) | Staging Google start URL has s256; Gmail authorize-url unsigned 401. |
+| [`tac_images/3.2.1/CASA_3_2_1_gcp_client.png`](tac_images/3.2.1/CASA_3_2_1_gcp_client.png) | GCP: production **Web application** client; HTTPS Gmail, Calendar, and Supabase Auth redirect URIs. Client ID remainder and client secret redacted. |
 
 ### Portal comment
 
 ```
-Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft sign-in start at POST /users/oauth/{provider}/start and pass code_challenge to Supabase /auth/v1/authorize. Gmail, Outlook, Calendar, and DocuSign authorize URLs set response_type=code plus code_challenge_method=S256. There is no implicit flow and no resource-owner password grant to those providers. Staging POST /users/oauth/google/start returned a PKCE authorize URL (s256); the flow was not completed. Unsigned POST /integrations/gmail/authorize-url returns 401.
+Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft sign-in start at POST /users/oauth/{provider}/start and pass code_challenge to Supabase /auth/v1/authorize. Gmail, Outlook, Calendar, and DocuSign authorize URLs set response_type=code plus code_challenge_method=S256. There is no implicit flow and no resource-owner password grant to those providers. The production Google Cloud OAuth client is a Web application with HTTPS Gmail, Calendar, and Supabase Auth callback URIs. Staging POST /users/oauth/google/start returned a PKCE authorize URL (s256); the flow was not completed. Unsigned POST /integrations/gmail/authorize-url returns 401.
 ```
 
 ---
@@ -903,8 +905,9 @@ Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft 
 - Gmail / Outlook / Calendar / DocuSign `redirect_uri` is server-set from configuration, not client JSON. State binds user, provider, and `redirect_uri`.
 - Callback `postMessage` targets `FRONTEND_URL`, not `*`. SPA checks `isTrustedOAuthMessageOrigin`.
 - Staging 31 Aug 2026: evil `redirect_to` → **400**; allowlisted SPA callback → **200** (flow not completed); garbage exchange state → **400**.
+- Production Google Cloud OAuth client (same PNG as 3.2.1): authorized redirect URIs are production Gmail callback, Google Calendar callback, and Supabase Auth `/auth/v1/callback`. Client secret redacted.
 
-**Do not claim:** WSTG-ATHZ-05; exact-path match on sign-in `redirect_to` (origin check); completed consent; Google Cloud Console screenshots.
+**Do not claim:** WSTG-ATHZ-05; exact-path match on sign-in `redirect_to` (origin check); completed consent; that GCP listing replaces API origin checks.
 
 **Helpers:** `casa_auth_qa/render_casa_322_pages.py`, `casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete an OAuth exchange.
 
@@ -917,11 +920,12 @@ Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft 
 | [`tac_images/3.2.2/CASA_3_2_2_code.png`](tac_images/3.2.2/CASA_3_2_2_code.png) | validate_redirect_to, Fernet decode, Gmail redirect_uri from settings. |
 | [`tac_images/3.2.2/CASA_3_2_2_tests.png`](tac_images/3.2.2/CASA_3_2_2_tests.png) | Named tests for tampered state, provider mismatch, and postMessage origin. |
 | [`tac_images/3.2.2/CASA_3_2_2_deny.png`](tac_images/3.2.2/CASA_3_2_2_deny.png) | Staging: foreign redirect_to 400; allowlisted start 200; garbage state 400. |
+| [`tac_images/3.2.2/CASA_3_2_2_gcp_client.png`](tac_images/3.2.2/CASA_3_2_2_gcp_client.png) | Same production GCP Web client as 3.2.1: registered HTTPS redirect URIs. Secret redacted. |
 
 ### Portal comment
 
 ```
-OAuth redirect_uri and state are validated to prevent open redirect and OAuth CSRF. Google and Microsoft sign-in redirect_to must match an allowlisted SPA origin; a foreign origin returns 400. Sign-in state is a Fernet token with a 10-minute TTL; a forged state on POST /users/oauth/google/exchange returns 400 Invalid or expired OAuth state. Gmail, Outlook, Calendar, and DocuSign redirect_uri is set by the API from configuration, not by the client. Integration state binds user, provider, and redirect_uri. Callback postMessage targets FRONTEND_URL, not *. Staging: foreign redirect_to 400; garbage state 400.
+OAuth redirect_uri and state are validated to prevent open redirect and OAuth CSRF. Google and Microsoft sign-in redirect_to must match an allowlisted SPA origin; a foreign origin returns 400. Sign-in state is a Fernet token with a 10-minute TTL; a forged state on POST /users/oauth/google/exchange returns 400 Invalid or expired OAuth state. Gmail, Outlook, Calendar, and DocuSign redirect_uri is set by the API from configuration, not by the client. Google Cloud lists the production Gmail, Calendar, and Supabase Auth callback URIs as authorized redirects. Integration state binds user, provider, and redirect_uri. Callback postMessage targets FRONTEND_URL, not *. Staging: foreign redirect_to 400; garbage state 400.
 ```
 
 ---

@@ -168,8 +168,8 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 21 | 3.1.4 | Ready (ID-parameter APIs + tenant/assignment guards; staging unsigned ID paths 401) | CASA_3_1_4 | [ ] |
 | 22 | 3.1.5 | Ready (Bearer not cookie; CORS origin allowlist; register 5/min; ZAP no 10202) | CASA_3_1_5 | [ ] |
 | 23 | 3.1.6 | Packed (SPA HTML shell; API JSON 404; S3 Block public access On) | CASA_3_1_6 | [ ] |
-| 24 | 3.2.1 | Ready (authorization code + PKCE S256; no implicit/ROPC; staging start 200) | CASA_3_2_1 | [ ] |
-| 25 | 3.2.2 | Ready (redirect_to origin allowlist; Fernet state TTL; staging 400s) | CASA_3_2_2 | [ ] |
+| 24 | 3.2.1 | Packed (code+PKCE S256; GCP Web client + HTTPS redirects) | CASA_3_2_1 | [ ] |
+| 25 | 3.2.2 | Packed (redirect_to allowlist; Fernet state; GCP registered URIs) | CASA_3_2_2 | [ ] |
 | 26 | 3.3.1 | Ready (platform TOTP aal2; staging/prod UI; unsigned 401) | CASA_3_3_1 | [ ] |
 | 27 | 4.1.1 | Packed 31 Aug (Qualys A+ both hosts; live TLS 1.3/1.2 + HSTS; API HTTP still 200). ALB HTTP→HTTPS redirect still recommended | CASA_4_1_1 + SSL Labs | [ ] |
 | 28 | 4.1.2 | Packed 31 Aug (Qualys A+ + live Amazon ACM; SPA SAN includes prod+stage) | CASA_4_1_2 + SSL Labs | [ ] |

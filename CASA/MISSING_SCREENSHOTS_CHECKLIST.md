@@ -61,7 +61,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA | 5 |
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
-| P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner | 5 each |
+| P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner — **done 31 Aug** | 6 each |
 | P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner | 8 |
 | P3 | [2.2.3](#223--stateless-tokens-expire-within-24-hours) | Supabase JWT expiry (optional) | Owner — **done 31 Aug** | 6 |
 | P3 | [Scanner UI](#scanner-ui--zap--burp-all-dast-rows) | ZAP / Burp product UI | Owner | — |
@@ -110,31 +110,19 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 3.2.1 — OAuth authorization code + PKCE
 
-**Already packed:** staging `POST /users/oauth/google/start` returns `s256`; flow not completed.
+**Packed:** staging `POST /users/oauth/google/start` returns `s256`; flow not completed. Production GCP **Web application** client with HTTPS redirect URIs (`CASA_3_2_1_gcp_client.png`; same file on 3.2.2). Client secret redacted.
 
-**Still missing (optional):** Google Cloud Console client showing Web + redirect URIs (not Implicit).
+**Done 31 Aug 2026.** Do not recapture Google Cloud Console. Do **not** change OAuth. Do **not** complete consent. Do **not** attach `/login`.
 
-### Capture (read-only)
-
-1. Google Cloud → project **velvet-vles** (538509143953) → **APIs & Services** → **Credentials**.
-2. Open the **Web client** used for Velvet Elves sign-in (do **not** edit).
-3. Screenshot: application type **Web application**, **Authorized redirect URIs** (Supabase / Velvet Elves callbacks). Crop **Client secret**.
-
-**Must show:** Web client, redirect URIs.  
-**Must not show:** client secret, other projects’ clients, any edit confirmation.  
-**Save as:** `tac_images/3.2.1/CASA_3_2_1_gcp_client.png`  
-Copy the **same** file into `tac_images/3.2.2/` as `CASA_3_2_2_gcp_client.png` if redirect URIs are visible (covers 3.2.2).  
-**Who:** owner. Do **not** change OAuth. Do **not** complete consent. Do **not** attach `/login`.
-
-- [ ] GCP OAuth client PNG (also ticks 3.2.2)
+- [x] GCP OAuth client PNG (also ticks 3.2.2)
 
 ---
 
 ## 3.2.2 — OAuth redirect_uri and state
 
-Same GCP shot as 3.2.1 if redirect URIs are in frame. No extra Google accounts screenshot.
+**Packed:** same production GCP Web-client PNG as 3.2.1 (`CASA_3_2_2_gcp_client.png`) showing authorized redirect URIs.
 
-- [ ] GCP redirect-URI PNG (or reuse 3.2.1)
+- [x] GCP redirect-URI PNG (reuse of 3.2.1)
 
 ---
 

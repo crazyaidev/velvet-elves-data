@@ -154,7 +154,7 @@ def page1():
         y,
         [
             (
-                "Foreign redirect_to returned 400. Allowlisted SPA callback returned 200. Garbage state on exchange returned 400. Consent was not completed. Google Cloud Console was not opened.",
+                "Foreign redirect_to returned 400. Allowlisted SPA callback returned 200. Garbage state on exchange returned 400. Consent was not completed. Google Cloud lists production Gmail, Calendar, and Supabase Auth callback URIs (secret not shown).",
                 F_BODY,
                 INK,
             ),
@@ -171,7 +171,7 @@ def page2():
     rows = [
         (
             "redirect_uri / redirect_to",
-            "Sign-in origin must be on CORS_ORIGINS. Integration redirect_uri is server-set.",
+            "Sign-in origin must be on CORS_ORIGINS. Integration redirect_uri is server-set. GCP lists those production callback URIs.",
             True,
         ),
         (

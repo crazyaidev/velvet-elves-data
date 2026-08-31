@@ -34,6 +34,8 @@ See `CASA_3_2_2_deny.png`.
 
 Do not recapture Google Cloud Console. Do not complete consent. Do not attach `/login`.
 
+Production Google Cloud authorized redirect URIs (same PNG as 3.2.1): Gmail callback, Calendar callback, Supabase Auth callback. Secret redacted.
+
 ## Tests (names to cite)
 
 `test_oauth_exchange_rejects_tampered_state` — garbage Fernet → 400.  
@@ -46,11 +48,11 @@ Do not recapture Google Cloud Console. Do not complete consent. Do not attach `/
 - WSTG-ATHZ-05 / AL2 lab testing.
 - That sign-in `redirect_to` is an exact-path match (it is origin vs CORS).
 - A completed consent this session.
-- Google Cloud Console registered-URI screenshots.
+- That GCP registered URIs replace API origin checks.
 - HttpOnly cookies; MFA for all users.
 
 ## Portal comment
 
 ```
-OAuth redirect_uri and state are validated to prevent open redirect and OAuth CSRF. Google and Microsoft sign-in redirect_to must match an allowlisted SPA origin; a foreign origin returns 400. Sign-in state is a Fernet token with a 10-minute TTL; a forged state on POST /users/oauth/google/exchange returns 400 Invalid or expired OAuth state. Gmail, Outlook, Calendar, and DocuSign redirect_uri is set by the API from configuration, not by the client. Integration state binds user, provider, and redirect_uri. Callback postMessage targets FRONTEND_URL, not *. Staging: foreign redirect_to 400; garbage state 400.
+OAuth redirect_uri and state are validated to prevent open redirect and OAuth CSRF. Google and Microsoft sign-in redirect_to must match an allowlisted SPA origin; a foreign origin returns 400. Sign-in state is a Fernet token with a 10-minute TTL; a forged state on POST /users/oauth/google/exchange returns 400 Invalid or expired OAuth state. Gmail, Outlook, Calendar, and DocuSign redirect_uri is set by the API from configuration, not by the client. Google Cloud lists the production Gmail, Calendar, and Supabase Auth callback URIs as authorized redirects. Integration state binds user, provider, and redirect_uri. Callback postMessage targets FRONTEND_URL, not *. Staging: foreign redirect_to 400; garbage state 400.
 ```

@@ -140,7 +140,7 @@ def page1():
         y,
         [
             (
-                "POST /users/oauth/google/start returned 200 with s256 and a code_challenge. Consent was not completed. Unsigned POST /integrations/gmail/authorize-url returned 401. Google Cloud Console was not opened.",
+                "POST /users/oauth/google/start returned 200 with s256 and a code_challenge. Consent was not completed. Unsigned POST /integrations/gmail/authorize-url returned 401. Google Cloud lists the production client as a Web application with HTTPS callback URIs (secret not shown).",
                 F_BODY,
                 INK,
             ),
@@ -171,8 +171,8 @@ def page2():
             True,
         ),
         (
-            "Staging",
-            "Google start returned s256. Gmail authorize-url without a session is 401.",
+            "Staging and GCP client type",
+            "Google start returned s256. Gmail authorize-url without a session is 401. Production GCP client is Web application with HTTPS redirects.",
             True,
         ),
     ]
@@ -190,7 +190,7 @@ def page2():
         y,
         [
             (
-                "Velvet Elves OAuth integrations use authorization code with PKCE. They do not use the Implicit flow or the Resource Owner Password Credentials flow.",
+                "Velvet Elves OAuth integrations use authorization code with PKCE. They do not use the Implicit flow or the Resource Owner Password Credentials flow. The production Google client is a Web application.",
                 F_BODY,
                 INK,
             ),
