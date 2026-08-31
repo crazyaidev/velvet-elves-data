@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -51,6 +51,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
 | 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
+| 27 | 4.1.1 | TLS 1.2+ | 5 | `CASA_4_1_1_tls.md` |
 
 ---
 
@@ -936,6 +937,41 @@ The application administrative interface is the platform console (/api/v1/platfo
 
 ---
 
+## 4.1.1 — TLS 1.2+ on production SPA and API
+
+**ADA:** enforce TLS for all connections and default to TLS 1.2+. AL1 named evidence is a **Qualys SSL Labs PDF**, typically grade **B or higher** (NIST SP.800-52r2).
+
+**Claimed controls**
+
+- SPA CloudFront `app.velvetelves.com`: TLS 1.3 default, TLS 1.2 accepted, HTTP **301** to HTTPS, HSTS `max-age=31536000; includeSubDomains`.
+- API ALB `api.prod.velvetelves.com`: TLS 1.3 default, TLS 1.2 accepted, HTTPS HSTS from `SecurityHeadersMiddleware`.
+- Certificates: Amazon ACM (public).
+- Live 31 Aug 2026 handshake: `TLS_AES_128_GCM_SHA256` (1.3); forced 1.2 `ECDHE-RSA-AES128-GCM-SHA256`. TLS 1.0/1.1 rejected by this client.
+
+**Do not claim:** a Qualys letter grade until S5/S6 PNGs are in the folder; that the API is HTTPS-only (HTTP `GET /api/v1/health` returned **200** JSON on 31 Aug 2026); full NIST cipher matrix from this handshake; HttpOnly session cookies.
+
+**Owner (S5/S6):** screenshot finished Qualys scans of `app.velvetelves.com` and `api.prod.velvetelves.com` as `CASA_4_1_1_ssllabs_app.png` / `CASA_4_1_1_ssllabs_api.png`. Copy the same two into `tac_images/4.1.2/` for the next row. Do not ask the agent to open ssllabs.com. Also set the API ALB HTTP:80 listener to redirect to HTTPS (already in the production deploy plan).
+
+**Helpers:** `casa_auth_qa/render_casa_411_pages.py`, `casa_411_tls.py`
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/4.1.1/CASA_4_1_1_page1.png`](tac_images/4.1.1/CASA_4_1_1_page1.png) | Written evidence page 1 of 2. TLS termination, live handshake, HTTP port 80, HSTS. |
+| [`tac_images/4.1.1/CASA_4_1_1_page2.png`](tac_images/4.1.1/CASA_4_1_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. API HTTP listener not claimed as HTTPS-only. |
+| [`tac_images/4.1.1/CASA_4_1_1_code.png`](tac_images/4.1.1/CASA_4_1_1_code.png) | FastAPI HSTS middleware; CloudFront TLSv1.2_2021; ALB TLS 1.3/1.2 policy. |
+| [`tac_images/4.1.1/CASA_4_1_1_tests.png`](tac_images/4.1.1/CASA_4_1_1_tests.png) | Named HSTS tests plus live TLS/HTTP notes. |
+| [`tac_images/4.1.1/CASA_4_1_1_tls.png`](tac_images/4.1.1/CASA_4_1_1_tls.png) | Live production handshake: TLS 1.3/1.2, HSTS, SPA 301, API HTTP health 200. |
+
+### Portal comment
+
+```
+The production SPA (app.velvetelves.com) and API (api.prod.velvetelves.com) terminate TLS on CloudFront and an ALB. On 31 Aug 2026 a live handshake negotiated TLS 1.3 (TLS_AES_128_GCM_SHA256) on both hosts; TLS 1.2 was also accepted. HTTPS responses send Strict-Transport-Security: max-age=31536000; includeSubDomains. HTTP on the SPA returns 301 to HTTPS. HTTP on the API currently reaches FastAPI (GET /api/v1/health returned 200 JSON); that listener is not claimed as HTTPS-only. Certificates are Amazon ACM.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -968,5 +1004,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.2.1 | `python render_casa_321_pages.py` then `python casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Prod UI: `node casa_331_prod_enroll_shots.mjs` (`QA_PASSWORD`). Folder is the upload set only. |
+| 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. Do **not** recapture ssllabs.com. Owner drops `CASA_4_1_1_ssllabs_app.png` / `ssllabs_api.png` when captured. |
 
 Eyeball every PNG for cut-off text before re-upload.
