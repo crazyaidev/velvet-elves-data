@@ -166,7 +166,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 19 | 3.1.2 | Ready (server profile attrs; register/OAuth ignore client tenant_id) | CASA_3_1_2 | [ ] |
 | 20 | 3.1.3 | Ready (fail closed 401/403; cron secret unset is unreachable; generic 500) | CASA_3_1_3 | [ ] |
 | 21 | 3.1.4 | Ready (ID-parameter APIs + tenant/assignment guards; staging unsigned ID paths 401) | CASA_3_1_4 | [ ] |
-| 22 | 3.1.5 | Ready | comp + S7 | [ ] |
+| 22 | 3.1.5 | Ready (Bearer not cookie; CORS origin allowlist; register 5/min; ZAP no 10202) | CASA_3_1_5 | [ ] |
 | 23 | 3.1.6 | Ready | M9a | [ ] |
 | 24 | 3.2.1 | Ready | oauth | [ ] |
 | 25 | 3.2.2 | Ready | oauth | [ ] |

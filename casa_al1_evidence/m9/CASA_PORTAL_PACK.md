@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -46,6 +46,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 19 | 3.1.2 | Users cannot manipulate access-control attributes | 5 | `CASA_3_1_2_policy_attrs.md` |
 | 20 | 3.1.3 | Access controls fail securely | 5 | `CASA_3_1_3_fail_secure.md` |
 | 21 | 3.1.4 | Sensitive resources protected against IDOR | 5 | `CASA_3_1_4_idor.md` |
+| 22 | 3.1.5 | Anti-CSRF / anti-automation | 6 | `CASA_3_1_5_csrf.md` |
 
 ---
 
@@ -756,6 +757,41 @@ User-supplied object IDs appear in paths such as /users/{id}, /tenants/{id}, /tr
 
 ---
 
+## 3.1.5 — Anti-CSRF for authenticated APIs; anti-automation for unauthenticated
+
+**ADA:** strong anti-CSRF on authenticated functionality; anti-automation or anti-CSRF on unauthenticated functionality (ASVS 4.2.2). AL1 evidence is ADA DAST. Verification: the scan shall not identify Burp **2098944**. Official scans were ZAP (SPA 10202/20012 = FAIL).
+
+**Claimed controls**
+
+- Authenticated APIs use `Authorization: Bearer` from `localStorage`, not a cookie session. Login JSON JWTs; staging `Set-Cookie` none (2.3.1). A cross-site form cannot attach the Bearer header.
+- CORS allowlists exact origins. A foreign `Origin` is not echoed as `Access-Control-Allow-Origin`.
+- Unauthenticated: register **5 / 60 s / IP**; login **10 / 60 s / IP**.
+- Official ZAP SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa` did not list 10202 / 20012.
+- Staging 31 Aug 2026: OPTIONS `/users/me` from `app.stage.velvetelves.com` → **200** + that origin; `evil.example` → **400** and no ACAO. Register 429 PNG copied from 1.1.1 (no new users minted).
+
+**Do not claim:** a synchronizer CSRF cookie; HttpOnly cookies; that CORS methods/headers are locked (`*` — origins are the control); that Burp 2098944 ran; CAPTCHA.
+
+**Helpers:** `casa_auth_qa/render_casa_315_pages.py`, `casa_315_cors.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. Do **not** register staging users for a fresh 429.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.1.5/CASA_3_1_5_page1.png`](tac_images/3.1.5/CASA_3_1_5_page1.png) | Written evidence page 1 of 2. Bearer not cookie; register limiter; ZAP. |
+| [`tac_images/3.1.5/CASA_3_1_5_page2.png`](tac_images/3.1.5/CASA_3_1_5_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.1.5/CASA_3_1_5_code.png`](tac_images/3.1.5/CASA_3_1_5_code.png) | CORSMiddleware origins; Bearer header; register/login limiters. |
+| [`tac_images/3.1.5/CASA_3_1_5_zap.png`](tac_images/3.1.5/CASA_3_1_5_zap.png) | Official ADA ZAP CSRF rule excerpt. Not a ZAP product screenshot. |
+| [`tac_images/3.1.5/CASA_3_1_5_cors.png`](tac_images/3.1.5/CASA_3_1_5_cors.png) | Staging OPTIONS: SPA origin allowed; evil.example not echoed. |
+| [`tac_images/3.1.5/CASA_3_1_5_register_429.png`](tac_images/3.1.5/CASA_3_1_5_register_429.png) | Staging sixth rapid POST /users/register → 429 (copy of 1.1.1 capture). |
+
+### Portal comment
+
+```
+Authenticated APIs use Authorization Bearer, not a cookie session. Login returns JWTs in JSON and sets no Set-Cookie, so a cross-site form cannot send the session. CORS allowlists the SPA origin; a foreign Origin does not receive Access-Control-Allow-Origin. Unauthenticated register is limited to 5 requests per minute per IP. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Absence of Anti-CSRF Tokens. We do not ship a synchronizer CSRF cookie.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -783,5 +819,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.2 | `python render_casa_312_pages.py` then `python casa_312_ignore.py`. Do **not** attach `/login`. Do **not** register a staging user to prove tenant_id ignore. |
 | 3.1.3 | `python render_casa_313_pages.py` then `python casa_313_fail.py`. Do **not** attach `/login`. Do **not** call the tick with a valid secret. |
 | 3.1.4 | `python render_casa_314_pages.py` then `python casa_314_deny.py`. Do **not** attach `/login`. Do **not** register a staging user. Do **not** query another tenant. |
+| 3.1.5 | `python render_casa_315_pages.py` then `python casa_315_cors.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. Do **not** mint staging users for a fresh 429. |
 
 Eyeball every PNG for cut-off text before re-upload.
