@@ -173,7 +173,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 26 | 3.3.1 | Ready (platform TOTP aal2; staging/prod UI; unsigned 401) | CASA_3_3_1 | [ ] |
 | 27 | 4.1.1 | Packed 31 Aug (Qualys A+ both hosts; live TLS 1.3/1.2 + HSTS; API HTTP still 200). ALB HTTP→HTTPS redirect still recommended | CASA_4_1_1 + SSL Labs | [ ] |
 | 28 | 4.1.2 | Packed 31 Aug (Qualys A+ + live Amazon ACM; SPA SAN includes prod+stage) | CASA_4_1_2 + SSL Labs | [ ] |
-| 29 | 4.1.3 | Ready | M9e | [ ] |
+| 29 | 4.1.3 | Packed 31 Aug (Fernet AES-128 + HMAC-SHA256; SHA-1 proposal ids compensating) | CASA_4_1_3 | [ ] |
 | 30 | 4.1.4 | Ready | M9e | [ ] |
 | 31 | 5.1.1 | Ready | dast | [ ] |
 | 32 | 5.1.2 | Ready | oauth | [ ] |

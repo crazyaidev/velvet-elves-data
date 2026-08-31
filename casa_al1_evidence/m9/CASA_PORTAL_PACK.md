@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -53,6 +53,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
 | 27 | 4.1.1 | TLS 1.2+ | 9 | `CASA_4_1_1_tls.md` |
 | 28 | 4.1.2 | Trusted TLS certificates | 8 | `CASA_4_1_2_certs.md` |
+| 29 | 4.1.3 | No weak crypto on secrets | 6 | `CASA_4_1_3_crypto.md` |
 
 ---
 
@@ -1011,6 +1012,40 @@ Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL L
 
 ---
 
+## 4.1.3 — No weak crypto that meaningfully impacts confidentiality
+
+**ADA:** describe encryption, hashing, and MAC/HMAC (algorithms, key size, IV, key management). 112-bit baseline.
+
+**Claimed controls**
+
+- Tokens and PII: Fernet AES-128-CBC + HMAC-SHA256. `ENCRYPTION_KEY` in Secrets Manager. Production fails closed if missing. Fresh 128-bit IV per token.
+- Passwords: GoTrue salted bcrypt (not in app tables).
+- Capability secrets and fingerprints: SHA-256. Webhooks: HMAC-SHA256. Session JWT: ES256/HS256.
+- SHA-1 only as a 16-hex intake proposal id (Fluid F052 Low). Not a password KDF or token MAC.
+
+**Do not claim:** AES-256; a completed key-rotation drill; that SHA-1 is unused; Fernet keys or production hashes in screenshots; that the API has no Qualys-flagged TLS CBC suites (see 4.1.1).
+
+**Helpers:** `casa_auth_qa/render_casa_413_pages.py`, `casa_413_fernet.py` (ephemeral key only).
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/4.1.3/CASA_4_1_3_page1.png`](tac_images/4.1.3/CASA_4_1_3_page1.png) | Written evidence page 1 of 2. Encryption, hashing, MAC, SHA-1 label. |
+| [`tac_images/4.1.3/CASA_4_1_3_page2.png`](tac_images/4.1.3/CASA_4_1_3_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/4.1.3/CASA_4_1_3_code.png`](tac_images/4.1.3/CASA_4_1_3_code.png) | Fernet encrypt/decrypt; production requires ENCRYPTION_KEY. |
+| [`tac_images/4.1.3/CASA_4_1_3_sha1.png`](tac_images/4.1.3/CASA_4_1_3_sha1.png) | `_proposal_id` SHA-1 truncated to 16 hex. |
+| [`tac_images/4.1.3/CASA_4_1_3_tests.png`](tac_images/4.1.3/CASA_4_1_3_tests.png) | Named Fernet state tests; garbage rejected. |
+| [`tac_images/4.1.3/CASA_4_1_3_fernet.png`](tac_images/4.1.3/CASA_4_1_3_fernet.png) | Ephemeral Fernet round-trip; tampered token InvalidToken. Production key not used. |
+
+### Portal comment
+
+```
+Confidential data uses Fernet (AES-128-CBC plus HMAC-SHA256) with a 256-bit key stored as ENCRYPTION_KEY in AWS Secrets Manager. Production fails to start if the key is missing. Fernet issues a fresh 128-bit IV per token. That covers OAuth tokens, selected PII, and OAuth state. User passwords are salted bcrypt in Supabase GoTrue, not in application tables. Capability secrets are stored as SHA-256 hashes. Webhooks use HMAC-SHA256. Session JWTs are ES256 or HS256. SHA-1 appears only as a 16-character intake proposal id (not a password or token MAC). No encryption keys are attached.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -1045,5 +1080,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Prod UI: `node casa_331_prod_enroll_shots.mjs` (`QA_PASSWORD`). Folder is the upload set only. |
 | 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. SSL Labs: `node casa_411_ssllabs.mjs app` then `node casa_411_ssllabs.mjs api`, then `python casa_411_caption_ssllabs.py` once. |
 | 4.1.2 | `python render_casa_412_pages.py` then `python casa_412_certs.py` (copies Qualys PNGs from 4.1.1; do not recapture ssllabs.com). |
+| 4.1.3 | `python render_casa_413_pages.py` then `python casa_413_fernet.py`. Do **not** print or attach ENCRYPTION_KEY. |
 
 Eyeball every PNG for cut-off text before re-upload.
