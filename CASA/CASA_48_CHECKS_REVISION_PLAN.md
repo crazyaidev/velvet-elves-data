@@ -186,7 +186,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 39 | 5.1.9 | Packed 31 Aug (no subprocess; ZAP 90020 not in alerts; health $(id) ignored) | CASA_5_1_9 | [ ] |
 | 40 | 5.1.10 | Packed 31 Aug (path-traversal High FP; ad click 404; 4 URI replay no file dump) | CASA_5_1_10 | [ ] |
 | 41 | 5.2.1 | Packed 31 Aug (MIME allowlist; unsigned 401; authed 415; picker UI) | CASA_5_2_1 | [ ] |
-| 42 | 6.1.1 | Packed 31 Aug (npm 0; pip ecdsa 7.4 no fix). Production image not scanned | CASA_6_1_1 | [ ] |
+| 42 | 6.1.1 | Packed 31 Aug (npm 0; pip ecdsa 7.4 no fix). ECR amd64 child 48 Critical / 174 High | CASA_6_1_1 | [ ] |
 | 43 | 6.2.1 | Packed 31 Aug (prod docs 404; staging docs 200) | CASA_6_2_1 | [ ] |
 | 44 | 6.3.1 | Packed 31 Aug (foreign Origin /users/me 401) | CASA_6_3_1 | [ ] |
 | 45 | 6.4.1 | Packed 31 Aug (live DNS). Route 53 console NOT captured | CASA_6_4_1 | [ ] |

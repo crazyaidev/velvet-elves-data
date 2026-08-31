@@ -51,7 +51,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P1 | [6.4.1](#641--subdomain-takeover) | Route 53 hosted zone | Owner | 4 |
 | P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner | 3 |
 | P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
-| P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner | 5 |
+| P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner — **done 31 Aug** (linux/amd64 child of prod-latest) | 7 |
 | P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner | 5 |
 | P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA — **done 31 Aug** | 6 |
@@ -252,9 +252,9 @@ Do not scan production. Do not write a new exploit.
 
 ## 6.1.1 — No known exploitable components
 
-**Already packed:** `npm audit --omit=dev` 0 vulns; `pip-audit` `ecdsa` 0.19.2 CVSS 7.4, no fix.
+**Already packed:** `npm audit --omit=dev` 0 vulns; `pip-audit` `ecdsa` 0.19.2 CVSS 7.4, no fix. Production linux/amd64 child of `prod-latest` ECR scan **Complete** 29 Aug 2026: **48 Critical, 174 High** (`CASA_6_1_1_ecr.png`). Index itself is not scannable (`CASA_6_1_1_ecr_index.png`).
 
-**Still missing:** scan of the **running production image**, not the laptop lockfile.
+**Still missing:** ECS task digest confirmation (optional). Do not recapture AWS unless TAC asks.
 
 ### Capture
 
@@ -267,7 +267,7 @@ Do not scan production. Do not write a new exploit.
 **Save as:** `tac_images/6.1.1/CASA_6_1_1_ecr.png`  
 **Who:** owner. OWASP dependency-check is optional if ECR/Inspector is in frame.
 
-- [ ] Production image scan PNG
+- [x] Production image scan PNG
 - [ ] (optional) Confirm ECS task uses that same digest
 
 ---

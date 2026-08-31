@@ -67,7 +67,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 39 | 5.1.9 | OS command injection | 5 | pack 5.1.9 |
 | 40 | 5.1.10 | LFI / RFI | 6 | pack 5.1.10 |
 | 41 | 5.2.1 | Malicious uploads | 6 | pack 5.2.1 |
-| 42 | 6.1.1 | Dependency scan | 5 | pack 6.1.1 |
+| 42 | 6.1.1 | Dependency scan | 7 | pack 6.1.1 |
 | 43 | 6.2.1 | Debug off in production | 5 | pack 6.2.1 |
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 4 | pack 6.4.1 |
@@ -1452,9 +1452,11 @@ Deal documents POST /documents/upload allow PDF, DOCX, DOC, JPEG, PNG, WEBP, GIF
 
 **ADA:** AL1 dependency scan output. CVE CVSS >= 7.0 needs unused-code or no-patch justification.
 
-**Claimed:** npm audit --omit=dev 0 vulns. pip-audit: only ecdsa 0.19.2 PYSEC-2026-1325 / CVE-2024-23342 CVSS 7.4; no upstream fix; JWT verify uses python-jose[cryptography], not ecdsa signing.
+**Claimed:** npm audit --omit=dev 0 vulns. pip-audit: only ecdsa 0.19.2 PYSEC-2026-1325 / CVE-2024-23342 CVSS 7.4; no upstream fix; JWT verify uses python-jose[cryptography], not ecdsa signing. Production ECR `velvet-elves/backend:prod-latest` is an OCI **image index** (Buildx); ECR cannot scan the index. The **linux/amd64** child Image (`sha256:96e074af…`) scan on 29 Aug 2026 was **Complete**: **48 Critical, 174 High**, 7 Medium, 1 Low. That scan is the OS/base layer (`python:3.12-slim`), not the application lockfile.
 
-**Missing:** Production image layer scan; OWASP dependency-check; owner deploy proof that staging/prod match these lockfiles.
+**Missing:** OWASP dependency-check; ECS task-definition digest confirmation (optional).
+
+**Do not claim:** 0 High/Critical on the production image; that the image index was scanned; that all 48/174 image findings were triaged as unused; that we re-ran the scan on 31 Aug (the complete scan is 29 Aug, same prod-latest push).
 
 ### Images
 
@@ -1465,11 +1467,13 @@ Deal documents POST /documents/upload allow PDF, DOCX, DOC, JPEG, PNG, WEBP, GIF
 | [`tac_images/6.1.1/CASA_6_1_1_deps_code.png`](tac_images/6.1.1/CASA_6_1_1_deps_code.png) | Pins |
 | [`tac_images/6.1.1/CASA_6_1_1_pip.png`](tac_images/6.1.1/CASA_6_1_1_pip.png) | pip-audit ecdsa only |
 | [`tac_images/6.1.1/CASA_6_1_1_npm.png`](tac_images/6.1.1/CASA_6_1_1_npm.png) | npm audit 0 vulns |
+| [`tac_images/6.1.1/CASA_6_1_1_ecr.png`](tac_images/6.1.1/CASA_6_1_1_ecr.png) | ECR Complete scan of linux/amd64 child: 48 Critical, 174 High |
+| [`tac_images/6.1.1/CASA_6_1_1_ecr_index.png`](tac_images/6.1.1/CASA_6_1_1_ecr_index.png) | prod-latest Image Index; Scan not found; points at amd64 child |
 
 ### Portal comment
 
 ```
-Local pip-audit of backend requirements.txt on 31 Aug 2026 reported one finding: ecdsa 0.19.2 PYSEC-2026-1325 (CVE-2024-23342, CVSS 7.4). There is no upstream fix. Session JWTs are verified with python-jose[cryptography], not ecdsa.SigningKey.sign_digest (verification is out of scope for that CVE). npm audit --omit=dev on the SPA reported 0 vulnerabilities. This is a lockfile scan, not a screenshot of production image layers. pydantic-ai-slim 1.107.5 and pypdf 6.16.2 are pinned in requirements.txt.
+Local pip-audit of backend requirements.txt on 31 Aug 2026 reported one finding: ecdsa 0.19.2 PYSEC-2026-1325 (CVE-2024-23342, CVSS 7.4). There is no upstream fix. Session JWTs are verified with python-jose[cryptography], not ecdsa.SigningKey.sign_digest (verification is out of scope for that CVE). npm audit --omit=dev on the SPA reported 0 vulnerabilities. Production ECR velvet-elves/backend:prod-latest is an OCI image index from Docker Buildx; Amazon ECR cannot scan that index (Scan not found / UnsupportedImageTypeException). The linux/amd64 child Image was scanned by Amazon ECR on 29 Aug 2026 (status Complete): 48 Critical, 174 High, 7 Medium, 1 Low. That result is the OS/base layer (python:3.12-slim), not the application lockfile. pydantic-ai-slim 1.107.5 and pypdf 6.16.2 are pinned in requirements.txt.
 ```
 
 ---
