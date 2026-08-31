@@ -177,19 +177,19 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 30 | 4.1.4 | Packed 31 Aug (InvalidToken / 401 / 400; no distinct padding error) | CASA_4_1_4 | [ ] |
 | 31 | 5.1.1 | Packed 31 Aug (ZAP 20014 not in alerts; staging last-wins 422/200; unsigned teams 401) | CASA_5_1_1 | [ ] |
 | 32 | 5.1.2 | Packed 31 Aug (ZAP 20019 not in alerts; staging OAuth evil redirect_to 400; SPA ?next= no Location) | CASA_5_1_2 | [ ] |
-| 33 | 5.1.3 | Ready | sast | [ ] |
-| 34 | 5.1.4 | Ready | sast | [ ] |
-| 35 | 5.1.5 | Ready | dast + attest | [ ] |
-| 36 | 5.1.6 | Ready | dast | [ ] |
-| 37 | 5.1.7 | Ready (comp CSP) | comp + dast | [ ] |
-| 38 | 5.1.8 | Ready (FP note) | dast | [ ] |
-| 39 | 5.1.9 | Ready | sast | [ ] |
-| 40 | 5.1.10 | Ready (FP note) | dast | [ ] |
-| 41 | 5.2.1 | Ready | attest | [ ] |
-| 42 | 6.1.1 | Code landed → deploy + S12 | deps (refreshed) + S12 | [ ] |
-| 43 | 6.2.1 | Ready | M9a + S11 | [ ] |
-| 44 | 6.3.1 | Ready | M9f | [ ] |
-| 45 | 6.4.1 | Verify S9 | M9a + S9 | [ ] |
-| 46 | 6.5.1 | Ready | M9g | [ ] |
-| 47 | 6.6.1 | Ready (verified 27 Aug) | comp | [ ] |
-| 48 | 6.7.1 | Ready | M9d | [ ] |
+| 33 | 5.1.3 | Packed 31 Aug (ZAP 90019 not in alerts; no eval) | CASA_5_1_3 | [ ] |
+| 34 | 5.1.4 | Packed 31 Aug (no Jinja; ZAP no SSTI plugin) | CASA_5_1_4 | [ ] |
+| 35 | 5.1.5 | Packed 31 Aug (assert_safe_url; unsigned 401; authed metadata 400) | CASA_5_1_5 | [ ] |
+| 36 | 5.1.6 | Packed 31 Aug (no XML parser; XML login rejected) | CASA_5_1_6 | [ ] |
+| 37 | 5.1.7 | Packed 31 Aug (XSS closed a9d78f05; CSP Mediums residual) | CASA_5_1_7 | [ ] |
+| 38 | 5.1.8 | Packed 31 Aug (auth SQLi High FP; unsigned 401) | CASA_5_1_8 | [ ] |
+| 39 | 5.1.9 | Packed 31 Aug (no subprocess; ZAP 90020 not in alerts) | CASA_5_1_9 | [ ] |
+| 40 | 5.1.10 | Packed 31 Aug (path-traversal High FP; ad click 404) | CASA_5_1_10 | [ ] |
+| 41 | 5.2.1 | Packed 31 Aug (MIME allowlist; unsigned 401; authed 415) | CASA_5_2_1 | [ ] |
+| 42 | 6.1.1 | Packed 31 Aug (npm 0; pip ecdsa 7.4 no fix). Production image not scanned | CASA_6_1_1 | [ ] |
+| 43 | 6.2.1 | Packed 31 Aug (prod docs 404; staging docs 200) | CASA_6_2_1 | [ ] |
+| 44 | 6.3.1 | Packed 31 Aug (foreign Origin /users/me 401) | CASA_6_3_1 | [ ] |
+| 45 | 6.4.1 | Packed 31 Aug (live DNS). Route 53 console NOT captured | CASA_6_4_1 | [ ] |
+| 46 | 6.5.1 | Packed 31 Aug (code mask). CloudWatch login/payment logs NOT captured | CASA_6_5_1 | [ ] |
+| 47 | 6.6.1 | Packed 31 Aug (token keys gone after Log Out; return_location remains) | CASA_6_6_1 | [ ] |
+| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager + Fernet). AWS console NOT captured | CASA_6_7_1 | [ ] |

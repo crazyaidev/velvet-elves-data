@@ -46,13 +46,15 @@
 - **4.1.4** — **Verified 31 Aug 2026.** Fernet HMAC/ciphertext flips both `InvalidToken`. Staging garbage JWT **401**; garbage OAuth state **400**. Packed in `CASA_PORTAL_PACK.md`. Do not claim WSTG-CRYP-02.
 - **5.1.1** — **Verified 31 Aug 2026.** Official ZAP 20014 not in DAST_SUMMARY alert lists. Staging duplicate query last-wins (help search 422 vs 200). Packed in `CASA_PORTAL_PACK.md`. Do not claim Burp 5248000/5248001 or WSTG-INPV-04.
 - **5.1.2** — **Verified 31 Aug 2026.** Official ZAP 20019 not in DAST_SUMMARY alert lists. Staging foreign OAuth `redirect_to` **400**; SPA `?next=` has no `Location` to the foreign host. Packed in `CASA_PORTAL_PACK.md`. Do not claim Burp 5243136–5243154 or WSTG-CLNT-04.
-- **5.1.3–5.1.10** — SAST 0 High/Critical/Medium + three ZAP XMLs; XSS callback fix verified; SQLi and path-traversal Highs written up as false positives with replays.
-- **5.2.1** — Uploads to object storage, never executed.
-- **6.2.1** — `APP_DEBUG=false`, prod docs/redoc/openapi 404 (smoke-tested).
-- **6.3.1** — Origin never used for authz.
-- **6.5.1** — Log masking (M9g), no tokens/bodies.
-- **6.6.1** — **Verified today:** `LOGOUT` action calls `clearTokens()` removing both `velvet_elves_token` and `velvet_elves_refresh_token`; since the 27 Aug fix it also revokes the Supabase session server-side first.
-- **6.7.1** — Secrets Manager + Fernet; state Disconnect soft-deactivate honestly.
+- **5.1.3–5.1.10** — Packed 31 Aug 2026 in `CASA_PORTAL_PACK.md`. Official ZAP + live probes. Auth SQLi/path-traversal Highs remain FP. 5.1.5 authenticated metadata webhook is 400. Burp not run.
+- **5.2.1** — Packed. MIME allowlists; unsigned upload 401; authenticated probe.exe 415.
+- **6.1.1** — Packed lockfile scans. npm 0. pip-audit ecdsa CVSS 7.4 no fix. Production image not scanned.
+- **6.2.1** — Packed. Prod docs 404; staging docs 200.
+- **6.3.1** — Packed. Foreign Origin /users/me 401.
+- **6.4.1** — Packed live DNS. Route 53 console NOT captured.
+- **6.5.1** — Packed code mask. CloudWatch login/payment log samples NOT captured (ADA-named gap).
+- **6.6.1** — Packed. Staging Log Out: token keys gone; velvet_elves_return_location remains. DevTools Application panel not captured.
+- **6.7.1** — Packed write-up. AWS Secrets Manager console NOT captured.
 
 ## Recommended sequence (updated 27 Aug — code work done)
 

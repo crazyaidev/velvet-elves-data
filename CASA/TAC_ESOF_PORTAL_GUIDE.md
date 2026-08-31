@@ -258,22 +258,22 @@ Comments (punctuation allowed) and files:
 | 30 | 4.1.4 crypto fail securely | `tac_images/4.1.4/` — `CASA_4_1_4_page1.png`, `page2.png`, `code.png`, `tests.png`, `fernet_fail.png`, `deny.png` | Cryptographic failures fail closed and do not return plaintext. Fernet verifies HMAC-SHA256 before AES-CBC decrypt; a bad MAC and a flipped ciphertext byte both raise InvalidToken, mapped to a generic Decryption failed error. Display helpers return empty on any decrypt exception so ciphertext is not shown in the UI. OAuth state decode returns None on InvalidToken; exchange is 400 Invalid or expired OAuth state. Invalid JWTs raise JWTError and become 401 Could not validate credentials. Staging: GET /users/me with Bearer not-a-jwt is 401; POST /users/oauth/google/exchange with garbage state is 400. |
 | 31 | 5.1.1 HTTP parameter pollution | `tac_images/5.1.1/` — `CASA_5_1_1_page1.png`, `page2.png`, `code.png`, `zap.png`, `hpp.png` | Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report HTTP Parameter Pollution (ZAP plugin 20014; SPA conf FAIL, API conf WARN). We did not run Burp 5248000 or 5248001. FastAPI binds query and path parameters as typed scalars; the backend does not call getlist. Duplicate keys take one value and are not concatenated. Staging public help search: q=ok plus a 161-character q is 422 on the last value; a long q plus q=ok is 200. Unsigned GET /teams?page=1&page=2 is 401. Duplicate public payment tokens are 403. Session is Authorization Bearer, not a query parameter. WSTG-INPV-04 is AL2 and was not run. |
 | 32 | 5.1.2 open redirect | `tac_images/5.1.2/` — `CASA_5_1_2_page1.png`, `page2.png`, `code.png`, `zap.png`, `tests.png`, `deny.png` | Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report External Redirect (ZAP plugin 20019; SPA conf FAIL, API conf WARN). We did not run Burp 5243136, 5243137, 5243152, 5243153, or 5243154. OAuth sign-in redirect_to must match a CORS origin; a foreign origin is 400. Password-reset redirect_to that is not allowlisted is ignored. Ad click 302 uses a stored click_url, not a query parameter; an unknown hook is 404. OAuth callback postMessage targets FRONTEND_URL, not *. SPA return URLs must start with /. Staging: POST /users/oauth/google/start with https://evil.example/steal is 400 with no Location; GET /ads/{uuid}/click is 404 with no Location; SPA GET ?next=https://evil.example is 200 with no Location to that host. WSTG-CLNT-04 is AL2 and was not run. |
-| 33 | 5.1.3 no eval | `SAST_SUMMARY.md` | No user driven eval SAST CSV 0 High |
-| 34 | 5.1.4 template injection | `SAST_SUMMARY.md` | Server templates are not user controlled SAST CSV 0 High |
-| 35 | 5.1.5 SSRF | `DAST_SUMMARY.md` | No user controlled server fetch of arbitrary URLs ZAP XML attached in scan zip |
-| 36 | 5.1.6 XML injection | `DAST_SUMMARY.md` | JSON APIs not XML parsers for user input |
-| 37 | 5.1.7 XSS | `compensating_controls.md` | OAuth XSS closed on rescan CSP Mediums are compensating residuals |
-| 38 | 5.1.8 SQLi | `DAST_SUMMARY.md` | SQLAlchemy parameterized Auth ZAP SQLi High is false positive replay 422 or generic 500 |
-| 39 | 5.1.9 OS command injection | `SAST_SUMMARY.md` | No shelling user input SAST CSV 0 High |
-| 40 | 5.1.10 file inclusion | `DAST_SUMMARY.md` | Auth ZAP path traversal High is false positive path segment only |
-| 41 | 5.2.1 malicious uploads | `self_attestation_draft.md` | Uploads go to object storage not executed as code |
-| 42 | 6.1.1 no known exploitable components | `DEPS_SUMMARY.md` (refresh) + S12 | npm production 0 pip audit clean after upgrades pydantic ai and pypdf upgraded 27 Aug Remaining notes ecdsa has no released fix and pytest is dev only not shipped |
-| 43 | 6.2.1 debug off in production | `M9a_architecture.md` | Production APP DEBUG false docs redoc openapi are 404 |
-| 44 | 6.3.1 Origin not used as auth | `M9f_tenant_isolation.md` | Auth is JWT not Origin header |
-| 45 | 6.4.1 subdomain takeover | `M9a_architecture.md` | Live hosts are CloudFront and ALB No dangling review CNAMEs in use |
-| 46 | 6.5.1 do not log credentials | `M9g_logging.md` | Logs mask emails No tokens or mail bodies |
-| 47 | 6.6.1 clear browser storage on logout | `compensating_controls.md` | Logout clears velvet elves token keys in localStorage |
-| 48 | 6.7.1 server secrets | `M9d_token_storage.md` | Secrets in AWS Secrets Manager Google tokens Fernet encrypted Disconnect is soft deactivate |
+| 33 | 5.1.3 no eval | `tac_images/5.1.3/` | Official ZAP did not report code injection. No eval/exec on user input. Staging health extra query 200. Burp not run. |
+| 34 | 5.1.4 template injection | `tac_images/5.1.4/` | JSON APIs; named {{token}} mapping not Jinja. ZAP no SSTI plugin. Burp 1052800 not run. |
+| 35 | 5.1.5 SSRF | `tac_images/5.1.5/` | assert_safe_url blocks metadata/private. Unsigned webhook 401. Authenticated metadata URL 400. No ZAP SSRF plugin. Burp OOB not run. |
+| 36 | 5.1.6 XML injection | `tac_images/5.1.6/` | No lxml/xpath. XML login body rejected. ZAP 90023/90021 not in alerts. |
+| 37 | 5.1.7 XSS | `tac_images/5.1.7/` | OAuth XSS closed on a9d78f05. Callback does not echo script. CSP Mediums compensating. Auth JSON XSS Low. |
+| 38 | 5.1.8 SQLi | `tac_images/5.1.8/` | Auth ZAP SQLi High is Low-confidence FP. Unsigned page_size quote is 401 not SQL. |
+| 39 | 5.1.9 OS command injection | `tac_images/5.1.9/` | No subprocess/os.system. ZAP 90020 not in alerts. Burp 1048832 not run. |
+| 40 | 5.1.10 file inclusion | `tac_images/5.1.10/` | Auth path-traversal Highs are FP path segments. Ad click traversal 404. |
+| 41 | 5.2.1 malicious uploads | `tac_images/5.2.1/` | MIME allowlists. Object storage. Unsigned POST /documents/upload 401. Authenticated probe.exe 415. |
+| 42 | 6.1.1 no known exploitable components | `tac_images/6.1.1/` | npm audit --omit=dev 0. pip-audit: ecdsa 0.19.2 PYSEC-2026-1325 CVSS 7.4 no fix; JWT verify uses jose/cryptography. Not a production image scan. |
+| 43 | 6.2.1 debug off in production | `tac_images/6.2.1/` | Prod /api/docs /redoc /openapi.json 404. Staging docs 200. |
+| 44 | 6.3.1 Origin not used as auth | `tac_images/6.3.1/` | GET /users/me with foreign Origin is 401. JWT authz. |
+| 45 | 6.4.1 subdomain takeover | `tac_images/6.4.1/` | Live DNS to CloudFront/ALB. Route 53 console not captured. |
+| 46 | 6.5.1 do not log credentials | `tac_images/6.5.1/` | Code masks emails; passwords not logged. CloudWatch login and payment log samples were NOT obtained. |
+| 47 | 6.6.1 clear browser storage on logout | `tac_images/6.6.1/` | Staging Log Out: token keys present then absent. velvet_elves_return_location remains. /login after logout. |
+| 48 | 6.7.1 server secrets | `tac_images/6.7.1/` | Secrets Manager plus Fernet. Disconnect is soft deactivate. AWS console and CloudTrail shots NOT obtained. No secret values attached. |
 
 File paths under `casa_al1_evidence/m9/` except `DAST_SUMMARY.md` / `SAST_SUMMARY.md` / `DEPS_SUMMARY.md` in `casa_al1_evidence/2026-08-21/`. AI screenshot `openai-data-controls.png` is extra for any secrets/subprocessor question; do not call it ZDR.
 
