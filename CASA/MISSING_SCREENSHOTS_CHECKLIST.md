@@ -62,7 +62,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
 | P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner — **done 31 Aug** | 6 each |
-| P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner — **done 31 Aug** (API cert; SPA/CloudFront ACM optional leftover) | 9 |
+| P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner — **done 31 Aug** | 10 |
 | P3 | [2.2.3](#223--stateless-tokens-expire-within-24-hours) | Supabase JWT expiry (optional) | Owner — **done 31 Aug** | 6 |
 | P3 | [Scanner UI](#scanner-ui--zap--burp-all-dast-rows) | ZAP / Burp product UI | Owner | — |
 
@@ -128,12 +128,12 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 4.1.2 — Trusted TLS certificates
 
-**Packed:** Qualys A+ + live ACM peer cert (`CASA_4_1_2_cert.png`) + ACM console for the production API cert (`CASA_4_1_2_acm.png`).
+**Packed:** Qualys A+ + live ACM peer cert + ACM console for the API cert (`CASA_4_1_2_acm.png`) and the SPA/CloudFront cert (`CASA_4_1_2_acm_spa.png`). Folder is at the **10-file** cap.
 
-**Done 31 Aug 2026** for the API ACM shot. Do not recapture ACM. Do not claim the API is HTTPS-only on port 80. Optional leftover: CloudFront SPA cert in **us-east-1** — skip unless TAC asks.
+**Done 31 Aug 2026.** Do not recapture ACM or Qualys. Do not claim the API is HTTPS-only on port 80. Do not claim a production-only SPA certificate (us-east-1 cert also names `app.stage.velvetelves.com`).
 
 - [x] ACM console PNG (`CASA_4_1_2_acm.png`, `api.prod.velvetelves.com`)
-- [ ] SPA/CloudFront ACM PNG (optional, us-east-1)
+- [x] SPA/CloudFront ACM PNG (`CASA_4_1_2_acm_spa.png`, us-east-1)
 
 ---
 

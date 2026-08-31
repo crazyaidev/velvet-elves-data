@@ -150,7 +150,7 @@ def page1():
         y,
         [
             (
-                "TLS terminates at CloudFront (SPA) and the ALB (API) on public ACM certificates. AWS Certificate Manager in us-east-2 shows api.prod.velvetelves.com as Amazon issued, status Issued, in use, valid through 14 January 2027. The application does not ship a self-signed leaf for these hostnames. Backend HTTPS clients do not set verify=False.",
+                "TLS terminates at CloudFront (SPA) and the ALB (API) on public ACM certificates. ACM us-east-1 shows app.velvetelves.com and app.stage.velvetelves.com on one Amazon-issued certificate, Issued and in use through 13 January 2027. ACM us-east-2 shows api.prod.velvetelves.com Issued and in use through 14 January 2027. Backend HTTPS clients do not set verify=False.",
                 F_BODY,
                 INK,
             ),
@@ -187,7 +187,7 @@ def page2():
         ),
         (
             "Currently valid",
-            "SPA through 13 Jan 2027. API through 14 Jan 2027. ACM console for the API cert: Issued, in use (31 Aug 2026).",
+            "SPA through 13 Jan 2027. API through 14 Jan 2027. ACM console: both certs Amazon issued, Issued, in use (31 Aug 2026).",
             True,
         ),
         (

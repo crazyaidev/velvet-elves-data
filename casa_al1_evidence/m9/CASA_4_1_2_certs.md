@@ -30,18 +30,21 @@ Backend HTTPS clients do not set `verify=False` / `CERT_NONE`.
 
 ## ACM console (31 Aug 2026)
 
-Owner-captured AWS Certificate Manager **us-east-2** for `api.prod.velvetelves.com`: type **Amazon issued**, status **Issued**, in use **Yes**, not after **14 January 2027**. DNS validation CNAME name and value are redacted. No private key (ACM does not show one). The SPA/CloudFront certificate (often us-east-1) was not captured.
+- **us-east-2** `api.prod.velvetelves.com`: **Amazon issued**, **Issued**, in use **Yes**, not after **14 January 2027**. See `CASA_4_1_2_acm.png`.
+- **us-east-1** `app.stage.velvetelves.com` + `app.velvetelves.com` (one cert): **Amazon issued**, **Issued**, in use **Yes**, not after **13 January 2027**. See `CASA_4_1_2_acm_spa.png`.
+
+DNS validation CNAME name and value are redacted on both. No private key (ACM does not show one). Row is at the 10-file portal cap.
 
 ## Do not claim
 
 - A dedicated production-only SPA certificate (SAN also includes `app.stage.velvetelves.com`).
 - SSL Labs grades of Supabase, Google, or other outbound hosts.
-- An ACM console screenshot of the SPA certificate.
+- An ACM console screenshot of a production-only SPA certificate (the us-east-1 cert also names staging).
 - That the API is HTTPS-only on port 80 (see 4.1.1).
 - HttpOnly session cookies; MFA for all users.
 
 ## Portal comment
 
 ```
-Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. The SPA certificate SAN includes app.velvetelves.com (CN is app.stage.velvetelves.com; one cert covers both SPA names). The API certificate CN and SAN are api.prod.velvetelves.com. AWS Certificate Manager in us-east-2 shows that API certificate as Amazon issued, status Issued, in use, valid through 14 January 2027. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
+Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. ACM in us-east-1 lists one Amazon-issued certificate covering app.stage.velvetelves.com and app.velvetelves.com, status Issued, in use, valid through 13 January 2027. ACM in us-east-2 lists the api.prod.velvetelves.com certificate as Amazon issued, Issued, in use, valid through 14 January 2027. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
 ```
