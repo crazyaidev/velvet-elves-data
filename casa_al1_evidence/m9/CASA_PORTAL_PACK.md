@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -49,6 +49,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 22 | 3.1.5 | Anti-CSRF / anti-automation | 6 | `CASA_3_1_5_csrf.md` |
 | 23 | 3.1.6 | Directory browsing disabled | 5 | `CASA_3_1_6_directory.md` |
 | 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
+| 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
 
 ---
 
@@ -860,6 +861,40 @@ Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft 
 
 ---
 
+## 3.2.2 — OAuth redirect_uri and state
+
+**ADA:** securely validate `redirect_uri` and `state` to prevent open redirect and OAuth CSRF. AL1: written description plus evidence. WSTG-ATHZ-05 is AL2; we did not run it.
+
+**Claimed controls**
+
+- Sign-in `redirect_to` must match a CORS allowlisted origin (`validate_redirect_to`). Foreign host → **400**.
+- Sign-in `state` is Fernet (10-minute TTL). Tampered or mismatched state → **400** `Invalid or expired OAuth state.`
+- Gmail / Outlook / Calendar / DocuSign `redirect_uri` is server-set from configuration, not client JSON. State binds user, provider, and `redirect_uri`.
+- Callback `postMessage` targets `FRONTEND_URL`, not `*`. SPA checks `isTrustedOAuthMessageOrigin`.
+- Staging 31 Aug 2026: evil `redirect_to` → **400**; allowlisted SPA callback → **200** (flow not completed); garbage exchange state → **400**.
+
+**Do not claim:** WSTG-ATHZ-05; exact-path match on sign-in `redirect_to` (origin check); completed consent; Google Cloud Console screenshots.
+
+**Helpers:** `casa_auth_qa/render_casa_322_pages.py`, `casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete an OAuth exchange.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.2.2/CASA_3_2_2_page1.png`](tac_images/3.2.2/CASA_3_2_2_page1.png) | Written evidence page 1 of 2. redirect_to allowlist; Fernet state; server-set integration redirect_uri; postMessage origin. |
+| [`tac_images/3.2.2/CASA_3_2_2_page2.png`](tac_images/3.2.2/CASA_3_2_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.2.2/CASA_3_2_2_code.png`](tac_images/3.2.2/CASA_3_2_2_code.png) | validate_redirect_to, Fernet decode, Gmail redirect_uri from settings. |
+| [`tac_images/3.2.2/CASA_3_2_2_tests.png`](tac_images/3.2.2/CASA_3_2_2_tests.png) | Named tests for tampered state, provider mismatch, and postMessage origin. |
+| [`tac_images/3.2.2/CASA_3_2_2_deny.png`](tac_images/3.2.2/CASA_3_2_2_deny.png) | Staging: foreign redirect_to 400; allowlisted start 200; garbage state 400. |
+
+### Portal comment
+
+```
+OAuth redirect_uri and state are validated to prevent open redirect and OAuth CSRF. Google and Microsoft sign-in redirect_to must match an allowlisted SPA origin; a foreign origin returns 400. Sign-in state is a Fernet token with a 10-minute TTL; a forged state on POST /users/oauth/google/exchange returns 400 Invalid or expired OAuth state. Gmail, Outlook, Calendar, and DocuSign redirect_uri is set by the API from configuration, not by the client. Integration state binds user, provider, and redirect_uri. Callback postMessage targets FRONTEND_URL, not *. Staging: foreign redirect_to 400; garbage state 400.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -890,5 +925,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.5 | `python render_casa_315_pages.py` then `python casa_315_cors.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. Do **not** mint staging users for a fresh 429. |
 | 3.1.6 | `python render_casa_316_pages.py` then `python casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console. |
 | 3.2.1 | `python render_casa_321_pages.py` then `python casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
+| 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 
 Eyeball every PNG for cut-off text before re-upload.

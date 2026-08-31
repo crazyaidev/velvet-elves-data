@@ -169,7 +169,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 22 | 3.1.5 | Ready (Bearer not cookie; CORS origin allowlist; register 5/min; ZAP no 10202) | CASA_3_1_5 | [ ] |
 | 23 | 3.1.6 | Ready (SPA HTML shell not Index of; API JSON 404; ZAP no plugin 0) | CASA_3_1_6 | [ ] |
 | 24 | 3.2.1 | Ready (authorization code + PKCE S256; no implicit/ROPC; staging start 200) | CASA_3_2_1 | [ ] |
-| 25 | 3.2.2 | Ready | oauth | [ ] |
+| 25 | 3.2.2 | Ready (redirect_to origin allowlist; Fernet state TTL; staging 400s) | CASA_3_2_2 | [ ] |
 | 26 | 3.3.1 | Option A landed → deploy, enroll admins | CASA_3_3_1 | [ ] |
 | 27 | 4.1.1 | Ready + S5/S6 | M9a + SSL Labs | [ ] |
 | 28 | 4.1.2 | Ready + S5/S6 | M9a + SSL Labs | [ ] |
