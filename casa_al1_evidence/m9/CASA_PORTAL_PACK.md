@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3, 4.1.4  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3, 4.1.4, 5.1.1  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -55,6 +55,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 28 | 4.1.2 | Trusted TLS certificates | 8 | `CASA_4_1_2_certs.md` |
 | 29 | 4.1.3 | No weak crypto on secrets | 6 | `CASA_4_1_3_crypto.md` |
 | 30 | 4.1.4 | Crypto fail securely | 6 | `CASA_4_1_4_fail_closed.md` |
+| 31 | 5.1.1 | HTTP parameter pollution | 5 | `CASA_5_1_1_hpp.md` |
 
 ---
 
@@ -1081,6 +1082,38 @@ Cryptographic failures fail closed and do not return plaintext. Fernet verifies 
 
 ---
 
+## 5.1.1 — Protect against HTTP parameter pollution
+
+**ADA:** AL1 evidence is ADA DAST. Verification: scan shall **not** identify Burp **5248000** (client-side HPP reflected) or **5248001** (stored). WSTG-INPV-04 is AL2.
+
+**Claimed controls**
+
+- Official ADA ZAP (SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa`): plugin **20014** HTTP Parameter Pollution is FAIL on the SPA conf and WARN on the API conf. Alert lists did not include it.
+- FastAPI typed Query/path scalars. No `request.query_params.getlist`. Duplicate keys are not concatenated.
+- Staging 31 Aug 2026: help search last-wins (422 vs 200); unsigned `/teams?page=1&page=2` **401**; duplicate pay tokens **403**.
+
+**Do not claim:** that Burp 5248000/5248001 ran; WSTG-INPV-04; that every param is a scalar (`list[str] = Query` exists on some authenticated filters); that the SPA spider crawled authenticated routes.
+
+**Helpers:** `casa_auth_qa/render_casa_511_pages.py`, `casa_511_hpp.py`
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/5.1.1/CASA_5_1_1_page1.png`](tac_images/5.1.1/CASA_5_1_1_page1.png) | Written evidence page 1 of 2. Official ZAP 20014, typed FastAPI params, staging last-wins, SPA URLSearchParams.get. |
+| [`tac_images/5.1.1/CASA_5_1_1_page2.png`](tac_images/5.1.1/CASA_5_1_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. Burp not run. SPA spider limited to /, robots, sitemap. |
+| [`tac_images/5.1.1/CASA_5_1_1_code.png`](tac_images/5.1.1/CASA_5_1_1_code.png) | FastAPI Query scalars for teams page, help search q, public pay token. No getlist. |
+| [`tac_images/5.1.1/CASA_5_1_1_zap.png`](tac_images/5.1.1/CASA_5_1_1_zap.png) | Official ADA ZAP 20014 FAIL/WARN; DAST_SUMMARY alert lists did not include HPP. Pillow summary, not ZAP UI. |
+| [`tac_images/5.1.1/CASA_5_1_1_hpp.png`](tac_images/5.1.1/CASA_5_1_1_hpp.png) | Staging: duplicate health keys 200; help search last-wins 422 then 200; unsigned teams 401; duplicate pay tokens 403. |
+
+### Portal comment
+
+```
+Official ADA ZAP scans of staging (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report HTTP Parameter Pollution (ZAP plugin 20014; SPA conf FAIL, API conf WARN). We did not run Burp 5248000 or 5248001. FastAPI binds query and path parameters as typed scalars; the backend does not call getlist. Duplicate keys take one value and are not concatenated. Staging public help search: q=ok plus a 161-character q is 422 on the last value; a long q plus q=ok is 200. Unsigned GET /teams?page=1&page=2 is 401. Duplicate public payment tokens are 403. Session is Authorization Bearer, not a query parameter. WSTG-INPV-04 is AL2 and was not run.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -1117,5 +1150,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.2 | `python render_casa_412_pages.py` then `python casa_412_certs.py` (copies Qualys PNGs from 4.1.1; do not recapture ssllabs.com). |
 | 4.1.3 | `python render_casa_413_pages.py` then `python casa_413_fernet.py`. Do **not** print or attach ENCRYPTION_KEY. |
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
+| 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |
 
 Eyeball every PNG for cut-off text before re-upload.

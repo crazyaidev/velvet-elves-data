@@ -44,7 +44,8 @@
 - **3.3.1** — **Verified 31 Aug 2026.** Platform console requires TOTP (`aal2` + live factor). Staging/prod two-step prompt and Security on. Unsigned platform GETs **401**. Packed in `CASA_PORTAL_PACK.md`. Do not claim MFA for all users. Do not attach enroll QR PNGs (TOTP secret in frame).
 - **4.1.3** — **Verified 31 Aug 2026.** Fernet AES-128-CBC + HMAC-SHA256 for tokens/PII; bcrypt via GoTrue; SHA-256 / HMAC-SHA256 elsewhere. SHA-1 is a 16-hex intake proposal id (F052 Low). Packed in `CASA_PORTAL_PACK.md`. Do not claim AES-256 or a key-rotation drill.
 - **4.1.4** — **Verified 31 Aug 2026.** Fernet HMAC/ciphertext flips both `InvalidToken`. Staging garbage JWT **401**; garbage OAuth state **400**. Packed in `CASA_PORTAL_PACK.md`. Do not claim WSTG-CRYP-02.
-- **5.1.1–5.1.10** — SAST 0 High/Critical/Medium + three ZAP XMLs; XSS callback fix verified; SQLi and path-traversal Highs written up as false positives with replays.
+- **5.1.1** — **Verified 31 Aug 2026.** Official ZAP 20014 not in DAST_SUMMARY alert lists. Staging duplicate query last-wins (help search 422 vs 200). Packed in `CASA_PORTAL_PACK.md`. Do not claim Burp 5248000/5248001 or WSTG-INPV-04.
+- **5.1.2–5.1.10** — SAST 0 High/Critical/Medium + three ZAP XMLs; XSS callback fix verified; SQLi and path-traversal Highs written up as false positives with replays.
 - **5.2.1** — Uploads to object storage, never executed.
 - **6.2.1** — `APP_DEBUG=false`, prod docs/redoc/openapi 404 (smoke-tested).
 - **6.3.1** — Origin never used for authz.
