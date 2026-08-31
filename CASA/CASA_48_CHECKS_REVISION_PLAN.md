@@ -183,7 +183,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 36 | 5.1.6 | Packed 31 Aug (no XML parser; XML login rejected) | CASA_5_1_6 | [ ] |
 | 37 | 5.1.7 | Packed 31 Aug (XSS closed a9d78f05; stored name is text; CSP Mediums residual) | CASA_5_1_7 | [ ] |
 | 38 | 5.1.8 | Packed 31 Aug (auth SQLi High FP; unsigned 401; 28 URI replay no SQL text) | CASA_5_1_8 | [ ] |
-| 39 | 5.1.9 | Packed 31 Aug (no subprocess; ZAP 90020 not in alerts) | CASA_5_1_9 | [ ] |
+| 39 | 5.1.9 | Packed 31 Aug (no subprocess; ZAP 90020 not in alerts; health $(id) ignored) | CASA_5_1_9 | [ ] |
 | 40 | 5.1.10 | Packed 31 Aug (path-traversal High FP; ad click 404) | CASA_5_1_10 | [ ] |
 | 41 | 5.2.1 | Packed 31 Aug (MIME allowlist; unsigned 401; authed 415) | CASA_5_2_1 | [ ] |
 | 42 | 6.1.1 | Packed 31 Aug (npm 0; pip ecdsa 7.4 no fix). Production image not scanned | CASA_6_1_1 | [ ] |

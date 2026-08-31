@@ -56,7 +56,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA — **done 31 Aug** | 6 |
 | P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API — **done 31 Aug** | 6 |
-| P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API | 4 |
+| P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API | 5 |
 | P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA | 5 |
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
@@ -193,9 +193,9 @@ Do not scan production. Do not write a new exploit.
 
 ## 5.1.9 — OS command injection
 
-**Already packed:** grep — no `subprocess` / `os.system` / `shell=True` in `app/`.
+**Already packed:** grep — no `subprocess` / `os.system` / `shell=True` in `app/`. Staging health extra query `q=$(id)` → **200** JSON health, not command stdout (`CASA_5_1_9_probe.png`).
 
-**Still missing:** live probe PNG (same style as 5.1.3 health).
+**Still missing:** Burp 1048832 UI only if TAC asks.
 
 ### Capture
 
@@ -206,7 +206,7 @@ Do not scan production. Do not write a new exploit.
 **Must not show:** tokens. Do not run commands on the server.  
 **Save as:** `tac_images/5.1.9/CASA_5_1_9_probe.png`
 
-- [ ] Live OS-command-ignored probe PNG
+- [x] Live OS-command-ignored probe PNG
 
 ---
 

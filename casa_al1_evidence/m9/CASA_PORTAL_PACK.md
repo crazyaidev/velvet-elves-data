@@ -64,7 +64,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 36 | 5.1.6 | XML / XPath | 5 | pack 5.1.6 |
 | 37 | 5.1.7 | XSS | 6 | pack 5.1.7 |
 | 38 | 5.1.8 | SQLi | 6 | pack 5.1.8 |
-| 39 | 5.1.9 | OS command injection | 4 | pack 5.1.9 |
+| 39 | 5.1.9 | OS command injection | 5 | pack 5.1.9 |
 | 40 | 5.1.10 | LFI / RFI | 5 | pack 5.1.10 |
 | 41 | 5.2.1 | Malicious uploads | 5 | pack 5.2.1 |
 | 42 | 6.1.1 | Dependency scan | 5 | pack 6.1.1 |
@@ -1360,9 +1360,13 @@ Official unauth ZAP scans did not confirm SQL injection. Auth ZAP 33afa2aa raise
 
 **ADA:** AL1 DAST. Burp 1048832 shall not be identified.
 
-**Claimed:** No subprocess/os.system. ZAP 90020 not in alerts.
+**Claimed:** No subprocess/os.system. ZAP 90020 not in alerts. Staging `GET /api/v1/health?q=$(id)` → **200** JSON health (`status ok`); body is **not** command stdout.
 
-**Missing:** Burp 1048832; WSTG-INPV-12; live command-injection probe PNG (grep-only extra).
+**Missing:** Burp 1048832; WSTG-INPV-12.
+
+**Do not claim:** that this probe tested subprocess of user input on other routes (health ignores extra query); that Burp 1048832 ran; that a command was run on the server.
+
+**Helpers:** `casa_auth_qa/casa_519_probe.py`. Do **not** attach `/login`.
 
 ### Images
 
@@ -1372,11 +1376,12 @@ Official unauth ZAP scans did not confirm SQL injection. Auth ZAP 33afa2aa raise
 | [`tac_images/5.1.9/CASA_5_1_9_oscmd_page2.png`](tac_images/5.1.9/CASA_5_1_9_oscmd_page2.png) | AL1 mapping |
 | [`tac_images/5.1.9/CASA_5_1_9_oscmd_code.png`](tac_images/5.1.9/CASA_5_1_9_oscmd_code.png) | No subprocess |
 | [`tac_images/5.1.9/CASA_5_1_9_oscmd_zap.png`](tac_images/5.1.9/CASA_5_1_9_oscmd_zap.png) | ZAP 90020 |
+| [`tac_images/5.1.9/CASA_5_1_9_probe.png`](tac_images/5.1.9/CASA_5_1_9_probe.png) | Staging GET /health?q=$(id) → 200 JSON health, not command stdout |
 
 ### Portal comment
 
 ```
-Official ADA ZAP scans did not report OS command injection or Shell Shock (ZAP 90020 FAIL, 10048 FAIL). The backend has no subprocess, os.system, or shell=True. Fluid SAST 5999aab9 was 0 High/Critical/Medium. We did not run Burp 1048832. WSTG-INPV-12 is AL2 and was not run.
+Official ADA ZAP scans did not report OS command injection or Shell Shock (ZAP 90020 FAIL, 10048 FAIL). The backend has no subprocess, os.system, or shell=True. Fluid SAST 5999aab9 was 0 High/Critical/Medium. Staging GET /api/v1/health with q=$(id) returned 200 JSON health (status ok); the body is not command stdout and the extra query is ignored. We did not run Burp 1048832. WSTG-INPV-12 is AL2 and was not run.
 ```
 
 ---
@@ -1647,6 +1652,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 | 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |
 | 5.1.2 | `python render_casa_512_pages.py` then `python casa_512_deny.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or Google Cloud Console. Do **not** complete OAuth. |
-| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. 5.1.7 extra: `node casa_517_stored.mjs` then `python casa_517_caption.py` (`QA_PASSWORD`; deletes the contact). 5.1.8 extra: `python casa_518_replay.py` (`QA_PASSWORD`; local gitignored ZAP XML). Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
+| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. 5.1.7 extra: `node casa_517_stored.mjs` then `python casa_517_caption.py` (`QA_PASSWORD`; deletes the contact). 5.1.8 extra: `python casa_518_replay.py` (`QA_PASSWORD`; local gitignored ZAP XML). 5.1.9 extra: `python casa_519_probe.py`. Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
 
 Eyeball every PNG for cut-off text before re-upload.
