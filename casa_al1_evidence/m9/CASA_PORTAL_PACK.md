@@ -37,7 +37,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 9 | 2.1.1 | URLs shall not expose authentication material | 5 | `CASA_2_1_1_no_tokens_in_url.md` |
 | 10 | 2.2.1 | Logout invalidates stateful session tokens | 6 | `CASA_2_2_1_logout.md` |
 | 11 | 2.2.2 | Terminate other sessions after password change | 7 | `CASA_2_2_2_password_change_sessions.md` |
-| 12 | 2.2.3 | Stateless authentication tokens expire within 24 hours | 4 | `CASA_2_2_3_stateless_expiry.md` |
+| 12 | 2.2.3 | Stateless authentication tokens expire within 24 hours | 5 | `CASA_2_2_3_stateless_expiry.md` |
 | 13 | 2.3.1 | Cookie-based session tokens shall have the Secure attribute | 5 | `CASA_2_3_1_cookie_secure.md` |
 | 14 | 2.3.2 | Cookie-based session tokens shall have the HttpOnly attribute | 5 | `CASA_2_3_2_cookie_httponly.md` |
 | 15 | 2.3.3 | Session tokens rather than static API secrets and keys | 4 | `CASA_2_3_3_session_not_static_key.md` |
@@ -459,13 +459,15 @@ Password change is through password reset (Forgot password), not an in-app curre
 **Claimed controls**
 
 - Access JWT is the stateless session token. Refresh is a separate, stateful GoTrue session (2.2.1 / 2.2.2).
-- Staging 28 Aug 2026: `POST /users/login` then decode `iat` / `exp` — **28800 seconds (8.00 hours)**, ES256. Token not shown.
+- Production GoTrue **Authentication → Sessions** (31 Aug 2026): **Access token expiry time = 3600 seconds (1 hour)**.
+- Staging live `POST /users/login` then decode `iat` / `exp`: **28800 seconds (8.00 hours)** on 28 Aug and again 31 Aug 2026, ES256. Token not shown. Staging and production GoTrue projects are not the same clock.
+- Both values are under ADA's **24-hour** cap.
 - `decode_access_token` verifies the JWT; expired tokens raise `JWTError` → 401.
 - SPA reads `exp` (`getTokenExpirationMs`) and silent-refreshes ~60 s before expiry.
 
-**Do not claim:** a 1-hour access JWT (this project issues **8 hours**); that the refresh token expires within 24 hours; HttpOnly cookies; invite/reset/mailbox tokens as the session JWT; pasting JWTs.
+**Do not claim:** that staging issues 1-hour JWTs (live staging is 8 hours); that production issues 8-hour JWTs (dashboard is 3600 s); that the refresh token expires within 24 hours; that **Inactivity timeout** or **Time-box user sessions** (both 0 = never on this PNG) are the 2.2.3 control — those are not the access JWT `exp`; HttpOnly cookies; invite/reset/mailbox tokens as the session JWT; pasting JWTs.
 
-**Helpers:** `casa_auth_qa/render_casa_223_pages.py`, `casa_223_exp.py` (`QA_PASSWORD`). Do **not** recapture supabase.com. Owner JWT-settings dashboard shot is optional backup (S2).
+**Helpers:** `casa_auth_qa/render_casa_223_pages.py`, `casa_223_exp.py` (`QA_PASSWORD`). Owner Sessions shot is `CASA_2_2_3_supabase_jwt.png` — do **not** recapture supabase.com.
 
 ### Images
 
@@ -475,11 +477,12 @@ Password change is through password reset (Forgot password), not an in-app curre
 | [`tac_images/2.2.3/CASA_2_2_3_page2.png`](tac_images/2.2.3/CASA_2_2_3_page2.png) | Written evidence page 2 of 2. AL1 mapping. Measured from live staging login. |
 | [`tac_images/2.2.3/CASA_2_2_3_code.png`](tac_images/2.2.3/CASA_2_2_3_code.png) | `decode_access_token` verifies `exp`; SPA `getTokenExpirationMs` and silent refresh 60 s before expiry. |
 | [`tac_images/2.2.3/CASA_2_2_3_exp.png`](tac_images/2.2.3/CASA_2_2_3_exp.png) | Staging API: login 200, JWT `exp − iat` = 28800 s (8.00 hours), under 24 hours. Token not shown. |
+| [`tac_images/2.2.3/CASA_2_2_3_supabase_jwt.png`](tac_images/2.2.3/CASA_2_2_3_supabase_jwt.png) | Production Supabase Authentication → Sessions. Access token expiry **3600 s**. No keys. Inactivity/time-box 0 is not this row. |
 
 ### Portal comment
 
 ```
-The user session access token is a signed JWT. On staging (28 Aug 2026) exp minus iat is 28800 seconds (8 hours), under ADA's 24-hour cap. The API rejects expired JWTs. The app reads exp and refreshes about a minute before expiry. The refresh token is a separate, revocable session token (see 2.2.1), not the stateless token this row covers.
+The user session access token is a signed JWT. Production GoTrue Sessions sets access token expiry to 3600 seconds (1 hour). Staging login on 31 Aug 2026 still issues tokens with exp minus iat of 28800 seconds (8 hours). Both are under ADA's 24-hour cap. The API rejects expired JWTs. The app reads exp and refreshes about a minute before expiry. The refresh token is a separate, revocable session token (see 2.2.1), not the stateless token this row covers.
 ```
 
 ---
