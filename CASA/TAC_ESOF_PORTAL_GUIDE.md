@@ -7,7 +7,7 @@
 **Login:** `jan@velvetelves.com` (alternate email on Jake’s account; same password as Jake’s TAC login)  
 **Google due date:** 18 November 2026  
 **GCP:** `velvet-vles` / **538509143953**  
-**Companion:** `GOOGLE_CASA_AL1_NEXT_STEPS.md`, `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` (row comments + image descriptions), `casa_al1_evidence/m9/`
+**Companion:** `GOOGLE_CASA_AL1_NEXT_STEPS.md`, `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` (row comments + image descriptions), `CASA/MISSING_SCREENSHOTS_CHECKLIST.md` (gaps still to capture), `casa_al1_evidence/m9/`
 
 This is the lab portal for **ADA-CASA AL1 only**. It is not SOC 2.  
 Support: `casasupport@tacsecurity.com`  

@@ -6,6 +6,7 @@
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
+**Missing screenshots (checklist):** `CASA/MISSING_SCREENSHOTS_CHECKLIST.md`  
 **ADA source:** [Web App Test Guide v1.0](https://github.com/appdefensealliance/ASA-WG/blob/v1.0/Web%20App%20Profile/Web%20App%20Test%20Guide.md)
 
 Do not check “I confirm…” or click Evidence **Submit** until all 48 rows are filled.

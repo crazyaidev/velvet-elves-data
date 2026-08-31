@@ -3,7 +3,7 @@
 **Date:** 27 Aug 2026 · **Phase 1 code complete same day** (backend 2069 tests green, frontend 546 green, tsc/eslint clean, pip-audit clean save two documented notes)
 **Google deadline:** 18 Nov 2026 (LOV must be issued and sent by TAC before then)
 **Portal state:** Step 3 "Assessment Review" In Progress. Scan zip accepted 26 Aug. All 48 evidence rows empty. Confirm box unchecked.
-**Companions:** `TAC_ESOF_PORTAL_GUIDE.md` (§7 = row-by-row comments), `../casa_al1_evidence/m9/CASA_PORTAL_PACK.md` (comments + image descriptions; filename is fixed), `../casa_al1_evidence/m9/GAP_ANALYSIS_48_CHECKS.md` (verdicts), `../casa_al1_evidence/m9/` (write-ups)
+**Companions:** `TAC_ESOF_PORTAL_GUIDE.md` (§7 = row-by-row comments), `MISSING_SCREENSHOTS_CHECKLIST.md` (uncaptured shots + how to take them), `../casa_al1_evidence/m9/CASA_PORTAL_PACK.md` (comments + image descriptions; filename is fixed), `../casa_al1_evidence/m9/GAP_ANALYSIS_48_CHECKS.md` (verdicts), `../casa_al1_evidence/m9/` (write-ups)
 
 Target: every row filled with a true statement + PNG evidence. All four known gaps are now **fixed in code**; they become true claims after the owner deploys. TAC Premium has unlimited retests — the bar is **no false claims**, not 48 greens on the first pass.
 
