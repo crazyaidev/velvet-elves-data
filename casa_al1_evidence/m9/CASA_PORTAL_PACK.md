@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1, 4.1.1, 4.1.2, 4.1.3, 4.1.4  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -54,6 +54,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 27 | 4.1.1 | TLS 1.2+ | 9 | `CASA_4_1_1_tls.md` |
 | 28 | 4.1.2 | Trusted TLS certificates | 8 | `CASA_4_1_2_certs.md` |
 | 29 | 4.1.3 | No weak crypto on secrets | 6 | `CASA_4_1_3_crypto.md` |
+| 30 | 4.1.4 | Crypto fail securely | 6 | `CASA_4_1_4_fail_closed.md` |
 
 ---
 
@@ -1046,6 +1047,40 @@ Confidential data uses Fernet (AES-128-CBC plus HMAC-SHA256) with a 256-bit key 
 
 ---
 
+## 4.1.4 — Cryptographic failures fail closed
+
+**ADA:** crypto failures must not disclose operation state or enable a padding oracle. User-facing errors stay vague and consistent.
+
+**Claimed controls**
+
+- Fernet HMAC is checked before AES-CBC. HMAC flip and ciphertext flip both `InvalidToken`. Display helpers return empty/None (no `gAAAA` leak).
+- OAuth state decode returns None → **400** `Invalid or expired OAuth state.`
+- JWT `JWTError` → **401** `Could not validate credentials.`
+- Staging 31 Aug 2026: garbage Bearer **401**; garbage OAuth state **400**.
+
+**Do not claim:** a WSTG-CRYP-02 lab scan; that every historical row is ciphertext.
+
+**Helpers:** `casa_auth_qa/render_casa_414_pages.py`, `casa_414_fail.py`
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/4.1.4/CASA_4_1_4_page1.png`](tac_images/4.1.4/CASA_4_1_4_page1.png) | Written evidence page 1 of 2. Fernet, OAuth state, JWT, padding-oracle note. |
+| [`tac_images/4.1.4/CASA_4_1_4_page2.png`](tac_images/4.1.4/CASA_4_1_4_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/4.1.4/CASA_4_1_4_code.png`](tac_images/4.1.4/CASA_4_1_4_code.png) | InvalidToken, _safe_decrypt, OAuth None, JWT 401. |
+| [`tac_images/4.1.4/CASA_4_1_4_tests.png`](tac_images/4.1.4/CASA_4_1_4_tests.png) | Named tests plus live HMAC/JWT/OAuth notes. |
+| [`tac_images/4.1.4/CASA_4_1_4_fernet_fail.png`](tac_images/4.1.4/CASA_4_1_4_fernet_fail.png) | Ephemeral Fernet: HMAC and ciphertext flips both InvalidToken. |
+| [`tac_images/4.1.4/CASA_4_1_4_deny.png`](tac_images/4.1.4/CASA_4_1_4_deny.png) | Staging: garbage JWT 401; garbage OAuth state 400. |
+
+### Portal comment
+
+```
+Cryptographic failures fail closed and do not return plaintext. Fernet verifies HMAC-SHA256 before AES-CBC decrypt; a bad MAC and a flipped ciphertext byte both raise InvalidToken, mapped to a generic Decryption failed error. Display helpers return empty on any decrypt exception so ciphertext is not shown in the UI. OAuth state decode returns None on InvalidToken; exchange is 400 Invalid or expired OAuth state. Invalid JWTs raise JWTError and become 401 Could not validate credentials. Staging: GET /users/me with Bearer not-a-jwt is 401; POST /users/oauth/google/exchange with garbage state is 400.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -1081,5 +1116,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. SSL Labs: `node casa_411_ssllabs.mjs app` then `node casa_411_ssllabs.mjs api`, then `python casa_411_caption_ssllabs.py` once. |
 | 4.1.2 | `python render_casa_412_pages.py` then `python casa_412_certs.py` (copies Qualys PNGs from 4.1.1; do not recapture ssllabs.com). |
 | 4.1.3 | `python render_casa_413_pages.py` then `python casa_413_fernet.py`. Do **not** print or attach ENCRYPTION_KEY. |
+| 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 
 Eyeball every PNG for cut-off text before re-upload.
