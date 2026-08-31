@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -48,6 +48,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 21 | 3.1.4 | Sensitive resources protected against IDOR | 5 | `CASA_3_1_4_idor.md` |
 | 22 | 3.1.5 | Anti-CSRF / anti-automation | 6 | `CASA_3_1_5_csrf.md` |
 | 23 | 3.1.6 | Directory browsing disabled | 5 | `CASA_3_1_6_directory.md` |
+| 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
 
 ---
 
@@ -826,6 +827,39 @@ Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin v
 
 ---
 
+## 3.2.1 — OAuth authorization code + PKCE
+
+**ADA:** use only recommended OAuth 2.0 flows (authorization code, or authorization code + PKCE). Do not use Implicit or Resource Owner Password Credentials. AL1: written description plus evidence of which flow is used.
+
+**Claimed controls**
+
+- Google / Microsoft **sign-in**: `POST /users/oauth/{provider}/start` → PKCE S256 on Supabase `/auth/v1/authorize`; exchange sends `code_verifier`.
+- Gmail, Outlook, Google Calendar, DocuSign: `response_type=code` + `code_challenge_method=S256`.
+- Email/password login is Supabase `sign_in_with_password`, not an OAuth password grant to Google.
+- Staging 31 Aug 2026: `POST /users/oauth/google/start` → **200** with `s256` (flow not completed). Unsigned `POST /integrations/gmail/authorize-url` → **401**.
+
+**Do not claim:** implicit flow; Google ROPC; a completed consent this session; Google Cloud Console screenshots.
+
+**Helpers:** `casa_auth_qa/render_casa_321_pages.py`, `casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console or accounts.google.com. Do **not** complete an OAuth exchange.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.2.1/CASA_3_2_1_page1.png`](tac_images/3.2.1/CASA_3_2_1_page1.png) | Written evidence page 1 of 2. Sign-in PKCE; mailbox/DocuSign code+S256. |
+| [`tac_images/3.2.1/CASA_3_2_1_page2.png`](tac_images/3.2.1/CASA_3_2_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.2.1/CASA_3_2_1_code.png`](tac_images/3.2.1/CASA_3_2_1_code.png) | oauth_service.py and gmail_provider.py PKCE params. |
+| [`tac_images/3.2.1/CASA_3_2_1_tests.png`](tac_images/3.2.1/CASA_3_2_1_tests.png) | Named tests for encrypted PKCE state and tampered-state 400. |
+| [`tac_images/3.2.1/CASA_3_2_1_pkce.png`](tac_images/3.2.1/CASA_3_2_1_pkce.png) | Staging Google start URL has s256; Gmail authorize-url unsigned 401. |
+
+### Portal comment
+
+```
+Velvet Elves OAuth is authorization code with PKCE (S256). Google and Microsoft sign-in start at POST /users/oauth/{provider}/start and pass code_challenge to Supabase /auth/v1/authorize. Gmail, Outlook, Calendar, and DocuSign authorize URLs set response_type=code plus code_challenge_method=S256. There is no implicit flow and no resource-owner password grant to those providers. Staging POST /users/oauth/google/start returned a PKCE authorize URL (s256); the flow was not completed. Unsigned POST /integrations/gmail/authorize-url returns 401.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -855,5 +889,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.4 | `python render_casa_314_pages.py` then `python casa_314_deny.py`. Do **not** attach `/login`. Do **not** register a staging user. Do **not** query another tenant. |
 | 3.1.5 | `python render_casa_315_pages.py` then `python casa_315_cors.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. Do **not** mint staging users for a fresh 429. |
 | 3.1.6 | `python render_casa_316_pages.py` then `python casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console. |
+| 3.2.1 | `python render_casa_321_pages.py` then `python casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 
 Eyeball every PNG for cut-off text before re-upload.

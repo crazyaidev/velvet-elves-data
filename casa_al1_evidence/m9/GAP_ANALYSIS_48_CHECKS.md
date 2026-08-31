@@ -39,7 +39,8 @@
 - **3.1.4** — **Verified 31 Aug 2026.** ID-parameter APIs listed; IDOR process is load-then-`require_tenant_access` / `require_transaction_access`. Staging unsigned placeholder UUID GETs **401**. Packed in `CASA_PORTAL_PACK.md`. Do not claim a live authenticated two-tenant probe, or that every route uses `require_tenant_access` (contacts skip tenant deny for `role == Admin`).
 - **3.1.5** — **Verified 31 Aug 2026.** Bearer session (no cookie CSRF); CORS does not echo `evil.example`; register 5/min. Official ZAP did not list 10202/20012. Packed in `CASA_PORTAL_PACK.md`. Do not claim a CSRF cookie or that Burp 2098944 ran.
 - **3.1.6** — **Verified 31 Aug 2026.** SPA prefix GETs return the HTML shell (not `Index of /` / ListBucket). API directory-like paths JSON **404**. Official ZAP did not list plugin 0. Packed in `CASA_PORTAL_PACK.md`. Do not claim missing `/assets/*` is 403 on staging.
-- **3.2.1 / 3.2.2** — PKCE code flow; `redirect_uri` fixed, `state` validated (test: "Invalid or expired OAuth state").
+- **3.2.1** — **Verified 31 Aug 2026.** Authorization code + PKCE S256 on sign-in, Gmail/Outlook/Calendar, and DocuSign. Staging Google start returned `s256`; flow not completed. Packed in `CASA_PORTAL_PACK.md`. Do not claim implicit or Google ROPC.
+- **3.2.2** — `redirect_uri` fixed, `state` validated (test: "Invalid or expired OAuth state").
 - **4.1.3 / 4.1.4** — Fernet for tokens/PII; SHA-1 is a non-security proposal id (Fluid Low, compensating); decrypt failures return generic errors.
 - **5.1.1–5.1.10** — SAST 0 High/Critical/Medium + three ZAP XMLs; XSS callback fix verified; SQLi and path-traversal Highs written up as false positives with replays.
 - **5.2.1** — Uploads to object storage, never executed.
