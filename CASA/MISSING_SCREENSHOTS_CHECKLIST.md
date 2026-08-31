@@ -55,7 +55,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner | 5 |
 | P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA — **done 31 Aug** | 6 |
-| P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API | 5 |
+| P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API — **done 31 Aug** | 6 |
 | P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API | 4 |
 | P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API | 5 |
 | P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA | 5 |
@@ -171,9 +171,9 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 5.1.8 — SQL injection
 
-**Already packed:** unsigned `page_size='(` → **401**. Auth ZAP Highs are Low-confidence FPs (plugin **40018**, 28 URLs).
+**Already packed:** unsigned `page_size='(` → **401**. Auth ZAP Highs are Low-confidence FPs (plugin **40018**, 28 URLs). Authenticated replay of all 28 URIs (`CASA_5_1_8_auth_replay.png`): 400/403/422/generic 500, none 401, no SQL text.
 
-**Still missing:** authenticated replay of those ZAP URIs (status only — not a new attack).
+**Still missing:** Burp SQLi UI only if TAC asks.
 
 ### Capture
 
@@ -187,7 +187,7 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 **Save as:** `tac_images/5.1.8/CASA_5_1_8_auth_replay.png`  
 Do not scan production. Do not write a new exploit.
 
-- [ ] Authenticated 40018 replay PNG (all 28 URIs)
+- [x] Authenticated 40018 replay PNG (all 28 URIs)
 
 ---
 

@@ -63,7 +63,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 35 | 5.1.5 | SSRF | 6 | pack 5.1.5 |
 | 36 | 5.1.6 | XML / XPath | 5 | pack 5.1.6 |
 | 37 | 5.1.7 | XSS | 6 | pack 5.1.7 |
-| 38 | 5.1.8 | SQLi | 5 | pack 5.1.8 |
+| 38 | 5.1.8 | SQLi | 6 | pack 5.1.8 |
 | 39 | 5.1.9 | OS command injection | 4 | pack 5.1.9 |
 | 40 | 5.1.10 | LFI / RFI | 5 | pack 5.1.10 |
 | 41 | 5.2.1 | Malicious uploads | 5 | pack 5.2.1 |
@@ -1329,9 +1329,13 @@ Official unauth API ZAP a9d78f05 closed reflected XSS on OAuth callbacks (0 High
 
 **ADA:** AL1 DAST. Burp 1049088 / 1049104 shall not be identified.
 
-**Claimed:** Auth ZAP SQLi High/Low is FP; unsigned page_size='( is 401, no SQL text.
+**Claimed:** Auth ZAP SQLi High/Low is FP. Unsigned `page_size='(` is **401**, no SQL text. Authenticated replay of all **28** plugin **40018** URIs on staging (scan `33afa2aa`): **400**×4, **403**×11 (including `mfa_required` on platform routes), **422**×7, generic JSON **500**×6. None **401**. No SQLSTATE, table names, or `syntax error at`.
 
-**Missing:** Burp SQLi; WSTG-INPV-05; authenticated replay of all 28 ZAP URLs.
+**Missing:** Burp SQLi; WSTG-INPV-05.
+
+**Do not claim:** that Burp 1049088 / 1049104 ran; that 403 MFA reproduced ZAP’s 500s; that generic 500s are confirmed CWE-89; that production was scanned.
+
+**Helpers:** `casa_auth_qa/casa_518_replay.py` (`QA_PASSWORD`; reads local gitignored ZAP XML). Do **not** attach `/login`. Do **not** print the Bearer.
 
 ### Images
 
@@ -1342,11 +1346,12 @@ Official unauth API ZAP a9d78f05 closed reflected XSS on OAuth callbacks (0 High
 | [`tac_images/5.1.8/CASA_5_1_8_sqli_code.png`](tac_images/5.1.8/CASA_5_1_8_sqli_code.png) | Parameterized access |
 | [`tac_images/5.1.8/CASA_5_1_8_sqli_zap.png`](tac_images/5.1.8/CASA_5_1_8_sqli_zap.png) | Auth High FP note |
 | [`tac_images/5.1.8/CASA_5_1_8_replay.png`](tac_images/5.1.8/CASA_5_1_8_replay.png) | Unsigned page_size quote is 401 |
+| [`tac_images/5.1.8/CASA_5_1_8_auth_replay.png`](tac_images/5.1.8/CASA_5_1_8_auth_replay.png) | All 28 plugin 40018 URIs replayed; no SQL text |
 
 ### Portal comment
 
 ```
-Official unauth ZAP scans did not confirm SQL injection. Auth ZAP 33afa2aa raised SQL Injection High with Low confidence (plugin 40018 WARN on the API conf). Evidence was HTTP 500 only, no SQL error text. Staging unsigned GET /teams?page_size='( is 401 Not authenticated, not a database error. Queries go through SQLAlchemy / PostgREST, not client SQL strings. We did not run Burp 1049088 or 1049104. WSTG-INPV-05 is AL2 and was not run.
+Official unauth ZAP scans did not confirm SQL injection. Auth ZAP 33afa2aa raised SQL Injection High with Low confidence (plugin 40018 WARN on the API conf). Evidence was HTTP 500 only, no SQL error text. Staging unsigned GET /teams?page_size='( is 401 Not authenticated, not a database error. On 31 Aug 2026 we replayed all 28 plugin 40018 URIs against api.stage.velvetelves.com with a staging Bearer (value not shown). None returned 401. Responses were 400, 403 (including mfa_required on platform routes), 422 validation, or generic JSON 500 An internal server error occurred. None contained SQLSTATE, table names, or syntax error at. Queries go through SQLAlchemy / PostgREST, not client SQL strings. We did not run Burp 1049088 or 1049104. WSTG-INPV-05 is AL2 and was not run.
 ```
 
 ---
@@ -1642,6 +1647,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 | 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |
 | 5.1.2 | `python render_casa_512_pages.py` then `python casa_512_deny.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or Google Cloud Console. Do **not** complete OAuth. |
-| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. 5.1.7 extra: `node casa_517_stored.mjs` then `python casa_517_caption.py` (`QA_PASSWORD`; deletes the contact). Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
+| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. 5.1.7 extra: `node casa_517_stored.mjs` then `python casa_517_caption.py` (`QA_PASSWORD`; deletes the contact). 5.1.8 extra: `python casa_518_replay.py` (`QA_PASSWORD`; local gitignored ZAP XML). Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
 
 Eyeball every PNG for cut-off text before re-upload.
