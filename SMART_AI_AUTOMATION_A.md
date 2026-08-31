@@ -94,9 +94,9 @@ Only these, and only on Assisted or Autopilot:
 
 | Letter | Who receives it | What it needs |
 | :---- | :---- | :---- |
-| Buyer welcome | Buyer | Their email on People |
-| Seller welcome | Seller | Their email on People |
-| Co-op agent welcome | Co-op agent | Their email on People |
+| Buyer welcome | Buyer | Their email on Contacts |
+| Seller welcome | Seller | Their email on Contacts |
+| Co-op agent welcome | Co-op agent | Their email on Contacts |
 | Loan officer welcome | Lender | Their email, plus the purchase agreement on the file |
 | Order Title | Title company or title rep | Their email, plus the purchase agreement |
 | Confirm Title Order | Title company or title rep | Same as Order Title |
@@ -108,7 +108,7 @@ Guards that already apply:
 
 \- Active deals only. Paused / closed files are left alone.
 
-\- Recipients come only from **People**. The system never guesses an address and never uses a platform "noreply" address for deal mail.
+\- Recipients come only from **Contacts**. The system never guesses an address and never uses a platform "noreply" address for deal mail.
 
 \- A connected Gmail or Outlook mailbox is required. No mailbox → the task is flagged, not sent.
 
@@ -124,7 +124,7 @@ Guards that already apply:
 
 \- If the body says a file is attached, the file actually has to be on the email.
 
-These letters use locked templates (address, closing date, the right packet) — not free-written AI prose. That is why they are allowed to send unattended. Wrong address or wrong attachment is still the risk, which is why People and the purchase agreement are hard requirements.
+These letters use locked templates (address, closing date, the right packet) — not free-written AI prose. That is why they are allowed to send unattended. Wrong address or wrong attachment is still the risk, which is why Contacts and the purchase agreement are hard requirements.
 
 ## **4.2 Everything else waits for Send**
 
@@ -194,7 +194,7 @@ If a library letter cannot go out, the task lands in Needs You with a reason tha
 
 | The AI stopped because | What you actually click |
 | :---- | :---- |
-| No email on that party | **Add contact** on People |
+| No email on that party | **Add contact** on Contacts |
 | Purchase agreement (or other required file) is missing | **Upload document** |
 | Mailbox disconnected or unauthorized | **Reconnect mailbox** in Email & E-signature |
 | Task is more than 30 days overdue | **Change due date** |
@@ -259,6 +259,8 @@ I am stating these as commitments, because they are how we keep your agents out 
 \- We will **not** grow the library-letter list without a written yes for that specific letter.
 
 \- We will **not** put those letters on a brand-new production workspace that is still on Manual and has no mailbox.
+
+As long as these are NOT hard stops and just for the conference. Most of these will be easy to automate once we get you additional information on exactly how each task will be completed. They will become common sense after we get through 4-5 of them.
 
 # **6\. What I need from you**
 
@@ -406,7 +408,7 @@ Until F–J are answered, those tasks stay **prepared drafts or human work**. Th
 
 **Question L — Writing style: per agent or per brokerage?**
 
-\- \[X \] Per agent (my recommendation) Really it’s per user. TC, TL, Admin, etc.
+\- \[X \] Per agent (my recommendation) Really it’s per user. TC, TL, Admin, etc. user
 
 \- \[ \] Per brokerage, set by the admin
 
@@ -418,13 +420,13 @@ Until F–J are answered, those tasks stay **prepared drafts or human work**. Th
 
 \- \[ \] Rename deal Autopilot to something else — suggestion: \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-\- \[X\] Let's discuss on a call (my recommendation) Agreed and I would love to hear your thoughts/concerns about this. 
+\- \[X\] Let's discuss on a call (my recommendation) Agreed and I would love to hear your thoughts/concerns about this. Should we use our AI name for this? (Aime)
 
 **Question N — After a library letter sends, should the deal progress bar count that AI task, or only the Automation activity line?** Today progress often ignores Automated rows on purpose so the human bar stays honest.
 
-\- \[X \] Keep progress as the human bar; show AI work on Automation / handled today (my recommendation)
+\- \[ \] Keep progress as the human bar; show AI work on Automation / handled today (my recommendation)
 
-\- \[ \] Count Automated completions in progress % as well
+\- \[X \] Count Automated completions in progress % as well This will show a user that AI is working on their files while they have been away, which is a staple to our marketing campaign and general product as a whole.
 
 # **7\. What I will build next, in order**
 
@@ -455,7 +457,7 @@ The countdown delayed auto-send.
 | What people fear | What Velvet Elves actually does |
 | :---- | :---- |
 | The AI invents a letter and sends it | Only named library templates, from deal facts |
-| It emails a guessed address | Only captured People emails |
+| It emails a guessed address | Only captured Contacts emails |
 | It talks about wires | Those messages are held, never drafted |
 | It moves a closing date | Dates never move without your confirm |
 | It keeps sending after something is wrong | It stops, names the cause, and retries when that cause is gone |

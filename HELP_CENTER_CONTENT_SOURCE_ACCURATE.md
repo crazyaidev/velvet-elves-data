@@ -2,12 +2,10 @@
 
 > **How this file was produced.** Every article below was written by reading the
 > shipped frontend and backend source, not the planning documents in
-> `velvet-elves-data`. Where the previously-live content
-> (`20260903090000_help_center_content_rewrite.sql`) disagreed with the code, the
-> code wins. The companion migration
-> `20260905090000_help_center_content_source_accurate.sql` upserts this content
+> `velvet-elves-data`. The companion migration
+> `20261004090000_help_center_content_as_built.sql` upserts this content
 > in place (same collection/article slugs, so existing rows and curated related
-> links are refreshed, not duplicated).
+> links are refreshed, not duplicated). New article: `needs-you`.
 
 ---
 
@@ -50,14 +48,7 @@ instead of the product*. Concretely:
    Review Tasks) launched full-screen straight from **+ New Transaction** — there
    is no separate "AI Import" chooser.
 
-5. **The app kept moving after the content was written.** Settings was
-   consolidated into a single hub with ~20 cards
-   ([settingsCards.ts](../velvet-elves-frontend/src/pages/settings/settingsCards.ts)),
-   each deal now opens a tabbed **Workspace** with an AI Agent pane
-   ([TransactionWorkspacePage.tsx](../velvet-elves-frontend/src/pages/transactions/TransactionWorkspacePage.tsx)),
-   and tenant billing became a **credit wallet** ("Billing & Credits"). The
-   content never caught up, and — per the project notes — it was structurally
-   verified but never reconciled against the live UI.
+5. **The app kept moving after the content was written.** Settings is a hub of cards (`settingsCards.ts`), each deal opens a tabbed **Workspace** with Overview and Billing (`TransactionWorkspacePage.tsx`), **Needs You** is the residual automation queue, the named assistant is **Aime**, Intelligence email is labeled **Email**, and tenant billing is **Settings → Billing** (per-deal fee, prepaid deals). Refresh this file against source whenever those labels change.
 
 The fix below re-grounds every article in what the code renders today.
 
@@ -66,19 +57,21 @@ The fix below re-grounds every article in what the code renders today.
 | Area | Source of truth | What ships |
 | --- | --- | --- |
 | Roles | `types/enums.ts`, `formatters.ts` | Agent, Transaction Coordinator, Team Lead, Attorney, Admin, Client, For-Sale-By-Owner, Vendor. No "elf." |
-| Internal sidebar | `dashboardShellConfig.ts`, `AppLayout.tsx` | KPI tiles + Dashboard, **Deals**, **Workflow**, **Payments**, **Vendors**, **Intelligence**, **Team** (TL/Admin), **Oversight** (Admin), **Platform** (platform admins). |
+| Internal sidebar | `dashboardShellConfig.ts`, `AppLayout.tsx` | KPI tiles + Dashboard, **Deals** (Active Transactions, Drafts & Paused, Closed, All Transactions, Clients, Contacts), **Workflow** (Needs You, My Task Queue, All Documents, Closing Calendar), **Payments**, **Vendors**, **Intelligence** (AI Suggestions, Email, Vendor Proposals, Analytics; AI Coach teaser for Team Lead), **Team** (TL/Admin), **Oversight** (Admin), **Platform** (platform admins). |
 | Account menu | `AppLayout.tsx` | Settings · Help Center · Log Out. |
-| Deals list tabs | `TransactionListPage.tsx` | All, Overdue, Due Today, Needs Attention, Closing Soon, In Inspection, On Track, Unhealthy. Sort: Urgency, Close Date, Client Name, Price. |
+| Deals list tabs | `TransactionListPage.tsx` | All, Overdue, Due Today, Closing Soon, Needs Attention, In Inspection, On Track. Sort: Urgency, Close Date, Client Name, Price. No Unhealthy tab. |
 | Deal card | `components/shared/TransactionCard.tsx` | Expands in place to 3 columns (Tasks / Key Dates / Contacts) + milestone bar + AI next-step; opens the full workspace at `/transactions/:id`. |
-| Deal workspace | `TransactionWorkspacePage.tsx` | Tabs: Agent, Timeline, Compliance, Documents, Tasks, People, Activity, Email. |
-| New-transaction wizard | `wizardTypes.ts` | Steps: Documents, AI Parsing, Address & Contacts, Purchase Info, Missing Info, Confirm, Timeline, Compliance, Review Tasks. |
-| Transaction status | `models/enums.py` | Active, Incomplete, Paused, Completed, Closed. |
+| Deal workspace | `TransactionWorkspacePage.tsx` | Tabs: Overview, Timeline, Compliance, Tasks, Documents, Contacts, Billing, Activity. Agent and Email when the AI-agent workspace is on. |
+| New-transaction wizard | `wizardTypes.ts` | Four public phases: Upload → Contract Details → Contacts & Fees → Verification. Create is **Upload Transaction**. Parsing is a transient screen. Timeline / compliance / tasks generate at commit. |
+| Transaction status | `models/enums.py` | Active, Incomplete, Paused, Completed, Closed, Terminated. |
 | Closing modes | `types/enums.ts` | attorney, title_escrow, shared_approval. |
 | Completion methods | `active-transactions/AddTaskModal.tsx` | Phone Call, Email, DocuSign/E-Signature, In Person, Upload Document, Online Portal, AI Agent, Other. |
 | Email connect | `settingsCards.ts`, `ConnectionsPanel.tsx` | Settings → **Email & E-signature**: Gmail / Outlook + DocuSign. |
-| All Documents tabs | `pages/documents/DocumentsPage.tsx` | All, Missing, Pending review, Sent, Signed. |
+| All Documents tabs | `pages/documents/DocumentsPage.tsx` | AI priority, All docs, Missing, Pending review, Sent for sig, Signed. |
 | Requirement status | `schemas/document_requirement.py` | `missing` \| `uploaded` \| `waived`. |
-| Settings hub | `settingsCards.ts` | Personal + Workspace + Platform card groups (see Admin & Settings). |
+| Settings hub | `settingsCards.ts` | Personal + Workspace + Platform card groups (see Admin & Settings). Workspace billing card is **Billing** (per-deal fee, prepaid deals). |
+| Named assistant | `AIChatPanel.tsx` | **Aime** — floating Ask Aime, workspace Agent tab, Needs You. |
+| Needs You | `NeedsYouPage.tsx` | Ready to send, AI proposal, Draft to review, Decision. |
 
 ---
 
@@ -92,21 +85,20 @@ FileText, CreditCard, Settings, Calendar, Building2, ShieldCheck, Sparkles};
 ---
 
 ### Collection: Getting Started  `getting-started`
-Icon Rocket / green. *New to Velvet Elves? Start here — what the platform does,
-how to sign in, what your role can do, and a first-deal walkthrough.*
+Icon Rocket / green. *New to Velvet Elves? Start here — what the platform does, how to sign in, what your role can do, and a first-deal walkthrough.*
 
 #### `what-is-velvet-elves` — What is Velvet Elves?
 *Excerpt:* The short version: you give it a contract, and it sets up and runs the whole transaction for you.
 
 **Velvet Elves is software that does the busywork of a real estate transaction for you.** You upload the signed contract, its AI reads the document, sets up the deal, builds a to-do list with real due dates, and then helps you keep everything on track to closing.
 
-Think of it as a transaction coordinator that never sleeps: it reads paperwork, drafts emails, watches deadlines, and tells you what needs attention today.
+Think of it as a transaction coordinator that never sleeps: **Aime** reads paperwork, drafts emails, watches deadlines, and tells you what needs attention today.
 
 ## What it actually does
 - **Reads your paperwork.** Upload a contract and the AI pulls out the property address, the buyers and sellers, the price, the financing, and the deadlines, so you do not retype anything.
 - **Builds your task list automatically.** From the deal type and the dates in the contract, it generates the tasks you need with due dates already filled in.
 - **Keeps everyone on the same page.** Emails, documents, vendors, and client updates all live on the deal, with a searchable history.
-- **Tells you what is urgent.** A daily AI briefing sorts your deals into Critical, Needs Attention, and On Track so you always know where to start.
+- **Tells you what is urgent.** A daily briefing sorts your deals into Critical, Needs Attention, and On Track. **Needs You** is the queue of drafts, proposals, and decisions that still need a person.
 
 ## Who uses it
 Velvet Elves has a workspace shaped for each role: **Agents** who run deals, **Transaction Coordinators** who keep paperwork and deadlines moving, **Team Leads** who oversee a team, **Attorneys** who review and release legal files, and **Admins** who configure the account. It also gives **Clients**, **for-sale-by-owner sellers**, and **Vendors** their own limited views.
@@ -128,18 +120,15 @@ You need to be signed in (see [Signing in and managing your account](/articles/s
 Click **+ New Transaction** in the top bar or the sidebar footer. This opens the full-screen New Transaction wizard.
 
 ## Step 2: Add the contract
-On the wizard's first step (**Documents**), drag your contract into the upload area or browse for it. You can add several files, and split one combined scan into separate documents by page range.
+On the wizard's first phase (**Upload**), drag your contract into the upload area or browse for it. You can add several files, and split one combined scan into separate documents by page range. Parsing runs as a progress screen, then you land on **Contract Details**.
 
-## Step 3: Let the AI read it
-The **AI Parsing** step extracts the property, the people, the price and financing, and every milestone date. The following steps (Address & Contacts, Purchase Info, Missing Info) show you what it found so you can confirm or fix each part.
+## Step 3: Confirm what it found
+**Contract Details** is price, financing, property, and dates. **Contacts & Fees** is the people and vendors (Missing Info is collected here if needed). Edit anything that looks wrong — each value cites the page it came from.
 
-## Step 4: Double-check and confirm
-On **Confirm**, the wizard compares its readings and highlights anything it was unsure about, next to a preview of the source document. Edit anything before you accept it.
+## Step 4: Verification and create
+**Verification** is the double-check. Confirm what the AI read, then click **Upload Transaction**. Velvet Elves saves the deal, builds the task list, timeline, and compliance checklist, and opens the deal's workspace.
 
-## Step 5: Review the plan and create
-**Timeline** and **Compliance** show the dates and checklist, then **Review Tasks** lists the tasks that will be created. Finish, and Velvet Elves saves the transaction, builds the task list, and opens the deal's workspace.
-
-> If credit billing is enabled for your workspace, creating a transaction may spend one credit.
+> If per-deal billing is enabled for your workspace, creating a transaction may charge the deal fee (prepaid deals are used first).
 
 ## What to do next
 - Learn the list you live in: [The Active Transactions list](/articles/active-transactions-workspace).
@@ -178,7 +167,7 @@ Click your name or avatar (top-right, or the sidebar footer) to open the account
 | **Agent** | Owns deals, works the task list, talks to clients and vendors. |
 | **Transaction Coordinator** | Supports agents by managing tasks, documents, and messages across many deals. |
 | **Team Lead** | Sees the whole team, can step into any agent's deal, and manages shared templates and members. |
-| **Attorney** | Reviews legal packets in a dedicated matter workspace, signs off at approval gates, and releases files to close. |
+| **Attorney** | Reviews legal packets in a dedicated matter workspace (caseload rail: Need review, Ready to release, Filed & clean), signs off at approval gates, and releases files to close. |
 | **Admin** | Configures the account: users, templates, AI settings, branding, billing, and integrations. |
 
 > "Velvet Elves" is the product's name. The coordinator role is labeled **Transaction Coordinator** (sometimes shortened to TC) everywhere in the app.
@@ -200,13 +189,13 @@ Permissions are enforced everywhere. If this help center describes something you
 
 ## The left sidebar
 At the top, KPI tiles show live numbers for your book (for an agent: Overdue tasks, Closing this week, Active deals, Pipeline value). Below them is a standalone **Dashboard** link, then grouped navigation:
-- **Deals** — Active Transactions, Pending, Closed, All Transactions, Clients.
-- **Workflow** — My Task Queue, All Documents, Closing Calendar.
+- **Deals** — Active Transactions, Drafts & Paused, Closed, All Transactions, Clients, Contacts.
+- **Workflow** — Needs You, My Task Queue, All Documents, Closing Calendar.
 - **Payments** — Invoices & Payments (and Commission Payouts if you can trigger payouts).
 - **Vendors** — Vendor Directory.
-- **Intelligence** — AI Suggestions, AI Email Review, Vendor Proposals, Analytics.
+- **Intelligence** — AI Suggestions, Email, Vendor Proposals, Analytics. Team Leads also see a locked **AI Coach** teaser.
 
-Team Leads and Admins also see a **Team** group (Team Overview, Teams). Admins see an **Oversight** group (Communication Audit, Audit Log). Attorneys get their own Workspace group (Matters, Releases Queue, Recording Calendar, State Rules).
+Team Leads and Admins also see a **Team** group (Team Overview, Teams). Admins see an **Oversight** group (Communication Audit, Audit Log). Attorneys use a dedicated counsel shell: a caseload rail of **Matters** (Need review, Ready to release, Filed & clean), not the internal Deals/Workflow groups.
 
 ## The top bar
 Left to right: your brokerage logo, the **Today's AI Briefing** button, the Critical / Needs Attention / On Track chips, **Search** (⌘K), the **Notifications** bell, your avatar menu (Settings / Help Center / Log Out), and the **+ New Transaction** button.
@@ -244,7 +233,7 @@ Icon LayoutDashboard / blue. *Creating a deal from a contract, the list where yo
 **Click + New Transaction (top bar or sidebar footer) to open the full-screen New Transaction wizard.** Everything happens in one place; there is no separate "import vs. manual" chooser.
 
 ## With a contract (recommended)
-On the first step, drag in the contract (PDF, photo, or Word) or browse for it. The AI reads it and pre-fills the property, people, price, financing, and dates for you to confirm. See [Using the AI transaction wizard](/articles/ai-transaction-wizard).
+On the first phase (**Upload**), drag in the contract (PDF, photo, or Word) or browse for it. The AI reads it and pre-fills the property, people, price, financing, and dates for you to confirm. See [Using the AI transaction wizard](/articles/ai-transaction-wizard).
 
 ## Without a contract yet
 You can skip the upload and fill the essentials by hand — client, property address, transaction type, price, key dates, lender/title — then add the contract later and let the AI complete the rest.
@@ -252,28 +241,23 @@ You can skip the upload and fill the essentials by hand — client, property add
 ## What happens when you finish
 Velvet Elves saves the deal, **builds the task list** from the deal type and dates, and **opens the deal's workspace**. See [The transaction workspace](/articles/active-transactions-workspace).
 
-> If credit billing is on for your workspace, creating a deal may spend one credit.
+> If per-deal billing is on for your workspace, creating a deal may charge the deal fee (prepaid deals are used first).
 
 #### `ai-transaction-wizard` — Using the AI transaction wizard
-*Excerpt:* A nine-step, guided flow that turns a contract into a filled-in deal — and shows its work at every step.
+*Excerpt:* A four-phase flow that turns a contract into a filled-in deal — and shows its work at every step.
 
-**The New Transaction wizard walks through nine steps, grouped into phases, with a stepper at the top and a deal brief on the side.** You confirm the details as you go.
+**The New Transaction wizard walks through four phases, with a stepper at the top and a deal brief on the side.** You confirm the details as you go.
 
-## The steps
-1. **Documents** — upload the contract; add multiple files and split a combined scan by page range.
-2. **AI Parsing** — the AI extracts everything it can find.
-3. **Address & Contacts** — confirm the property and the people (buyers, sellers, agents, lender, title, attorney).
-4. **Purchase Info** — price, financing, earnest money, and which side you represent.
-5. **Missing Info** — anything the AI could not find is collected here.
-6. **Confirm** — the double-check step: the wizard compares its readings and highlights low-confidence or conflicting fields next to an evidence viewer that shows the source document. Edit before you accept.
-7. **Timeline** — the milestone dates that will drive your task due dates.
-8. **Compliance** — the closing checklist that applies to this deal.
-9. **Review Tasks** — the tasks that will be created; adjust before you finish.
+## The phases
+1. **Upload** — upload the contract; add multiple files and split a combined scan by page range. Parsing is a progress screen, then you move on automatically.
+2. **Contract Details** — price, financing, property, and contractual dates, each with a citation to the page it came from.
+3. **Contacts & Fees** — buyers, sellers, agents, lender, title, attorney, and fees. Missing Info is collected here if needed (it auto-skips when nothing is missing).
+4. **Verification** — the double-check: the wizard highlights low-confidence or conflicting fields next to an evidence viewer. Edit before you accept. Click **Upload Transaction** to create the deal.
 
-If the wizard finds documents that still need signatures, you can send them for e-signature. See [Sending documents for e-signature](/articles/sending-for-signature).
+The task plan, timeline, and compliance checklist are generated when the deal is created — they are not separate wizard steps. You can send documents for e-signature from the workspace. See [Sending documents for e-signature](/articles/sending-for-signature).
 
 ## Why the double-check
-The Confirm step is how the platform keeps AI mistakes from slipping through — you are never handed a finished deal you did not review. See [How AI confidence and review work](/articles/how-ai-confidence-works).
+Verification is how the platform keeps AI mistakes from slipping through — you are never handed a finished deal you did not review. See [How AI confidence and review work](/articles/how-ai-confidence-works).
 
 #### `active-transactions-workspace` — The transaction list and workspace
 *Excerpt:* Triage every deal from the Active Transactions list, then open a deal to run it in its tabbed workspace.
@@ -284,23 +268,25 @@ The Confirm step is how the platform keeps AI mistakes from slipping through —
 Each deal is a card. Collapsed, it shows the client and address, a colored status pill, "why" badges, the AI next-step, a milestone bar, days to close, overdue count, and price. **Click a card to expand it in place** into three columns — **Tasks**, **Key Dates** (edit inline), and **Contacts** (grouped, with call/email). To open the full deal, click through to its workspace.
 
 ### Filters and sorting
-Tabs across the top, each with a live count: **All, Overdue, Due Today, Needs Attention, Closing Soon, In Inspection, On Track, Unhealthy**. Sort by **Urgency, Close Date, Client Name, or Price**. The **Pending**, **Closed**, and **All Transactions** sidebar links open the same list pre-filtered.
+Tabs across the top, each with a live count: **All, Overdue, Due Today, Closing Soon, Needs Attention, In Inspection, On Track**. Sort by **Urgency, Close Date, Client Name, or Price**. The **Drafts & Paused**, **Closed**, and **All Transactions** sidebar links open the same list pre-filtered.
 
 ## The deal workspace (`/transactions/:id`)
 Opening a deal shows a tabbed workspace:
-- **Agent** — the AI assistant for this deal.
+- **Overview** — what needs you, key dates, progress, who is on the deal.
 - **Timeline** — milestones and dates.
 - **Compliance** — required documents and checklist status.
-- **Documents** — files on the deal, with e-signature.
 - **Tasks** — this deal's task list.
-- **People** — the parties and vendors.
+- **Documents** — files on the deal, with e-signature.
+- **Contacts** — the parties and vendors.
+- **Billing** — invoices on this deal.
 - **Activity** — the full, searchable history.
-- **Email** — the deal's messages.
+
+When the AI-agent workspace is on, **Agent** (Aime for this deal) and **Email** also appear.
 
 (Attorneys open the Attorney Matter Workspace instead.)
 
 ## The status pill
-The pill is calculated from the deal's tasks, dates, and messages, so risky deals rise to the top: **Critical**, **Needs Attention**, **On Track**, or **Unhealthy**.
+The pill is calculated from the deal's tasks, dates, and messages, so risky deals rise to the top: **Critical**, **Needs Attention**, or **On Track**.
 
 #### `transaction-types-and-closing-modes` — Transaction types and closing modes
 *Excerpt:* Two settings decide which tasks and documents your deal needs.
@@ -350,6 +336,7 @@ Task due dates are calculated from milestone dates, so moving a milestone moves 
 | **Paused** | Temporarily on hold. |
 | **Completed** | Work done, pending final close-out. |
 | **Closed** | Closed and moved into history. |
+| **Terminated** | Ended without closing. |
 
 ## The activity timeline
 The deal's **Activity** tab (and the history panel on the card) shows one combined timeline — messages, task completions, date confirmations, document changes, and AI flags — grouped by day. Search it by keyword to find a specific email, document, or change. The history cannot be edited, which makes it the single source of truth for handoffs, client questions, and audits.
@@ -357,7 +344,7 @@ The deal's **Activity** tab (and the history panel on the card) shows one combin
 ---
 
 ### Collection: Tasks & Workflow  `tasks-and-workflow`
-Icon Calendar / orange. *Where tasks come from, clearing your queue, adding tasks, reminders, and printing closing checklists.*
+Icon Calendar / orange. *Where tasks come from, My Task Queue, Needs You, adding tasks, reminders, and printing closing checklists.*
 
 #### `how-tasks-are-generated` — Where your tasks come from
 *Excerpt:* Your task list is built from rules, the deal type, and the contract dates — not AI guesswork.
@@ -386,8 +373,8 @@ Tasks are grouped by timing — overdue/earlier first, then today, then upcoming
 ## Completing a task
 Open a task, mark it complete, and record **how** it was done: Phone Call, Email, DocuSign/E-Signature, In Person, Upload Document, Online Portal, AI Agent, or Other. Recording the method keeps the deal's history accurate for handoffs and audits.
 
-## Pair it with the briefing
-The **Today's AI Briefing** tells you which deals are at risk; the queue tells you the exact next actions. For deadline nudges, see [Task reminders](/articles/task-reminders).
+## Pair it with Needs You
+**Needs You** (Workflow) is the other daily list: drafts ready to send, AI proposals, drafts to review, and coverage decisions. The briefing tells you which deals are at risk; the task queue tells you the next actions; Needs You tells you what still needs a human. For deadline nudges, see [Task reminders](/articles/task-reminders).
 
 #### `adding-a-task` — Adding a task manually
 *Excerpt:* Create a one-off task, choose how it will be done, and let AI catch duplicates.
@@ -429,6 +416,27 @@ From a deal, use **Print Checklist**. Velvet Elves builds both the agent and cli
 ## Keep your playbook sharp
 Update your templates and preferred vendors in **Settings → My Playbook**; admins and team leads standardize them in **Team Playbook** so every agent's checklist is consistent.
 
+#### `needs-you` — Working from Needs You
+*Excerpt:* The queue of drafts, proposals, and decisions that still need a person.
+
+**Needs You is the residual queue for work Aime cannot finish alone.** It sits at the top of the Workflow group, next to My Task Queue.
+
+## What lands here
+Four kinds of item, each with a live count:
+- **Ready to send** — a draft that is ready; you can send one or **Send all ready**.
+- **AI proposal** — a suggested action (for example a date change) waiting for Approve.
+- **Draft to review** — a reply that needs your eyes before it can send.
+- **Decision** — a coverage gap that needs a human choice.
+
+Items are grouped by deal. Expand a row for the email body, recipients, or the proposal's reasoning.
+
+## Giving work back to Aime
+If you took something over and want Aime to try again, use **Give back to AI** where it is offered.
+
+## Related reading
+- [AI email drafts](/articles/ai-email-drafts)
+- [How AI confidence and review work](/articles/how-ai-confidence-works)
+
 ---
 
 ### Collection: Documents & E-Signature  `documents-and-esignature`
@@ -454,7 +462,7 @@ Filed documents appear on the deal's Documents tab and in the cross-deal [All Do
 **All Documents is one screen for working with files across all your deals.** It complements the Documents tab on each deal.
 
 ## Tabs
-The page is organized into **All, Missing, Pending review, Sent,** and **Signed**, so you can see at a glance what still needs attention.
+The page opens on **AI priority** (open document work ranked by severity). Classic views: **All docs, Missing, Pending review, Sent for sig,** and **Signed**.
 
 ## What you can do
 Search across every deal (AI-assisted, by name, type, or contents); view, download, rename, and re-type; **email** a document to chosen recipients with a subject, message, and optional template; send for signature; and archive or soft-delete with restore for authorized roles.
@@ -477,7 +485,7 @@ Soft-delete with restore means an accidental delete is recoverable by authorized
 #### `sending-for-signature` — Sending documents for e-signature
 *Excerpt:* Send through DocuSign, track who has signed, and let the finished copy distribute itself.
 
-**Velvet Elves sends documents for signature through DocuSign** and handles the finished copy. You can start from the document center, a deal's Documents tab, or the wizard.
+**Velvet Elves sends documents for signature through DocuSign** and handles the finished copy. You can start from the document center or a deal's Documents tab.
 
 ## How to send
 Open the document, choose **Send for signature**, add the signers and who receives the completed copy, then send and track the status on the deal.
@@ -513,7 +521,7 @@ Icon Mail / blue. *Connect your inbox, let AI draft replies you approve, keep a 
 Open **Settings → Email & E-signature**, choose **Gmail** or **Outlook**, and sign in through the secure provider popup to grant send/receive access. (DocuSign connects from the same page.)
 
 ## What it unlocks
-Automatic filing of related email onto the matching deal, [AI-drafted replies you approve](/articles/ai-email-drafts), and one-click resend from the deal's Email tab.
+Automatic filing of related email onto the matching deal, [AI-drafted replies you approve](/articles/ai-email-drafts) in **Intelligence → Email**, and one-click resend from the deal's Email tab.
 
 ## Your privacy
 Only messages related to your transactions are attached to deals, and the log follows your organization's retention policy. You can disconnect any time from the same page; already-filed messages stay on their deals.
@@ -521,7 +529,7 @@ Only messages related to your transactions are attached to deals, and the log fo
 #### `ai-email-drafts` — AI email drafts and auto-responses
 *Excerpt:* AI drafts routine replies and escalates anything uncertain, so nothing risky goes out alone.
 
-**The AI drafts replies to routine emails for you to review** and is built with guardrails — anything it is unsure about comes to you instead of sending on its own. Review pending drafts under **Intelligence → AI Email Review**.
+**The AI drafts replies to routine emails for you to review** and is built with guardrails — anything it is unsure about comes to you instead of sending on its own. Review pending drafts under **Intelligence → Email** (Inbox, Outbox, Sent, Filtered) or **Workflow → Needs You**.
 
 ## What it can draft
 Common messages from clients, FSBO customers, and vendors — document requests and factual questions about closing dates, status, and milestones. A person is always kept in the loop.
@@ -530,6 +538,8 @@ Common messages from clients, FSBO customers, and vendors — document requests 
 - If a requested document exists, it drafts the reply and attaches it.
 - If something is missing or it is unsure, it does not send — it notifies the owner with a draft to finish.
 - Any assumption in a draft is shown in **bold**, with an Approve or Edit-and-Send control and a side-by-side view against the source.
+
+Admins set Manual, Assisted, or Autopilot in **Settings → AI & Automation**. Autopilot may send named welcome, title-order, and inspection-reminder letters when confidence is high. Everything else waits for you. Wire and legal mail are never drafted for auto-send.
 
 The AI uses your configured tone, never gives legal advice, and adds a disclaimer where appropriate.
 
@@ -573,16 +583,16 @@ The AI pulls the date and proposes a task-date update; vague replies are flagged
 ### Collection: AI Assistant & Intelligence  `ai-and-intelligence`
 Icon Sparkles / orange. *The AI assistant, reviewing suggestions, analytics, and how the AI checks itself.*
 
-#### `meet-the-ai-assistant` — Meet the Velvet Elves AI assistant
-*Excerpt:* A chat assistant that already knows the deal you are on.
+#### `meet-the-ai-assistant` — Meet Aime
+*Excerpt:* Aime is the chat assistant that already knows the deal you are on.
 
-**The AI assistant is a chat panel that understands your context.** Open it from the floating button anywhere, or the **Agent** tab inside a deal, and ask in plain language.
+**Aime is the in-app assistant.** Open it from the floating **Ask Aime** button anywhere, or the **Agent** tab inside a deal, and ask in plain language.
 
 ## What you can ask
-Things like "Show overdue tasks," "Draft the inspection response," or "Summarize the Young deal." The **Today's AI Briefing** button also opens it with a ready-made briefing prompt.
+Things like "Show overdue tasks," "Draft the inspection response," or "Summarize the Young deal." The **Today's AI Briefing** button also opens Aime with a ready-made briefing prompt.
 
 ## It acts, not just answers
-Along with its answer, the assistant offers **suggested actions** you can take in one click — open a filtered list, start a draft, and so on. Some answers, like an exact closing date, come back in a precise fixed format. The final decision, and the send button, stay with you.
+Along with its answer, Aime offers **suggested actions** you can take in one click — open a filtered list, start a draft, and so on. Some answers, like an exact closing date, come back in a precise fixed format. Everyday sends still wait for you in Email or Needs You.
 
 #### `ai-suggestions` — Reviewing AI suggestions
 *Excerpt:* Recommendations with a reason attached — nothing changes until you approve.
@@ -612,7 +622,7 @@ Pair analytics with the daily briefing: the briefing tells you what needs attent
 **Velvet Elves is built so the AI assists but people decide.**
 
 ## The double-check
-When the AI reads a document it runs two passes and compares key fields. Where they agree, you move quickly; where they disagree or confidence is low, the field is flagged for you to confirm against the source (the wizard's Confirm step).
+When the AI reads a document it runs two passes and compares key fields. Where they agree, you move quickly; where they disagree or confidence is low, the field is flagged for you to confirm against the source (the wizard's **Verification** phase).
 
 ## Confidence thresholds
 Admins set a global minimum confidence floor and team leads can set higher thresholds (Settings → AI & Automation). Anything below the threshold goes to human review rather than being applied automatically.
@@ -642,7 +652,7 @@ A **party** is a contact in their role on a specific deal ([Transaction parties]
 **Parties are everyone involved in one deal**, and most are captured automatically when the AI reads your contract.
 
 ## Who counts
-Buyers and sellers, the agents, the loan officer, the title rep, and the closing/settlement attorney when there is one. They appear on the deal's **People** tab and as grouped contact cards with call/email actions. Add or correct a party any time.
+Buyers and sellers, the agents, the loan officer, the title rep, and the closing/settlement attorney when there is one. They appear on the deal's **Contacts** tab and as grouped contact cards with call/email actions. Add or correct a party any time.
 
 ## Parties vs. the vendor directory
 A provider acting as a party is not automatically a saved vendor. To reuse them, **save the party as a vendor**. See [The vendor directory](/articles/vendor-directory).
@@ -685,7 +695,7 @@ Only the milestone timeline and key dates — never your tasks, notes, or other 
 #### `client-portal` — What clients see in the client portal
 *Excerpt:* A clean view of milestones, documents, messages, and invoices — nothing internal.
 
-**The client portal gives your buyer or seller a friendly "closing concierge" view.** Its own navy shell (not the internal app) has Home, Timeline, Documents, Payments, and Agent Info.
+**The client portal gives your buyer or seller a friendly "closing concierge" view.** Its own navy shell (not the internal app) has **Home, Next Steps, Timeline, Documents, and Updates**. Invoices, agent info, and account settings are also available.
 
 ## What is in it
 Milestones in plain language, documents to review or provide (each with a status), messages tied to the deal, invoices to pay online, and an agent bio. Clients manage their own notification preferences; you control what is shared, from inside the deal. Clients cannot delete a document outright — they can flag one for deletion, which routes to an agent or coordinator for approval.
@@ -693,10 +703,10 @@ Milestones in plain language, documents to review or provide (each with a status
 #### `fsbo-workspace` — The FSBO customer workspace
 *Excerpt:* A simplified, property-focused workspace for sellers handling their own sale.
 
-**The FSBO workspace is a simplified space for sellers running their own sale.** Its sidebar has My Properties, Documents, Payments, and Messages, plus a persistent action banner surfacing the top next step.
+**The FSBO workspace is a simplified space for sellers running their own sale.** Its sidebar has My Properties, Documents, Messages, and Payments (only if invoices exist), plus a footer **Share milestones** CTA. Ask Aime is the floating button.
 
 ## What it includes
-A property portfolio (status, closing date, missing docs, new messages), document upload and tracking, plain-English milestone guidance, invoices, and read-only milestone sharing (footer "Share milestones" CTA). It supports both listing-prep and under-contract stages.
+A property portfolio (listing prep or under contract), document upload and tracking, plain-English milestone guidance, invoices when they exist, and read-only milestone sharing.
 
 ## Where the line is
 Guidance is plain-English and glossary-style. Velvet Elves coordinates the workflow but does not act as the customer's agent and does not give legal advice — stated clearly in the workspace.
@@ -720,7 +730,7 @@ Icon CreditCard / green. *Collect fees through Stripe, send invoices clients pay
 Admins control payment capabilities per role in **Settings → Payment Access** (invoice, refund, payout). If you do not see an action, your role may not include it — all internal roles can at least view history.
 
 ## Note on billing vs. payments
-Client-facing invoicing (this collection) is separate from your workspace's own **Billing & Credits** (the credit wallet in Settings → Billing & Credits).
+Client-facing invoicing (this collection) is separate from your workspace's own **Billing** (Settings → Billing: the per-deal fee, prepaid deals, and payment history).
 
 #### `creating-invoices` — Creating and sending invoices
 *Excerpt:* Bill a specific amount, send it, and let the client pay online.
@@ -786,7 +796,7 @@ Branding flows across sign-in, the dashboards, email, documents, and the custome
 
 **You choose your notifications in Settings → Notifications.** Pick in-app and email channels for reminders and assignment alerts, and turn categories on or off. The daily summary email only goes out on days you have tasks due; reminder timing (day before, day of, past due) is configurable. Clients and FSBO customers manage their own preferences in their portals. See [Task reminders](/articles/task-reminders).
 
-> The full Settings hub also includes Email Templates, My Playbook, Help & Tour (personal); Company, Billing & Credits, Document Templates, Integrations & Webhooks, Payment Access, and Advertising (workspace); and Platform Billing / Advertising for platform admins.
+> The full Settings hub also includes Email Templates, My Playbook, Help & Tour (personal); Company, Billing, Document Templates, Integrations & Webhooks, Payment Access, and Advertising (workspace); and Platform Billing / Advertising for platform admins.
 
 ---
 
@@ -802,13 +812,13 @@ Icon BookOpen / purple. *Quick answers, plain-English definitions, fixes, time-s
 
 **What is a "TC"?** A Transaction Coordinator — the person who keeps paperwork and deadlines moving. See [Understanding roles](/articles/understanding-roles).
 
-**How do I start a deal?** Click **+ New Transaction** and use the wizard — upload a contract or enter the basics. See [Creating a transaction](/articles/creating-a-transaction).
+**How do I start a deal?** Click **+ New Transaction** and use the wizard — four phases, then **Upload Transaction**. See [Creating a transaction](/articles/creating-a-transaction).
 
 **Where do my tasks come from?** From templates, the deal type, and the contract dates — not AI guesswork. See [Where your tasks come from](/articles/how-tasks-are-generated).
 
 **I changed a closing date — do I fix every task?** No. Dependent task dates move automatically. See [Editing key dates](/articles/editing-key-dates).
 
-**Will the AI email my clients without me?** Only routine, factual replies, and it always keeps a person in the loop; anything uncertain waits for you in AI Email Review. See [AI email drafts](/articles/ai-email-drafts).
+**Will the AI email my clients without me?** Everyday replies wait for you in **Email** or **Needs You**. If an admin sets Autopilot, a small set of named letters (welcome, title order, inspection reminder) may send when confidence is high. Wire and legal mail never auto-send. See [AI email drafts](/articles/ai-email-drafts).
 
 **Does the AI change my deals on its own?** No — it suggests, you approve. See [Reviewing AI suggestions](/articles/ai-suggestions).
 
@@ -821,8 +831,11 @@ Icon BookOpen / purple. *Quick answers, plain-English definitions, fixes, time-s
 | **Transaction Coordinator (TC)** | The role that manages paperwork and deadlines across deals (labeled "Transaction Coordinator" in the app). |
 | **Transaction (deal)** | A single property sale you manage from contract to closing. |
 | **Workspace** | The role-specific screens where you work; also each deal's tabbed page at `/transactions/:id`. |
+| **Aime** | The in-app assistant (floating Ask Aime, and the Agent tab on a deal). |
+| **Needs You** | The Workflow queue of drafts, proposals, and decisions that still need a person. |
 | **AI briefing** | The top-bar summary sorting deals into Critical, Needs Attention, and On Track. |
-| **Status pill** | The colored label on a deal (Critical / Needs Attention / On Track / Unhealthy). |
+| **Status pill** | The colored label on a deal (Critical / Needs Attention / On Track). |
+| **Email** | Intelligence → Email: Inbox, Outbox, Sent, and Filtered. |
 | **Milestone / key date** | A major date in a deal, like inspection response or closing. |
 | **My Task Queue** | One combined list of everything due across all your deals. |
 | **Completion method** | How a task was done: phone, email, DocuSign, upload, and so on. |
@@ -831,7 +844,7 @@ Icon BookOpen / purple. *Quick answers, plain-English definitions, fixes, time-s
 | **Playbook** | Your (or the team's) closing-checklist templates, tagged notes, preferred vendors, and resources. |
 | **Portal** | The limited view a client, FSBO seller, or vendor sees. |
 | **Tenant / workspace** | Your brokerage's own account and data. |
-| **Credit wallet** | Prepaid credits used for per-transaction billing (Settings → Billing & Credits). |
+| **Billing** | Settings → Billing: the per-deal fee, prepaid deals, and payment history. |
 
 ## Real estate terms
 | Term | What it means |
@@ -852,7 +865,7 @@ Icon BookOpen / purple. *Quick answers, plain-English definitions, fixes, time-s
 
 **My file will not upload.** Use a PDF, image, or Word document. Try a fresh upload or a different browser. See [Uploading documents](/articles/uploading-documents).
 
-**The AI read my contract wrong.** Edit the field — nothing is final until you confirm on the wizard's **Confirm** step. Highlighted fields are exactly the ones it was unsure about.
+**The AI read my contract wrong.** Edit the field — nothing is final until you confirm on the wizard's **Verification** phase. Highlighted fields are exactly the ones it was unsure about.
 
 **A vendor replied but the date did not update.** A vague reply is flagged for clarification, not guessed. Open **Intelligence → Vendor Proposals** and confirm the date.
 
@@ -871,7 +884,7 @@ Icon BookOpen / purple. *Quick answers, plain-English definitions, fixes, time-s
 
 **Search instead of clicking.** Press ⌘K — search spans clients, vendors, companies, addresses, and dates.
 
-**Let AI do the first draft.** Let the wizard read contracts, let AI draft routine replies (you approve in AI Email Review), and ask the assistant to summarize a deal or pull up overdue tasks.
+**Let AI do the first draft.** Let the wizard read contracts, let Aime draft routine replies (you approve in Email or Needs You), and ask Aime to summarize a deal or pull up overdue tasks.
 
 **Set up once.** Connect your email, keep your **My Playbook** templates and preferred vendors current, and tune your notifications.
 
@@ -879,7 +892,7 @@ Icon BookOpen / purple. *Quick answers, plain-English definitions, fixes, time-s
 *Excerpt:* Where to look first, how to ask the AI, and how to reach a human.
 
 1. **Search this help center** — the search box spans every article by title and content.
-2. **Ask the AI assistant in the app** — open the floating panel (or a deal's Agent tab) and ask in plain language.
+2. **Ask Aime in the app** — open the floating Ask Aime button (or a deal's Agent tab) and ask in plain language.
 3. **Check troubleshooting and the FAQ** — [Troubleshooting](/articles/troubleshooting-common-issues) and [FAQ](/articles/frequently-asked-questions).
 4. **Ask your admin or team lead** — for anything account-specific (your role, permissions, whether a feature is enabled).
 5. **Contact support** — use the contact/chat option in the help center. Include what you were trying to do, what happened instead, and the deal or screen where it happened.

@@ -125,7 +125,7 @@ Browser-verified consequences on `/transactions/7d4122ad-…`:
 
 | §16 / §4.6 says | Built page actually does |
 | --- | --- |
-| Tabs: Overview · Timeline · Tasks · Documents · People · Billing · Activity | Agent · Timeline · **Compliance** · Documents · Tasks · People · Activity · Email |
+| Tabs: Overview · Timeline · Tasks · Documents · Contacts · Billing · Activity | Agent · Timeline · **Compliance** · Documents · Tasks · Contacts · Activity · Email |
 | Lands on **Overview** | Lands on **Timeline** (`aria-selected=true`) |
 | Compliance is the Checklist view of Documents | Compliance is still its own tab |
 | Billing tab lists the deal's invoices | No Billing tab; `?tab=billing` silently falls back to Timeline |
@@ -546,7 +546,7 @@ Worth recording, because the surface is far from broken:
   `_sort_cards`'s urgency key degenerates to closing-date order.)
 - **Detail tabs** — Timeline (8 dated rows with bases), Compliance (10 open /
   3 uploaded / 0 waived), Documents (10 files with AI-verification chips),
-  Tasks (37 open, grouped, with honest "AI needs you" rows), People (fees
+  Tasks (37 open, grouped, with honest "AI needs you" rows), Contacts (fees
   section, 5 party groups, RESPA note), Email (3 pending drafts) all render
   real data.
 - **Responsive** — no horizontal overflow at 1600 px, 1024 px or 375 px on
@@ -577,7 +577,7 @@ Worth recording, because the surface is far from broken:
 | 15. Timeline tab | 12 | 6 | 3 | 0 | 3 |
 | 16. Documents/Checklist | 12 | 7 | 2 | 0 | 3 |
 | 17. Tasks tab | 11 | 8 | 0 | 0 | 3 |
-| 18. People tab | 13 | 9 | 2 | 0 | 2 |
+| 18. Contacts tab | 13 | 9 | 2 | 0 | 2 |
 | 19. Billing/Activity/Email/Agent | 13 | 6 | 5 | 0 | 2 |
 | 20. Detail states & edges | 12 | 5 | 1 | 0 | 6 |
 | 21. Cross-surface | 6 | 2 | 2 | 1 | 1 |

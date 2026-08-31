@@ -134,7 +134,7 @@ workspace owner. Everything else works as an Agent.
 | 5.13 | **Tasks** — the task list is the right one for this kind of deal (nothing missing, nothing you would never do) | |
 | 5.14 | **Tasks** — a task showing "Waiting on an earlier step" really should be waiting | |
 | 5.15 | **Tasks** — an amber "AI needs you" task explains itself clearly enough to fix | |
-| 5.16 | **People** — everyone is under the right heading; you can add, edit, assign a teammate and manage client access | |
+| 5.16 | **Contacts** — everyone is under the right heading; you can add, edit, assign a teammate and manage client access | |
 | 5.17 | **Activity** — History explains what changed; the Automation lens shows only what ran without a click, with Undo | |
 | 5.18 | **Email** — this deal's Outbox and Inbox show the right messages | |
 

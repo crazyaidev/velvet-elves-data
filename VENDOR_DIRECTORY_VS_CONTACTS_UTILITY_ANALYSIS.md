@@ -166,7 +166,7 @@ transaction_vendor_assignment_contacts
 
 Schema: `202603110000_new_vendors_and_ad_hooks.sql` created `vendors` and added `contacts.vendor_id`. Milestone 4.3 added assignments, colleague tokens, background refresh. Milestone 5.3 added `user_preferred_vendors`.
 
-**Bridge that now exists** (`app/services/vendor_autobridge.py`): when a service-provider party is saved on a deal (wizard or People tab) — inspector, appraiser, title, attorney, home warranty, loan officer — the backend silently:
+**Bridge that now exists** (`app/services/vendor_autobridge.py`): when a service-provider party is saved on a deal (wizard or Contacts tab) — inspector, appraiser, title, attorney, home warranty, loan officer — the backend silently:
 
 1. matches or creates a **vendor company** (email → phone → normalized company name),
 2. matches or creates a **contact person** with `is_vendor=true` and `vendor_id` set,
@@ -324,7 +324,7 @@ The older conclusion that Directory is “mostly disconnected from the deal flow
 
 3. **Link through.** On a Contacts row with `vendor_id`, show the company name as a control that opens Directory (or the vendor modal) instead of a dead string. On Directory, “Contacts” is already a list of people; those names could deep-link to `/contacts?focus=`.
 
-4. **Do not fold Directory into Contacts as a tab unless the tab is companies.** A future “Directory” hub with **People | Companies** would reduce the thin Vendors group without collapsing the data model. That is an IA change, not a deletion.
+4. **Do not fold Directory into Contacts as a tab unless the tab is companies.** A future “Directory” hub with **Contacts | Companies** would reduce the thin Vendors group without collapsing the data model. That is an IA change, not a deletion.
 
 5. **Leave Vendor Proposals in Intelligence.** That grouping question is separate (`VENDOR_PROPOSALS_NAV_PLACEMENT_ANALYSIS.md`). Directory is an address book; Proposals is an AI approval queue.
 

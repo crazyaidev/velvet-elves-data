@@ -20,7 +20,7 @@ on and no script to run.
 - On a wide screen you see the **AI agent pane on the left** and the
   **workbench on the right**. The workbench is **one unified panel** with
   underline tabs across its top (Timeline, Compliance, Documents, Tasks,
-  People, Activity, Email) and the active tab on the same surface below — no
+  Contacts, Activity, Email) and the active tab on the same surface below — no
   floating tab bar over a separate card. There is no KPI strip, tracking-date
   band, or deal-brief card.
 - On a narrow screen there is no split — the deal opens straight into the
@@ -147,7 +147,7 @@ nothing was sent, and Undo worked — all visible on screen.
 4. Alternative: drag a row straight onto the composer — same chip, nothing is
    uploaded or changed.
 5. The **+** button in the composer opens a searchable picker with tabs
-   (Documents, Tasks, Deadlines, Requirements, People, Emails). Pick one to
+   (Documents, Tasks, Deadlines, Requirements, Contacts, Emails). Pick one to
    insert it.
 
 Pass: every item is referenceable by mouse; the chip's name matches the row.

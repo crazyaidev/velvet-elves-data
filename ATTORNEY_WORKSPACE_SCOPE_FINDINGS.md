@@ -40,7 +40,7 @@ Direct URL access is **not** permitted. Role gates must bounce counsel to `/dash
 |---|---|---|
 | All Documents | `/documents`, `/documents/all` | Agent AI document queue. Counsel reviews docs **on the matter**. |
 | Closing calendar | `/calendar` | Agent pipeline calendar. Counsel calendar is `/attorney/recording-calendar`. |
-| Contacts directory | `/contacts` | Tenant Rolodex. Counsel people live on the matter People panel. |
+| Contacts directory | `/contacts` | Tenant Rolodex. Counsel people live on the matter Contacts panel. |
 | AI Suggestions | `/ai-suggestions` | Agent intelligence page. Counsel tool is Ask AI. |
 | Analytics / reports | `/reports`, `/analytics`, `/profile` → reports | Permission matrix: Attorney has **No** analytics. |
 | AI email outbox | `/ai-emails` | Agent draft-approval queue. |

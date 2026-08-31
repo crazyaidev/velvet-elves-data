@@ -1,0 +1,3 @@
+Velvet Elves QA fixture — Client Portal document upload
+Generated for Chrome QA of the represented-client Documents surface.
+This is a plain-text stand-in for a client-owned closing document.

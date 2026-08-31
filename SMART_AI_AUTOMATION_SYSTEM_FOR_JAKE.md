@@ -88,9 +88,9 @@ Only these, and only on Assisted or Autopilot:
 
 | Letter | Who receives it | What it needs |
 | --- | --- | --- |
-| Buyer welcome | Buyer | Their email on People |
-| Seller welcome | Seller | Their email on People |
-| Co-op agent welcome | Co-op agent | Their email on People |
+| Buyer welcome | Buyer | Their email on Contacts |
+| Seller welcome | Seller | Their email on Contacts |
+| Co-op agent welcome | Co-op agent | Their email on Contacts |
 | Loan officer welcome | Lender | Their email, plus the purchase agreement on the file |
 | Order Title | Title company or title rep | Their email, plus the purchase agreement |
 | Confirm Title Order | Title company or title rep | Same as Order Title |
@@ -101,7 +101,7 @@ Only these, and only on Assisted or Autopilot:
 Guards that already apply:
 
 - Active deals only. Paused / closed files are left alone.
-- Recipients come only from **People**. The system never guesses an address and never uses a platform "noreply" address for deal mail.
+- Recipients come only from **Contacts**. The system never guesses an address and never uses a platform "noreply" address for deal mail.
 - A connected Gmail or Outlook mailbox is required. No mailbox → the task is flagged, not sent.
 - **Manual** stops the send.
 - A task more than **30 days** overdue is flagged instead of surprising someone months later.
@@ -110,7 +110,7 @@ Guards that already apply:
 - The recipient is never told that AI wrote the message. Legacy "written by AI" disclaimers are stripped if they appear.
 - If the body says a file is attached, the file actually has to be on the email.
 
-These letters use locked templates (address, closing date, the right packet) — not free-written AI prose. That is why they are allowed to send unattended. Wrong address or wrong attachment is still the risk, which is why People and the purchase agreement are hard requirements.
+These letters use locked templates (address, closing date, the right packet) — not free-written AI prose. That is why they are allowed to send unattended. Wrong address or wrong attachment is still the risk, which is why Contacts and the purchase agreement are hard requirements.
 
 ### 4.2 Everything else waits for Send
 
@@ -167,7 +167,7 @@ If a library letter cannot go out, the task lands in Needs You with a reason tha
 
 | The AI stopped because | What you actually click |
 | --- | --- |
-| No email on that party | **Add contact** on People |
+| No email on that party | **Add contact** on Contacts |
 | Purchase agreement (or other required file) is missing | **Upload document** |
 | Mailbox disconnected or unauthorized | **Reconnect mailbox** in Email & E-signature |
 | Task is more than 30 days overdue | **Change due date** |
@@ -394,7 +394,7 @@ The countdown delayed auto-send.
 | What people fear | What Velvet Elves actually does |
 | --- | --- |
 | The AI invents a letter and sends it | Only named library templates, from deal facts |
-| It emails a guessed address | Only captured People emails |
+| It emails a guessed address | Only captured Contacts emails |
 | It talks about wires | Those messages are held, never drafted |
 | It moves a closing date | Dates never move without your confirm |
 | It keeps sending after something is wrong | It stops, names the cause, and retries when that cause is gone |

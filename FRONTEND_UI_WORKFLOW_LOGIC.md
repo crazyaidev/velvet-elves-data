@@ -1,64 +1,125 @@
 # Velvet Elves — Frontend UI Workflow Logic Specification
 
-**Version:** 1.1
-**Date:** 2026-05-09
-**Scope:** Complete page-by-page frontend workflow logic for all routes
-**Reference Designs:** 10 approved HTML designs in `completed_designs/`
-**Status:** Live as-built spec — sections 2.1 (Onboarding), 6.3 (Settings), 6.4 (AI Email Review), and §14.10 (Product Tour) have been rewritten to match the May 2026 implementation. Other sections still reflect the pre-Phase-3 design review and may drift from the build.
+**Version:** 2.0
+**Date:** 2026-08-25
+**Scope:** As-built page-by-page frontend workflow for every live route in `velvet-elves-frontend/src/App.tsx`
+**Source of truth:** `src/utils/constants.ts` (`ROUTES`), `src/layouts/dashboardShellConfig.ts`, `src/layouts/AppLayout.tsx`
+**Status:** Live as-built spec. Role strings in code are `TransactionCoordinator` and `ForSaleByOwner` (UI: Transaction Coordinator, For Sale By Owner). Historical “Elf” / “FSBO Customer” wording is retired except as a nickname.
 
 ---
 
 ## Table of Contents
 
+0. [Live route map](#0-live-route-map)
 1. [Auth Pages](#1-auth-pages)
 2. [Onboarding](#2-onboarding)
 3. [Dashboard Landing Pages](#3-dashboard-landing-pages)
 4. [Deals Section](#4-deals-section)
-5. [Workflow Section](#5-workflow-section)
-6. [Intelligence Section](#6-intelligence-section)
+5. [Workflow Section](#5-workflow-section) (Needs You, Task Queue, Calendar, Documents)
+6. [Intelligence Section](#6-intelligence-section) (includes Settings hub §6.3)
 7. [Attorney Workspace](#7-attorney-workspace)
-8. [FSBO Customer Workspace](#8-fsbo-customer-workspace)
+8. [FSBO Workspace](#8-fsbo-customer-workspace)
 9. [Client Portal](#9-client-portal)
-10. [Admin Section](#10-admin-section)
-11. [Profile](#11-profile)
+10. [Admin, Settings extras & Platform](#10-admin-section)
+11. [Profile](#11-profile) (legacy `/profile` redirect)
 12. [Shared / Public](#12-shared--public)
 13. [Cross-Cutting Workflows](#13-cross-cutting-workflows)
 14. [Global Interaction Patterns](#14-global-interaction-patterns)
 15. [Constraints & Rules](#15-constraints--rules)
 
+Vendor portal, payments list, and platform admin are summarized in §0 (route map) and in the as-built notes at §7, §9.5, §10.9, and §12.2.
+
 ---
 
 ## Shared Shell Reference
 
-All internal pages share a common app shell. This section defines it once; individual page sections reference it by name.
+Four shells exist. Portal users never see AppLayout.
 
-### Internal Shell
+### Internal Shell (Agent, Transaction Coordinator, Team Lead, Admin)
 
-- **Topbar (58px):** Brand lockup + AI indicator | "Today's AI Briefing" chip (Critical / Needs Attention / On Track counts — clickable as filter shortcuts) | Global search input | Notification bell | User avatar chip (click opens menu: Settings, Log out) | Contextual CTA (e.g., "+ New Transaction")
-- **Left Sidebar (220px, dark navy `#1E3356`):** work + record-review only. All configuration lives in the Settings hub (NAVIGATION_AND_SETTINGS_CONSOLIDATION_SUPERIOR_PLAN.md).
-  - 2×2 KPI tiles (role-specific; default for Agent: Overdue Tasks, Closing This Week, Active Deals, Pipeline Value)
-  - Navigation groups:
-    - **Dashboard** — role-specific landing
-    - **Deals** — Active Transactions (badge), Pending (badge), Closed, All Transactions, Clients
-    - **Workflow** — My Task Queue (badge), All Documents, Closing Calendar
-    - **Payments** — Invoices & Payments, Commission Payouts (when permitted)
-    - **Vendors** — Vendor Directory
-    - **Intelligence** — AI Suggestions (badge), AI Email Review (badge), Vendor Proposals (badge), Analytics
-    - **Team** (Team Lead + Admin) — Team Overview
-    - **Oversight** (Admin) — Communication Audit, Audit Log
-  - Footer: Pinned "+ New Transaction" CTA button | User profile card (avatar, name, role; click opens menu: **Settings**, Log out)
-- **Settings hub (`/settings`):** opened from the avatar-menu Settings entry. One card-grid surface, role-filtered, in two scope groups:
-  - **Personal Settings** (every internal role): Account, Notifications, Email & E-signature (per-user inbox + DocuSign), Email Templates, My Playbook, Help & Tour.
-  - **Workspace Settings** (Admin / Owner; team library shared with Team Lead): Company, Branding, Billing & Credits, Users & Invites, Teams, Task Templates, Vendor Templates, Team Playbook, Integrations & Webhooks, AI & Automation, Payment Access, Advertising, Delete Organization.
-  - Portal roles (Client / FSBO / Vendor) keep the lightweight Account modal instead of the hub.
-- **Page Header:** Title + count pill | Action buttons (Export CSV, Print Report) | Tab bar (page-level filter tabs with live counts) | Sort control + inline search
-- **Content Area:** Scrollable, padded, receives primary page content
+- **Layout:** `AppLayout` — dark navy sidebar + slim topbar + page content
+- **Topbar:** Brand lockup | Today's AI Briefing chip (Critical / Needs Attention / On Track — counts filter the transaction list; chip opens Ask AI) | ⌘K search | Notification bell | User chip | `+ New Transaction` (Agent/TC/Team Lead; Admin has it in the topbar only)
+- **Sidebar KPI tiles:** Overdue tasks (Team Lead: Team Overdue) · Closing this week · Active deals · Pipeline value
+- **Navigation groups:**
+  - **Dashboard** — role landing (`getLandingRoute`)
+  - **Deals** — Active Transactions, Drafts & Paused, Closed, All Transactions, Clients, Contacts
+  - **Workflow** — Needs You, My Task Queue, All Documents, Closing Calendar (`/calendar`)
+  - **Payments** — Invoices & Payments (+ Commission Payouts when `can_trigger_payout`)
+  - **Vendors** — Vendor Directory
+  - **Intelligence** — AI Suggestions, Email (`/ai-emails`), Vendor Proposals, Analytics (`/reports`) (+ locked AI Coach teaser on a team)
+  - **Team** (Team Lead + Admin) — Team Overview, Teams
+  - **Oversight** (Admin) — Communication Audit, Audit Log
+  - **Platform** (`is_platform_admin`) — Tenants, Users, Waitlist, AI usage, Costs & pricing, Help center
+- **Footer:** `+ New Transaction` (Agent/TC/Team Lead) | profile card → Settings / Log out
+- **Settings:** `/settings` hub from the avatar menu — not a sidebar group
 
-### FSBO / Client Shell
+### Attorney Shell (`AttorneyLayout`)
 
-- Simplified sidebar: Dashboard, My Properties, Documents, Milestones & Messages, Ask Velvet Elves AI, Notifications, Sharing
-- Topbar: Brand lockup | "Share milestones" CTA (FSBO) | Notification bell | User chip
-- No internal workflow navigation (Deals, Workflow, Intelligence groups hidden)
+- Caseload rail: filters **Needs a call** / **Ready** / **All** + matter list → `/transactions/:id`
+- CTA: **Upload documents** (legal-packet modal)
+- No AppLayout KPI mosaic / AI briefing bar. Own Ask AI + ⌘K
+- Landing `/dashboard/attorney` opens the first matter or empty state
+
+### Client Shell (`ClientWorkspaceLayout`)
+
+- Concierge navy sidebar (not AppLayout)
+- Nav: Home · Next Steps · Timeline · Documents · Updates
+- Account chip: Profile modal, Help Center, Log out
+- `/client/transactions` redirects to `/client/home`
+
+### FSBO Shell (AppLayout `fsbo` variant)
+
+- Standalone Home (`/fsbo`)
+- Workspace: My Properties, Documents, Payments (only if open invoices), Messages
+- KPI tiles: My Properties · Missing Docs · Share Links Live · Days To Close
+- Footer CTA: Share milestones (opens `FsboShareManagementModal`)
+- No AI briefing / no global search; Floating Ask AI
+
+### Vendor Shell (`VendorWorkspaceLayout`)
+
+- Bright white rail (not AppLayout)
+- Nav: Loan Files / Title Files / Your Files (by `scope_family`) · Documents · Tasks
+- CTA: Upload document
+
+---
+
+# 0. Live Route Map
+
+| Route | Page | Roles |
+|-------|------|-------|
+| `/login` `/register` `/forgot-password` `/reset-password` `/auth/confirm` `/oauth/callback` `/invite/:token` | Auth | Public |
+| `/terms` `/privacy` | Legal | Public |
+| `/onboarding` | OnboardingWizard | Authenticated |
+| `/transactions/new` | WizardWorkspacePage | Agent, TC, TeamLead, Admin |
+| `/dashboard` | DashboardRouter | All (redirects) |
+| `/dashboard/agent` | SoloAgentDashboardPage | Agent, TC |
+| `/dashboard/team` | TeamLeaderDashboardPage | TeamLead, Agent/TC on a team, Admin |
+| `/dashboard/attorney` | AttorneyDashboardPage → first matter | Attorney |
+| `/dashboard/admin` | AdminDashboardPage | Admin |
+| `/transactions` `/transactions/active\|pending\|closed\|all` | TransactionListPage (AttorneyWorkspacePage for Attorney) | Internal + Attorney |
+| `/transactions/:id` | TransactionWorkspacePage / AttorneyMatterWorkspacePage | Internal + Attorney |
+| `/needs-you` | NeedsYouPage | Internal ops |
+| `/tasks/queue` | TaskQueuePage | Internal ops |
+| `/documents` `/documents/all` | DocumentsPage | Internal ops |
+| `/calendar` | CalendarPage | Internal ops |
+| `/clients` | ClientsHubPage | Internal ops |
+| `/contacts` | ContactsPage | Internal ops |
+| `/vendors` | VendorListPage | Internal ops |
+| `/ai-suggestions` | AISuggestionsPage | Internal ops |
+| `/ai-emails` | AiEmailReviewPage | Internal ops |
+| `/vendor-proposals` | VendorProposalsPage | Internal ops |
+| `/reports` | AnalyticsPage (`/analytics` redirects) | Internal ops |
+| `/payments` `/payments/payouts` | Payments | Internal ops |
+| `/settings` and `/settings/*` | Settings hub + personal panes | Internal + Attorney |
+| `/organization` | OrganizationPage | Admin / owner |
+| `/attorney/releases` `/attorney/state-rules` `/attorney/recording-calendar` | Counsel | Attorney |
+| `/fsbo` `/fsbo/properties` `/fsbo/documents` `/fsbo/milestones` `/fsbo/invoices` | FSBO | ForSaleByOwner |
+| `/client/home` `/client/next-steps` `/client/milestones` `/client/documents` `/client/updates` | Client | Client |
+| `/portal/vendor` `/portal/vendor/documents` `/portal/vendor/tasks` | Vendor | Vendor |
+| `/platform/*` | Platform admin | `is_platform_admin` |
+| `/milestones/:shareToken` `/v/:token` `/pay/invoices/:id` `/advertise` | Public | Unauthenticated |
+
+**Retired / redirect:** `/attorney/queue` → `/transactions/active`; `/attorney/intake` → `/dashboard/attorney`; `/communications` → `/admin/communications`; `/profile` → `/reports?scope=me` (Attorney → `/settings/account`); `/client/transactions` → `/client/home`.
 
 ---
 
@@ -120,7 +181,7 @@ All internal pages share a common app shell. This section defines it once; indiv
 **"Sign In" button click:**
 - Trigger: Click or Enter key
 - Immediate UI: Button disabled + spinner, inputs disabled
-- API call: `POST /api/v1/auth/login` with `{ email, password }`
+- API call: `POST /api/v1/users/login` with `{ email, password }` (OAuth2 password form; there is no `/api/v1/auth/login`)
 - Success: Store JWT + refresh token → check `onboarding_completed` flag → if false redirect to `/onboarding`, else redirect to `/dashboard`
 - Failure:
   - 401 Invalid credentials → error toast "Invalid email or password" + shake animation on form
@@ -137,7 +198,7 @@ All internal pages share a common app shell. This section defines it once; indiv
 - Trigger: Click
 - Immediate UI: Button loading state, redirect to OAuth provider
 - API call: Supabase Auth `signInWithOAuth({ provider })`
-- Success: OAuth callback at `/auth/callback` handles token exchange → redirect to `/dashboard` or `/onboarding`
+- Success: OAuth callback at `/oauth/callback` handles token exchange → redirect to `/dashboard` or `/onboarding`
 - Failure: Return to `/login` with error toast "Authentication failed. Please try again."
 - Side effects: Audit log entry
 
@@ -149,7 +210,7 @@ All internal pages share a common app shell. This section defines it once; indiv
 
 ### 6. Navigation Flows
 - **Inbound routes:** Direct URL entry, logout redirect, unauthorized access redirect (with return URL in query param), invite acceptance redirect
-- **Outbound routes:** `/dashboard` (successful login), `/forgot-password`, `/register` (if enabled), `/auth/callback` (OAuth), `/onboarding` (if onboarding not completed)
+- **Outbound routes:** `/dashboard` (successful login), `/forgot-password`, `/register` (if enabled), `/oauth/callback` (OAuth), `/onboarding` (if onboarding not completed)
 - **Deep-link support:** `?returnTo=/path` query parameter preserved through login; after successful auth, redirect to returnTo instead of `/dashboard`
 - **Back navigation:** Browser back goes to previous page (typically landing page or referrer)
 
@@ -215,7 +276,7 @@ All internal pages share a common app shell. This section defines it once; indiv
 **"Create Account" button click:**
 - Trigger: Click or Enter
 - Immediate UI: Button disabled + spinner
-- API call: `POST /api/v1/auth/register` with `{ full_name, email, phone, password }`
+- API call: `POST /api/v1/users/register` with `{ full_name, email, phone, password, role }` (self-signup roles: Agent, TeamLead, TransactionCoordinator, Admin only)
 - Success: Confirmation email sent → redirect to `/login` with success toast "Account created! Please check your email to verify."
 - Failure:
   - 409 Email exists → inline error "An account with this email already exists"
@@ -276,7 +337,7 @@ All internal pages share a common app shell. This section defines it once; indiv
 **"Send Reset Link" click:**
 - Trigger: Click
 - Immediate UI: Button disabled + spinner
-- API call: `POST /api/v1/auth/forgot-password` with `{ email }`
+- API call: `POST /api/v1/users/password-reset/request` with `{ email }` (always 202; no `/api/v1/auth/*`)
 - Success: Show confirmation state "Check your email" with email icon illustration; "Didn't receive it? Resend" link (cooldown 60 seconds)
 - Failure: Always show success state to prevent email enumeration. Log failure internally.
 - Side effects: Email sent via Supabase Auth; audit log
@@ -327,10 +388,10 @@ All internal pages share a common app shell. This section defines it once; indiv
 
 ---
 
-## 1.5 OAuth Callback — `/auth/callback`
+## 1.5 OAuth Callback — `/oauth/callback`
 
 ### 1. Page Identity & Access
-- **Route:** `/auth/callback`
+- **Route:** `/oauth/callback`
 - **Page title:** "Completing sign in…"
 - **Allowed roles:** Public (OAuth redirect target)
 - **Auth requirement:** Public — processes OAuth authorization code
@@ -561,15 +622,15 @@ All internal pages share a common app shell. This section defines it once; indiv
 - **Route:** `/dashboard`
 - **Page title:** N/A (redirect only)
 - **Allowed roles:** All authenticated roles
-- **Redirect rule:**
-  - Agent (solo, no team) → `/dashboard/agent`
-  - Agent/Elf on a team, Team Lead → `/dashboard/team`
+- **Redirect rule:** `getLandingRoute(user)` in `dashboardShellConfig.ts`
+  - Agent / TransactionCoordinator with no `team_id` → `/dashboard/agent`
+  - Agent / TC with `team_id`, Team Lead → `/dashboard/team`
   - Attorney → `/dashboard/attorney`
   - Admin → `/dashboard/admin`
-  - Client → `/client/transactions`
-  - FSBO Customer → `/fsbo`
-  - Vendor → `/vendor` (the Vendor portal owns the vendor surface; the old
-    `/client/documents` vendor hijack was removed — that route is Client-only)
+  - Client → `/client/home`
+  - ForSaleByOwner → `/fsbo`
+  - Vendor → `/portal/vendor`
+  - Unknown role → `/unauthorized`
 - **Auth requirement:** Protected
 
 This is a pure redirect route. No UI rendered.
@@ -583,12 +644,12 @@ This is a pure redirect route. No UI rendered.
 ### 1. Page Identity & Access
 - **Route:** `/dashboard/agent`
 - **Page title:** "Dashboard"
-- **Allowed roles:** Agent (solo — no team_id), Elf (standalone)
+- **Allowed roles:** Agent (solo — no team_id), TransactionCoordinator (standalone)
 - **Redirect rule:** If user has `team_id` → `/dashboard/team`. Non-agent roles → `/dashboard` for re-routing.
 - **Auth requirement:** Protected + role check
 
 ### 2. Entry Conditions & Data Loading
-- **Prerequisite state:** Authenticated, `onboarding_completed === true`, role is Agent or standalone Elf
+- **Prerequisite state:** Authenticated, `onboarding_completed === true`, role is Agent or standalone TransactionCoordinator
 - **API endpoints consumed on mount:**
   - `GET /api/v1/dashboard/agent` — aggregated dashboard payload:
     - `health_score` (0–100), `health_descriptor` (text)
@@ -598,8 +659,8 @@ This is a pure redirect route. No UI rendered.
     - `production_snapshot` — { pending_gci, pending_volume, closings_ytd, closings_lifetime, active_count }
     - `priority_transactions[]` — top transactions with next-step CTA, tasks, dates, contacts
     - `ai_intelligence` — portfolio insights, missing-doc concentration, recent communication highlights
-  - `GET /api/v1/ai/briefing` — { critical, needs_attention, on_track } counts for topbar
-  - `GET /api/v1/transactions/kpi` — sidebar KPI tile data (overdue_tasks, closing_this_week, active_deals, pipeline_value)
+  - `GET /api/v1/dashboard/ai-briefing` — { critical, needs_attention, on_track } counts for topbar
+  - `GET /api/v1/dashboard/sidebar-kpis` — sidebar KPI tile data (overdue_tasks, closing_this_week, active_deals, pipeline_value)
 - **Loading state UI:** Command grid skeleton: large placeholder card for hero, two smaller placeholders for production/overview. Sidebar KPI tiles show animated pulse placeholders. Topbar briefing chip shows "Loading…"
 - **Empty state UI:** If zero transactions: Hero card replaced with "Get started" card — "Create your first transaction to see your dashboard come to life" with prominent "+ New Transaction" CTA and document drag-drop zone
 - **Error state UI:** Failed API → error banner at top of content area "Unable to load dashboard data" with Retry button; cached stale data shown if available
@@ -643,7 +704,7 @@ This is a pure redirect route. No UI rendered.
   - Recent Communication Highlights: last 5 notable communications
 
 - **Overlay/modal inventory:**
-  - New Transaction quick-create modal (triggered by "+ New Transaction" CTA or file drop)
+  - IntakeConfirmationModal on file drop, then `/transactions/new` (full-screen wizard — not a quick-create modal)
   - AI Chat panel (floating, triggered by AI indicator in topbar or chat icon)
 
 ### 4. User Actions & State Transitions
@@ -652,8 +713,8 @@ This is a pure redirect route. No UI rendered.
 - Trigger: Drag document over intake card, drop
 - Immediate UI: Drop zone highlights on drag-over (dashed border, champagne glow); on drop, shows "AI is reading your document…" with progress spinner
 - API call: `POST /api/v1/documents/intake` with file → `POST /api/v1/ai/parse-document`
-- Success: Opens New Transaction quick-create modal with AI-extracted fields pre-filled
-- Failure: Toast "Unable to read document. Please try again or enter details manually." → opens empty quick-create modal
+- Success: IntakeConfirmationModal → `/transactions/new` with files in IntakeContext; wizard parse fills Contract Details
+- Failure: Toast "Unable to read document. Please try again or enter details manually." → still opens the wizard for manual entry
 - Side effects: Document stored in temp storage; audit log
 
 **Fast filter button click (e.g., "Critical Closings"):**
@@ -691,11 +752,11 @@ This is a pure redirect route. No UI rendered.
 
 **"+ New Transaction" CTA click:**
 - Trigger: Click
-- Immediate UI: Opens New Transaction quick-create modal
-- See Cross-Cutting Workflow A for full modal spec
+- Immediate UI: Navigate to `/transactions/new` (full-screen wizard)
+- See Cross-Cutting Workflow A for the 4-phase spec
 
 ### 5. Conditional Rendering Logic
-- **Role-based visibility:** This page only renders for solo Agent/standalone Elf. If user has `team_id`, they see Team Leader Dashboard instead.
+- **Role-based visibility:** This page only renders for solo Agent / standalone TransactionCoordinator. If user has `team_id`, they see Team Leader Dashboard instead.
 - **State-based visibility:**
   - Upload intake card always visible
   - If zero transactions: show empty-state hero instead of command grid
@@ -761,7 +822,7 @@ This is a pure redirect route. No UI rendered.
 ### 1. Page Identity & Access
 - **Route:** `/dashboard/team`
 - **Page title:** "Team Dashboard"
-- **Allowed roles:** Team Lead, Agent with `team_id`, Elf with `team_id`
+- **Allowed roles:** Team Lead, Agent with `team_id`, TransactionCoordinator with `team_id`
 - **Redirect rule:** Users without `team_id` → `/dashboard/agent`. Non-internal roles → `/dashboard`.
 - **Auth requirement:** Protected + team membership check
 
@@ -775,8 +836,8 @@ This is a pure redirect route. No UI rendered.
     - `agent_board[]` — per-agent summary (active deals, overdue tasks, upcoming closings, health score)
     - `team_financials` — { pipeline_health, annual_pace, pending_gci, pending_volume }
     - `closings_next_14_days[]` — upcoming closing list
-  - `GET /api/v1/ai/briefing?scope=team` — team-scoped briefing counts
-  - `GET /api/v1/transactions/kpi?scope=team` — team KPI tiles
+  - `GET /api/v1/dashboard/ai-briefing?scope=team` — team-scoped briefing counts
+  - `GET /api/v1/dashboard/sidebar-kpis?scope=team` — team KPI tiles
 - **Loading state UI:** Same skeleton pattern as Solo Agent but with team-specific placeholders
 - **Empty state UI:** If team has zero transactions: "Your team hasn't started any transactions yet" with "+ New Transaction" CTA
 - **Error state UI:** Error banner with retry
@@ -785,7 +846,7 @@ This is a pure redirect route. No UI rendered.
 - **Shell variant:** Internal shell with Team Lead sidebar additions
 - **Sidebar state:** "Dashboard" active; additional "Team" section with "Agents" and "Task Templates" links. KPI tiles: Team Overdue Tasks, Team Closings This Week, Team Active Deals, Team Pipeline Value.
 - **Topbar state:** AI briefing chip shows team-aggregated counts; "+ New Transaction" CTA
-- **Page header:** "Team Dashboard" title; toggle switch: "My Deals" | "Team View" (default: Team View for Team Lead, My Deals for Agent/Elf)
+- **Page header:** "Team Dashboard" title; toggle switch: "My Deals" | "Team View" (default: Team View for Team Lead, My Deals for Agent/Transaction Coordinator)
 - **Primary content area (command grid layout):**
 
   **Row 1: Upload Intake Card** (same as Solo Agent)
@@ -809,7 +870,7 @@ This is a pure redirect route. No UI rendered.
   - Recent communication highlights
 
 - **Overlay/modal inventory:**
-  - New Transaction quick-create modal
+  - File drop → IntakeConfirmationModal → `/transactions/new`
   - AI Chat panel
   - Agent drill-down modal/page (click agent row → see their full portfolio)
 
@@ -839,7 +900,7 @@ This is a pure redirect route. No UI rendered.
 - **Role-based visibility:**
   - Team Lead: sees full intervention queue, agent coaching indicators, task template management links
   - Agent on team: sees "My Deals" by default; can toggle to "Team View" (read-only team overview); cannot see coaching indicators for other agents
-  - Elf on team: same as Agent on team but with elf-specific task queue emphasis
+  - TransactionCoordinator on team: same as Agent on team with task-queue emphasis
 - **State-based visibility:**
   - AI Coach placeholder card: shown but locked ("Coming Soon — $79/agent/month") — not functional in MVP
   - Agent board: only visible in "Team View" mode
@@ -864,31 +925,24 @@ This is a pure redirect route. No UI rendered.
 
 ## 3.4 Attorney Dashboard — `/dashboard/attorney`
 
+**As-built:** This route does **not** render a dashboard mosaic. `AttorneyDashboardPage` loads `GET /api/v1/dashboard/attorney`, then `Navigate`s to the first assigned matter (`/transactions/:id`) or shows **"No matters assigned"**. The caseload lives in `AttorneyLayout`. Historical mosaic notes below describe the original HTML mock, not the live page.
+
 **Design reference:** `completed_designs/ve-attorney_dashboard.html`
 
 ### 1. Page Identity & Access
 - **Route:** `/dashboard/attorney`
-- **Page title:** "Attorney Dashboard"
+- **Page title:** "Attorney Dashboard" (empty state only; otherwise redirects)
 - **Allowed roles:** Attorney
-- **Redirect rule:** Non-attorney roles → `/dashboard`
+- **Redirect rule:** Non-attorney roles → `/dashboard`. With matters: first file. `/attorney/queue` → `/transactions/active`.
 - **Auth requirement:** Protected + Attorney role check
 
 ### 2. Entry Conditions & Data Loading
 - **Prerequisite state:** Authenticated, onboarding complete, role is Attorney
 - **API endpoints consumed on mount:**
-  - `GET /api/v1/dashboard/attorney` — aggregated attorney payload:
-    - `legal_health_score` (0–100) focused on approval gates
-    - `matters_needing_judgment[]` — matters requiring legal decisions
-    - `critical_approval_gates[]` — approval actions with deadlines
-    - `drift_summary` — { blocked_matters, missing_formal_docs, release_ready_packets }
-    - `filter_counts` — { all, needs_review, missing_docs, ready_to_release, clean_files }
-    - `matter_cards[]` — per-matter: name, status pills, review items, key dates, AI-prepared next step
-    - `state_rules` — active state rules for the attorney's matters
-  - `GET /api/v1/ai/briefing?scope=attorney`
-  - `GET /api/v1/transactions/kpi?scope=attorney` — KPI tiles: Hard Stops, Release-Ready Packets, Active Matters, Reviewed Volume
-- **Loading state UI:** Skeleton with matter card placeholders
-- **Empty state UI:** "No active matters assigned to you" with guidance text
-- **Error state UI:** Error banner with retry
+  - `GET /api/v1/dashboard/attorney` — `matter_cards[]` used to pick the landing matter
+- **Loading state UI:** Centered spinner "Loading matters…"
+- **Empty state UI:** "No matters assigned" — ask an agent or admin to assign a file
+- **Error state UI:** "We could not load your matters" with Try again
 
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
@@ -1033,7 +1087,7 @@ This is a pure redirect route. No UI rendered.
     - `ai_action_summary` (actions this week, approval rate, provider usage)
     - `task_template_stats` (tasks added/removed globally)
     - `recent_audit_logs[]` (last 20 system-wide audit entries)
-  - `GET /api/v1/ai/briefing?scope=system`
+  - `GET /api/v1/dashboard/ai-briefing?scope=system`
 - **Loading state UI:** Dashboard skeleton with stat card placeholders
 - **Empty state UI:** Unlikely (admin always has system data); if fresh tenant → "Welcome! Start by inviting your first agent." CTA
 - **Error state UI:** Error banner with retry
@@ -1079,35 +1133,36 @@ This is a pure redirect route. No UI rendered.
 ### 1. Page Identity & Access
 - **Route:** `/transactions/active`
 - **Page title:** "Active Transactions"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney, Admin
-- **Redirect rule:** Client → `/client/transactions`; FSBO → `/fsbo`; Vendor → 403
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Attorney, Admin
+- **Redirect rule:** Client → `/client/home`; FSBO → `/fsbo`; Vendor → `/portal/vendor`
 - **Auth requirement:** Protected + internal role check
 
 ### 2. Entry Conditions & Data Loading
 - **Prerequisite state:** Authenticated, onboarding complete, internal role
 - **API endpoints consumed on mount:**
   - `GET /api/v1/transactions?status=Active&page=1&limit=20` with optional query params:
-    - `filter` — all|overdue|due_today|closing_soon|in_inspection|on_track|unhealthy
+    - `filter` / tab — all|overdue|today|closing_soon|needs_attention|in_inspection|on_track (`unhealthy` aliases to overdue)
     - `sort` — urgency (default)|close_date|client_name|price
     - `search` — text search across client names, vendor names, companies, dates, addresses
     - `agent` — filter by agent ID (team view)
     - `highlight` — transaction ID to auto-scroll and expand
-  - `GET /api/v1/ai/briefing` — topbar briefing counts
-  - `GET /api/v1/transactions/kpi` — sidebar KPI tiles
-  - `GET /api/v1/transactions/tab-counts` — counts for each filter tab
+  - `GET /api/v1/dashboard/ai-briefing` — topbar briefing counts
+  - `GET /api/v1/dashboard/sidebar-kpis` — sidebar KPI tiles
+  - `GET /api/v1/dashboard/transaction-tab-counts` — counts for each filter tab
+  - `GET /api/v1/dashboard/transaction-cards` — collapsible card payload
 - **Loading state UI:** Page header with tab bar (counts show "–" placeholder); content area shows 3–5 transaction card skeletons with pulsing placeholders for status pill, name, address, milestone bar, and info badges
 - **Empty state UI:** "No active transactions" centered illustration with: "Get started by creating your first transaction" text and prominent "+ New Transaction" button. If a specific filter is selected with no results: "No transactions match '[filter name]'" with "Clear filter" link.
 - **Error state UI:** Error banner "Unable to load transactions" with Retry button; if partial data loaded, show stale data with warning badge
 
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
-- **Sidebar state:** "Active Transactions" nav link active (highlighted with orange indicator). KPI tiles: Overdue Tasks (count, red if > 0), Closing This Week (count), Active Deals (count), Pipeline Value (currency). Deals section counts: Active Transactions (badge), Pending (badge), Closed, All Transactions.
+- **Sidebar state:** "Active Transactions" nav link active. Deals group: Active Transactions, **Drafts & Paused** (`/transactions?status=pending` or `/transactions/pending`), Closed, All Transactions, Clients, Contacts.
 - **Topbar state:** AI briefing chip with Critical/Needs Attention/On Track counts (each clickable to set filter). Global search input. Notification bell. User chip. "+ New Transaction" CTA button.
 - **Page header:**
   - Breadcrumb: Deals > Active Transactions
   - "Active Transactions" title + count pill (total matching current filter, mono font)
   - Action buttons: "Export CSV" | "Print Report"
-  - Tab bar: All (count) | Overdue (count, red text if > 0) | Due Today (count, amber) | Closing Soon (count) | In Inspection (count) | On Track (count, green) | Unhealthy (count, red)
+  - Tab bar: All (count) | Overdue | Due Today | Closing Soon | Needs Attention | In Inspection | On Track
   - Below tabs: Sort control dropdown (Urgency | Close Date | Client Name | Price) + inline search input
 - **Primary content area — Transaction Card List:**
 
@@ -1115,7 +1170,7 @@ This is a pure redirect route. No UI rendered.
 
   **Card Collapsed State:**
   - Left edge: Vertical color bar indicating urgency (red = critical, amber = warning, green = on track)
-  - Row 1: Client name (bold) | Property address | Status pill (Critical / Needs Attention / On Track / In Inspection / Unhealthy) + "why" badges (e.g., "2 overdue", "no client touch 5 days", "missing inspection response")
+  - Row 1: Client name (bold) | Property address | Status pill (Critical / Needs Attention / On Track / In Inspection) + "why" badges (e.g., "2 overdue", "no client touch 5 days", "missing inspection response"). The old **Unhealthy** tab is retired (`unhealthy` bookmarks map to Overdue).
   - Row 2: AI next-step banner (champagne glow background, orange left border): icon + "Next step: [action description]" + context sub-text + CTA button (e.g., "Send Response", "Request Docs")
   - Row 3: Primary contact (name, role) with clickable `tel:` phone link and `mailto:` email link (stopPropagation to avoid card toggle) | Milestone bar: Contract → EM → Inspection → Appraisal → CD Delivered → CTC → Close (filled steps = green, current = amber, future = gray, overdue = red)
   - Row 4: Info badges: Tasks (overdue/total) | Emails | Notes | Missing Docs | Client Touch (days) | Lender Touch (days) | History count
@@ -1154,7 +1209,7 @@ This is a pure redirect route. No UI rendered.
     Comms | Client access | Client Q&A | Invoice | Delete (TeamLead/Admin)
 
 - **Overlay/modal inventory:**
-  - New Transaction quick-create modal
+  - (Create is `/transactions/new`, not a modal)
   - Add Task modal · Add Contact modal · Assign Team modal
   - Transaction Documents modal · Manage Client Access modal
   - Client Q&A drawer · Transaction History panel · Communications panel
@@ -1297,13 +1352,13 @@ This is a pure redirect route. No UI rendered.
 
 **"+ New Transaction" CTA click:**
 - Trigger: Click (topbar or sidebar)
-- Immediate UI: Opens New Transaction quick-create modal
-- See Cross-Cutting Workflow A for complete specification
+- Immediate UI: Navigate to `/transactions/new`
+- See Cross-Cutting Workflow A
 
 ### 5. Conditional Rendering Logic
 - **Role-based visibility:**
   - **Agent:** Sees own transactions only; can create, edit, complete tasks, edit dates
-  - **Elf:** Sees assigned transactions; same actions as Agent except cannot change master templates
+  - **Transaction Coordinator:** Sees assigned transactions; same actions as Agent except cannot change master templates
   - **Team Lead:** Sees all team transactions; additional "Team member" filter dropdown in page header; assignee name shown on each card; can access Task Templates from sidebar
   - **Attorney:** Sees transactions with `closing_mode = 'attorney'` assigned to them; sign-off checkboxes appear in expanded drawer; legal-specific "why" badges (e.g., "missing notarized doc"); AI next-step items clearly marked "AI-Prepared"
   - **Admin:** Can see all transactions (read access); limited action capabilities (observe, not modify transactions directly)
@@ -1398,32 +1453,25 @@ This is a pure redirect route. No UI rendered.
 
 ---
 
-## 4.2 Pending Transactions — `/transactions/pending`
+## 4.2 Drafts & Paused — `/transactions/pending`
 
 ### 1. Page Identity & Access
-- **Route:** `/transactions/pending`
-- **Page title:** "Pending Transactions"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney, Admin
+- **Route:** `/transactions/pending` or `/transactions?status=pending`
+- **Page title:** "Drafts & Paused"
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Attorney, Admin
 - **Redirect rule:** External roles → their portals
 - **Auth requirement:** Protected + internal role
 
 ### 2. Entry Conditions & Data Loading
-- **Prerequisite state:** Authenticated, internal role
-- **API endpoints on mount:**
-  - `GET /api/v1/transactions?status=Active` — same endpoint as Active Transactions (pending = active non-closed transactions; this is functionally equivalent to Active Transactions as per requirements: "Pending — all active transactions that aren't closed")
-  - Same KPI and briefing endpoints
-- **Loading/Empty/Error states:** Same patterns as Active Transactions
+- Same card APIs as Active, with `state_filter=pending` (backend: **Incomplete + Paused** only — not “all non-closed”)
+- Empty hint: "Deals you started but have not finished, and deals you have paused, appear here."
 
-### 3. Layout & Component Hierarchy
-- **Shell variant:** Internal shell
-- **Sidebar state:** "Pending" nav link active
-- **Page header breadcrumb:** Deals > Pending
-- **Identical to Active Transactions workspace** — this route serves as a named alias. The sidebar "Pending" link navigates here, and the page renders the same workspace with the same data (active, non-closed transactions). This preserves a future hook for differentiating "Active" (listings) from "Pending" (under contract) in v2.
-- **All components, overlays, actions, and behaviors:** Same as `/transactions/active`
+### 3. Layout
+- Sidebar: **Drafts & Paused** active
+- Same expandable cards + Open workspace as Active
+- This is **not** an alias of Active. Active Listings (pre-contract) remains a future hook.
 
-### 4–10. Same as Active Transactions
-- All actions, conditional rendering, navigation, AI integration, real-time behavior, and edge cases are identical
-- **Note for v2:** This route will be differentiated when "Active Listings" functionality is built. For MVP, Pending = Active Transactions.
+### 4–10. Same card/drawer patterns as §4.1; create still goes to `/transactions/new`
 
 ---
 
@@ -1432,7 +1480,7 @@ This is a pure redirect route. No UI rendered.
 ### 1. Page Identity & Access
 - **Route:** `/transactions/closed`
 - **Page title:** "Closed Transactions"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney, Admin
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Attorney, Admin
 - **Redirect rule:** External roles → their portals
 - **Auth requirement:** Protected + internal role
 
@@ -1441,7 +1489,8 @@ This is a pure redirect route. No UI rendered.
   - `GET /api/v1/transactions?status=Closed&page=1&limit=20&sort=closing_date_desc`
   - Same KPI and briefing endpoints (though KPI tiles reflect global counts, not just closed)
 - **Loading state UI:** Transaction card skeletons
-- **Empty state UI:** "No closed transactions yet" with subtle illustration
+- Empty: "Deals appear here once you mark them Closed or Completed. Files that fell through are Terminated, not Closed."
+- `state_filter=closed` includes Closed + Completed (not Terminated)
 - **Error state UI:** Error banner with retry
 
 ### 3. Layout & Component Hierarchy
@@ -1486,22 +1535,22 @@ This is a pure redirect route. No UI rendered.
 ### 1. Page Identity & Access
 - **Route:** `/transactions/all`
 - **Page title:** "All Transactions"
-- **Allowed roles:** Agent, Elf, Team Lead, Attorney, Admin
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Attorney, Admin
 - **Auth requirement:** Protected + internal role
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
   - `GET /api/v1/transactions?page=1&limit=20` — all transactions regardless of status
-  - Optional filters: `status` (Active, Incomplete, Paused, Completed, Closed), `sort`, `search`
+  - Optional filters: `status` (Active, Incomplete, Paused, Completed, Closed, Terminated), `sort`, `search`
 - **Loading/Empty/Error:** Same patterns
 
 ### 3. Layout & Component Hierarchy
 - **Shell variant:** Internal shell
 - **Sidebar state:** "All Transactions" nav link active
 - **Page header:** Breadcrumb: Deals > All Transactions | "All Transactions" title + count pill | "Export CSV"
-- **Tab bar:** All | Active | Incomplete | Paused | Completed | Closed (each with count)
+- **Tab bar:** All | Active | Incomplete | Paused | Completed | Closed | Terminated (each with count)
 - **Sort options:** Urgency | Close Date | Client Name | Price | Status
-- **Transaction cards:** Same pattern; status pill reflects actual status (Active, Incomplete, Paused, Completed, Closed) with appropriate colors
+- **Transaction cards:** Same pattern; status pill reflects actual status (Active, Incomplete, Paused, Completed, Closed, Terminated)
 - **Expanded drawer:** Same layout; edit capabilities depend on transaction status (Active/Incomplete/Paused = editable; Completed/Closed = read-only)
 
 ### 4–10. Combines behaviors of Active and Closed pages based on per-transaction status
@@ -1516,7 +1565,7 @@ This is a pure redirect route. No UI rendered.
 ### 1. Page Identity & Access
 - **Route:** `/transactions/new`
 - **Page title:** "New Transaction"
-- **Allowed roles:** Agent, Elf, Team Lead
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead
 - **Redirect rule:** Non-authorized roles → `/dashboard` with toast
 - **Auth requirement:** Protected + creation-capable role
 
@@ -1568,7 +1617,7 @@ This is a pure redirect route. No UI rendered.
 - FSBO transactions: property-centric pre-contract state supported
 
 ### 6. Navigation Flows
-- **Inbound:** "+ New Transaction" CTA (from anywhere), quick-create modal "Full Wizard" link, sidebar CTA
+- **Inbound:** "+ New Transaction" CTA (from anywhere), sidebar CTA, file drop, dashboard intake
 - **Outbound:** After confirmation → `/transactions/active` (or `/transactions/:id` for the new transaction)
 - **Back navigation:** Back button between steps; "Save as Draft" option for Incomplete status
 
@@ -1644,17 +1693,16 @@ sections are no longer a card nested inside a grid inside a padded body.
     the guidance.
 - **Creation receipt strip (first visit after the wizard only, `?created=1`):** one flat green line — "Created just now · N tasks (M handled by AI) · N checklist items · N documents attached · Fees captured · E-signature queued · N requests to the other agent" — each segment linking to the tab whose rows back that number, dismissible, never shown again. Segments render only when their count is real.
 - **Tab bar (full width, on the header surface):** Overview | Timeline |
-  Tasks | Documents | People | Billing | Activity (+ Email with the agent
-  flag, + Agent on narrow screens). **Compliance is not a tab** — the
-  checklist is a view of Documents (Files | Checklist), because both are the
-  deal's paperwork.
+  Compliance | Tasks | Documents | Contacts | Billing | Activity (+ Email with the agent
+  flag, + Agent on narrow screens). **Compliance is its own tab** (living
+  checklist). Documents is the file list. Deep link `?view=checklist` still
+  opens Compliance.
 - **Body:** the next-action strip, then the active section. The assistant
   docks on the right when opened from the header's "Ask AI".
 - **Deep links:** `?tab=`, `?view=files|checklist` (Documents),
   `?task=<id>` (flash), `?requirement=<id>` (flash), `?qa=1` / `?access=1`
-  (People opens the Client Q&A drawer / Manage client access once, then the
-  flag is stripped), `?created=1` (receipt). `?tab=compliance` predates the
-  Documents merge and resolves to Documents › Checklist.
+  (Contacts opens the Client Q&A drawer / Manage client access once, then the
+  flag is stripped), `?created=1` (receipt). `?tab=compliance` is a live tab.
 - **Primary content area (per tab; ONE card per tab):**
 
   **Overview Tab (the landing view, 2026-07-22):**
@@ -1666,7 +1714,7 @@ sections are no longer a card nested inside a grid inside a padded body.
       clicking one goes to Timeline, where dates are edited
     - **Progress** — tasks complete of total with a bar, open/overdue counts,
       purchase price
-    - **People** — the parties on the deal, with "Manage"
+    - **Contacts** — the parties on the deal, with "Manage"
   - Honest by construction: a panel renders only when it has real data, and
     nothing here is a second place to edit the same thing.
 
@@ -1702,7 +1750,7 @@ sections are no longer a card nested inside a grid inside a padded body.
   - Grouped sections (Overdue / Due Today / Upcoming / Completed) with status menu, basis chips, related-compliance links, Auto-Email toggle (eligible targets only), AI evidence chips
   - Add Task modal (shared Dialog; completion method + assignee via branded selects; AI-suggested approaches)
 
-  **People Tab:**
+  **Contacts Tab:**
   - **Deal fees** at the top: the professional fee and transaction fee as "3% · seller" / "buyer $250 · seller 2%" rows, editable in place (pencil → Radix dialog with the wizard's fee-card anatomy: Buyer/Seller/Both, one amount + `%`/`$` per paying side, "Remove fee"); with no fees entered an editing role sees "+ Add fees", and a viewer without edit rights sees nothing at all. Mirrors the `PATCH /transactions/{id}` role gate (Agent / TeamLead / Admin, D5); every edit lands in the Activity audit trail. Fees live here — with the deal's commercial relationships — because the deal brief / overview band stays off the workspace page (Jan's 2026-06-13 review).
   - Representation-aware groups (Buyer, Seller, Agents, Lender, Title + Other contacts); add/edit via AddContactModal; Assign team; Manage client access; client thread; compose
   - **Client Q&A badge (2026-07-22):** an amber dot on the Client Q&A button
@@ -1778,7 +1826,7 @@ sections are no longer a card nested inside a grid inside a padded body.
   - Vendor: Documents (own uploads only) — no other tabs
   - FSBO: Overview (simplified), Documents (view/upload/flag), Milestones — no Tasks, no Communications
   - Attorney: All tabs + sign-off actions + legal packet actions; AI items clearly marked
-  - Agent/Elf/Team Lead: Full access per their role permissions
+  - Agent/Transaction Coordinator/Team Lead: Full access per their role permissions
   - Admin: Full read access; limited write access
 - **State-based:**
   - Closed transactions: all editing disabled; tabs become read-only
@@ -1801,6 +1849,24 @@ sections are no longer a card nested inside a grid inside a padded body.
 
 ---
 
+## 5.0 Needs You — `/needs-you`
+
+### 1. Page Identity & Access
+- **Route:** `/needs-you`
+- **Page title:** "Needs You"
+- **Allowed roles:** Agent, TransactionCoordinator, TeamLead, Admin (INTERNAL_OPS_ROLES)
+- **Redirect rule:** Attorney → dashboard/matter; Client/FSBO/Vendor → their portals
+- **Auth requirement:** Protected + internal ops
+
+### 2. Entry & Layout
+- Unified automation residual queue (AUTOMATE_EVERYTHING Phase 2)
+- **API:** `GET /api/v1/automation/needs-you` (+ approve/send mutations)
+- **Kinds:** Ready to send · AI proposal · Draft to review · Decision
+- Chrome matches Task Queue: search, filters, deal-grouped cards, batch approve/send, export
+- Sidebar badge = `needsYou.counts.total`
+
+---
+
 ## 5.1 My Task Queue — `/tasks/queue`
 
 **Design reference:** `completed_designs/ve-workflow-my_task_queue.html`
@@ -1808,7 +1874,7 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/tasks/queue`
 - **Page title:** "My Task Queue"
-- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Admin
 - **Redirect rule:** Attorney → `/dashboard/attorney` (counsel uses the matter workspace, not the Agent task queue); Client/FSBO/Vendor → their portals
 - **Auth requirement:** Protected + internal role
 
@@ -1817,8 +1883,8 @@ sections are no longer a card nested inside a grid inside a padded body.
   - `GET /api/v1/tasks/queue?assignee=me` — tasks assigned to current user, grouped by status/urgency
     - Returns: task list with `{ id, name, transaction_name, transaction_id, client_name, due_date, status, completion_method, assigned_to, ai_reason, ai_confidence }`
   - Optional params: `sort=due_date|urgency|transaction|status`, `filter=overdue|due_today|upcoming|completed`
-  - `GET /api/v1/transactions/kpi` — sidebar KPIs
-  - `GET /api/v1/ai/briefing`
+  - `GET /api/v1/dashboard/sidebar-kpis` — sidebar KPIs
+  - `GET /api/v1/dashboard/ai-briefing`
 - **Loading state UI:** Task row skeletons (8–10 rows) grouped under section headers
 - **Empty state UI:** "No tasks in your queue" with illustration and "All caught up! Check your dashboard for what's next." message
 - **Error state UI:** Error banner with retry
@@ -1903,7 +1969,7 @@ sections are no longer a card nested inside a grid inside a padded body.
 - **Role-based:**
   - Team Lead: toggle "My Tasks" / "Team Tasks" — team view shows all team members' tasks with assignee column
   - Attorney: sees only attorney-related tasks (legal review, packet approval); sign-off tasks have special treatment
-  - Agent/Elf: own assigned tasks only
+  - Agent/Transaction Coordinator: own assigned tasks only
 - **State-based:**
   - Overdue section only appears if overdue tasks exist
   - "Vendor cart" view option: group tasks by vendor across transactions (follow up all tasks for one vendor in one email)
@@ -1926,7 +1992,9 @@ sections are no longer a card nested inside a grid inside a padded body.
 
 ---
 
-## 5.2 Task Detail — `/tasks/:id`
+## 5.2 Task Detail — `/tasks/:id` (not a live route)
+
+There is **no** standalone task-detail page. Tasks open in `/tasks/queue` or `/transactions/:id?tab=tasks&task=:id`. Historical field notes below are not a product surface.
 
 ### 1. Page Identity & Access
 - **Route:** `/tasks/:id`
@@ -1971,22 +2039,21 @@ sections are no longer a card nested inside a grid inside a padded body.
 
 ---
 
-## 5.3 Closing Calendar — `/closing-calendar`
+## 5.3 Closing Calendar — `/calendar`
 
 **Design reference:** `completed_designs/ve-workflow-closing_calendar.html`
 
 ### 1. Page Identity & Access
-- **Route:** `/closing-calendar`
+- **Route:** `/calendar`
 - **Page title:** "Closing Calendar"
-- **Allowed roles:** Agent, Elf, Team Lead, Admin
-- **Auth requirement:** Protected + internal ops role. Attorney uses `/attorney/recording-calendar`. Typed `/calendar` URLs bounce to the Attorney desk.
-- **Auth requirement:** Protected + internal role
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Admin
+- **Auth requirement:** Protected + internal ops. Attorney uses `/attorney/recording-calendar`; typed `/calendar` as Attorney bounces to the Attorney desk.
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
   - `GET /api/v1/transactions/calendar?start=:monthStart&end=:monthEnd` — transactions with closing dates in the visible range, including: transaction_id, client_name, address, closing_date, closing_time, status, stage_pill, days_to_close
-  - `GET /api/v1/transactions/kpi`
-  - `GET /api/v1/ai/briefing`
+  - `GET /api/v1/dashboard/sidebar-kpis`
+  - `GET /api/v1/dashboard/ai-briefing`
 - **Loading state UI:** Calendar grid skeleton with pulsing day cells
 - **Empty state UI:** Calendar renders with no events; sidebar note "No closings scheduled this month"
 - **Error state UI:** Error banner with retry
@@ -2045,7 +2112,7 @@ sections are no longer a card nested inside a grid inside a padded body.
 - **Role-based:**
   - Team Lead: shows all team closings with agent name column
   - Attorney: shows only attorney-closing matters
-  - Agent/Elf: shows own closings
+  - Agent/Transaction Coordinator: shows own closings
 - **State-based:** Overdue (past) closings show red indicators; today's closings amber; future green
 - **Responsive:** Month view → List view forced on mobile (<768px)
 
@@ -2068,15 +2135,15 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/documents/all`
 - **Page title:** "All Documents"
-- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Admin
 - **Auth requirement:** Protected + internal ops role. Attorney reviews documents on the matter workspace; typed `/documents` URLs bounce to the Attorney desk.
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
   - `GET /api/v1/documents?page=1&limit=30` — all documents across all user's transactions
     - Query params: `search`, `type`, `transaction_id`, `sort=date|name|type|transaction`
-  - `GET /api/v1/transactions/kpi`
-  - `GET /api/v1/ai/briefing`
+  - `GET /api/v1/dashboard/sidebar-kpis`
+  - `GET /api/v1/dashboard/ai-briefing`
 - **Loading state UI:** Document row/card skeletons
 - **Empty state UI:** "No documents yet" with "Upload your first document" CTA and drag-drop zone
 - **Error state UI:** Error banner with retry
@@ -2154,7 +2221,7 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 5. Conditional Rendering Logic
 - **Role-based:**
   - Agent/Team Lead/Admin: full actions (upload, email, e-sign, delete)
-  - Elf: upload, email, e-sign, no delete
+  - Transaction Coordinator: upload, email, e-sign, no delete
   - Attorney: upload (legal packets), email, view — delete only own uploads
   - Vendor/Client/FSBO: do NOT see this page (redirected)
 - **State-based:**
@@ -2181,7 +2248,7 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/ai-suggestions`
 - **Page title:** "AI Suggestions"
-- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Admin
 - **Auth requirement:** Protected + internal ops role. Attorney Ask AI lives on the desk; typed `/ai-suggestions` URLs bounce to the Attorney desk.
 
 ### 2. Entry Conditions & Data Loading
@@ -2255,7 +2322,7 @@ sections are no longer a card nested inside a grid inside a padded body.
   - Agent: sees suggestions for own transactions; "Apply to all future" requires confirmation
   - Team Lead: sees team-wide suggestions; "Apply to all future" affects team templates (preview of affected transactions shown before confirmation)
   - Attorney: sees legal-relevant suggestions only; AI guardrails enforced (no legal judgment suggestions)
-  - Elf: sees suggestions for assigned transactions
+  - Transaction Coordinator: sees suggestions for assigned transactions
 - **State-based:**
   - High-confidence suggestions (≥90%) shown with green border
   - Low-confidence suggestions (<75%) shown with amber "Needs review" badge
@@ -2275,7 +2342,7 @@ sections are no longer a card nested inside a grid inside a padded body.
 ### 1. Page Identity & Access
 - **Route:** `/analytics`
 - **Page title:** "Analytics"
-- **Allowed roles:** Agent, Elf, Team Lead, Admin
+- **Allowed roles:** Agent, Transaction Coordinator, Team Lead, Admin
 - **Auth requirement:** Protected + internal role
 
 ### 2. Entry Conditions & Data Loading
@@ -2327,14 +2394,24 @@ sections are no longer a card nested inside a grid inside a padded body.
 
 ## 6.3 Settings — `/settings`
 
-> **⚠ Superseded (May 2026 redesign — see `ACCOUNT_MODAL_REDESIGN_PLAN.md`).** Settings is no longer a single page. Personal preferences (Profile/identity, Notifications, My Closing Checklist Templates, My Tagged Notes, My Preferred Vendors, My Internal Resources, Help & tour) now live in the shared **Account modal** opened from the avatar menu / footer gear. Tenant/workspace configuration (Company, Branding, AI configuration, Email integrations, E-signature, Danger Zone) lives on the new **Organization page** at `/organization`. The **Task Templates** stub was deleted (its sole home is `/admin/task-templates`). `/settings`, `/client/settings`, `/fsbo/settings` (+ `?section=`) are kept as routes that open the Account modal. The section descriptions below remain accurate per-section, but their *location* has moved.
+**As-built (2026-08-25):** Internal roles get `SettingsHubPage` — a searchable card grid grouped **Personal / Workspace / Platform**. Tiles deep-link to `/settings/account`, `/settings/notifications`, `/settings/connections`, `/settings/my-playbook`, `/settings/document-templates`, `/settings/help`, `/organization`, `/admin/*`, and `/platform/*` by role. Portal roles (`/client/settings`, `/fsbo/settings`) still open the Account modal. Workspace Company / Branding / Billing / Danger live on `/organization`, not a scrolling Settings document.
 
 ### 1. Page Identity & Access
-- **Route:** `/settings`
+- **Route:** `/settings` (`SettingsRouter`)
 - **Page title:** "Settings"
-- **Allowed roles:** Any authenticated user. The route is registered without `ProtectedRoute` (unlike `/team` and `/admin/*`), so TC/Elf, Team Lead, and Admin all see the same page with the same controls.
-- **Redirect rule:** None role-specific — the page renders identically for every role.
-- **Auth requirement:** Protected (auth required, no role gating).
+- **Allowed roles:** Authenticated. Internal + Attorney see the hub; Client/FSBO see Account modal; Vendor has no Settings hub.
+- **Redirect rule:** None for internal. Cards are `visible`-filtered so users never land on a 403 tile.
+- **Auth requirement:** Protected.
+
+### 2. Entry Conditions & Data Loading
+- **API endpoints on mount:** `GET /api/v1/users/me`; credit wallet probe for billing tile; individual panes fetch on navigation.
+- **Layout:** White sheet, search box, equal-height cards. No seven-section scroll document.
+
+The May 2026 Account-modal catalog below is **historical** (those panes moved to hub tiles + `/organization`). Do not implement Settings as a single scrolling page.
+
+---
+
+> Historical section catalog (Account modal / former Settings page):
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
@@ -2625,22 +2702,14 @@ sections are no longer a card nested inside a grid inside a padded body.
 
 ---
 
-## 7.1 Attorney Queue — `/attorney/queue`
+## 7.1 Caseload — `/transactions/active` (Attorney)
 
-### 1. Page Identity & Access
-- **Route:** `/attorney/queue`
-- **Page title:** "Attorney Matter Queue"
-- **Allowed roles:** Attorney
-- **Redirect rule:** Non-attorney → `/dashboard`
-- **Auth requirement:** Protected + Attorney role
+`/attorney/queue` is **not a live page**. It redirects to `/transactions/active`, which for Attorney renders `AttorneyWorkspacePage` (caseload + file). `/dashboard/attorney` redirects into the first assigned matter or shows empty "No matters assigned".
 
-### 2–3. Entry & Layout
-- This route overlaps heavily with the Attorney Dashboard (§3.4). For MVP, `/attorney/queue` redirects to `/dashboard/attorney` which contains the full matter queue with filter tabs.
-- If implemented as a separate page in future: same data, layout, and actions as the Attorney Dashboard matter cards, but without the hero card and production metrics — focused purely on the queue.
-
-### 4–10. See Attorney Dashboard (§3.4) for all action, rendering, navigation, and AI specifications.
-
----
+- **Shell:** `AttorneyLayout` — caseload rail filters **Needs a call / Ready / All**
+- **Matter URL:** `/transactions/:id` → `AttorneyMatterWorkspacePage` (checklist/timeline/activity + AI legal brief; not the Agent tab strip)
+- **CTA:** Upload documents (legal-packet intake modal)
+- **Ask AI:** counsel-scoped; does not load Agent Critical / Needs Attention counts
 
 ## 7.2 Attorney Releases — `/attorney/releases`
 
@@ -2756,7 +2825,7 @@ The Attorney Workspace is a specialized legal desk. Counsel must not reach defau
 ### 1. Page Identity & Access
 - **Route:** `/fsbo`
 - **Page title:** "Dashboard"
-- **Allowed roles:** FSBO Customer
+- **Allowed roles:** ForSaleByOwner
 - **Redirect rule:** Non-FSBO roles → `/dashboard`
 - **Auth requirement:** Protected + FSBO_Customer role
 
@@ -2895,7 +2964,7 @@ The Attorney Workspace is a specialized legal desk. Counsel must not reach defau
 
 **Ask Velvet Elves AI — floating widget, not a page.** There is no `/fsbo/ask-ai` route. The floating `FloatingAskAi` button sits on every FSBO page; clicking it opens the shared `AiChatContext` panel with an FSBO-friendly placeholder. The Property Detail and Overview "Plain-English guide" cards link to it via `aiChat.open(...)`.
 
-**Property Detail "People involved" panel.** `/fsbo/properties/:id` includes a "People involved" rail card sourced from `transaction_parties` (decrypted via `_safe_decrypt`). Each contact carries role label, name (or company), and inline Call / Email buttons. Empty rows (no name / email / phone / company) are dropped server-side.
+**Property Detail "Contacts involved" panel.** `/fsbo/properties/:id` includes a "Contacts involved" rail card sourced from `transaction_parties` (decrypted via `_safe_decrypt`). Each contact carries role label, name (or company), and inline Call / Email buttons. Empty rows (no name / email / phone / company) are dropped server-side.
 
 **Unread coordinator messages.** Property Detail and Milestones pages render a small orange dot for any message with `seen === false`. On mount, the page POSTs the visible log_ids to `/api/v1/dashboard/fsbo/messages/seen` so the dot is suppressed on the next refetch. The endpoint upserts `(log_id, user_id)` into `communication_log_views` and rejects ids that don't belong to the FSBO user's transactions.
 
@@ -2907,100 +2976,59 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ---
 
+> **Shipping nav (2026-08-17 operational rebuild).** Represented clients use
+> `ClientWorkspaceLayout` with **Home · Next Steps · Timeline · Documents · Updates**.
+> Payments and Agent Info stay reachable from Home, not as sidebar items.
+> Documents = the client's own uploads **plus** packets staff marked
+> `documents.is_client_visible`. "Ask your team" is the human
+> `is_client_visible` thread — not an LLM. Next Steps and Home both render
+> `home.next_action` from `derive_client_next_action`. See
+> `CLIENT_PORTAL_OPERATIONAL_REBUILD_PLAN.md`.
+
 > **2026-05-30 redesign — the "closing concierge" Home.** The client landing is
 > now **`/client/home`** (`ClientHomePage`), a single warm, card-based concierge
 > screen reconstructed from Jake's design comp and implemented per
-> `CLIENT_WORKSPACE_REDESIGN_PLAN.md`. The client nav set is **Home · Timeline ·
-> Documents · Payments · Agent Info** (the comp's "Next Steps" and "Updates"
-> destinations are surfaced *on* Home as the Next Best Action and Recent Updates /
-> Ask Velvet cards — no separate pages, no duplicate nav). The Home is fed by an
+> `CLIENT_WORKSPACE_REDESIGN_PLAN.md`. The Home is fed by an
 > **additive `home` block** on the same canonical `GET /api/v1/dashboard/client`
 > read (no new endpoint): hero (buy/sell verb + decrypted address + phase chip +
 > closing target + progress %), next best action, "what Velvet is handling",
 > upcoming dates, recent updates, documents-needing-attention, and key contacts
-> (agent + deal parties). "Ask Velvet" reuses the existing two-way
-> `is_client_visible` thread (`/api/v1/client/messages`) — no new LLM. The four
-> tool surfaces below (§9.1–§9.4) remain reachable from the new nav.
+> (agent + deal parties). "Ask your team" reuses the existing two-way
+> `is_client_visible` thread (`/api/v1/client/messages`) — no new LLM. The tool
+> surfaces below remain reachable from the new nav.
 
-## 9.1 Client Transactions — `/client/transactions`
+## 9.1 Client Home — `/client/home`
 
-### 1. Page Identity & Access
-- **Route:** `/client/transactions`
-- **Page title:** "My Transactions"
-- **Allowed roles:** Client
-- **Redirect rule:** Non-client roles → `/dashboard`
-- **Auth requirement:** Protected + Client role
+`/client/transactions` **redirects here**. The Client portal does not use AppLayout.
 
-### 2. Entry Conditions & Data Loading
-- **API endpoints on mount:**
-  - `GET /api/v1/dashboard/client` — the **canonical client read** that feeds all
-    four surfaces (transactions + per-transaction milestones/key-dates, document
-    status summary, agent card). There are **no** per-surface
-    `/api/v1/client/transactions` / `/client/documents` endpoints — the rebuild
-    standardized on the `/dashboard/client` namespace, mirroring FSBO's
-    `/dashboard/fsbo/...` decision (CLIENT_WORKSPACE_PLAN.md D3).
-  - Each transaction view: address (decrypted), status, closing date, key dates,
-    milestone timeline, next milestone.
-- **Loading state UI:** Transaction card skeletons
-- **Empty state UI:** "No transactions yet. Your agent will add you when your transaction begins."
+- **Shell:** `ClientWorkspaceLayout` — Home · Next Steps · Timeline · Documents · Updates
+- **API:** `GET /api/v1/dashboard/client` (canonical aggregate)
+- **Ask your team:** `POST/GET /api/v1/client/messages` (`is_client_visible` thread — not an LLM)
+- Also routed: `/client/next-steps`, `/client/milestones`, `/client/documents`, `/client/updates`, `/client/invoices`, `/client/agent`
 
-### 3. Layout & Component Hierarchy
-- **Shell variant:** Client shell (`ClientPortalShell`) — the same §15 tool shell
-  as the FSBO portal: `Your Workspace › [Page]` breadcrumb, standard
-  `px-3 md:px-6` gutters, boundary-notice footer.
-- **Navigation:** the AppLayout sidebar ONLY (My Transactions | Documents |
-  Milestones | Agent Info). There is **no** in-shell tab bar — the prior
-  `_shell` tab bar duplicated the sidebar 1:1 and was removed (D1/L1).
-- **Page header:** "My Transactions" title
-- **Primary content area:**
-  - Transaction cards: address, status pill (Active/Closed), closing date, a
-    compact milestone stepper, and the next milestone in plain English.
-  - Cards are **containers with explicit buttons** (View details / Documents /
-    Ask a question) — never a whole-card click target (L8).
-  - "View details" → an enriched inline panel: key dates, per-transaction
-    Documents/Milestones links, and the two-way "Ask a question" thread.
-  - No task visibility, no internal notes.
+### Legacy card list (retired)
 
-### 4. User Actions
-- **"View details" button:** Expand the inline panel (dates, milestones/documents links, thread)
-- **"Documents" / "Open documents":** Navigate to `/client/documents?transaction=:id`
-- **"View Milestones" link:** Navigate to `/client/milestones?transaction=:id`
-- **"Ask a question":** Open the expand and focus the message composer. The topbar
-  "Ask your agent" CTA (`?ask=1`) opens this directly — pre-selecting the
-  transaction when the client has exactly one, prompting a choice when several.
-- **Messaging:** `POST /api/v1/client/messages` to ask; `GET /api/v1/client/messages?transaction_id=`
-  for the thread. The thread is gated server-side by `communication_logs.is_client_visible`
-  — the client's own questions plus any team reply explicitly surfaced to them;
-  internal notes / AI drafts / audit rows are never returned.
+The former `/client/transactions` card list is gone. Journey lives on Home + Timeline. Historical field notes:
 
-### 5. Conditional Rendering Logic
-- Client sees: transaction overview, key dates, milestones, documents (view/upload), agent info
-- Client CANNOT see: tasks, internal notes, communication logs (internal), AI suggestions
-- Upload button visible for documents (client can upload but not delete)
-- "Flag for deletion" button available (sends request to agent)
-
-### 6–10. Standard patterns
-- Real-time: milestone updates, document status changes
-- AI: no direct AI interaction for clients (except possible future chat)
-
----
+- Each transaction view: address (decrypted), status, closing date, key dates, milestone timeline
+- Client CANNOT see: tasks, internal notes, AI drafts
 
 ## 9.2 Client Documents — `/client/documents`
 
-- Leads with the **real** `PortalDocumentList` (the role-scoped GET /documents,
-  which returns only the client's own uploads — never agent-internal files) with
-  per-row "Flag for deletion". This is the single document representation; the
-  old five-column hardcoded-zero status board was removed (CLIENT_WORKSPACE_PLAN.md D4).
+- Leads with items waiting on the client, then **From your team** (staff-shared
+  `is_client_visible` packets) and **You uploaded**. Per-row actions: **Open**,
+  **Sign** / **Acknowledge** when derived, **Flag for deletion** on own uploads
+  only. Shared packets are not client-deletable.
+- Deep links: `/client/documents/:id?sign=1` / `?ack=1`.
 - A **slim, real status summary** driven by `documents_summary` shows only the
   buckets that actually have documents: **In progress / Uploaded / Verified /
   Complete**. "Missing" is **not** shown for a represented client — required-doc
-  tracking is the agent's responsibility on a represented deal, so a client-facing
-  Missing count would be fiction.
+  tracking is the agent's responsibility; sharing is explicit, not a Missing counter.
 - **Upload is a modal** (`ClientUploadModal`) launched from the page header CTA,
   collecting **transaction + document type** (+ optional label) before submit —
   not a bare on-page dropzone (L2/L3).
-- Cannot delete documents directly; "Flag for deletion" sends a request to the agent.
-- Cannot see the full document center (only the client's own documents).
+- Staff share control lives on the deal Documents tab (**Share with client**:
+  Review / Acknowledge / Sign / Unshare).
 
 ---
 
@@ -3027,6 +3055,18 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
   Agent → TC → TeamLead → Attorney), never the first non-client assignee, so a
   client never sees their TC/attorney under "Your agent" (CLIENT_WORKSPACE_PLAN.md §4.2 #8).
 - Read-only informational page
+
+---
+
+## 9.5 Vendor Portal — `/portal/vendor`
+
+- **Shell:** `VendorWorkspaceLayout` (bright white rail — not AppLayout)
+- **Nav:** `{Loan|Title|Your} Files` · Documents · Tasks (`scope_family`)
+- **Routes:** `/portal/vendor`, `/portal/vendor/files/:transactionId`,
+  `/portal/vendor/documents`, `/portal/vendor/tasks`
+- **API:** `/api/v1/vendor-portal/*` (overview, files, tasks/completion-request, documents)
+- Upload via CTA `?panel=upload`. Account = Profile modal.
+- Cannot see the internal document center, agent task queue, or other files' internals.
 
 ---
 
@@ -3157,7 +3197,7 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
-  - `GET /api/v1/confidence-settings`
+  - `GET /api/v1/confidence`
 
 ### 3. Layout & Component Hierarchy
 - **Page header:** "AI Confidence Settings" title
@@ -3176,7 +3216,7 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
   - Changes audit-logged
 
 ### 4. User Actions
-- Slider changes: auto-save with debounce; `PATCH /api/v1/confidence-settings`
+- Slider changes: auto-save with debounce; `PUT /api/v1/confidence/tenant` (Admin) or `PUT /api/v1/confidence/team/{team_id}`
 - Validation: if team lead tries to set threshold below admin minimum → blocked with message
 
 ---
@@ -3191,7 +3231,7 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ### 2. Entry Conditions & Data Loading
 - **API endpoints on mount:**
-  - `GET /api/v1/admin/audit-logs?page=1&limit=50` — system-wide audit log
+  - `GET /api/v1/audit-logs?page=1&page_size=50` — system-wide audit log
   - Query params: `user_id`, `entity_type`, `action`, `date_start`, `date_end`, `search`
 - **Loading state UI:** Log row skeletons
 
@@ -3217,8 +3257,27 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
   - Feature flags: toggle features on/off
   - Data retention settings
   - Default notification policies
-- Save: `PATCH /api/v1/tenants/:id`
+- Save: `PATCH /api/v1/tenants/:id` (current tenant uses `PATCH /api/v1/tenants/current`)
 - Side effects: Branding changes apply across all pages via CSS variables; audit log
+- **As-built:** the tenant admin surface is `/organization?section=company|branding|billing|danger`, reached from the Settings hub. `/admin/tenant` is not a live route.
+
+## 10.9 Platform Admin — `/platform/*`
+
+Gated by `PlatformAdminGuard` (`users.is_platform_admin`). Sidebar **Platform** group:
+
+| Route | Page |
+|-------|------|
+| `/platform/tenants` | Fleet tenants |
+| `/platform/users` | Every account (`?segment=outside` = old registrations) |
+| `/platform/users/alerts` | Registration alert recipients |
+| `/platform/waitlist` | Marketing-site leads |
+| `/platform/ai-usage` | Cross-tenant AI usage |
+| `/platform/costs` | Costs & pricing |
+| `/platform/billing` | Deal fee / Stripe health |
+| `/platform/help` | Help Center CMS |
+| `/platform/advertising` | Ad packages & approvals |
+
+Non-platform users receive a 404 (route tree does not leak).
 
 ---
 
@@ -3228,7 +3287,7 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 
 ## 11.1 Profile — `/profile`
 
-> **⚠ Superseded (May 2026 redesign — see `ACCOUNT_MODAL_REDESIGN_PLAN.md`).** There is no standalone Profile page or route. Identity now lives as the **Profile** section inside the shared **Account modal** (opened from each role's avatar menu / footer gear). Same fields and the same `PATCH /api/v1/users/me` save path described below; the surface is a modal section rather than a page. `/profile` still 301-redirects to `/analytics?scope=me` for legacy report links.
+> **⚠ Superseded.** There is no standalone Profile page. Identity lives in **Settings → Profile** (`/settings/account`) for internal roles, or the **Account modal** for portal roles. `/profile` redirects to `/reports?scope=me` (Attorney → `/settings/account`).
 
 ### 1. Page Identity & Access
 - **Route:** `/profile`
@@ -3347,6 +3406,20 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 - Edge case: High traffic on shared link → caching for public milestone data (CDN-friendly)
 - Link opened in expired state → clear message, no broken UI
 
+## 12.2 Other public routes
+
+| Route | Page |
+|-------|------|
+| `/v/:token` | Vendor colleague invite (`AddColleaguePage`) |
+| `/pay/invoices/:invoiceId` | Public invoice pay (Stripe Checkout) |
+| `/pay/invoices/:invoiceId/complete` | Payment complete |
+| `/advertise` | Ad storefront |
+| `/advertise/checkout/:orderId` | Ad checkout |
+| `/advertise/complete` | Ad purchase complete |
+| `/terms` `/privacy` | Legal |
+
+Internal payments UI: `/payments` (invoices list + `?invoice=` / `?payment=` drawers), `/payments/payouts` (parked unless capability on). Deal Billing tab on `/transactions/:id?tab=billing`.
+
 ---
 
 # 13. Cross-Cutting Workflows
@@ -3356,126 +3429,63 @@ All FSBO sub-pages follow the FSBO shell, FSBO sidebar navigation (with active s
 ## A. New Transaction Creation Flow
 
 ### Entry Points
-1. "+ New Transaction" CTA (topbar button, sidebar button — available on all internal pages)
-2. Document drag-and-drop anywhere in the authenticated workspace
-3. Dashboard upload intake card
+1. "+ New Transaction" CTA (topbar and/or sidebar footer) → navigates to `/transactions/new`
+2. Document drag-and-drop anywhere in the authenticated workspace → IntakeConfirmationModal → wizard with in-memory files
+3. Dashboard upload intake card → same wizard handoff
 4. Direct navigation to `/transactions/new`
 
-### Quick-Create Modal (from CTA click)
-**Trigger:** Click "+ New Transaction" from topbar or sidebar
-**Modal contents:**
-- "AI Import" action card: "Paste a contract or MLS listing — AI will auto-fill all fields"
-  - Text paste area (for pasting contract text)
-  - File drop/browse zone (for uploading documents)
-  - On paste/drop → AI parsing begins → fields auto-populate below
-- Manual entry fields (populated by AI or entered manually):
-  - Client Name (required)
-  - Property Address (required) + City/ZIP
-  - Transaction Type: Buyer / Seller / Dual Agency (required)
-  - Financing: Cash / Financed (required)
-  - Purchase Price
-  - Contract Date
-  - Projected Closing Date
-  - Lender/Title Company
-  - Notes
-- "Create with AI Checklist" primary button → creates transaction + generates tasks
-- "Full Wizard" link → navigates to `/transactions/new` for full wizard experience
+Quick-create-as-primary is **retired**. The full-screen wizard is the product path.
 
-**"Create with AI Checklist" click:**
-- API call: `POST /api/v1/transactions` with form data → `POST /api/v1/tasks/generate` with confirmed use case
-- Success: Transaction created; tasks generated; redirect to `/transactions/active?highlight=:newId`; toast "Transaction created with X tasks"
-- If first transaction: trigger profile completion prompt if checklist templates missing
+### Wizard (4 public phases)
 
-### Full Wizard Flow (from `/transactions/new` or "Full Wizard" link)
+Host: `WizardWorkspacePage` — no AppLayout chrome. Drafts: `GET/PUT/DELETE /api/v1/wizard-runs/current`.
 
-**Step 1 — Document Upload:**
-- Drag-drop or browse for files (PDF, JPEG, GIF, DOC, DOCX; up to 20MB per file)
-- Multiple files allowed; order doesn't matter
-- Auto-compression for files over 10MB
-- Multi-page document splitting: preview with page range selection
-- "Skip — enter details manually" link (for when no documents are available)
-- Upload: `POST /api/v1/documents/upload` per file
+**Phase 1 — Upload** (`upload` + transient `parsing`)
+- Drag-drop or browse (PDF, JPEG, GIF, DOC, DOCX; up to 20MB)
+- Auto-compression over 10MB; multi-page split
+- Skip → enter details manually
+- Parsing progress (not a stepper stop): Reading documents → Extracting property data → Identifying parties → Checking dates
+- Textract OCR + active AI provider; two-pass double-check; per-field confidence + citations
+- Autopilot may jump to Verification when ship-it criteria are met
+- Back never returns to a finished parse
 
-**Step 2 — AI Parsing Progress:**
-- Animated progress display: "Reading documents…" → "Extracting property data…" → "Identifying parties…" → "Checking dates…"
-- Double-check mechanism: two-pass extraction with agreement check
-- If passes disagree: show fields where AI is uncertain with amber highlight and "Low confidence" badge
-- Show extracted data as it becomes available (streaming feel)
-- Error handling: blurry docs → "Unable to read. Please upload a clearer copy or enter manually." with manual entry fallback
+**Phase 2 — Contract Details** (`purchase`)
+- Address, price, dates, financing, contingencies, notes
+- Required no-default decisions: who orders title (except attorney-controlled states), cash appraisal election
+- Honest blanks for deadline windows (requirements §15)
 
-**Step 3 — Address Confirmation:**
-- AI-normalized address displayed: Street, City, State, ZIP
-- Validation: city/state/zip alignment check
-- Inconsistency flags: highlighted with amber border and explanation
-- User must confirm address (checkbox or "Confirm" button)
-- Edit capability: all fields editable before confirmation
+**Phase 3 — Contacts & Fees** (`address`; `missing` auto-skips)
+- Party contact cards; vendor roles may defer email/phone to a collect-info task
+- Professional + Transaction fees (Buyer/Seller/Both; per-side amount + unit)
+- AI public-source search for missing contacts; confirmation required
 
-**Step 4 — Purchase Information Validation:**
-- Display all extracted data for confirmation:
-  - Final purchase price (tracked across counteroffers/amendments)
-  - Contract acceptance date
-  - Closing date
-  - Possession date
-  - Insurance days
-  - Inspection days
-  - Home warranty info (who orders)
-  - HOA documentation days
-  - Professional fees (who pays what)
-  - Financing status
-  - Appraisal status (cash only)
-- Discrepancy flags: inconsistencies between documents highlighted with inline alerts
-- Signature verification: "All documents signed by all parties" check; flag missing signatures
-- Document preview panel: shows relevant document sections alongside extracted data
-- User must explicitly confirm all variable dates, price, and fees
-- "Suggest AI Improvement" button (optional — user feedback to improve AI)
+**Phase 4 — Verification** (`confirm`)
+- Source-linked summary, timeline proposals, deal brief, signature decision
+- Create via full-width **Upload Transaction** (credit paywall if no prepaid deals)
+- Commit generates tasks + auto-matches compliance; then `/transactions/:id?created=1`
 
-**Step 5 — Missing Information Handling:**
-- For each missing required field:
-  - Prompt: "We couldn't find [field]. Please enter it below."
-  - If user doesn't know: "Search" button → AI searches public sources (Google for contact info, company websites, licensed contact info)
-  - Search screen: animated "Searching for [field]…" with activity indicators
-  - Results: clearly labeled "AI-sourced" with source attribution
-  - User must confirm any externally sourced data (explicit checkbox)
-  - No auto-acceptance of external data
-
-**Step 6 — Confirmation Page:**
-- Single summary page showing all extracted/entered data:
-  - Address (confirmed)
-  - Purchase price
-  - Closing date + closing mode (if applicable)
-  - All deadline dates
-  - All parties with contact info
-  - Financing status
-  - Appraisal status (if cash)
-  - Uploaded documents list
-- Edit buttons per section (edit in place; one-time validation, no rescan)
-- "Accept & Create Transaction" primary button
-- On confirmation only: system creates transaction → locks baseline dates → generates task list
-
-### Post-Creation
-- Redirect to `/transactions/active?highlight=:newId`
-- If first transaction and profile incomplete → overlay prompt: "Complete your profile to enable closing checklists and notification preferences" with link to `/profile`
-- Toast: "Transaction '[Client Name]' created with [X] tasks"
+Retired from navigation: standalone `timeline`, `checklist`, `review` (kept as draft ids).
 
 ---
 
 ## B. Transaction Lifecycle Management Flow
 
-1. **Active Transactions workspace:** View, filter, sort transactions (§4.1)
-2. **Card expansion:** See tasks, key dates, contacts in 3-column drawer
-3. **Inline task completion:** Checkbox in drawer or task queue
-4. **Key date editing:** Inline date popover with Save/Cancel
-5. **AI suggestions:** Next-step banners, drawer suggestions panel
-6. **Document management:** Upload/view/email/e-sign from transaction context
+1. **Active Transactions list:** View, filter, sort (§4.1); open `/transactions/:id` for durable editing
+2. **Card expansion:** Quick glance at tasks, key dates, contacts; workspace is the source of truth
+3. **Task completion:** Workspace Tasks tab, list drawer, or `/tasks/queue`
+4. **Key date editing:** Workspace Timeline (cascade preview for Closing/Possession)
+5. **AI suggestions:** Next-step banners, Needs You, `/ai-suggestions`
+6. **Document management:** Workspace Documents/Compliance tabs or `/documents`
 7. **Transaction type switching:** If use case changes (e.g., Financing → Cash):
    - Check all task IDs for completed status → preserve completed tasks
    - Generate new tasks that didn't exist in previous use case
    - Remove/sleep tasks that don't apply to new use case (soft-delete, restorable)
    - Log all updates for audit
    - Toast: "Transaction type updated. [X] tasks added, [Y] tasks removed."
-8. **Status transitions:** Active → Completed (all tasks done + closing date passed) → Closed (admin/agent marks as closed)
+8. **Status transitions:** Active / Incomplete / Paused / Completed / Closed / Terminated
    - Paused: agent can pause a transaction (tasks stop generating reminders)
    - Incomplete: saved but wizard not finished
+   - Terminated: deal cancelled; remains in All Transactions
 9. **Post-closing feedback:** On first view of a recently closed transaction → prompt: "How was this transaction?" with useful/unnecessary/missing task feedback options
    - Feedback stored for AI learning system
    - Compliance tasks cannot be marked as "unnecessary for all future transactions"
@@ -3633,9 +3643,9 @@ These patterns must be consistently applied across all pages.
 - Refreshes via polling (60 seconds) or realtime subscription
 
 ### 4. "+ New Transaction" CTA
-- Available from both topbar and sidebar footer on all internal pages
-- Opens quick-create modal (not full wizard — quick-create is faster)
-- Same modal regardless of where triggered
+- Available from topbar and sidebar footer on Agent/TC/Team Lead pages (Admin: topbar only)
+- Navigates to `/transactions/new` (full-screen wizard). Does **not** open a quick-create modal as the primary path.
+- Drag-drop uses IntakeConfirmationModal, then the same wizard.
 
 ### 5. Print Closing Checklist
 - Available from any transaction context (expanded card footer, transaction detail)
@@ -3680,7 +3690,7 @@ These patterns must be consistently applied across all pages.
   - **Attorney:** 12 steps — Welcome → Matters → Releases Queue → Recording Calendar → State Rules → AI Suggestions → Upload Legal Packet → Search → Notifications → Settings & your account → Ask AI FAB → Finale.
   - **FSBO:** 9 steps — Welcome → My Properties → Documents → Payments → Messages → Share milestones CTA → Notifications → Ask AI FAB → Portal finale.
   - **Client:** 9 steps — Welcome → Home → Timeline → Documents → Payments → Agent Info → Ask-your-agent CTA → Notifications → Portal finale.
-  - **Vendor:** 6 steps — Welcome → Document Requests → My Uploads → Upload document CTA → Notifications → Portal finale.
+  - **Vendor:** 6 steps — Welcome → Document Requests → My Uploads → Upload document CTA → Notifications → Portal finale. (Tour titles still use those labels; live nav is Files / Documents / Tasks.)
 - **Visual style:** Backdrop `rgba(15,20,30,0.55)` drawn as one full-viewport SVG rect with an animated rounded-rect hole punched via an SVG mask (a giant box-shadow was culled by Chromium whenever the cutout touched a viewport edge — i.e. every sidebar target). Spotlight = 1.5 px orange ring + soft halo element + 2 s pulse ring, 8 px padding. Tooltip card 360 px wide, flat white, hairline `ve-border`, soft shadow, **no gradient strip**; sentence-case context line above a serif title; small caret pointing at the spotlight. Placement auto-flips and clamps inside the viewport. Welcome and Finale render as a centered hero card over the uniform dim.
 - **Animations:** Framer Motion fades + 0.28 s ease-out tween on spotlight moves; pulse loops every 2 s. Wrapped in `MotionConfig reducedMotion="user"`. Re-measures every animation frame; auto-scrolls the target into view once per step.
 - **Controls:**
@@ -3709,7 +3719,7 @@ These patterns must be consistently applied across all pages.
 7. **Attorney AI guardrails are absolute.** AI must NOT determine legal equivalence, legal position, final packet release approval, or same-day disbursement exceptions. These are always human-owned.
 8. **FSBO boundary.** Velvet Elves coordinates workflow but does not act as the customer's agent or provide legal advice.
 9. **Dashboard deep-linking.** Dashboard cards, fast filters, and AI prompts must open filtered views in Active Transactions or the relevant workspace. No dead-end pages.
-10. **MVP Active Transactions is shared.** All internal roles use the same Active Transactions workspace with role-specific adaptations (not separate pages per role).
+10. **Deal list + deal workspace.** Internal ops share `/transactions` (expandable cards) and `/transactions/:id` (tabbed workspace). Attorney uses AttorneyLayout + matter workspace on the same IDs. Portal roles never use these URLs.
 
 ---
 

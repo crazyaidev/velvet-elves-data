@@ -446,7 +446,7 @@ correct).
 
 ### D3 · Tab set and the Compliance merge
 
-Final set: **Overview · Timeline · Tasks · Documents · People · Billing ·
+Final set: **Overview · Timeline · Tasks · Documents · Contacts · Billing ·
 Activity** (+ Email and Agent behind the agent flag). Compliance becomes the
 **Checklist view of Documents** (`Files | Checklist` toggle) — both are the
 deal's paperwork. `?tab=compliance` must resolve to Documents › Checklist, and
@@ -465,7 +465,7 @@ only when it has real data (spec §4.6):
   to Timeline. **The data is already served** — `plan.tracking_dates` returns 7
   populated entries today and nothing renders them.
 - **Progress** — complete/total with the bar, open/overdue counts, price.
-- **People** — the parties, with "Manage".
+- **Contacts** — the parties, with "Manage".
 
 Landing tab becomes Overview.
 
@@ -498,8 +498,8 @@ This retires the dead `DealOverviewCard` / `DealBriefBand` chain
 
 `?tab=`, `?view=files|checklist`, `?task=<id>`, `?requirement=<id>`,
 `?qa=1`, `?access=1` (open the Client Q&A drawer / Manage client access once on
-People, then strip the flag), `?created=1`. `?qa=1` and `?access=1` are no-ops
-today. Add the Client-Q&A amber dot on People from the same tenant-wide thread
+Contacts, then strip the flag), `?created=1`. `?qa=1` and `?access=1` are no-ops
+today. Add the Client-Q&A amber dot on Contacts from the same tenant-wide thread
 summary the list already uses.
 
 ### D8 · Verification gate
@@ -679,7 +679,7 @@ rebuild, as planned.
 | **C3** F-16 | **new** `services/task_progress.py`, `transaction_plan.py`, `closing_checklist.py` | ONE canonical rule — Completed ÷ (all tasks except Skipped and AI-hidden) — with `percent` returning `None` rather than 0 when there is nothing to measure. The checklist had been counting AI-owned tasks and scoring Skipped as complete; that is why it said "28 total · 3 completed" for a deal the app showed as 26/1. |
 | **D1/D2** | `TransactionWorkspacePage.tsx`, `WorkspaceHeader.tsx` | Three-row header; facts line; ⋯ menu with Print + Delete; Ask AI; assistant closed by default; posture collapsed from a three-way segmented control into one chip. |
 | **D3–D5** | **new** `OverviewTab.tsx`, **new** `BillingTab.tsx`, `CreationReceiptStrip.tsx` | Overview is the landing tab; Billing lists the deal's invoices; Compliance became the Checklist view of Documents. |
-| **D6/D7** | `TimelineTab.tsx`, `PeopleTab.tsx` | Tracking-dates rail (Closing/Possession route through the existing cascade picker; the five pure fields save directly); `?qa=1` / `?access=1` open their surface once and pin `tab=people`. |
+| **D6/D7** | `TimelineTab.tsx`, `ContactsTab.tsx` | Tracking-dates rail (Closing/Possession route through the existing cascade picker; the five pure fields save directly); `?qa=1` / `?access=1` open their surface once and pin `tab=contacts`. |
 | **E1** F-09 | **new** `hooks/useInertWhenClosed.ts` + 3 panels | Closed panels are `inert` + `aria-hidden`; 63 focusable controls left the tab order. |
 | **E2** F-12 | `dashboard.py`, `schemas/dashboard.py`, `useDashboard.ts`, `TransactionListPage.tsx` | `/all` gained its status tab bar, backed by a new `status_counts` block and a `status` query param. |
 | **E4** F-22/23 | `TransactionCard.tsx`, `TransactionListPage.tsx` | Deleted the dead History-badge handler and the `onChangeTaskStatus` callback. |
@@ -695,7 +695,7 @@ Browser (real Chrome, admin user, local stack):
 | Pill "6 deals" over 2 cards | every tab's pill equals its card count (6/6, 1/1, 4/4, 0/0) |
 | No search input | present, filters to 1 deal, writes `?search=oak`, clearable |
 | "-75 DAYS TO CLOSE", "Closing is in -3 days" | "Past due · 3 days ago"; no negative anywhere on the page |
-| Detail: no Overview, no Billing, Compliance a tab, no facts line, no ⋯, pane open | Overview · Timeline · Tasks · Documents · People · Billing · Activity; lands on Overview; facts line renders all five facts; ⋯ has Print + Delete; pane closed (`aria-pressed=false`, no stored pref) |
+| Detail: no Overview, no Billing, Compliance a tab, no facts line, no ⋯, pane open | Overview · Timeline · Tasks · Documents · Contacts · Billing · Activity; lands on Overview; facts line renders all five facts; ⋯ has Print + Delete; pane closed (`aria-pressed=false`, no stored pref) |
 | Activity: every row "Invalid Date" | 0 occurrences; times render ("9:12 PM") with working "Open" links |
 | 3 closed dialogs focusable | all `inert` + `aria-hidden` |
 | Console error on every list load | clean; zero 4xx across the sweep |
@@ -743,9 +743,9 @@ The rebuilt page was reviewed and four things were called out. All are fixed.
 | **The assistant belongs on the LEFT.** The first rebuild docked it right at 400px per §16.3's literal wording; the reviewer's point is that this is an *agent-centric* workspace, and the conversation is the primary surface, not a sidecar. | Pane restored to the **left, 55fr** — the layout §16.1 already blessed. §16.3's "400px docked right" is superseded on this point. |
 | **Too much at the top of the page.** Five facts stacked under the title read as clutter, not as a summary. | The header now carries the **address only**. Closing date, price, overdue count and progress all moved to **Overview**, each into the panel that owns it: the closing headline leads Key dates, and Open / Overdue / Purchase price became a labelled stat row on Progress. |
 | **The right panel's tabs overflowed**, clipping "Email" off the edge. | Two causes, both fixed: the tabs are **label-only** now (the icons bought nothing the label did not already say), and the workbench keeps a **600px floor** (`minmax(600px,45fr)`). Measured after the change: zero clipped tabs with the pane open at 1600 (598px strip in 598px) and at 1280 (pane yields to 376px). A fade + scroll-into-view remains for anything narrower. |
-| **Card and detail page named the same things differently** — "Contacts" vs the "People" tab, "Invoices & Payments" vs "Billing" — so one feature read as two. | **"Contacts" everywhere**: the card section, the workspace tab (key `contacts`, with `?tab=people` aliased so live links keep working), the tab's own heading, and the Overview panel. **The card's "Invoices & Payments" section is removed**; invoices live on the workspace's Billing tab. The card footer's "Invoice" button stays — creating one is a triage-speed action, and it opens the same modal Billing does. |
+| **Card and detail page named the same things differently** — "Contacts" vs a second name for the same tab, "Invoices & Payments" vs "Billing" — so one feature read as two. | **"Contacts" everywhere**: the card section, the workspace tab (key `contacts`, with `?tab=contacts` aliased so live links keep working), the tab's own heading, and the Overview panel. **The card's "Invoices & Payments" section is removed**; invoices live on the workspace's Billing tab. The card footer's "Invoice" button stays — creating one is a triage-speed action, and it opens the same modal Billing does. |
 
-The Attorney Matter Workspace keeps its own "People" pane: it is a separate
+The Attorney Matter Workspace keeps its own Contacts pane: it is a separate
 surface for a separate role and was not in scope.
 
 Re-verified after these changes: integration 113 passed (same lone pre-existing

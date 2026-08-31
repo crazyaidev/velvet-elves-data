@@ -90,7 +90,7 @@ Full consent screens, unverified-app warning, inbound match, and live **Approve 
 
 ### BUG-003 — Seller missing after AI extract (and Add seller UI did not refresh)
 
-- **Severity:** high (Scene 3 People/Contacts)  
+- **Severity:** high (Scene 3 Contacts)  
 - **Details:** Contacts showed **No seller on file**. The PDF listed Harper Devlin as seller **and** loan officer on the same Gmail (`happydev0705@gmail.com`); extraction kept her as lender only.  
 - **Add seller:** toast “Contact added”, but the Seller group stayed empty until a later navigation. `AddContactModal` only invalidated `['dashboard']`, not `['transaction', 'parties', id]`.  
 - **Fix in repo (not yet production):** invalidate the parties query after add.  
@@ -129,7 +129,7 @@ Full consent screens, unverified-app warning, inbound match, and live **Approve 
 
 ### Script mismatch (not a product bug)
 
-- Workspace tab is **Contacts**, not “People.”  
+- Workspace tab is **Contacts**, not “Contacts.”  
 - Wizard confirmation header is **Confirm Details**, not “Verification.”
 
 ---

@@ -80,7 +80,7 @@ Say these names on camera. The older guides used different words.
 
 | Do not say | The product shows |
 | --- | --- |
-| People | **Contacts** |
+| Contacts | **Contacts** |
 | Verification (wizard) | **Confirm Details** |
 | AI Email Review | **Intelligence → Email** |
 | Incoming / Needs review | **Inbox** / **Outbox** / **Sent** |

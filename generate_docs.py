@@ -1247,6 +1247,16 @@ def create_smart_ai_automation_for_jake_doc():
     )
 
 
+def create_aime_transaction_workflow_questions_for_jake_doc():
+    """Generate a .docx of AIME_TRANSACTION_WORKFLOW_QUESTIONS_FOR_JAKE.md —
+    workflow issues and questions for Jake after his AI architecture and
+    Audri's automation answers (audience: Jake; real-estate logic only)."""
+    _create_markdown_doc(
+        "AIME_TRANSACTION_WORKFLOW_QUESTIONS_FOR_JAKE.md",
+        "AIME_TRANSACTION_WORKFLOW_QUESTIONS_FOR_JAKE.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -1587,6 +1597,58 @@ def create_google_demo_video_requirements_doc():
     render_feedback_body(doc, body_lines)
 
     save_document(doc, "GOOGLE_DEMO_VIDEO_REQUIREMENTS.docx")
+
+
+def create_google_reviewer_testing_guidelines_doc():
+    """Generate a .docx export of GOOGLE_REVIEWER_TESTING_GUIDELINES.md.
+
+    Step-by-step instructions for Google Trust and Safety reviewers, written
+    against the 2026-08-06 verification email (test credentials, no auth
+    blockers, navigation that demonstrates each submitted scope).
+    """
+    doc = Document()
+
+    for section in doc.sections:
+        section.top_margin = Cm(2.54)
+        section.bottom_margin = Cm(2.54)
+        section.left_margin = Cm(2.54)
+        section.right_margin = Cm(2.54)
+
+    lines = read_source_lines("GOOGLE_REVIEWER_TESTING_GUIDELINES.md")
+    title, metadata, body_lines = extract_feedback_header(lines)
+    main_title, subtitle = split_document_title(title)
+
+    doc.add_paragraph()
+    doc.add_paragraph()
+    add_styled_paragraph(doc, "VELVET ELVES", 'Title', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(28))
+    add_styled_paragraph(doc, "AI-First Transaction Management Platform", 'Subtitle',
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(18))
+    doc.add_paragraph()
+    add_styled_paragraph(doc, main_title, 'Heading 1', bold=True,
+                         alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(20))
+    if subtitle:
+        add_styled_paragraph(doc, subtitle, 'Heading 2',
+                             alignment=WD_ALIGN_PARAGRAPH.CENTER, size=Pt(14))
+    doc.add_paragraph()
+
+    if metadata:
+        table = doc.add_table(rows=len(metadata), cols=2)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+        table.style = 'Light Grid Accent 1'
+        for row_index, (label, value) in enumerate(metadata):
+            table.rows[row_index].cells[0].text = label
+            table.rows[row_index].cells[1].text = value
+            for column_index, cell in enumerate(table.rows[row_index].cells):
+                for paragraph in cell.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = BODY_FONT_SIZE
+                        if column_index == 0:
+                            run.bold = True
+
+    doc.add_page_break()
+    render_feedback_body(doc, body_lines)
+    save_document(doc, "GOOGLE_REVIEWER_TESTING_GUIDELINES.docx")
 
 
 TESTING_REVIEW_FEATURES = None  # Populated at bottom of file
@@ -2548,7 +2610,7 @@ TESTING_REVIEW_FEATURES = [
             "From the Active Transactions list, open any deal. It opens as its own full page with its own web address — not just an expanded card.",
             ("On a normal computer screen, confirm the page has two sides.", [
                 "On the left: the Velvet Elves AI assistant for this deal.",
-                "On the right: a panel with tabs across the top — Timeline, Compliance, Documents, Tasks, People, Activity, and Email.",
+                "On the right: a panel with tabs across the top — Timeline, Compliance, Documents, Tasks, Contacts, Activity, and Email.",
             ]),
             ("Look at the top of the page.", [
                 "A 'X% complete' progress bar (shown once the deal has tasks).",
@@ -2627,9 +2689,9 @@ TESTING_REVIEW_FEATURES = [
         "feature": "Point the assistant at any item, and quick commands",
         "route": "Any tab row + the assistant's message box",
         "how_to_test": [
-            "On any tab (Tasks, Compliance, Documents, Timeline, People), open a row's three-dot menu (or hover the row) and choose 'Ask AI about this'.",
+            "On any tab (Tasks, Compliance, Documents, Timeline, Contacts), open a row's three-dot menu (or hover the row) and choose 'Ask AI about this'.",
             "Confirm the item appears as a small tag in the message box and the assistant comes into focus. Type a question and send it — the answer should be about that item.",
-            "Click the '+' in the message box to open a picker with tabs (Documents, Tasks, Deadlines, Requirements, People, Emails). Pick one to add it as a tag.",
+            "Click the '+' in the message box to open a picker with tabs (Documents, Tasks, Deadlines, Requirements, Contacts, Emails). Pick one to add it as a tag.",
             "Type '/' in the message box to open the command menu (for example /scan, /readiness, /summarize, /draft-email, /request-document, /add-deadline, /move-date).",
             "Click '/readiness' and confirm the assistant reports whether the deal is ready to close and what is still in the way.",
         ],
@@ -2684,7 +2746,7 @@ TESTING_REVIEW_FEATURES = [
     {
         "no": "17.7",
         "category": "Daily Agent / Elf Workflow",
-        "feature": "The deal tabs (Timeline, Compliance, Documents, Tasks, People, Activity)",
+        "feature": "The deal tabs (Timeline, Compliance, Documents, Tasks, Contacts, Activity)",
         "route": "The tab bar across the top of the right-hand panel",
         "how_to_test": [
             ("Click each tab in turn and confirm it shows this deal's information.", [
@@ -2692,7 +2754,7 @@ TESTING_REVIEW_FEATURES = [
                 "Compliance — the document checklist; attach or upload a document to a requirement, and the AI flags mismatches.",
                 "Documents — every document on the deal, with Upload, Manage, Print, and download.",
                 "Tasks — the deal's tasks; each task's status is a colored pill (Pending, In progress, Completed, Skipped), with 'Add Task' and a three-dot menu on each task.",
-                "People — the buyers, sellers, and other contacts, with 'Manage client access' where your role allows it.",
+                "Contacts — the buyers, sellers, and other contacts, with 'Manage client access' where your role allows it.",
                 "Activity — the deal's history (date changes, status updates, checklist edits) and a Communications button.",
             ]),
             "On the Tasks tab, change a task's status and confirm the pill changes color right away and a 'Saving…' note appears at the top while it records.",
@@ -4549,7 +4611,7 @@ TESTING_REVIEW_FEATURES = [
         "route": "/transactions/<id> (as Attorney) — opens from Review on a matter card",
         "how_to_test": [
             "Open a matter from the Matters list. Confirm a full-screen workspace with a header (property address, status, and a matter switcher to jump between matters) rather than a simple scrolling page.",
-            "Use the left section rail to move between Overview, Review, Brief, Timeline, People, Activity, and Releases. Confirm each section loads its own content.",
+            "Use the left section rail to move between Overview, Review, Brief, Timeline, Contacts, Activity, and Releases. Confirm each section loads its own content.",
             "On the Review section, work through the document review items. On the Releases section, confirm you can start a packet release.",
             "Use the matter switcher in the header to jump to a different matter without going back to the list.",
         ],
@@ -4950,9 +5012,11 @@ TARGET_BUILDERS = {
     "demo-video-guideline": create_demo_video_guideline_doc,
     "demo-video-guide-for-jake": create_demo_video_guide_for_jake_doc,
     "google-demo-video-requirements": create_google_demo_video_requirements_doc,
+    "google-reviewer-testing-guidelines": create_google_reviewer_testing_guidelines_doc,
     "billing-minimum-price": create_billing_minimum_price_doc,
     "email-guideline-questions": create_email_guideline_questions_doc,
     "smart-ai-automation-for-jake": create_smart_ai_automation_for_jake_doc,
+    "aime-transaction-workflow-questions": create_aime_transaction_workflow_questions_for_jake_doc,
     "first-conference-listedkit-advantage-strategy": create_first_conference_listedkit_advantage_strategy_doc,
 }
 
@@ -5060,6 +5124,12 @@ TARGET_ALIASES = {
     "demo-video-requirements": "google-demo-video-requirements",
     "video-requirements": "google-demo-video-requirements",
     "demo-v2": "google-demo-video-requirements",
+    "google_reviewer_testing_guidelines": "google-reviewer-testing-guidelines",
+    "google_reviewer_testing_guidelines.md": "google-reviewer-testing-guidelines",
+    "google_reviewer_testing_guidelines.docx": "google-reviewer-testing-guidelines",
+    "google-reviewer-guidelines": "google-reviewer-testing-guidelines",
+    "reviewer-testing-guidelines": "google-reviewer-testing-guidelines",
+    "google-testing-guidelines": "google-reviewer-testing-guidelines",
     "email_guideline_questions_for_jake": "email-guideline-questions",
     "email_guideline_questions_for_jake.md": "email-guideline-questions",
     "email_guideline_questions_for_jake.docx": "email-guideline-questions",
@@ -5075,6 +5145,14 @@ TARGET_ALIASES = {
     "smart-automation-jake": "smart-ai-automation-for-jake",
     "jake-smart-automation": "smart-ai-automation-for-jake",
     "smart-ai-automation": "smart-ai-automation-for-jake",
+    "aime_transaction_workflow_questions_for_jake": "aime-transaction-workflow-questions",
+    "aime_transaction_workflow_questions_for_jake.md": "aime-transaction-workflow-questions",
+    "aime_transaction_workflow_questions_for_jake.docx": "aime-transaction-workflow-questions",
+    "aime-transaction-workflow-questions-for-jake": "aime-transaction-workflow-questions",
+    "aime-workflow-questions": "aime-transaction-workflow-questions",
+    "aime-questions-for-jake": "aime-transaction-workflow-questions",
+    "jake-aime-questions": "aime-transaction-workflow-questions",
+    "tme-questions-for-jake": "aime-transaction-workflow-questions",
     "first_conference_listedkit_advantage_strategy": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.md": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.docx": "first-conference-listedkit-advantage-strategy",

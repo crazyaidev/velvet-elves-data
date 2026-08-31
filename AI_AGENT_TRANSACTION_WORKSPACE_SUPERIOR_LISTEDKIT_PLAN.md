@@ -39,7 +39,7 @@ Frontend source reviewed:
 - `velvet-elves-frontend/src/components/workspace/ComplianceTab.tsx`
 - `velvet-elves-frontend/src/components/workspace/DocumentsTab.tsx`
 - `velvet-elves-frontend/src/components/workspace/TasksTab.tsx`
-- `velvet-elves-frontend/src/components/workspace/PeopleTab.tsx`
+- `velvet-elves-frontend/src/components/workspace/ContactsTab.tsx`
 - `velvet-elves-frontend/src/components/workspace/ActivityTab.tsx`
 - `velvet-elves-frontend/src/components/workspace/AiEvidenceChip.tsx`
 - `velvet-elves-frontend/src/components/workspace/CascadeEditor.tsx`
@@ -151,7 +151,7 @@ The current `TransactionWorkspacePage.tsx` already provides:
 
 - A single deal route at `/transactions/:transactionId`.
 - Header identity, status control, AI next-step strip, quick actions, and tab pills.
-- Tabs for Timeline, Compliance, Documents, Tasks, People, and Activity.
+- Tabs for Timeline, Compliance, Documents, Tasks, Contacts, and Activity.
 - Workspace-wide drag-and-drop upload routing to the Documents tab.
 - Quick actions for Add Task, Upload Document, Compose, Print, and Ask AI.
 - Cascade preview/apply/undo for anchor date changes.
@@ -178,7 +178,7 @@ The current backend already provides:
 - AI document parse, packet parse, document resolution, public source search, intake classification, AI feedback, wizard command parsing, and checklist parsing.
 - On-demand AI email compose, inbound email drafting, settings, templates, test inbound, approval, edit/send, discard, regenerate, and escalation.
 - Transaction-scoped communication logs via `/api/v1/communication-logs/transaction/{transaction_id}` and AI email drafts via `/api/v1/ai-emails/drafts?transaction_id=...`.
-- External party CRUD through `/api/v1/transactions/{transaction_id}/parties`, used by the People tab and recipient selection.
+- External party CRUD through `/api/v1/transactions/{transaction_id}/parties`, used by the Contacts tab and recipient selection.
 - Multi-tenant RBAC, Fernet PII encryption, provider-agnostic AI switching, and audit logging.
 
 Important backend constraints the plan must preserve:
@@ -324,7 +324,7 @@ Right pane contents:
 
 - Timeline
 - Tasks
-- Details or People
+- Details or Contacts
 - Compliance
 - Documents or Files
 - Email
@@ -748,7 +748,7 @@ Email actions:
 - `open_email_review`
 - `file_inbound_email_to_transaction`
 
-People/contact actions:
+Contacts/contact actions:
 
 - `add_party`
 - `update_party_email`
@@ -790,7 +790,7 @@ V1 canonical handler map:
 | `preview_date_cascade` | `POST /api/v1/transactions/{transaction_id}/plan/preview` | Required before any date apply. |
 | `apply_date_cascade` | `POST /api/v1/transactions/{transaction_id}/plan/apply` | Use existing `commit_id` and `inverse_changes` for undo. |
 | `split_document` | `GET /documents/{id}/pages` then `POST /documents/{id}/split` | PDF-only; preview page ranges before apply. |
-| `add_party` / `update_party_email` | `/api/v1/transactions/{transaction_id}/parties` | Use People tab vocabulary and audit without copying raw PII into agent JSON. |
+| `add_party` / `update_party_email` | `/api/v1/transactions/{transaction_id}/parties` | Use Contacts tab vocabulary and audit without copying raw PII into agent JSON. |
 
 ### 9.6 Preview and apply contract
 
@@ -892,14 +892,14 @@ TransactionWorkspacePage
       ComplianceTab
       DocumentsTab
       TasksTab
-      PeopleTab
+      ContactsTab
       ActivityTab
       EmailTab
 ```
 
 The existing tab components should remain source-of-truth surfaces. The new agent pane orchestrates them.
 
-Migration rule: the current shipped workspace has Timeline, Compliance, Documents, Tasks, People, and Activity. Do not block the agent shell on a full ListedKit-style Email or Details tab. Phase 2 may add a minimal transaction Email panel/tab for pending AI drafts created by agent actions; Phase 4 expands it into the full Outbox/Inbox Email tab. A Details tab is a later consolidation of `DealOverviewCard` and `PeopleTab`, not a first-slice dependency.
+Migration rule: the current shipped workspace has Timeline, Compliance, Documents, Tasks, Contacts, and Activity. Do not block the agent shell on a full ListedKit-style Email or Details tab. Phase 2 may add a minimal transaction Email panel/tab for pending AI drafts created by agent actions; Phase 4 expands it into the full Outbox/Inbox Email tab. A Details tab is a later consolidation of `DealOverviewCard` and `ContactsTab`, not a first-slice dependency.
 
 ### 10.2 New frontend components
 
@@ -1040,7 +1040,7 @@ Manual direct-send correction:
 
 ### 10.8 Details tab
 
-ListedKit has Details in the right rail. Velvet Elves currently has People and DealOverviewCard. Create a Details tab or combine People + transaction facts:
+ListedKit has Details in the right rail. Velvet Elves currently has Contacts and DealOverviewCard. Create a Details tab or combine Contacts + transaction facts:
 
 - Address.
 - Property facts.

@@ -1,0 +1,23 @@
+version: 0.2
+
+# Privileged Linux CodeBuild: pull Fluid Attacks SAST and scan the backend
+# with the official CASA checks list. CSV only (ADA: CSV or XML, not both).
+
+phases:
+  pre_build:
+    commands:
+      - echo Pulling fluidattacks/sast
+      - docker pull fluidattacks/sast:latest
+  build:
+    commands:
+      - echo Scanning velvet-elves-backend
+      - docker run --rm -v "$CODEBUILD_SRC_DIR":/src fluidattacks/sast:latest sast scan /src/config.yaml
+      - echo "---- result head ----"
+      - wc -l "$CODEBUILD_SRC_DIR/Fluid-Attacks-Results.csv" || true
+      - head -n 20 "$CODEBUILD_SRC_DIR/Fluid-Attacks-Results.csv" || true
+      - test -f "$CODEBUILD_SRC_DIR/Fluid-Attacks-Results.csv"
+
+artifacts:
+  files:
+    - Fluid-Attacks-Results.csv
+  name: casa-fluid-sast-$(date +%Y%m%d-%H%M%S)

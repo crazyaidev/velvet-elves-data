@@ -1,0 +1,17 @@
+Subject: Re: Waitlist Connection
+
+Hi Jake,
+
+Done. I did not touch your marketing app or the VM.
+
+Read-only role okos_waitlist_ro is on production. It can SELECT public.marketing_leads, waitlist rows only — not newsletter, demo, or early_access, and not any other table. Session pooler URI, not the direct db. host (IPv6-only; Lightsail is IPv4).
+
+The DSN is on this one-time link (opens once, then dies):
+
+https://password.link/r4GkWY9g/#dClyR3lFX0EpWm1zdCtEekA4
+
+Paste it into /opt/okos/data/secrets/ve/waitlist-dsn.txt and flip enabled. Query public.marketing_leads as you planned. If GROUP BY interest no longer shows newsletter, that is intended.
+
+/platform/waitlist is unchanged. Capture on velvetelves.com is unchanged.
+
+Jan

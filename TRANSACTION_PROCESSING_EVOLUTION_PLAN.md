@@ -505,7 +505,7 @@ No new design - the Q&A plan remains authoritative. Scheduled remainder:
   transaction-scoped) that calls the same `client_workspace.py` projection
   functions the client routes use - same functions, so preview and reality
   cannot diverge; client-facing routes and their role guards are untouched.
-  UI: a "View as client" action on the workspace People tab (client rows
+  UI: a "View as client" action on the workspace Contacts tab (client rows
   only) opening a read-only Radix modal bannered "This is what your client
   sees."
 - Client pages keep honest empty states throughout (standing rule).
@@ -578,7 +578,7 @@ new nav entries.
 AI-read basis shows its citation chip). Task Templates rows: gray outline
 workflow chip; editor: Workflow Select.
 
-**IV.5 "View as client".** People tab, client rows only: eye icon "View as
+**IV.5 "View as client".** Contacts tab, client rows only: eye icon "View as
 client". Full-height Radix modal, banner "This is what your client sees -
 read-only", body renders the client Home/Milestones/Documents projections
 from the [RC8] preview endpoint. No edit affordances inside.
@@ -711,7 +711,7 @@ additive; none rewrite existing rows.
   - E9: edit a deadline's days in all three places (wizard timeline,
     Add-deadline modal, workspace timeline) - the calendar/business toggle
     appears in each; pick business; chip and date update together.
-  - E10: People tab - [View as client] shows exactly the client portal
+  - E10: Contacts tab - [View as client] shows exactly the client portal
     content, read-only.
   - E11: Analytics - Closings: click a KPI; the backing list matches the
     number.

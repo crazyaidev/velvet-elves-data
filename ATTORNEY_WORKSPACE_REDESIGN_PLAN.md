@@ -353,7 +353,7 @@ Workspace › Matters › 123 Oak St
  ▸ Review            ⁵ │ scrolls on its own. Section rail stays put.
  ▸ Brief               │
  ▸ Timeline            │
- ▸ People              │
+ ▸ Contacts              │
  ▸ Activity         •  │
  ▸ Releases            │
 ─────────────────────────────────────────────────────────────────────
@@ -368,7 +368,7 @@ Section rail items, each with optional badges:
 | Review | review_items needing sign-off | `detail.review_items` where `signed_off === false` |
 | Brief | — | `detail.ai_legal_brief` |
 | Timeline | upcoming deadlines within 14d | `detail.timeline` |
-| People | — | `detail.contacts` |
+| Contacts | — | `detail.contacts` |
 | Activity | unseen items in last 24h (if available) | `detail.activity` |
 | Releases | "Ready" or "Held" | derived from `detail.matter_state` + release rows |
 
@@ -418,8 +418,8 @@ card chrome.
   different (e.g. each step has a "legal hold" sub-status), create a
   variant `LegalMatterTimeline` that shares the same visual.
 
-- **People**: contacts as standalone cards in a 2-col grid (FSBO Property
-  Detail People pane pattern). Per-card: avatar (party_role tone) · name ·
+- **Contacts**: contacts as standalone cards in a 2-col grid (FSBO Property
+  Detail Contacts pane pattern). Per-card: avatar (party_role tone) · name ·
   role · company · email/phone buttons.
 
 - **Activity**: ordered event list (audit-log rows). Standalone bordered
@@ -637,7 +637,7 @@ rail on the left, where should the switcher live?
 
 ### Q2. Section breakdown for the Matter Workspace
 
-Proposed sections: Overview / Review / Brief / Timeline / People /
+Proposed sections: Overview / Review / Brief / Timeline / Contacts /
 Activity / Releases. Confirm or rebalance:
 
 - **A (recommended)**: Use the 7 sections as listed. Releases is its own
@@ -734,7 +734,7 @@ Work items:
    - Brief (AI legal brief on a clean work surface)
    - Timeline (reuse `MilestoneTimeline` or build `LegalMatterTimeline`
      per Q7)
-   - People (contact cards, 2-col grid)
+   - Contacts (contact cards, 2-col grid)
    - Activity (event row list)
    - Releases (per-matter history + Send packet CTA)
 6. Loading / error / 404 / 403 states (StateFrame pattern).

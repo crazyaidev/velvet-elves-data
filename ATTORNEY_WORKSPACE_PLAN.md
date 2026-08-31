@@ -285,7 +285,7 @@ whether I judge it *necessary* for the Attorney role to be functional.
 - AI legal brief (existing `AiLegalBrief`)
 - Timeline (existing `MatterTimeline`)
 - Activity feed (existing `MatterActivity`)
-- People panel (existing `MatterPeoplePanel`)
+- Contacts panel (existing `MatterContactsPanel`)
 - Release-packet action (existing `SendPacketModal`)
 - Hold-matter action (existing `PATCH /api/v1/attorney/matters/{id}`)
 
@@ -515,7 +515,7 @@ A three-region layout, all on a single page-level scroll (per §15.1):
 │              │                                                   │
 │              │  Activity feed                                    │
 │              │                                                   │
-│              │  People on matter                                 │
+│              │  Contacts on matter                               │
 └──────────────┴──────────────────────────────────────────────────┘
 ```
 
@@ -539,7 +539,7 @@ Reusable or nearly reusable from the current Attorney dashboard work:
 - `components/dashboard/attorney/AiLegalBrief.tsx` — AI legal brief.
 - `components/dashboard/attorney/MatterTimeline.tsx` — timeline.
 - `components/dashboard/attorney/MatterActivity.tsx` — activity feed.
-- `components/dashboard/attorney/MatterPeoplePanel.tsx` — people.
+- `components/dashboard/attorney/MatterContactsPanel.tsx` — people.
 - `components/dashboard/SendPacketModal.tsx` — release modal.
 - `components/dashboard/StateRulesModal.tsx` — state rules modal.
 
@@ -597,7 +597,7 @@ similar visual contract.
 - File-checklist rows follow pattern 16 (priority queue row
   vocabulary): severity rail, tinted icon tile, pill row, serif
   title, muted next-step, single filled primary action button.
-- People panel uses pattern 8 progressive disclosure (collapsed
+- Contacts panel uses pattern 8 progressive disclosure (collapsed
   contact rows, expand on click).
 - Pattern 9 (explicit button per row, not whole-card click) — the
   checklist rows already have explicit "Review draft" / "Open draft"

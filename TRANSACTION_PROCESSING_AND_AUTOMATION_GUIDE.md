@@ -49,7 +49,7 @@ The workspace is one screen with the AI assistant on the left and tabs on the ri
 - **Compliance** - the document checklist: what is in, what is missing, what is waived.
 - **Documents** - every file on the deal; drag a new file anywhere on the page to add it.
 - **Tasks** - the working task list, with due dates and a checkbox per task to auto-draft its email (more on this in Part 2).
-- **People** - everyone on the deal; service providers can be saved to your vendor directory in one click.
+- **Contacts** - everyone on the deal; service providers can be saved to your vendor directory in one click.
 - **Activity** - the full history of everything that happened, who did it, and when.
 - **Email** - the deal's email: AI drafts waiting for review, sent mail, and the inbound thread.
 

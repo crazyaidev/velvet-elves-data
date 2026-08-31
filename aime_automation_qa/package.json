@@ -1,0 +1,9 @@
+{
+  "name": "aime-automation-qa",
+  "private": true,
+  "type": "module",
+  "description": "Headless Chrome QA for staging. Not shipped with the product.",
+  "dependencies": {
+    "playwright": "^1.55.0"
+  }
+}

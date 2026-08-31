@@ -1,5 +1,3 @@
-
-
 # **VELVET ELVES**
 
 ## *AI-First Transaction Management Platform*
@@ -307,15 +305,15 @@ These ten already state their attachment rule in the task text. I propose to use
 
 | ID | Task | Goes to | Attach | Leave out |
 | :---- | :---- | :---- | :---- | :---- |
-| 8 | Review Documentation | Agent | Any unsigned documents found in the review | n/a |
-| 80 | Confirm Title Order | Title | Purchase Agreement, all Counters, BLC or Tax Sheet, Sellers Disclosure, Lead Based Paint, Amendments & Addendums | Preapproval |
-| 110 | Deliver HOA Docs (buy side) | Buyer | HOA documents | n/a |
-| 115 | Deliver HOA Docs (both sides) | Buyer | HOA documents | n/a |
-| 120 | Deliver HOA Docs (sell side) | Co-op Agent | HOA documents | n/a |
-| 150 | Deliver Utility Info (buy side) | Buyer | Utility information | n/a |
-| 155 | Deliver Utility Info (both sides) | Buyer | Utility information | n/a |
-| 160 | Deliver Utility Info (sell side) | Seller | Utility information | n/a |
-| 170 | Order Home Warranty | Home Warranty Company | Home warranty invoice, sent on to the title company once invoice is uploaded. | n/a |
+| 8 | Review Documentation | Agent/TC | Any unsigned documents found in the review | n/a |
+| 80 | Confirm Title Order | Title/Agent/TC | Purchase Agreement, all Counters, BLC or Tax Sheet, Sellers Disclosure, Lead Based Paint, Amendments & Addendums | Preapproval |
+| 110 | Deliver HOA Docs (buy side) | Buyer/Agent/TC | HOA documents | n/a |
+| 115 | Deliver HOA Docs (both sides) | Buyer/Agent/TC | HOA documents | n/a |
+| 120 | Deliver HOA Docs (sell side) | Co-op Agent/Agent/TC | HOA documents | n/a |
+| 150 | Deliver Utility Info (buy side) | Buyer/Agent/TC | Utility information | n/a |
+| 155 | Deliver Utility Info (both sides) | Buyer/Agent/TC | Utility information | n/a |
+| 160 | Deliver Utility Info (sell side) | Seller/Agent/TC | Utility information | n/a |
+| 170 | Order Home Warranty | Title/Agent/TC | Home warranty invoice, sent on to the title company once invoice is uploaded. | n/a |
 | 265 | Appraisal Ordered (cash deals) | Not yet set — see note | Purchase Agreement, to match task 260, Counter Offer(s) and amendments | n/a |
 
 **Two notes on this group.**

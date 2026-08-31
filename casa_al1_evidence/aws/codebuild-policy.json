@@ -1,0 +1,40 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "WriteBuildLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": [
+        "arn:aws:logs:us-east-2:388482955098:log-group:/aws/codebuild/velvet-elves-casa-fluid-sast",
+        "arn:aws:logs:us-east-2:388482955098:log-group:/aws/codebuild/velvet-elves-casa-fluid-sast:*",
+        "arn:aws:logs:us-east-2:388482955098:log-group:/aws/codebuild/velvet-elves-casa-zap-dast",
+        "arn:aws:logs:us-east-2:388482955098:log-group:/aws/codebuild/velvet-elves-casa-zap-dast:*"
+      ]
+    },
+    {
+      "Sid": "ReadSourceAndWriteResults",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:GetObjectVersion",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::velvet-elves-stage-codebuild-source-388482955098/casa-al1/*"
+    },
+    {
+      "Sid": "ListSourceBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetBucketLocation",
+        "s3:GetBucketAcl"
+      ],
+      "Resource": "arn:aws:s3:::velvet-elves-stage-codebuild-source-388482955098"
+    }
+  ]
+}

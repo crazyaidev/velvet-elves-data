@@ -285,7 +285,7 @@ The plan adds surfaces, not a new look. Everything reuses the resolved design la
 - **Risk: posture write-through drift.** The "Fine-tune" panel shows the resolved state, and a deal differing from the tenant default shows the "custom" dot, so hand-toggled rules are never invisible.
 - **Risk: over-automation surprising a user.** Every autonomous action is undoable-or-draft-only by the eligibility rule, logged to the Automation lens, and reversible in one click.
 - **Boundary deliberately not crossed:** the digest stays a per-user setting (R4); posture never flips another person's notifications.
-- **Dependency: parties need emails.** The sweep already skips targets without a captured email; the posture card's caption notes "add party emails to let AI draft their updates," and the People tab surfaces the gaps.
+- **Dependency: parties need emails.** The sweep already skips targets without a captured email; the posture card's caption notes "add party emails to let AI draft their updates," and the Contacts tab surfaces the gaps.
 
 ---
 

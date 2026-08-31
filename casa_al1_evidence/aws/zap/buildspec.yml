@@ -1,0 +1,81 @@
+version: 0.2
+
+# Official ADA CASA DAST: ZAP Docker full-scan / api-scan, XML only.
+# SCAN_TARGET=spa|api|api-auth. api-auth needs SCAN_BEARER (do not echo it).
+
+env:
+  variables:
+    SCAN_TARGET: spa
+    ZAP_IMAGE: ghcr.io/zaproxy/zaproxy:stable
+    SPA_URL: https://app.stage.velvetelves.com
+    OPENAPI_URL: https://api.stage.velvetelves.com/api/openapi.json
+    API_HOST: api.stage.velvetelves.com
+
+phases:
+  pre_build:
+    commands:
+      - echo Pulling $ZAP_IMAGE
+      - docker pull "$ZAP_IMAGE"
+      - chmod -R a+rwX "$CODEBUILD_SRC_DIR"
+  build:
+    commands:
+      - |
+        set +e
+        if [ "$SCAN_TARGET" = "api-auth" ]; then
+          if [ -z "$SCAN_BEARER" ]; then
+            echo "SCAN_BEARER is empty" >&2
+            exit 1
+          fi
+          python3 filter_openapi.py "$OPENAPI_URL" "$CODEBUILD_SRC_DIR/openapi-casa.json" --auth
+          docker run --rm \
+            -e SCAN_BEARER \
+            -v "$CODEBUILD_SRC_DIR":/zap/wrk/:rw \
+            -t "$ZAP_IMAGE" \
+            zap-api-scan.py \
+              -t /zap/wrk/openapi-casa.json \
+              -f openapi \
+              -O "https://$API_HOST" \
+              -c zap-casa-api-config.conf \
+              -x zap-casa-api-auth.xml \
+              -I \
+              --hook /zap/wrk/zap_auth_hook.py
+          rc=$?
+          echo "ZAP_EXIT=$rc"
+          test -s "$CODEBUILD_SRC_DIR/zap-casa-api-auth.xml"
+        elif [ "$SCAN_TARGET" = "api" ]; then
+          python3 filter_openapi.py "$OPENAPI_URL" "$CODEBUILD_SRC_DIR/openapi-casa.json"
+          docker run --rm \
+            -v "$CODEBUILD_SRC_DIR":/zap/wrk/:rw \
+            -t "$ZAP_IMAGE" \
+            zap-api-scan.py \
+              -t /zap/wrk/openapi-casa.json \
+              -f openapi \
+              -O "https://$API_HOST" \
+              -c zap-casa-api-config.conf \
+              -x zap-casa-api.xml \
+              -I
+          rc=$?
+          echo "ZAP_EXIT=$rc"
+          test -s "$CODEBUILD_SRC_DIR/zap-casa-api.xml"
+        else
+          docker run --rm \
+            -v "$CODEBUILD_SRC_DIR":/zap/wrk/:rw \
+            -t "$ZAP_IMAGE" \
+            zap-full-scan.py \
+              -t "$SPA_URL" \
+              -c zap-casa-config.conf \
+              -x zap-casa-spa.xml \
+              -I
+          rc=$?
+          echo "ZAP_EXIT=$rc"
+          test -s "$CODEBUILD_SRC_DIR/zap-casa-spa.xml"
+        fi
+      - ls -la "$CODEBUILD_SRC_DIR"/*.xml || true
+
+artifacts:
+  files:
+    - zap-casa-spa.xml
+    - zap-casa-api.xml
+    - zap-casa-api-auth.xml
+    - openapi-casa.json
+  name: casa-zap-dast-$(date +%Y%m%d-%H%M%S)

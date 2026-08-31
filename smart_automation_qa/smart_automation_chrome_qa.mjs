@@ -411,7 +411,7 @@ async function main() {
       const body = await dumpText(page, 'deal_workspace')
       const postureChip = page.getByRole('button', { name: /Automation posture for this deal/i })
       await postureChip.waitFor({ state: 'visible', timeout: 15000 })
-      const tabs = /Tasks/i.test(body) && /Email/i.test(body) && /(People|Contacts)/i.test(body)
+      const tabs = /Tasks/i.test(body) && /Email/i.test(body) && /Contacts/i.test(body)
       log('W0-S-05', (await postureChip.isVisible().catch(() => false)) && tabs ? 'PASS' : 'FAIL', dealUrl)
 
       await postureChip.click()

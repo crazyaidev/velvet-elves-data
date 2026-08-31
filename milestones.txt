@@ -1,14 +1,46 @@
 ================================================================================
 VELVET ELVES - AI-FIRST TRANSACTION MANAGEMENT PLATFORM
-PROJECT MILESTONES (22-WEEK TIMELINE)
+PROJECT MILESTONES (22-WEEK TIMELINE + AS-BUILT STATUS)
 ================================================================================
 Date Established: 2026-03-04
-Last Updated: 2026-04-06 (Pre-Phase 3 design review — workflow logic alignment)
+Last Updated: 2026-08-25 (as-built status from frontend/backend source)
 Start Date: Week 1 (2026-03-09)
-End Date: Week 22 (2026-08-02)
+Original End Date: Week 22 (2026-08-02 / 2026-08-09)
 Budget: Under USD $40,000 (Fixed-Price)
-Tech Stack: React | FastAPI | OpenAI GPT + Claude | Supabase | AWS EC2
+Tech Stack: React | FastAPI | OpenAI GPT + Claude + Textract | Supabase |
+            AWS ECS + CloudFront | Stripe | SendGrid
 ================================================================================
+
+
+================================================================================
+CURRENT STATUS — 2026-08-25
+================================================================================
+
+The original 22-week checkbox list below is kept as the historical plan.
+Status of that plan in source code:
+
+  COMPLETE (or effectively complete in code):
+    1.1, 1.2, 1.3, 2.1, 2.2, 2.3, 2.4, 2.5 (spec), 3.1–3.4, 4.1–4.3,
+    5.2 (invoices + $49/deal wallet; commission payouts PARKED),
+    5.3 (settings/playbook), 6.1 (white-label + calendar + CRM hooks),
+    6.2 (advertise storefront + admin ads)
+
+  MOSTLY COMPLETE / still polishing:
+    5.1 FSBO workspace pages exist; operating depth still iterating
+    7.1 Testing & hardening (large suites + Chrome QA; Aime cutover on stage)
+    7.2 Production infra is live; client QA is on staging; handoff open
+
+  STILL HOOKS (not in MVP delivery):
+    Native mobile, generic IMAP/SMTP, AI Coach paid add-on, orphan accounts,
+    custom video, named CRM (Follow Up Boss), Active Listings nav,
+    commission payouts, Supabase RLS activation
+
+Work shipped AFTER the original Week 22 list is recorded as PHASE 8 below
+(platform admin, Help Center, marketing site, deal workspace, Aime/Needs You,
+document templates, client/vendor portal redesigns).
+
+Staging: https://app.stage.velvetelves.com
+Prod hosts: app.velvetelves.com, api.prod.velvetelves.com, help.velvetelves.com
 
 
 ================================================================================
@@ -18,6 +50,7 @@ Weeks 1-3
 
 MILESTONE 1.1 - Project Setup & Architecture Design (Week 1)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (2026-08-25)
 Deliverables:
   [ ] Review legacy ASP.NET MVC codebase and scope documents
   [ ] Finalize system architecture document (multi-tenant, modular)
@@ -38,6 +71,7 @@ Success Criteria: Architecture document approved, dev environments operational,
 
 MILESTONE 1.2 - Database & Data Model Implementation (Week 2)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (schema continues to evolve via migrations; RLS dormant)
 Deliverables:
   [ ] Implement full database schema in Supabase PostgreSQL:
       - Multi-tenant tables with Row Level Security (RLS)
@@ -62,6 +96,7 @@ Success Criteria: Database fully operational, task catalogue imported,
 
 MILESTONE 1.3 - Authentication & User Management Backend (Week 3)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (roles: TransactionCoordinator / ForSaleByOwner, not Elf / FSBO_Customer)
 Deliverables:
   [ ] Implement Supabase Auth integration (OAuth2/JWT)
   [ ] Build registration, login, password reset APIs
@@ -87,6 +122,7 @@ Weeks 4-8 (Mar 30 - May 3)
 
 MILESTONE 2.1 - Transaction Management Backend (Week 4)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE
 Deliverables:
   [ ] Build transaction CRUD APIs (create, read, update, delete)
   [ ] Implement 6 transaction types with validation
@@ -140,6 +176,7 @@ Success Criteria: Full transaction lifecycle operational via API, type switching
 
 MILESTONE 2.2 - Task Engine Backend (Weeks 5-6)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (generation + state rules + attorney library; no separate visual rule-builder)
 Deliverables:
   [ ] Build task CRUD APIs (create, read, update, delete)
   [ ] Implement master task library management API (admin-configurable)
@@ -175,6 +212,7 @@ Success Criteria: Tasks auto-generated from use case, dependencies enforced,
 
 MILESTONE 2.3 - Frontend Foundation & Auth UI (Week 7)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE
 Deliverables:
   [ ] Build React app shell matching approved designs (shared across roles):
       - Dark sidebar with role-specific KPI tiles and grouped navigation
@@ -238,6 +276,7 @@ Success Criteria: Users can register, login, navigate by role (all 8 roles);
 
 MILESTONE 2.4 - Transaction & Task UI (Week 8)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (list cards + /transactions/:id workspace; attorney matter workspace)
 Deliverables:
   [ ] Build Agent/Elf Active Transactions workspace per approved redesign:
       - Topbar AI briefing row (Today's AI Briefing + status counters)
@@ -405,6 +444,7 @@ NOTE: All Phase 3+ frontend implementation must align with the workflow logic
 
 MILESTONE 3.1 - AI Document Parsing Engine (Weeks 9-10)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (OpenAI/Claude + Textract; extraction QA continues)
 Deliverables:
   [ ] Build provider-agnostic AI abstraction layer (OpenAI GPT + Claude)
       with admin-configurable switching via system settings
@@ -436,11 +476,12 @@ Success Criteria: AI accurately extracts key fields from real estate documents,
 
 MILESTONE 3.2 - Wizard UI & Flow (Week 11)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (4 public phases, not the original 6-step flow)
+Deliverables:
   NOTE: Implementation must follow FRONTEND_UI_WORKFLOW_LOGIC.md §4.5 (New
   Transaction) and Cross-Cutting Workflow A (New Transaction Creation Flow)
   for full action specifications, conditional rendering, and edge cases.
 
-Deliverables:
   [ ] Build wizard Step 1: Document upload interface (drag-drop, multi-file)
   [ ] Add global drag-and-drop upload from anywhere in the authenticated
       workspace
@@ -470,11 +511,12 @@ Success Criteria: Complete wizard flow from upload to transaction creation,
 
 MILESTONE 3.3 - Document Management System (Week 12)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE
+Deliverables:
   NOTE: Implementation must follow FRONTEND_UI_WORKFLOW_LOGIC.md §5.3 (All
   Documents), §4.6 Transaction Detail Documents tab, and Cross-Cutting
   Workflow B (Document Upload & AI Processing) for UI flows and edge cases.
 
-Deliverables:
   [ ] Build document center UI (upload, view, download, email, archive)
   [ ] Build cross-transaction All Documents UI with AI-assisted search
   [ ] Implement version history with diffs
@@ -504,6 +546,7 @@ Success Criteria: Full document lifecycle operational, versioning working,
 
 MILESTONE 3.4 - E-Signature Integration (Week 13)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (DocuSign; HelloSign not wired)
 Deliverables:
   [ ] Integrate DocuSign API (primary e-sign provider)
   [ ] Build e-sign workflow in document center:
@@ -536,6 +579,7 @@ NOTE: Communication features must align with FRONTEND_UI_WORKFLOW_LOGIC.md
 
 MILESTONE 4.1 - Email Integration (Week 14)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (Gmail, Outlook, named iCloud connector; generic IMAP deferred)
 Deliverables:
   [ ] Integrate Gmail API (OAuth2 flow, send/receive)
   [ ] Integrate Microsoft Graph API for Outlook (OAuth2, send/receive)
@@ -558,6 +602,7 @@ Success Criteria: Gmail and Outlook connected, emails sent/received/logged,
 
 MILESTONE 4.2 - AI Email Automation (Week 15)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (Aime drafts + /ai-emails; autopilot still expanding)
 Deliverables:
   [ ] Build AI email response engine (OpenAI GPT + Claude via abstraction layer):
       - Auto-respond to vendor/client/FSBO document requests (always CC the
@@ -645,6 +690,8 @@ NOTE: Dashboard and profile implementations must align with
 
 MILESTONE 5.1 - Role-Specific Dashboards (Week 17)
 -----------------------------------------------------------------------------
+STATUS: MOSTLY COMPLETE — Agent/Team/Admin/Attorney/Client/Vendor shells
+  ship; FSBO pages exist and continue to iterate as an operating workspace
 Deliverables:
   NOTE: Dashboard landing pages are now approved for Solo Agent, Team Leader,
   FSBO, and Attorney (approved 2026-03-26). The Active Transactions workspace
@@ -754,6 +801,7 @@ Success Criteria: All 8 role dashboards/workspaces functional with real data;
 
 MILESTONE 5.2 - Payment Processing (Week 18)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE for invoices + $49/deal credit wallet; commission payouts PARKED
 Deliverables:
   [ ] Integrate Stripe API:
       - Secure credit-card processing
@@ -771,6 +819,7 @@ Success Criteria: Agents can collect fees via Stripe, commissions tracked,
 
 MILESTONE 5.3 - Profiles & Advanced Features (Week 19)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (Settings hub + playbook; NLP/feedback depth lighter than original wording)
 Deliverables:
   [ ] Build brokerage profile (all agents/teams in one dashboard)
   [ ] Build agent/team profile:
@@ -818,6 +867,7 @@ NOTE: White-label and tenant configuration must align with
 
 MILESTONE 6.1 - White-Label & Multi-Tenant (Week 20)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (branding studio, calendar, CRM webhooks; RLS still dormant)
 Deliverables:
   [ ] Implement multi-tenant data isolation (Supabase RLS policies)
   [ ] Build white-label configuration UI:
@@ -841,6 +891,7 @@ Success Criteria: Multiple tenants with isolated data and custom branding,
 
 MILESTONE 6.2 - Advertising Hooks & Consumer Site (Week 21)
 -----------------------------------------------------------------------------
+STATUS: COMPLETE (/advertise storefront + admin/platform ads)
 Deliverables:
   [ ] Build advertising module architecture hooks:
       - Modular ad slots in wizard and task screens
@@ -874,6 +925,8 @@ NOTE: End-to-end testing must verify all workflows defined in
 
 MILESTONE 7.1 - Comprehensive Testing & Hardening (Week 22 - First Half)
 -----------------------------------------------------------------------------
+STATUS: PARTIAL — large unit/integration + Chrome QA packs; Aime/task-library
+  cutover still client-tested on staging as of 2026-08-25
 Deliverables:
   [ ] Complete unit test coverage for all modules (>80%)
   [ ] Run full integration test suite
@@ -906,6 +959,8 @@ Success Criteria: All critical flows passing, security audit clean,
 
 MILESTONE 7.2 - Production Deployment & Handoff (Week 22 - Second Half)
 -----------------------------------------------------------------------------
+STATUS: PARTIAL — prod ECS/Supabase/domains live; client QA on staging;
+  training/handoff not closed
 Deliverables:
   [ ] Configure production AWS EC2 environment
   [ ] Set up production Supabase instance with backups
@@ -934,17 +989,70 @@ Success Criteria: Application live in production, all documentation delivered,
 MILESTONE SUMMARY
 ================================================================================
 
-Phase | Weeks  | Focus Area                              | Duration
-------|--------|----------------------------------------|----------
-  1   |  1-3   | Discovery, Architecture & Foundation    | 3 weeks
-  2   |  4-8   | Core Transaction & Task Engine          | 5 weeks
-  3   |  9-13  | AI Wizard & Document Management         | 5 weeks
-  4   | 14-16  | Communication Engine & AI Email          | 3 weeks
-  5   | 17-19  | Dashboards, Payments & Profiles          | 3 weeks
-  6   | 20-21  | White-Label, Integrations & Ad Hooks     | 2 weeks
-  7   |   22   | Testing, Deployment & Launch             | 1 week
-------|--------|----------------------------------------|----------
-TOTAL |  1-22  | Full MVP Delivery                       | 22 weeks
+Phase | Weeks  | Focus Area                              | Duration | Status
+------|--------|----------------------------------------|----------|--------
+  1   |  1-3   | Discovery, Architecture & Foundation    | 3 weeks  | COMPLETE
+  2   |  4-8   | Core Transaction & Task Engine          | 5 weeks  | COMPLETE
+  3   |  9-13  | AI Wizard & Document Management         | 5 weeks  | COMPLETE
+  4   | 14-16  | Communication Engine & AI Email          | 3 weeks  | COMPLETE
+  5   | 17-19  | Dashboards, Payments & Profiles          | 3 weeks  | MOSTLY
+  6   | 20-21  | White-Label, Integrations & Ad Hooks     | 2 weeks  | COMPLETE
+  7   |   22   | Testing, Deployment & Launch             | 1 week   | PARTIAL
+  8   | post   | Platform, portals, Aime, Help, marketing | ongoing  | IN PROD
+------|--------|----------------------------------------|----------|--------
+TOTAL |  1-22  | Original MVP plan                       | 22 weeks |
+
+
+================================================================================
+PHASE 8: POST-TIMELINE WORK SHIPPED IN CODE (through 2026-08-25)
+================================================================================
+
+MILESTONE 8.1 - Transaction Workspace
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  /transactions/:id for Agent/TC/TeamLead/Admin (Overview, Timeline,
+  Compliance, Tasks, Documents, Contacts, Billing, Activity, optional
+  Agent/Email). Attorney matter workspace on the same URL.
+
+MILESTONE 8.2 - Aime / Needs You / Automation posture
+-----------------------------------------------------------------------------
+STATUS: COMPLETE (autopilot letter set still expanding)
+  /needs-you residual queue; per-deal automation; agent pane; overnight tick.
+
+MILESTONE 8.3 - Settings hub + Organization
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  /settings card grid; /organization (company, branding, billing, danger);
+  playbook at /settings/my-playbook and /admin/team-settings.
+
+MILESTONE 8.4 - Platform admin
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  /platform/tenants, users, waitlist, AI usage, costs, billing, advertising,
+  help CMS. Gated by users.is_platform_admin.
+
+MILESTONE 8.5 - Help Center + Marketing website
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  velvet-elves-help-center (help.velvetelves.com) + public_help API.
+  velvet-elves-marketing-website + public_marketing / platform waitlist.
+
+MILESTONE 8.6 - Client closing-concierge + Vendor partner portal
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  Client: /client/home, next-steps, milestones, documents, updates.
+  Vendor: /portal/vendor Files / Documents / Tasks (VendorWorkspaceLayout).
+
+MILESTONE 8.7 - Flat $49/deal billing
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  Credit wallet presented as prepaid deals; first deal free; optional bundle.
+  Staff seat cap retired. Commission payouts parked.
+
+MILESTONE 8.8 - Document templates
+-----------------------------------------------------------------------------
+STATUS: COMPLETE
+  /settings/document-templates fillable PDFs; generate-from-template on a deal.
 
 
 ================================================================================
@@ -992,25 +1100,25 @@ KEY DEPENDENCIES & RISKS
 
 
 ================================================================================
-POST-MVP ROADMAP (Beyond 22 Weeks)
+POST-MVP ROADMAP (still not in the shipping product)
 ================================================================================
 
 - Native/hybrid mobile app
-- IMAP/SMTP email fallback support
-- Specific CRM integrations (Follow Up Boss, etc.)
-- Advanced predictive analytics (closing delays, at-risk transactions)
+- Generic IMAP/SMTP email fallback (iCloud is a named connector only)
+- Specific CRM integrations (Follow Up Boss, etc.) — generic webhooks only
+- Advanced predictive analytics beyond current drift diagnostics
 - AI custom video creator for milestones
 - "Orphan Accounts" marketing dashboard
-- Expanded AI agents (voice, SMS)
-- Full advertising platform build-out
+- Expanded SMS / click-to-call (data model ready; Twilio not wired)
+- Full advertising platform build-out beyond current storefront
 - Pattern detection across teams
-- Compliance auditing enhancements
-- Role-specific Active Transactions pages (per-role transaction views beyond
-  the shared MVP workspace)
-- AI Coach paid add-on ($79/agent/month) for Team Leaders
-- Concierge / Concierge-Style upsell
-- "Active Listings" deal-state navigation item (v2 feature hook preserved
-  in MVP sidebar)
+- Role-specific Active Transactions pages beyond the shared list + workspace
+- AI Coach paid add-on ($79/agent/month) — locked teaser only
+- Concierge / Concierge-Style upsell (distinct from Client portal branding)
+- "Active Listings" deal-state navigation item
+- Commission / Stripe Connect payouts (parked)
+- FSBO self-listing (after v1)
+- Supabase RLS activation for client-direct access
 
 
 ================================================================================

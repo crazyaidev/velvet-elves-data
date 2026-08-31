@@ -34,7 +34,7 @@ All seven phases are built. Suites: backend `test_intake_handoff_alignment.py` (
 | 1 | `TransactionIntakePayload` + `intake_json` on `TransactionCreateRequest` (create only); merged into `metadata_json.intake` in the create endpoint; `metadata_json` threaded through `TransactionRepository.create()`; FE `TransactionIntakePayload` type; the wizard's `submit()` sends the record (never the shared draft payload, so save-draft is untouched) |
 | 2 | Both request tasks now carry `target: 'Co-op Agent'`, `basis` acceptance+2d **and** an explicit fallback `due_date`, plus `intake_request`; `_AddedTask.intake_request` added; the generation service writes it to `metadata_json` and now distinguishes `auto_draft_email: False` (suppressed) from absent (posture default) |
 | 3 | `_signature_deference()` + `_open_intake_request_exists()` in `ai_task_executor.py`; the §3.3 table honored in `_execute_documentation_review`; envelope-in-flight documents split out of the chase set entirely; deference codes `signing_deferred` / `covered_by_request_task` / `awaiting_esign` added to `_RETRYABLE_CODES` so the chase re-arms cleanly |
-| 4 | `FeeEditDialog.tsx` (per-side amounts + `$`/`%`, "Remove fee") + `DealFeesSection.tsx` on the **People tab**, with the pencil affordance and the "+ Add fees" empty state, gated on the PATCH role set (D5 default). See the deviation note below for why it is not on the deal brief |
+| 4 | `FeeEditDialog.tsx` (per-side amounts + `$`/`%`, "Remove fee") + `DealFeesSection.tsx` on the **Contacts tab**, with the pencil affordance and the "+ Add fees" empty state, gated on the PATCH role set (D5 default). See the deviation note below for why it is not on the deal brief |
 | 5 | Create now lands on `/transactions/:id?created=1` (save-draft and the onboarding `onCreated` path untouched); `CreationReceiptStrip.tsx` renders the one-time receipt with per-segment tab links and dismiss |
 | 6 | Checklist import retired per D3: deleted `ChecklistImportModal.tsx`, `useParseChecklist`, the `ChecklistImportItem` type, the MSW handler, the `WizardChecklistStep` wiring and its now-orphaned `onAddTasks` prop, the `/ai/parse-checklist` endpoint + models, `checklist_import.py`, and `test_checklist_import.py` |
 | 7 | Docs rewritten (below) + the regression run |
@@ -43,7 +43,7 @@ All seven phases are built. Suites: backend `test_intake_handoff_alignment.py` (
 
 My first fix was to render `DealBriefBand` at the top of the Timeline tab. **That was wrong, and the test suite caught it.** Two `TransactionWorkspace` tests assert the opposite in as many words - *"legacy deals render cleanly with no overview band on the page"* and *"Per Jan's 2026-06-13 review the deal brief / overview band was removed from the page entirely - neither the summary nor watch-outs appear"*. The band's absence is a deliberate, pinned design decision, not an accident of a refactor. Reverted.
 
-Shipped instead: a **`DealFeesSection` on the People tab** - the fees alone, no brief summary, no watch-outs, no KPI band. People is where the deal's commercial relationships already live (who is on the deal, and now who pays what), and it already carries the identical role gate. This satisfies invariant 5 without reopening a decision the client already made. The workspace's no-overview-band rule stands untouched.
+Shipped instead: a **`DealFeesSection` on the Contacts tab** - the fees alone, no brief summary, no watch-outs, no KPI band. Contacts is where the deal's commercial relationships already live (who is on the deal, and now who pays what), and it already carries the identical role gate. This satisfies invariant 5 without reopening a decision the client already made. The workspace's no-overview-band rule stands untouched.
 
 **Test churn (expected, from D1).** Eleven `WizardFlow` create-path assertions moved from `findByText('Transactions list')` to `findByText('Deal workspace')`, and the harness gained a `/transactions/:transactionId` route stub. The save-draft assertion deliberately still expects the list.
 
@@ -60,7 +60,7 @@ What clicking "Upload Transaction" emits, in order (the `submit()` chain in `New
 | # | Output | Where it lands in processing |
 |---|--------|------------------------------|
 | 1 | The transaction row, now including per-side **`fees_json`** (`transactions.py:306`; schema `schemas/transaction.py:137`) | Deal brief band on the workspace header (`DealBriefBand.tsx:30,131-137` via `transaction_plan.py:817`); nothing else reads fees |
-| 2 | Parties (with vendor auto-bridge) | People tab, vendor directory |
+| 2 | Parties (with vendor auto-bridge) | Contacts tab, vendor directory |
 | 3 | Linked documents + the confirmed compliance rows with auto-matched uploads (bulk insert before task generation) | Compliance tab, Documents tab |
 | 4 | E-signature queue, only when the **client's** side is unsigned and the user chose "Queue e-signature" (`NewTransactionWizard.tsx:4409`) | E-sign surfaces, `signature_in_flight` agent detector (`agent_issues.py:265`) |
 | 5 | The full deterministic task plan, plus wizard-approved AI rows (`added_tasks`, created `source="ai"`, `task_generation_service.py:432-521`) | Tasks tab, Timeline tab (with evidence chips), My Task Queue |
@@ -199,7 +199,7 @@ The invariant this encodes: **a decision the user made on Verification is never 
 
 ### 3.4 Fees become live deal facts (fixes S5)
 
-- **Where fees live:** a compact **Deal fees** section at the top of the **People tab** - the fees alone, never the brief summary or watch-outs, so the workspace's no-overview-band rule is untouched. People already holds the deal's commercial relationships (who is on the deal, and who pays what) and already carries the same role gate.
+- **Where fees live:** a compact **Deal fees** section at the top of the **Contacts tab** - the fees alone, never the brief summary or watch-outs, so the workspace's no-overview-band rule is untouched. Contacts already holds the deal's commercial relationships (who is on the deal, and who pays what) and already carries the same role gate.
 - **Edit in place:** the fee row gains a pencil affordance opening a compact Radix dialog that reuses the wizard's fee-card anatomy verbatim: "Who pays?" SegmentedControl (Buyer / Seller / Both), one amount `Input` + `$ | %` SegmentedControl per paying side (two labeled rows for Both). Same component family, zero new primitives, one number typed at most per side.
 - **Honest empty state:** when no fees exist and the viewer can edit, the band shows a ghost "+ Add fees"; viewers without edit rights see nothing (no fake rows).
 - **Removing fees works too:** the dialog offers "Remove fee" per card. Because `repo.update()` skips `None` kwargs (S5), removal sends the non-null empty payload `{"professional": null, "transaction": null}` (or nulls one side), never `"fees_json": null` - which the server would silently drop. The FE integration test pins this exact payload shape.
@@ -250,8 +250,8 @@ The deference table (§3.3) in `_execute_documentation_review`; open-request-tas
 *Acceptance (mouse):* same deal as Phase 2 - the Tasks tab shows Review Documentation surfaced with "your request task covers this" and **AI Emails contains zero chase drafts**; a fresh deal with "Mark not required" shows Review Documentation **completed** with the note; a deal with a queued envelope shows "awaiting e-signature" and **no chase draft to the co-op agent**; a quick-create deal with genuinely unsigned paperwork still gets today's chase draft.
 
 **Phase 4 - Fees editable on the workspace.**
-Fee edit dialog + the People-tab Deal fees section with its "+ Add fees" empty state; remove-fee sends the non-null empty payload (§3.4); old-shape tolerance kept; D5 role decision applied (one-line backend change if TC joins). Tests: FE unit (dialog per-side entry, Both = two rows), integration (edit → the section updates → reload persists; **remove → the section empties → reload stays empty**, pinning the payload shape against the `None`-skip), audit-row backend assertion. Screenshot check.
-*Acceptance (mouse):* on a deal created with no fees, open the People tab, click "+ Add fees," click Seller, type 3, click %, Save - the row reads "Professional fee · 3% · seller"; reload persists; "Remove fee" empties it and survives reload; Activity shows the fees update; a signed-in role outside the PATCH gate sees the fee row with no pencil and no "+ Add fees".
+Fee edit dialog + the Contacts-tab Deal fees section with its "+ Add fees" empty state; remove-fee sends the non-null empty payload (§3.4); old-shape tolerance kept; D5 role decision applied (one-line backend change if TC joins). Tests: FE unit (dialog per-side entry, Both = two rows), integration (edit → the section updates → reload persists; **remove → the section empties → reload stays empty**, pinning the payload shape against the `None`-skip), audit-row backend assertion. Screenshot check.
+*Acceptance (mouse):* on a deal created with no fees, open the Contacts tab, click "+ Add fees," click Seller, type 3, click %, Save - the row reads "Professional fee · 3% · seller"; reload persists; "Remove fee" empties it and survives reload; Activity shows the fees update; a signed-in role outside the PATCH gate sees the fee row with no pencil and no "+ Add fees".
 
 **Phase 5 - Workspace landing + creation receipt.**
 Navigation change (D1), `?created=1` receipt strip with real created-row counts, per-segment links, dismiss behavior. Tests: WizardFlow navigation assertion, receipt unit tests (segment truth table incl. absent-fees and no-request-task cases), screenshot at desktop and mobile widths.
@@ -270,7 +270,7 @@ All §3.7 rewrites; append the Part 5 matrix to the workspace testing guide; run
 
 | # | Scenario | Expected on screen |
 |---|----------|--------------------|
-| 1 | Happy path: upload the 10-doc packet → four stages → Upload Transaction | Lands on the deal workspace; receipt strip counts match the Tasks and Compliance tabs; fees from Contacts & Fees show on the People tab |
+| 1 | Happy path: upload the 10-doc packet → four stages → Upload Transaction | Lands on the deal workspace; receipt strip counts match the Tasks and Compliance tabs; fees from Contacts & Fees show on the Contacts tab |
 | 2 | Unsigned counterparty + "Request the signed copy from the other agent" | Request task due acceptance+2 near the top of Upcoming; Complete-this-task pre-addressed to the co-op agent; Review Documentation surfaced pointing at that task; zero AI chase drafts |
 | 3 | Same deal on Assisted posture | Exactly one chase draft appears in AI Email Review when the task comes due; running the cycle again adds none |
 | 4 | "Mark not required" on Verification | Review Documentation completes itself with the "you marked signatures not required" note; no chase draft ever; Activity shows the completion |
@@ -278,8 +278,8 @@ All §3.7 rewrites; append the Part 5 matrix to the workspace testing guide; run
 | 6 | Client-side unsigned + "Queue e-signature" | Envelope sent; agent pane shows "Awaiting signatures"; Review Documentation surfaces "awaiting e-signature"; no chase task and **no chase draft to the co-op agent** (new behavior - today a chase drafts against the pending envelope) |
 | 7 | Referenced Counter #2 deliberately removed + "Request from the other agent" | Request task lists Counter #2 in its body; completing it sends to the co-op agent |
 | 8 | Quick-create deal (no wizard) | Default checklist appears; Review Documentation behaves exactly as before this plan; no fees row, no receipt strip |
-| 9 | Deal created with no fees | The People tab shows "+ Add fees" for the agent, nothing for a role outside the edit gate (D5); adding 3% / Seller persists across reload; removing it empties the band across reload; Activity logs it |
-| 10 | Fee entered in the wizard, edited on the workspace | The People-tab row updates in place; reload persists; old deals with pre-reshape fee rows render without errors |
+| 9 | Deal created with no fees | The Contacts tab shows "+ Add fees" for the agent, nothing for a role outside the edit gate (D5); adding 3% / Seller persists across reload; removing it empties the band across reload; Activity logs it |
+| 10 | Fee entered in the wizard, edited on the workspace | The Contacts-tab row updates in place; reload persists; old deals with pre-reshape fee rows render without errors |
 | 11 | Checklist-import retirement check: look for an import affordance on Compliance and on a resumed stale pre-reorg draft; then build a checklist by hand | No import control exists anywhere; the guides no longer mention it; adding rows manually and generating library defaults still work |
 | 12 | Draft resume from a stale pre-reorg draft (retired step ids) | Reopens on the mapped step; create still lands on the workspace with the receipt |
 | 13 | Decision gates regression | A packet with unanswered "who orders title" cannot reach Upload Transaction; answering via the one-click card enables it; the created deal has the right title task (no workspace banner) |

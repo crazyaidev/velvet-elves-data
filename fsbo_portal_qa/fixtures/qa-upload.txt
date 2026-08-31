@@ -1,0 +1,3 @@
+Velvet Elves QA fixture — FSBO Portal document upload
+Generated for Chrome QA of the FSBO Documents surface.
+This is a plain-text stand-in for a seller disclosure packet.

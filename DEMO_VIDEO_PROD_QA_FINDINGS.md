@@ -85,10 +85,10 @@ Full consent screens, unverified-app warning, inbox match, Approve & send, and c
 - **Root cause:** Required dates only gated the internal `missing` step (still labeled Contacts & Fees); one-null verification dates became disagreements without filling the field; “Not found” could clear the create gate with an empty date picker.  
 - **Fix:** Contract Details Continue now requires closing + acceptance dates; ISO-normalize date writes; adopt pass-2-only dates into the payload; reject empty resolutions for required dates; clarify double-check copy (“to create”). True two-value conflicts (e.g. 992k vs 950k) still require human pick.
 
-### BUG-005 — Demo script tab name “People” vs product “Contacts”
+### BUG-005 — Demo script tab name vs product “Contacts”
 
 - **Severity:** low (script mismatch)  
-- **Details:** Workspace tab is **Contacts**, not “People.” Update narration/script so the walkthrough matches the UI.
+- **Details:** Workspace tab is **Contacts**. Update narration/script so the walkthrough matches the UI.
 
 ### BUG-006 — Intelligence → Email messages “Not linked”
 
@@ -103,7 +103,7 @@ Full consent screens, unverified-app warning, inbox match, Approve & send, and c
 | --- | --- | --- |
 | 1 Identity (site + privacy) | PASS | |
 | 2 Sign in + pipeline | PASS* | *After seeding; was empty initially |
-| 3 Inside a transaction tabs | PASS | Use 5915 or Cedar Mill; tab = Contacts not People |
+| 3 Inside a transaction tabs | PASS | Use 5915 or Cedar Mill; tab = Contacts |
 | 4 AI assistant + approve | FAIL / RISK | Portfolio-scoped answer; Approve path not proven |
 | 5 Connect Gmail + scopes | UI PASS / OAuth NOT RUN | Already connected — Disconnect→Connect for video |
 | 6 gmail.readonly E2E | NOT RUN | Needs inbound test email + match |

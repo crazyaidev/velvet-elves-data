@@ -203,7 +203,7 @@ async function main() {
     log('checklist', /File checklist/i.test(mText) ? 'PASS' : 'FAIL')
     log('ai-brief', /AI legal brief/i.test(mText) ? 'PASS' : 'FAIL')
     log('review-queue', /Review queue/i.test(mText) ? 'PASS' : 'FAIL')
-    log('people', /People on this matter/i.test(mText) ? 'PASS' : 'FAIL')
+    log('contacts', /Contacts on this matter/i.test(mText) ? 'PASS' : 'FAIL')
     log('activity', /What changed since you last looked/i.test(mText) ? 'PASS' : 'FAIL')
     log('upcoming', /Upcoming actions/i.test(mText) ? 'PASS' : 'FAIL')
     log('hold', await page.getByRole('button', { name: /Hold|Clear hold/i }).first().isVisible().catch(() => false) ? 'PASS' : 'FAIL')

@@ -1,9 +1,9 @@
 # Velvet Elves - System Design Document
 
 **Date:** 2026-03-05
-**Last Updated:** 2026-04-06 (Pre-Phase 3 design review — workflow logic alignment)
-**Scope:** Phase 1 (Milestones 1.1, 1.2, 1.3) — scalable for all future phases; dashboard and workspace designs approved for Solo Agent, Team Leader, Attorney, FSBO, and shared Active Transactions; Active Transactions UI fully aligned with ve-active_transactions.html; complete frontend workflow logic specification finalized (FRONTEND_UI_WORKFLOW_LOGIC.md)
-**Reference:** ListedKit.com functionality as design benchmark; FRONTEND_UI_WORKFLOW_LOGIC.md as canonical frontend specification
+**Last Updated:** 2026-08-25 (as-built sync with velvet-elves-backend and velvet-elves-frontend)
+**Scope:** Live architecture across all shipped phases — multi-tenant FastAPI + React SPA, AI wizard, transaction workspace, Aime automation, Stripe billing, platform admin, Help Center, and marketing lead capture. Original Phase 1 schema remains the foundation; this document now describes the as-built system, not the Week 1 plan.
+**Reference:** ListedKit.com as early design benchmark; FRONTEND_UI_WORKFLOW_LOGIC.md as canonical frontend specification; requirements.txt §15 for client-confirmed generation rules
 
 ---
 
@@ -13,7 +13,7 @@
 2. [Database Schema Design](#2-database-schema-design)
 3. [API Architecture](#3-api-architecture)
 4. [Frontend UI/UX Design](#4-frontend-uiux-design)
-5. [Phase 1 Implementation Plan](#5-phase-1-implementation-plan)
+5. [Phase 1 Implementation Plan (historical)](#5-phase-1-implementation-plan)
 
 ---
 
@@ -24,11 +24,12 @@
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                        CLIENTS                                    │
-│   React SPA (Vite + TypeScript)  ·  Future Mobile App             │
+│   React SPA (Vite + TypeScript)                                   │
+│   Help Center SPA · Marketing website SPA · Future Mobile App     │
 └──────────────┬───────────────────────────────────────────────────┘
-               │ HTTPS / JWT
+               │ HTTPS / JWT (Supabase Auth)
 ┌──────────────▼───────────────────────────────────────────────────┐
-│                    AWS EC2 / Docker                                │
+│              AWS (ECS Fargate + ECR + CloudFront)                  │
 │  ┌─────────────────────────────────────────────────────────────┐  │
 │  │              FastAPI Application Server                      │  │
 │  │  ┌──────────┐  ┌───────────┐  ┌────────────┐  ┌──────────┐ │  │
@@ -36,19 +37,19 @@
 │  │  │ (API v1) │  │ (Business │  │ (Data      │  │ Client   │ │  │
 │  │  │          │  │  Logic)   │  │  Access)   │  │          │ │  │
 │  │  └──────────┘  └───────────┘  └────────────┘  └──────────┘ │  │
-│  │  ┌──────────┐  ┌───────────┐  ┌────────────┐               │  │
-│  │  │   Auth   │  │ AI Engine │  │ Task Engine │               │  │
-│  │  │Middleware│  │(Multi-AI) │  │(Dependency) │               │  │
-│  │  └──────────┘  └───────────┘  └────────────┘               │  │
+│  │  ┌──────────┐  ┌───────────┐  ┌────────────┐  ┌─────────┐ │  │
+│  │  │   Auth   │  │ AI Engine │  │ Task Engine│  │ Billing │ │  │
+│  │  │Middleware│  │(Multi-AI) │  │+ Aime      │  │ Stripe  │ │  │
+│  │  └──────────┘  └───────────┘  └────────────┘  └─────────┘ │  │
 │  └─────────────────────────────────────────────────────────────┘  │
+│  EventBridge → POST /api/v1/internal/schedules/tick               │
 └──────────────┬───────────────────────────────────────────────────┘
                │
 ┌──────────────▼───────────────────────────────────────────────────┐
-│                      SUPABASE                                      │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐  ┌────────────┐  │
-│  │ PostgreSQL │  │    Auth    │  │  Storage   │  │  Realtime  │  │
-│  │   (RLS)    │  │  (GoTrue) │  │  (Buckets) │  │ (Webhooks) │  │
-│  └────────────┘  └────────────┘  └────────────┘  └────────────┘  │
+│  SUPABASE          AWS            STRIPE         SENDGRID         │
+│  PostgreSQL        Textract+S3    Invoices       Platform mail    │
+│  Auth (GoTrue)     (OCR)          Deal-fee       (welcome/alerts) │
+│  Storage buckets                  Credits                         │
 └──────────────────────────────────────────────────────────────────┘
 ```
 
@@ -70,32 +71,41 @@ Utils           │ Encryption, security, logging helpers
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| Database | Supabase PostgreSQL | Auth + DB + Storage unified; RLS for multi-tenancy |
-| Data Access | supabase-py (PostgREST) | No ORM overhead; aligns with Supabase ecosystem |
-| Auth | Supabase Auth (GoTrue) + JWT | OAuth2/JWT; no password storage in app |
-| Multi-tenancy | tenant_id + RLS policies | Row-level isolation per brokerage |
-| PII | Fernet encryption at rest | email, full_name, phone, address encrypted |
-| AI | OpenAI GPT + Claude (switchable) | Document parsing, email automation, task suggestions; provider-agnostic abstraction layer with admin-configurable switching |
-| File Storage | Supabase Storage | Integrated with auth; signed URLs for access |
+| Database | Supabase PostgreSQL | Auth + DB + Storage unified |
+| Data Access | supabase-py (PostgREST) | No ORM; aligns with Supabase |
+| Auth | Supabase Auth (GoTrue) + JWT, wrapped by FastAPI `/api/v1/users/*` | No `/api/v1/auth` router; passwords never stored in app DB |
+| Multi-tenancy | tenant_id + app-layer isolation | RLS policies exist but are dormant; service role bypasses RLS |
+| PII | Fernet encryption at rest | email, full_name, phone, address encrypted in repositories |
+| AI | OpenAI GPT **or** Anthropic Claude (switchable) + Amazon Textract OCR | Provider-agnostic factory; tenant `settings_json.ai_provider` |
+| File Storage | Supabase Storage | Signed URLs; documents bucket |
+| Hosting | AWS ECS Fargate + ECR; CloudFront for SPAs | Stage and prod; Secrets Manager |
+| Platform mail | SendGrid HTTP API | Welcomes, invites, registration alerts — not SES |
+| User mailboxes | Gmail, Outlook, iCloud | OAuth (Gmail/Outlook) or app-password (iCloud) |
+| E-sign | DocuSign | HelloSign not wired |
+| Payments | Stripe | Client invoices + public pay links + $49/deal credit wallet |
 | Frontend State | React Query (TanStack) | Server state caching, mutations, optimistic updates |
-| UI Components | shadcn/ui + Tailwind | Consistent design system, accessible components |
+| UI Components | shadcn/ui + Tailwind | Design system; tokens in `src/index.css` |
 
 ### 1.4 Multi-Tenant Architecture
 
 ```
 Tenant (Brokerage)
-  └── Users (Agent, Elf, TeamLead, Attorney, Admin, Client, FSBO_Customer, Vendor)
+  └── Users (Agent, TransactionCoordinator, TeamLead, Attorney, Admin,
+             Client, ForSaleByOwner, Vendor)
+       + is_platform_admin (flag, not a role)
+       + tenant owner (tenants.owner_user_id)
        └── Transactions
             ├── Tasks
-            ├── Documents
-            ├── Contacts
-            └── Communication Logs
+            ├── Documents / requirements / templates
+            ├── Contacts / parties / vendor assignments
+            ├── Communication logs + AI drafts
+            └── Invoices / payments
 ```
 
 - Every data table has `tenant_id` column
-- Supabase RLS policies enforce tenant isolation
+- Tenant isolation is enforced in FastAPI services; RLS policies exist in SQL but are **dormant** (API uses the service role)
 - Tenant configuration stores branding (logo, colors, domain)
-- Admin users manage tenant-level settings
+- Admin users and tenant owners manage tenant-level settings; platform admins use `/platform/*`
 
 ---
 
@@ -744,21 +754,23 @@ Already in the schema. No changes needed for Phase 1.
 ```python
 class UserRole(str, enum.Enum):
     AGENT = "Agent"
-    ELF = "Elf"
+    TRANSACTION_COORDINATOR = "TransactionCoordinator"  # UI: Transaction Coordinator (historically "Elf")
     TEAM_LEAD = "TeamLead"
-    ATTORNEY = "Attorney"          # NEW: legal review, packet release, state-rule compliance
+    ATTORNEY = "Attorney"
     ADMIN = "Admin"
     CLIENT = "Client"
-    FSBO_CUSTOMER = "FSBO_Customer" # NEW: self-guided seller workspace
+    FOR_SALE_BY_OWNER = "ForSaleByOwner"  # UI: For Sale By Owner
     VENDOR = "Vendor"
+# Platform admin is users.is_platform_admin (bool), not a role.
+# Tenant owner is tenants.owner_user_id == users.id (computed is_tenant_owner).
 
 class TransactionUseCase(str, enum.Enum):
-    BUY_FIN = "Buy-Fin"        # Buyer - Financing
-    BUY_CASH = "Buy-Cash"      # Buyer - Cash
-    SELL_FIN = "Sell-Fin"       # Seller - Financing
-    SELL_CASH = "Sell-Cash"     # Seller - Cash
-    BOTH_FIN = "Both-Fin"      # Buyer & Seller - Financing
-    BOTH_CASH = "Both-Cash"    # Buyer & Seller - Cash
+    BUY_FIN = "Buy-Fin"
+    BUY_CASH = "Buy-Cash"
+    SELL_FIN = "Sell-Fin"
+    SELL_CASH = "Sell-Cash"
+    BOTH_FIN = "Both-Fin"
+    BOTH_CASH = "Both-Cash"
 
 class TransactionStatus(str, enum.Enum):
     ACTIVE = "Active"
@@ -766,6 +778,34 @@ class TransactionStatus(str, enum.Enum):
     PAUSED = "Paused"
     COMPLETED = "Completed"
     CLOSED = "Closed"
+    TERMINATED = "Terminated"
+
+class TaskStatus(str, enum.Enum):
+    PENDING = "Pending"
+    IN_PROGRESS = "InProgress"
+    COMPLETED = "Completed"
+    BLOCKED = "Blocked"
+    SKIPPED = "Skipped"
+
+class AutomationLevel(str, enum.Enum):
+    AUTOMATED = "Automated"
+    TO_BE_AUTOMATED = "ToBeAutomated"
+    AI_ASSISTED = "AIAssisted"
+    MANUAL = "Manual"
+
+class ClosingMode(str, enum.Enum):
+    ATTORNEY = "attorney"
+    TITLE_ESCROW = "title_escrow"
+    SHARED_APPROVAL = "shared_approval"
+
+class FSBOState(str, enum.Enum):
+    LISTING_PREP = "listing_prep"
+    UNDER_CONTRACT = "under_contract"
+```
+
+Document types, contact types, and communication channels match `app/models/enums.py` (includes attorney packet types, addendum, lead-paint, listing photos, wire authorization, SMS/voice_call hooks).
+
+Self-signup roles (`SELF_SIGNUP_ROLES_NOW`): Agent, TeamLead, TransactionCoordinator, Admin.
 
 class TaskStatus(str, enum.Enum):
     PENDING = "Pending"
@@ -850,7 +890,10 @@ CREATE POLICY tenant_isolation_transactions ON public.transactions
   ));
 
 -- Similar policies for all other tables...
--- Note: Service role key bypasses RLS for backend operations
+-- Note: Service role key bypasses RLS for backend operations.
+-- As-built: FastAPI uses the service role; tenant isolation is enforced
+-- in services/repositories. RLS activation for client-direct access is
+-- still a hardening item.
 ```
 
 ### 2.5 Task Template Import Strategy (from REWORKING_TASK_DB.csv)
@@ -881,6 +924,26 @@ Special handling:
 - **Wizard-dependent floats**: "# of Days for HOA Doc Delivery Period entered in the wizard" → `float_days = 'wizard:hoa_doc_days'`
 - **Wizard-dependent conditions**: "If answer is no, this task does not populate" → `conditions_json = [{"field": "has_inspection", "value": true}]`
 
+### 2.6 Tables added after Phase 1 (as-built catalog)
+
+The live schema is additive across ~117 Supabase migrations. Milestone 5.3 profile tables (`profile_resources`, `profile_checklist_templates`, etc.) were **dropped**; playbook data lives in `users.profile_settings_json` and `/api/v1/me/*`.
+
+| Domain | Tables |
+|--------|--------|
+| Tenants / users | `tenants` (owner, plan, domain, deletion lifecycle), `workspace_memberships`, invitation + notification prefs on `users` (`is_platform_admin`, `deactivated_at`) |
+| Transactions | `transaction_field_corrections`, `transaction_briefs`, `user_metric_snapshots`; transactions gained `title_ordered_by`, `has_appraisal`, attorney-review columns, `deadline_day_basis_json`, `earnest_money_days`, `fees_json` |
+| Tasks | `task_templates.workflow` (`any` / `title_escrow` / `attorney`), attorney task library seeds |
+| Documents | `document_ocr_geometry`, `document_templates`, `document_requirement_templates`, `transaction_document_requirements`, priority waivers/flags/events |
+| Comms | `communication_log_views`, `email_templates`, `inbound_sender_deal_links`, `inbound_filtered`, `inbound_suppression_rules`, `notifications` |
+| Payments | `stripe_customers`, `invoices`, `invoice_line_items`, `payments`, `refunds`, `commission_payouts` (parked), `payment_access_policy`, `credit_wallets`, `credit_ledger`, `credit_purchases`, `platform_settings` |
+| Vendors | `vendor_email_templates`, `transaction_vendor_assignments` (+ contacts), `vendor_proposals`, `vendor_colleague_tokens`, `vendor_background_refreshes`, `vendor_task_actions` |
+| AI / Aime | `wizard_runs`, `ai_usage_events`, `ai_suggestions`, `agent_threads`, `agent_messages`, `agent_actions`, `agent_action_rules` |
+| Attorney | `attorney_review_items`, `attorney_packet_releases` |
+| Platform | `platform_audit`, `platform_archive`, `platform_legal_holds`, `tenant_deletion_runs`, `tenant_api_keys`, `tenant_webhooks`, `webhook_deliveries`, `service_cost_daily` |
+| Help / ads / misc | `help_collections`, `help_articles` (+ related/feedback/revisions), `advertising_hooks`, `ad_packages`, `ad_orders`, `calendar_event_links`, `milestone_share_links`, `marketing_leads` |
+
+RLS note: policies in §2.4 are designed; the API uses the service role and enforces tenant isolation in services. Activating RLS for client-direct access remains a hardening item (requirements §12.14).
+
 ---
 
 ## 3. API Architecture
@@ -897,28 +960,35 @@ Special handling:
 - All mutations return the updated resource
 - Webhook hooks for external integrations
 
-### 3.2 Phase 1 API Endpoints
+### 3.2 As-built API Endpoints
 
-#### Auth & Users (`/api/v1/auth`, `/api/v1/users`)
+All paths are under `/api/v1`. **There is no `/api/v1/auth` router.** Login, register, refresh, password-reset, OAuth, and `/me` live on `/api/v1/users/*`. Invitations live on `/api/v1/invitations`. OpenAPI is served at `/api/docs` outside production.
+
+#### Auth & Users (`/api/v1/users`)
 
 ```
-POST   /api/v1/auth/register              # Register new user
-POST   /api/v1/auth/login                 # Login (Supabase Auth)
-POST   /api/v1/auth/logout                # Logout
-POST   /api/v1/auth/password-reset        # Request password reset
-POST   /api/v1/auth/password-reset/confirm # Confirm password reset
-POST   /api/v1/auth/refresh               # Refresh JWT token
-GET    /api/v1/auth/me                    # Get current user profile
+POST   /api/v1/users/email-available
+POST   /api/v1/users/register
+POST   /api/v1/users/login                 # OAuth2 token URL
+POST   /api/v1/users/refresh
+POST   /api/v1/users/confirm-email
+POST   /api/v1/users/oauth/{provider}/start
+POST   /api/v1/users/oauth/{provider}/exchange
+POST   /api/v1/users/password-reset/request
+POST   /api/v1/users/password-reset/confirm
+GET    /api/v1/users/me
+PATCH  /api/v1/users/me
+GET    /api/v1/users/me/workspaces
+GET    /api/v1/users
+GET    /api/v1/users/assignable
+GET    /api/v1/users/{user_id}
+PUT    /api/v1/users/{user_id}/role
+DELETE /api/v1/users/{user_id}
 
-GET    /api/v1/users                      # List users (Admin/TeamLead)
-GET    /api/v1/users/{id}                 # Get user by ID
-PUT    /api/v1/users/{id}                 # Update user profile
-PUT    /api/v1/users/{id}/role            # Change user role (Admin only)
-DELETE /api/v1/users/{id}                 # Deactivate user (Admin only)
-
-POST   /api/v1/users/invite              # Send invitation (Agent/TeamLead/Admin)
-GET    /api/v1/users/invite/{token}       # Validate invitation token
-POST   /api/v1/users/invite/{token}/accept # Accept invitation & register
+POST   /api/v1/invitations
+GET    /api/v1/invitations
+GET    /api/v1/invitations/verify/{token}
+POST   /api/v1/invitations/accept/{token}
 ```
 
 #### Teams (`/api/v1/teams`)
@@ -1060,11 +1130,12 @@ GET    /api/v1/documents/{id}/versions    # List version history
 GET    /api/v1/transactions/{id}/documents # List documents for a transaction
 ```
 
-#### Confidence Settings (`/api/v1/settings/confidence`)
+#### Confidence Settings (`/api/v1/confidence`)
 
 ```
-GET    /api/v1/settings/confidence         # Get current settings
-PUT    /api/v1/settings/confidence         # Update settings (Admin/TeamLead)
+GET    /api/v1/confidence                  # Get current tenant/team floors
+PUT    /api/v1/confidence/tenant           # Admin
+PUT    /api/v1/confidence/team/{team_id}   # Team override (cannot go below tenant floor)
 ```
 
 #### AI Provider Settings (`/api/v1/settings/ai-provider`)
@@ -1081,65 +1152,67 @@ GET    /api/v1/audit-logs                  # List audit logs (Admin only)
 GET    /api/v1/audit-logs/{entityType}/{entityId} # Logs for specific entity
 ```
 
-#### Shared Active Transactions Workspace (`/api/v1/workspace`)
+#### Shared dashboard aggregations (`/api/v1/dashboard`) — not `/workspace`
 
 ```
-GET    /api/v1/workspace/ai-briefing        # Topbar AI briefing:
-                                            #   critical_count, needs_attention_count,
-                                            #   on_track_count, suggested_focus
-GET    /api/v1/workspace/sidebar-kpis       # Sidebar KPI tiles:
-                                            #   overdue_tasks, closing_this_week,
-                                            #   active_deals, pipeline_value
-GET    /api/v1/workspace/deal-state-counts  # Sidebar Deals counts:
-                                            #   active_transactions, pending, closed, all_transactions
-GET    /api/v1/workspace/transaction-cards  # Active transaction cards:
-                                            #   client, address, status_pill, why_badges,
-                                            #   ai_next_step, milestone_bar, info_badges,
-                                            #   key_dates, grouped_contacts, price,
-                                            #   Supports: ?view=personal|team,
-                                            #   ?state_filter=active|pending|closed|all,
-                                            #   ?tab=all|overdue|today|closing_soon|
-                                            #        in_inspection|on_track|unhealthy,
-                                            #   ?sort=urgency|close_date|client_name|price,
-                                            #   ?search=, ?team_member_id=
+GET    /api/v1/dashboard/ai-briefing
+GET    /api/v1/dashboard/sidebar-kpis
+GET    /api/v1/dashboard/deal-state-counts
+GET    /api/v1/dashboard/transaction-tab-counts
+GET    /api/v1/dashboard/transaction-cards
+GET    /api/v1/dashboard/documents-ai-briefing
+GET    /api/v1/dashboard/documents-priority-queue
+POST   /api/v1/dashboard/ai-chat
 
-# Key dates management (inline edit from expanded drawer)
-PUT    /api/v1/transactions/{id}/key-dates  # Update one or more key milestone dates:
-                                            #   em_delivered_date, inspection_response_date,
-                                            #   appraisal_expected_date, cd_delivered_date,
-                                            #   cleared_to_close_date, closing_date,
-                                            #   closing_time, possession_date, possession_time
+GET    /api/v1/dashboard/agent            # Solo Agent aggregate
+GET    /api/v1/dashboard/team
+GET    /api/v1/dashboard/attorney
+GET    /api/v1/dashboard/admin
+GET    /api/v1/dashboard/fsbo/overview
+GET    /api/v1/dashboard/client
+GET    /api/v1/dashboard/vendor
 
-# Transaction history timeline
-GET    /api/v1/transactions/{id}/history    # Searchable event timeline:
-                                            #   events grouped by date (Today, Yesterday, etc.)
-                                            #   Each: timestamp, description, detail, event_type
-                                            #   Merges audit logs, communication logs, task
-                                            #   completions, date changes, AI flags
-                                            #   Supports: ?search= for filtering
-
-# AI chat for workspace context
-POST   /api/v1/workspace/ai-chat           # Contextual AI assistant:
-                                            #   message, optional transaction_id context
-                                            #   Returns: response, suggested_actions[]
-                                            #   Quick-action prompts: "Show overdue tasks",
-                                            #   "Draft inspection response", "Summarize deal"
+PUT    /api/v1/transactions/{id}/key-dates
+GET    /api/v1/transactions/{id}/history
+GET    /api/v1/transactions/{id}/plan
+GET    /api/v1/automation/needs-you
 ```
+
+#### Additional as-built routers (summary)
+
+| Prefix | Purpose |
+|--------|---------|
+| `/onboarding` | Status, company, logo, complete |
+| `/integrations` | Gmail / Outlook / iCloud / DocuSign OAuth, CRM keys |
+| `/documents` | Upload, versions, OCR geometry, e-sign, flag-deletion, generate-from-template |
+| `/document-templates` | Fillable PDF library |
+| `/wizard-runs` | Cross-device wizard drafts |
+| `/ai` | Parse, recommend, suggestions, wizard-command |
+| `/ai-emails` | Drafts, approve/edit-and-send, inbound filter |
+| `/automation` | Tenant posture, needs-you, run-now |
+| `/agent/rules` | Always-approve rules |
+| `/confidence` | Tenant/team floors (`GET /confidence`, `PUT /confidence/tenant`) |
+| `/esign` | DocuSign send/status/webhooks |
+| `/invoices`, `/payments`, `/billing/credits`, `/public/pay` | Stripe lanes |
+| `/calendar` | Google / Outlook calendar |
+| `/search` | Global search |
+| `/notifications` | In-app + prefs + digest |
+| `/vendor-portal` | Vendor Files / Documents / Tasks |
+| `/client/*` | Messages, invoices, document ack |
+| `/attorney` | Approve, release-packet, matters, state-rules, recording-calendar |
+| `/milestones/shared/{token}` | Public milestone viewer |
+| `/platform/*` | Tenants, users, billing, costs, AI usage, help, ads, waitlist |
+| `/public/help`, `/public/marketing`, `/public/ads`, `/public/tenant-branding` | Public SPAs |
+| `/me` | Playbook (checklists, notes, vendors, resources) |
+| `/ads`, `/admin/advertising` | In-app ads |
+| `/internal/schedules/tick` | EventBridge scheduler |
 
 **Notes:**
-- `?view=personal` returns only the user's own deals (Agent View)
-- `?view=team` returns all team deals with assignee info (Team Leader View)
-- `?search=` searches across client names, vendor names, companies, dates, addresses
-- `?sort=urgency` (default) sorts by overdue + soonest closing first
-- `?tab=in_inspection` means the inspection response has not yet been sent
-- `pipeline_value` sums purchase_price of currently active transactions
-- Status pills and "why" badges are computed server-side from transaction
-  state, task state, due dates, message counts, and missing-doc conditions
-- Dashboard landing pages reuse these same aggregation services
-- Key dates are returned as part of transaction card data and are editable
-  inline via the `PUT /key-dates` endpoint; changes are audit-logged
-- Transaction history merges multiple event sources into a unified timeline;
-  the frontend displays it in the Transaction History panel
+- Dashboard landing pages reuse `/dashboard/*` aggregations
+- Key dates are editable via `PUT /transactions/{id}/key-dates`
+- Transaction history merges audit + comms + task events
+- AI chat is `POST /dashboard/ai-chat` (not `/workspace/ai-chat`)
+- Confidence settings are `/confidence`, not `/settings/confidence`
 
 #### Role-Specific Dashboard Landing Pages (`/api/v1/dashboard`)
 
@@ -1346,64 +1419,39 @@ GET    /api/v1/health                      # Health check
 GET    /api/v1/health/ready                # Readiness check (DB connectivity)
 ```
 
-### 3.3 Permission Matrix (Phase 1)
+### 3.3 Permission Matrix (as-built)
 
-| Endpoint | Admin | TeamLead | Agent | Elf | Attorney | Client | FSBO Customer | Vendor |
-|----------|-------|----------|-------|-----|----------|--------|---------------|--------|
-| User management | CRUD | Read team | Read self | Read self | Read self | Read self | Read self | Read self |
-| Invite users | Yes | Team only | Own elves | No | No | No | No | No |
-| Create transaction | Yes | Yes | Yes | No | No | No | No | No |
-| View transactions | All | Team | Own/assigned | Assigned | Assigned (attorney matters) | Own | Own properties | Own |
-| Manage tasks | All | Team templates | Own txn | Assigned txn | Attorney-owned tasks | No | No | No |
-| Task templates | System-wide | Team-wide | Personal | No | No | No | No | No |
-| Upload documents | Yes | Yes | Yes | Yes | Yes (legal packets) | Yes (no delete) | Yes (no delete) | Yes (own) |
-| Delete documents | Yes | Yes | Yes | Yes | Yes (own uploads) | Flag only | Flag only | No |
-| View documents | All | Team | Own txn | Assigned txn | Assigned txn | Own txn | Own property docs | Own uploads |
-| Active Transactions workspace | All | Team + personal toggle | Own | Assigned | Attorney queue | No | No | No |
-| Dashboard landing page | Admin dashboard | Team Leader dashboard | Solo Agent dashboard | Solo Agent dashboard | Attorney dashboard | Client portal | FSBO workspace | Vendor portal |
-| Approve/release packets | No | No | No | No | Yes (attorney-owned) | No | No | No |
-| AI-prepared legal work | No | No | No | No | Review only (no delegation) | No | No | No |
-| Milestone sharing | No | No | No | No | No | Share own | Share own (expirable links) | No |
-| Confidence settings | Global floor | Team threshold | No | No | No | No | No | No |
-| Audit logs | Full | Team | No | No | Own matters | No | No | No |
-| AI Suggestions | All | Team | Own txn | Assigned | Ask AI on assigned matters (no `/ai-suggestions` page) | No | No | No |
-| Analytics | System-wide | Team + per-agent | Own | No | No | No | No | No |
-| Notifications | Own | Own | Own | Own | Own | Own | Own | Own |
-| Client portal | No | No | No | No | No | Full | No | No |
-| FSBO workspace | No | No | No | No | No | No | Full | No |
-| Attorney release | No | No | No | No | Yes | No | No | No |
-| Public milestones | N/A | N/A | N/A | N/A | N/A | Create links | Create links | N/A |
+| Capability | Admin | TeamLead | Agent | TC | Attorney | Client | FSBO | Vendor |
+|------------|-------|----------|-------|----|----------|--------|------|--------|
+| User management | CRUD | Team | Self | Self | Self | Self | Self | Self |
+| Invite users | Yes | Team | Own TCs | No | No | No | No | No |
+| Create transaction | Yes | Yes | Yes | Yes | No | No | No | No |
+| View transactions | All | Team | Own/assigned | Assigned | Assigned matters | Own | Own properties | Assigned files |
+| Transaction workspace | Full | Team | Own | Assigned | Matter workspace | Portal | Portal | Portal |
+| Task templates | System | Team | Playbook | Playbook | No | No | No | No |
+| Upload documents | Yes | Yes | Yes | Yes | Legal packets | No delete | No delete | Own |
+| Needs You / AI emails | Yes | Yes | Yes | Yes | No (Ask AI on matter) | No | No | No |
+| Approve/release packets | No | No | No | No | Yes | No | No | No |
+| Confidence / AI settings | Yes | Team floor | No | No | No | No | No | No |
+| Audit logs | Full | Team comms audit | No | No | Own matters | No | No | No |
+| Analytics | System | Team | Own | No | No | No | No | No |
+| Invoices | Per payment-access policy | | | | No | Pay own | Pay own | No |
+| Platform console | Only `is_platform_admin` | | | | | | | |
+| Milestone sharing | — | — | — | — | — | Yes | Yes | No |
 
 ---
 
 ## 4. Frontend UI/UX Design
 
-### 4.1 Design System (Client-Approved Designs)
+### 4.1 Design System (as-built)
 
-**Workflow Logic Reference (2026-04-06):** The complete page-by-page frontend
-workflow specification is maintained in `FRONTEND_UI_WORKFLOW_LOGIC.md`. That
-document is the canonical reference for: entry conditions, data requirements,
-user actions and state transitions, conditional rendering logic, navigation
-flows, AI integration points, real-time behavior, and edge cases per route.
-All Phase 3+ frontend implementation must align with it.
+**Workflow Logic Reference:** The complete page-by-page frontend specification is `FRONTEND_UI_WORKFLOW_LOGIC.md` (synced 2026-08-25). That document is the canonical reference for live routes, shells, wizard phases, and workspace tabs.
 
-**Visual approach:** B2B institutional trust pack — dark sidebar + light content
-surface + high-density transaction cards. Customer-facing portals (FSBO) use a
-simplified but brand-consistent shell.
+**Visual approach:** B2B institutional trust pack — dark sidebar + light content surface + high-density transaction cards. Client portal uses a distinct concierge navy shell; Vendor portal uses a bright white rail; Attorney uses AttorneyLayout (caseload rail). STYLE_GUIDE.md (v2 comfort scale) governs type, contrast, and AI surfaces.
 
-**Approved HTML design references (2026-03-26):**
-- `completed_designs/ve-active_transactions.html` — shared Active Transactions workspace
-- `completed_designs/ve-homepage_dashboard-solo_agent.html` — Solo Agent dashboard landing
-- `completed_designs/ve-homepage_dashboard-team_leader.html` — Team Leader dashboard landing
-- `completed_designs/ve-fsbo_dashboard.html` — FSBO Customer workspace
-- `completed_designs/ve-attorney_dashboard.html` — Attorney dashboard landing
-- `completed_designs/ve-workflow-closing_calendar.html` — Closing Calendar workspace
-- `completed_designs/ve-workflow-my_task_queue.html` — My Task Queue workspace
-- `completed_designs/ve-intelligence-analytics.html` — Analytics workspace
-- `completed_designs/ve-intelligence-ai_suggestions.html` — AI Suggestions workspace
-- `completed_designs/ve-workflow-all_documents.html` — All Documents workspace
+**Approved HTML design references (2026-03-26)** remain historical benchmarks in `completed_designs/`. The shipping UI has since added the deal workspace, Needs You, Settings hub, and portal shells.
 
-**Additional brand references:** `data/ve-brandkit.txt` and `data/ve-style-sheet.txt`
+**Frontend stack:** Vite + React + TypeScript; TanStack Query; React Router; Tailwind + CSS variables; shadcn/ui. Route table: `src/App.tsx` + `src/utils/constants.ts` (`ROUTES`). Role landing: `getLandingRoute` in `dashboardShellConfig.ts`.
 
 - **Colors — brand-aligned semantic token system (CSS variables, white-label propagation):**
   ```css
@@ -1449,143 +1497,66 @@ simplified but brand-consistent shell.
 - **Responsive:** Desktop-first with mobile breakpoints; preserve scan density
   without collapsing the workspace into a consumer-style layout.
 
-### 4.2 Page Structure
+### 4.2 Page Structure (as-built 2026-08-25)
 
-**Scope update (2026-03-26):** Dashboard landing pages are now approved for
-Solo Agent, Team Leader, Attorney, and FSBO. The Active Transactions workspace
-remains the shared MVP transaction view for all internal roles. The page tree
-below reflects the full approved scope.
+Canonical route table: `FRONTEND_UI_WORKFLOW_LOGIC.md` §0. Shells: `AppLayout` (internal + FSBO variant), `AttorneyLayout`, `ClientWorkspaceLayout`, `VendorWorkspaceLayout`.
 
 ```text
 App
 |-- Auth (public)
-|   |-- Login
-|   |-- Register
-|   |-- Forgot Password
-|   |-- Reset Password
-|   |-- OAuth Callback
-|   `-- Invite Accept
+|   |-- /login /register /forgot-password /reset-password
+|   |-- /auth/confirm  /oauth/callback  /invite/:token
+|   |-- /terms /privacy
 |
 |-- Onboarding (protected, standalone)
-|   `-- OnboardingWizard
+|   `-- /onboarding
 |
-|-- Main App (protected — internal roles)
-|   |-- Topbar (shared shell)
-|   |   |-- Brand lockup + AI indicator
-|   |   |-- Today's AI Briefing chip (Critical / Needs Attention / On Track)
-|   |   |-- Global search
-|   |   |-- Notifications bell
-|   |   |-- User chip
-|   |   `-- Contextual CTA (e.g., + New Transaction)
-|   |
-|   |-- Sidebar (shared shell — KPIs and nav vary by role)
-|   |   |-- KPI tiles (2x2 grid, role-specific metrics)
-|   |   |-- Dashboard link
-|   |   |-- Deals
-|   |   |   |-- Active Transactions
-|   |   |   |-- Pending
-|   |   |   |-- Closed
-|   |   |   `-- All Transactions
-|   |   |-- Workflow
-|   |   |   |-- My Task Queue
-|   |   |   |-- All Documents
-|   |   |   `-- Closing Calendar
-|   |   |-- Intelligence
-|   |   |   |-- AI Suggestions
-|   |   |   |-- Analytics
-|   |   |   `-- Settings
-|   |   |-- Team (Team Lead only)
-|   |   |   |-- Agents
-|   |   |   `-- Task Templates
-|   |   |-- Pinned CTA (+ New Transaction)
-|   |   `-- User profile card
-|   |
-|   |-- Dashboard Landing Pages (role-specific, approved designs)
-|   |   |-- Solo Agent Dashboard
-|   |   |   |-- Upload intake card (drag/drop to start transaction)
-|   |   |   |-- Hero card (health score, action queue, drift diagnostics)
-|   |   |   |-- Production snapshot (GCI, volume, closings)
-|   |   |   |-- Priority transaction cards
-|   |   |   `-- Side rail (AI intelligence, missing docs, comms)
-|   |   |-- Team Leader Dashboard
-|   |   |   |-- Upload intake card
-|   |   |   |-- Hero card (team health score, intervention queue)
-|   |   |   |-- Drift / discipline metrics
-|   |   |   |-- Agent board with drill-down
-|   |   |   |-- Team financials and pipeline
-|   |   |   `-- Side rail (AI intel, coach prompts, docs blocking)
-|   |   `-- Attorney Dashboard
-|   |       |-- Upload intake card (legal packets)
-|   |       |-- Hero card (legal health score, approval gates)
-|   |       |-- Filter tabs (All, Needs Review, Missing Docs, Ready To Release, Clean Files)
-|   |       |-- Matter cards (review queue, key dates, AI next step)
-|   |       `-- State rules modal / recording calendar
-|   |
-|   |-- Active Transactions Workspace (shared MVP for Agent, Elf, Team Lead, Attorney)
-|   |   |-- Agent/Elf personal view
-|   |   |-- Team Lead team/personal toggle
-|   |   `-- Attorney queue view (filtered by attorney matters)
-|   |
-|   |-- Transaction Detail
-|   |   |-- Overview
-|   |   |-- Tasks
-|   |   |-- Documents
-|   |   |-- Parties
-|   |   `-- Communications
-|   |
-|   |-- Supporting workspaces
-|   |   |-- Task Queue
-|   |   |-- Closing Calendar
-|   |   |-- All Documents
-|   |   |-- Contacts
-|   |   `-- Analytics
-|   |
-|   |-- Profile
-|   |   |-- Personal Info
-|   |   |-- Notification Preferences
-|   |   |-- Checklist Templates
-|   |   `-- Integrations
-|   |
-|   `-- Admin
-|       |-- User Management
-|       |-- Task Templates
-|       |-- Confidence Settings
-|       |-- Tenant/Brokerage Settings
-|       `-- Audit Logs
+|-- Wizard (protected, no AppLayout)
+|   `-- /transactions/new          # 4 phases: Upload → Contract Details → Contacts & Fees → Verification
 |
-|-- FSBO Customer Workspace (protected — customer-facing)
-|   |-- Sidebar
-|   |   |-- KPI tiles (critical next steps, days to close, share links, missing docs)
-|   |   |-- Dashboard
-|   |   |-- My Properties
-|   |   |-- Documents
-|   |   |-- Milestones & Messages
-|   |   |-- Ask Velvet Elves AI
-|   |   |-- Notifications
-|   |   `-- Sharing
-|   |-- Portal tabs: Overview | Properties | Documents | Support
-|   |-- Property portfolio cards (listing-prep and under-contract states)
-|   |-- Plain-English AI guidance panel
-|   |-- Milestone sharing (expirable read-only links)
-|   `-- Support/guide contact area
+|-- Internal AppLayout (Agent, TransactionCoordinator, TeamLead, Admin)
+|   |-- Topbar: briefing chip · ⌘K · bell · user · + New Transaction
+|   |-- Sidebar KPIs + groups:
+|   |   |-- Dashboard (role landing)
+|   |   |-- Deals: Active · Drafts & Paused · Closed · All · Clients · Contacts
+|   |   |-- Workflow: Needs You · Task Queue · Documents · Calendar
+|   |   |-- Payments · Vendors
+|   |   |-- Intelligence: Suggestions · Email · Vendor Proposals · Reports
+|   |   |-- Team (TeamLead+Admin) · Oversight (Admin)
+|   |   `-- Platform (is_platform_admin)
+|   |-- Settings hub /settings (not a sidebar group); org at /organization
+|   |-- Deal list /transactions/*  + workspace /transactions/:id
+|   |   `-- Tabs: Overview, Timeline, Compliance, Tasks, Documents,
+|   |       Contacts, Billing, Activity (+ Agent/Email behind flag)
 |
-|-- Client Portal (protected — simplified shell)
-|   |-- Sidebar: My Transactions | Documents | Milestones | Agent Info
-|   |-- /client/transactions — transaction cards (overview, dates, milestones)
-|   |-- /client/documents — view/upload (no delete; flag for deletion)
-|   |-- /client/milestones — timeline with plain-English descriptions
-|   `-- /client/agent — Agent BIO / "Learn About Your Agent"
+|-- AttorneyLayout
+|   |-- /dashboard/attorney → first matter or empty
+|   |-- /transactions/:id AttorneyMatterWorkspacePage
+|   `-- /attorney/releases · /attorney/state-rules · /attorney/recording-calendar
 |
-|-- Vendor Portal (protected — minimal)
-|   `-- /vendor (vendor-scoped: own uploads only; the prior /client/documents hijack was removed)
+|-- FSBO (AppLayout fsbo variant)
+|   `-- /fsbo · properties · documents · milestones · invoices
+|       Share is a modal (no /fsbo/share)
+|
+|-- ClientWorkspaceLayout
+|   `-- /client/home · next-steps · milestones · documents · updates
+|       /client/transactions redirects to /client/home
+|
+|-- VendorWorkspaceLayout
+|   `-- /portal/vendor · files/:id · documents · tasks
+|
+|-- Platform /platform/*
 |
 `-- Public
-    `-- /milestones/:shareToken — read-only milestone viewer (no auth)
+    |-- /milestones/:shareToken
+    |-- /v/:token  /pay/invoices/:id  /advertise
 ```
 
-### 4.3 Key UI Components (Phase 1)
+### 4.3 Key UI Components (Phase 1 design files)
 
-#### 4.3.1 Agent/Elf Active Transactions Workspace (Client-Approved Redesign)
+**As-built deltas vs the mocks below:** Create is `/transactions/new` (4-phase wizard), not a quick-create modal. Durable editing is `/transactions/:id` (Compliance is a tab). Filter tab **Unhealthy** is retired. Role string is TransactionCoordinator, not Elf. Settings is a hub, not a sidebar Intelligence item. Attorney landing is a redirect into a matter.
+
+#### 4.3.1 Agent / Transaction Coordinator Active Transactions list (Client-Approved Redesign)
 
 **Reference:** `completed_designs/ve-active_transactions.html`
 **Scope note:** This section supersedes the earlier dashboard-first planning.
@@ -1609,8 +1580,8 @@ landing pages are now also approved (see 4.3.1c–4.3.1f).
 | PAGE HEADER                                                              |
 | - Title: Active Transactions                                             |
 | - Search + sort                                                          |
-| - Tabs: All | Overdue | Due Today | Closing Soon | In Inspection |       |
-|         On Track | Unhealthy                                             |
+| - Tabs: All | Overdue | Due Today | Closing Soon | Needs Attention |       |
+|         In Inspection | On Track                                           |
 +--------------------------------------------------------------------------+
 | TRANSACTION CARD STACK                                                   |
 | - Header: urgency edge, status pill, address/client summary, why badges  |
@@ -1622,7 +1593,7 @@ landing pages are now also approved (see 4.3.1c–4.3.1f).
 +--------------------------------------------------------------------------+
 | SUPPORTING OVERLAYS                                                      |
 | - Add Task modal (name, method, due date, assign to, AI suggestions)     |
-| - New Transaction quick-create modal (AI Import + manual fields)         |
+| - New Transaction → /transactions/new (4-phase wizard; not a modal)      |
 | - Transaction Documents modal                                            |
 | - All Documents AI Search modal                                          |
 | - Add Contact inline modal (company, name, phone, email)                 |
@@ -1686,7 +1657,7 @@ landing pages are now also approved (see 4.3.1c–4.3.1f).
 Team Lead Active Transactions Workspace
 
 - Shared shell:
-  - Same topbar, sidebar, tabs, transaction-card system, and overlays as Agent/Elf view
+  - Same topbar, sidebar, tabs, transaction-card system, and overlays as Agent/TC view
   - Toggle allows Team Lead to switch between personal and team scopes
 
 - Team view adjustments:
@@ -1988,147 +1959,69 @@ matter workspace, not the All Documents queue.
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 4.4 New Routes (Phase 1)
+### 4.4 Live frontend routes (2026-08-25)
 
-```typescript
-export const ROUTES = {
-  // Auth (existing)
-  LOGIN: '/login',
-  REGISTER: '/register',
-  FORGOT_PASSWORD: '/forgot-password',
-  RESET_PASSWORD: '/reset-password',
-  OAUTH_CALLBACK: '/auth/callback',
-  ONBOARDING: '/onboarding',
-  INVITE_ACCEPT: '/invite/:token',          // NEW
+Source of truth: `velvet-elves-frontend/src/utils/constants.ts` (`ROUTES`) and `src/App.tsx`. Condensed:
 
-  // Main app — role-specific dashboard landing pages (approved 2026-03-26)
-  DASHBOARD: '/dashboard',                          // auto-routes by role
-  DASHBOARD_AGENT: '/dashboard/agent',              // NEW: Solo Agent dashboard
-  DASHBOARD_TEAM_LEADER: '/dashboard/team',         // NEW: Team Leader dashboard
-  DASHBOARD_ATTORNEY: '/dashboard/attorney',        // NEW: Attorney dashboard
-  DASHBOARD_ADMIN: '/dashboard/admin',              // existing admin dashboard
-  PROFILE: '/profile',
-
-  // Deals section
-  ACTIVE_TRANSACTIONS: '/transactions/active',
-  PENDING_TRANSACTIONS: '/transactions/pending',
-  CLOSED_TRANSACTIONS: '/transactions/closed',
-  ALL_TRANSACTIONS: '/transactions/all',
-  ACTIVE_DEALS: '/deals',                    // alias / legacy naming
-  TRANSACTIONS: '/transactions',             // backward-compatible base route
-  NEW_TRANSACTION: '/transactions/new',
-  TRANSACTION_DETAIL: '/transactions/:id',
-
-  // Workflow section
-  TASK_QUEUE: '/tasks/queue',
-  CLOSING_CALENDAR: '/closing-calendar',
-  DOCUMENTS: '/documents',
-  ALL_DOCUMENTS: '/documents/all',
-
-  // Existing/future task views
-  DEADLINES: '/deadlines',                   // future dashboard/deadline page
-  TASKS: '/tasks',                           // cross-transaction task view
-  TASK_DETAIL: '/tasks/:id',
-  
-  // Intelligence / utility section
-  AI_SUGGESTIONS: '/ai-suggestions',
-  ANALYTICS: '/analytics',
-  SETTINGS: '/settings',
-
-  // Supporting pages retained in overall app shell
-  CONTACTS: '/contacts',
-  CONTACT_DETAIL: '/contacts/:id',
-  MESSAGES: '/messages',
-  PIPELINE: '/pipeline',
-
-  // Attorney workspace
-  ATTORNEY_QUEUE: '/attorney/queue',                // NEW: attorney matter queue
-  ATTORNEY_RELEASE_QUEUE: '/attorney/releases',     // NEW: release-ready packets
-  ATTORNEY_STATE_RULES: '/attorney/state-rules',    // NEW: state rules modal/view
-  ATTORNEY_RECORDING_CALENDAR: '/attorney/recording-calendar', // NEW
-
-  // FSBO Customer workspace
-  FSBO_DASHBOARD: '/fsbo',                          // NEW: FSBO overview
-  FSBO_PROPERTIES: '/fsbo/properties',              // NEW: property portfolio
-  FSBO_PROPERTY_DETAIL: '/fsbo/properties/:id',     // NEW
-  FSBO_DOCUMENTS: '/fsbo/documents',                // NEW: document submission
-  FSBO_MILESTONES: '/fsbo/milestones',              // NEW: milestones & messages
-  FSBO_SHARE: '/fsbo/share',                        // NEW: milestone sharing
-  FSBO_AI_HELP: '/fsbo/ask-ai',                     // NEW: plain-English AI guidance
-
-  // Client Portal
-  CLIENT_TRANSACTIONS: '/client/transactions',          // NEW: client transaction list
-  CLIENT_DOCUMENTS: '/client/documents',                // NEW: client document view
-  CLIENT_MILESTONES: '/client/milestones',              // NEW: client milestone timeline
-  CLIENT_AGENT: '/client/agent',                        // NEW: agent bio page
-
-  // Admin
-  ADMIN_USERS: '/admin/users',              // NEW
-  ADMIN_USER_DETAIL: '/admin/users/:userId',
-  ADMIN_TEMPLATES: '/admin/task-templates',  // NEW
-  ADMIN_TEMPLATE_DETAIL: '/admin/task-templates/:id', // NEW
-  ADMIN_TEMPLATE_IMPORT: '/admin/task-templates/import', // NEW
-  ADMIN_CONFIDENCE: '/admin/confidence',     // NEW
-  ADMIN_AUDIT_LOGS: '/admin/audit-logs',     // NEW
-  ADMIN_TENANT: '/admin/tenant',             // NEW
-
-  // Shared milestone viewer (public, read-only)
-  MILESTONE_VIEWER: '/milestones/:shareToken',      // NEW: expirable public link
-} as const;
+```
+Auth:     /login /register /forgot-password /reset-password
+          /auth/confirm /oauth/callback /invite/:token /terms /privacy
+Wizard:   /transactions/new
+Dash:     /dashboard → getLandingRoute(user)
+          /dashboard/agent | /team | /attorney (redirect to matter) | /admin
+Deals:    /transactions /transactions/active|pending|closed|all
+          /transactions/:id
+Workflow: /needs-you /tasks/queue /documents /calendar /clients /contacts
+Intel:    /ai-suggestions /ai-emails /vendor-proposals /reports
+Pay:      /payments  /payments/payouts
+Settings: /settings  /settings/account|notifications|connections|my-playbook
+          |document-templates|help
+          /organization
+Attorney: /attorney/releases | state-rules | recording-calendar
+          /attorney/queue → /transactions/active
+FSBO:     /fsbo /fsbo/properties /fsbo/documents /fsbo/milestones /fsbo/invoices
+Client:   /client/home /next-steps /milestones /documents /updates
+          /client/transactions → /client/home
+Vendor:   /portal/vendor /portal/vendor/files/:id /documents /tasks
+Platform: /platform/tenants|users|waitlist|ai-usage|costs|billing|help|advertising
+Public:   /milestones/:token /v/:token /pay/invoices/:id /advertise
+Retired:  /profile → /reports?scope=me   /communications → /admin/communications
+          /fsbo/share (modal)   /closing-calendar (use /calendar)
 ```
 
 ### 4.5 Frontend State Architecture
 
 ```text
-React Query (TanStack Query)
-|-- Server State (cached via React Query)
-|   |-- /auth/me                      -> current user
-|   |-- /workspace/ai-briefing        -> topbar AI briefing counts
-|   |-- /workspace/sidebar-kpis       -> sidebar KPI tiles
-|   |-- /workspace/deal-state-counts  -> Active/Pending/Closed/All counts
-|   |-- /workspace/transaction-cards  -> collapsible card data
-|   |-- /dashboard/agent/*            -> Solo Agent dashboard data (hero, production, priority, intel)
-|   |-- /dashboard/team/*             -> Team Leader dashboard data (intervention, performance, drift)
-|   |-- /dashboard/attorney/*         -> Attorney dashboard data (queue, hero, matters, state-rules)
-|   |-- /dashboard/fsbo/*             -> FSBO workspace data (overview, properties, docs, milestones)
-|   |-- /transactions                 -> transaction list
-|   |-- /tasks                        -> task list
-|   |-- /contacts                     -> contact directory
-|   |-- /documents                    -> transaction documents
-|   |-- /documents/search             -> all-documents AI search
-|   |-- /task-templates               -> template library
-|   |-- /audit-logs                   -> audit trail
-|   |-- /ai/suggestions              -> pending AI suggestions
-|   |-- /analytics/dashboard         -> analytics aggregation
-|   |-- /notifications               -> user notification list
-|   |-- /tasks/queue                 -> personal task queue
-|   |-- /attorney/releases           -> release-ready matters
-|   |-- /client/transactions         -> client transaction list
-|   |-- /client/milestones           -> client milestone timeline
-|   `-- /milestones/shared/:token    -> public milestone viewer
+React Query (TanStack Query) — keys in src/utils/constants.ts QUERY_KEYS
+|-- Server State
+|   |-- GET /users/me                     -> current user
+|   |-- GET /dashboard/ai-briefing        -> topbar briefing
+|   |-- GET /dashboard/sidebar-kpis       -> sidebar KPI tiles
+|   |-- GET /dashboard/deal-state-counts  -> Active / Drafts / Closed / All
+|   |-- GET /dashboard/transaction-cards  -> collapsible card data
+|   |-- GET /dashboard/agent|team|attorney|admin|fsbo/*|client|vendor
+|   |-- GET /wizard-runs/current          -> wizard draft
+|   |-- GET /automation/needs-you
+|   |-- GET /transactions /tasks /contacts /documents
+|   |-- GET /ai/suggestions  /ai-emails  /analytics
+|   |-- GET /invoices /payments /billing/credits
+|   |-- GET /vendor-portal/*
+|   `-- GET /milestones/shared/:token
 |
 |-- Client State (React Context)
-|   |-- AuthContext                   -> JWT token, user session, current role
-|   |-- ThemeContext                  -> white-label branding
-|   |-- WorkspaceViewContext          -> Team Lead personal/team toggle
-|   |-- WorkspaceFilterContext        -> deal-state + page-tab filters
-|   |-- DashboardContext              -> role-specific dashboard state, command grid layout
-|   |-- GlobalDropzoneContext         -> workspace-wide document drop handling
-|   |-- NotificationContext           -> toast/alert state
-|   `-- OnlineStatusContext          -> offline detection + action queue
-|
-`-- Form State (React Hook Form)
-    |-- TransactionForm
-    |-- TaskTemplateForm
-    |-- ContactForm
-    |-- UserInviteForm
-    |-- FSBOShareForm                 -> milestone sharing with expiry
-    `-- AttorneyReleaseForm           -> packet release approval
+|   |-- AuthContext
+|   |-- ThemeContext (white-label)
+|   |-- IntakeContext (file drop → wizard)
+|   |-- FsboShareContext (share modal)
+|   |-- TourProvider
+|   `-- Notification / toast
 ```
 
 ---
 
 ## 5. Phase 1 Implementation Plan
+
+**Historical Week 1–3 checklist.** Completion status lives in `milestones.txt` (STATUS lines + PHASE 8). Unchecked boxes below are **not** current work; they were the original plan. Hosting is ECS Fargate, not a long-lived EC2 app server. Auth is `/api/v1/users/*`.
 
 ### 5.1 Milestone 1.1 — Project Setup & Architecture Design (Week 1)
 

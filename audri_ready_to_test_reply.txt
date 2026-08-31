@@ -1,0 +1,31 @@
+Subject: Re: Aime testing — updated environment is on staging
+
+Hi Audri,
+
+The updated task library is on staging. You can pick testing back up in your own workspace.
+
+Please create **new** files for the library checks. Open tasks on files that were already running keep their old names and history until you complete them. The number on the task stays the live ID (we did not renumber from 360 onward).
+
+What to exercise this round (also in the Aime and AI Automation Testing guidelines):
+
+- Dual (Both): buyer and seller both; Title and Loan Officer once; no co-op letters; both inspection reminder and Inspection Negotiated rows
+- Order Title vs Confirm Title Order: same package, courtesy script when the co-op orders, not “has title been ordered?”
+- Cash appraisal: Buy-Cash to the buyer; Sell-Cash to the co-op (TC on copy)
+- Deliver Utility Info on a listing: To = buyer’s agent
+- Order Home Warranty: internal reminder to you / TC, not a warranty company
+- No seller Inspection Completed on new listings
+- Closing Gift on buyer and seller files
+- Closing-information still never attaches the Closing Disclosure
+- Fallen-through stays Terminated, not Closed
+
+Do not treat these as misses yet — they are not on staging:
+
+- Extra Autopilot send (request / deliver / CTC / CD check / closing-information / testimonials)
+- Next-day 10am follow-up and the 3-day step-in nags
+- December 1 exemption blast
+- Title-cloud summary in Deliver Title
+
+Use only inboxes you control on Contacts. Stop at the plan if To is a real outside agent. I will share the updated testing guidelines in Google Docs with this note.
+
+Thank you,
+Jan

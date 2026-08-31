@@ -160,7 +160,7 @@ Open **Needs You** from the left menu. A stuck AI task appears there with the
 reason. The two most common:
 
 - *"No … email is on file for this deal"* — that party has no email address yet.
-  Add it on the deal's **People** tab, and the AI will pick the task back up.
+  Add it on the deal's **Contacts** tab, and the AI will pick the task back up.
 - *"This email needs the purchase agreement attached"* — upload the contract to
   the deal, and it will send.
 
@@ -339,6 +339,6 @@ The full list is in **todo_list.md** alongside this guide.
 | Work my tasks | My Task Queue |
 | Read and send prepared emails | AI Email Review |
 | See one deal's tasks | Open the deal → Tasks tab |
-| Add a missing party email | Open the deal → People tab |
+| Add a missing party email | Open the deal → Contacts tab |
 | Change how much the AI does | Settings → AI & Automation |
 | Turn the morning summary on | Settings → Notifications |

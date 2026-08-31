@@ -309,7 +309,7 @@ works fully.
 | **Compliance** | The document checklist. Attach an existing file, upload a new one, or mark a row **not applicable**. Each fresh upload gets checked by the AI, which tells you if it read the document as something other than what the row asked for. |
 | **Documents** | Every file on the deal. Upload from the button, or **drag a file anywhere on the page**. The AI analyses it and reports in the assistant. |
 | **Tasks** | Overdue / Due Today / Upcoming / Completed, plus a collapsed **Handled by AI** group. Each task shows why it is due when it is due. **Email transaction party** is the action that finishes most of them. |
-| **People** | Everyone on the deal, grouped by side and role. Add or edit a party, assign a teammate, manage a client's portal access, and see the deal's fees. |
+| **Contacts** | Everyone on the deal, grouped by side and role. Add or edit a party, assign a teammate, manage a client's portal access, and see the deal's fees. |
 | **Activity** | Two lenses: **History** (everything that happened, including "Closing moved — 6 deadlines recomputed") and **Automation** (strictly what ran without a click, with **Undo** where possible). |
 | **Email** | This deal's **Outbox** and **Inbox**. |
 
@@ -601,7 +601,7 @@ takes you somewhere you cannot act.
 
 **Needs a Team Lead or Admin account.**
 
-### 14.1 People
+### 14.1 Team
 
 - **Team Overview** — your team's people and their production.
 - **Teams** — build and run teams, see members inline, invite into a team.
@@ -761,7 +761,7 @@ The full list, with why each one is where it is, is in `todo_list.md`.
 | See mail that came back in | Email → Inbox |
 | Work one deal properly | Open the deal → its workspace |
 | See one deal's tasks | Open the deal → Tasks tab |
-| Add a missing party email | Open the deal → People tab |
+| Add a missing party email | Open the deal → Contacts tab |
 | See what the AI did on its own | Open the deal → Activity → Automation |
 | Chase missing paperwork | All Documents → Missing |
 | Change how much the AI does | Settings → AI & Automation |

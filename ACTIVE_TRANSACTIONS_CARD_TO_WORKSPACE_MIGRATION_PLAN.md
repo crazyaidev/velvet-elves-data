@@ -44,7 +44,7 @@
 | The list page mounts 9 modal/panel components, TaskEmailFlow, an invoice modal, and a delete dialog, all reachable only through the card | `src/pages/transactions/TransactionListPage.tsx` (1,190 lines) |
 | The card itself is 1,280 lines: collapsed face, 3-column drawer (Tasks / Key Dates / Contacts), invoices panel, AI suggestions strip, 8-button emoji footer | `src/components/shared/TransactionCard.tsx` |
 | The workspace is live for all internal ops roles and is agent-first by default (`agentWorkspaceEnabled()` defaults on; localStorage `ve_agent_workspace_v1='off'` is only an escape hatch) | `src/App.tsx:177-184`, `src/components/agent/agentRefs.ts:33-42` |
-| The workspace renders 8 tabs (Agent, Timeline, Compliance, Documents, Tasks, People, Activity, Email) over the plan aggregate | `src/pages/transactions/TransactionWorkspacePage.tsx` |
+| The workspace renders 8 tabs (Agent, Timeline, Compliance, Documents, Tasks, Contacts, Activity, Email) over the plan aggregate | `src/pages/transactions/TransactionWorkspacePage.tsx` |
 | The plan aggregate header ALREADY carries `days_to_close`, `closing_date`, `purchase_price`, `ai_next_step`, task/doc counts | `src/hooks/useTransactionPlan.ts:36-65` |
 | `tracking_dates` is in the plan aggregate but rendered NOWHERE: `TrackingDatesCard`, `WorkspaceStatBand`, `WorkspaceQuickActions` are dead exports since the 2026-06-13 restyle | `src/hooks/useTransactionPlan.ts:190`, `src/components/workspace/WorkspaceHeader.tsx` (only `STAGE_PILL_CLASS` and `WorkspacePostureControl` are imported by the page) |
 | The workspace has NO invoices surface and NO delete-transaction control | grep for `invoice` in `src/components/workspace/` returns nothing; delete exists only in the card footer |
@@ -228,7 +228,7 @@ silent AI next-step refresh.
 | Compliance tab | Requirement rows: attach (existing file or upload in place), waive/unwaive, inline rule edits, add via AddDocumentModal, one-click standard checklist on empty, AI verification chips, per-row email |
 | Documents tab | Document list with verification chips; classified upload dialog; download; print closing checklist; full DocumentsModal manager mount; per-row Ask AI |
 | Tasks tab | Grouped sections; colored status selector (Pending/In progress/Completed/Skipped); basis chips; auto-email toggle (eligibility = target resolves to a captured party email); task email flow; Add Task modal; rule editor for due dates; related-requirement links; AI-handled tasks surfaced honestly |
-| People tab | Representation-aware party groups; add/edit via AddContactModal with prefill; tel: links; compose email; per-row Ask AI; Client Q&A drawer; Assign team; Manage client access; Deal fees section with edit dialog |
+| Contacts tab | Representation-aware party groups; add/edit via AddContactModal with prefill; tel: links; compose email; per-row Ask AI; Client Q&A drawer; Assign team; Manage client access; Deal fees section with edit dialog |
 | Activity tab | History audit feed inline; Automation lens (what ran without a click, with Undo); Communications panel mount |
 | Email tab | Outbox-first AI drafts (nothing sends without approval), send-all-ready, inbound thread, compose, links to /ai-emails |
 
@@ -249,19 +249,19 @@ Disposition legend:
 | A2 Expand drawer | n/a | RETIRE, replaced by navigate + optional peek (§8.2, decision D1) |
 | A3 Pills/badges | header stage pill | FACE (list triage value) |
 | A4 AI next-step banner + CTA | **not rendered** (header block carries `ai_next_step` unused) | GAP G2 + FACE (banner stays on card; CTA becomes a deep link) |
-| A5 Primary contact | People tab | FACE (read-only) |
+| A5 Primary contact | Contacts tab | FACE (read-only) |
 | A6 Milestone bar | Timeline tab (richer) | FACE (Jake's comp) |
 | A7 Docs/Tasks badges | Documents/Tasks tabs | FACE as deep links, modal opener retires |
 | A8 Stats (days/overdue/price) | **header shows % complete only**; data already in plan header | GAP G1 (compact header stats) + FACE |
-| A9 Assignee chip | People tab (Assign team) | FACE |
+| A9 Assignee chip | Contacts tab (Assign team) | FACE |
 | B1 Task sections + complete toggle | Tasks tab | COVERED (peek MAY keep quick-complete, decision D2) |
 | B2 Task email flow | Tasks tab | COVERED |
 | B3 Tasks full-view modal | Tasks tab IS the full view | COVERED, `TasksFullViewModal` retires |
 | B4 Add Task | Tasks tab (same modal) | COVERED |
 | B5 Key Dates quick edit (7 fields) | **not rendered anywhere** (`tracking_dates` unused; card edit bypasses cascade) | GAP G3 (tracking rail on Timeline; closing/possession via cascade) |
 | B6 Sync deadlines | Timeline tab | COVERED |
-| B7 Contact groups + add | People tab | COVERED |
-| B8 Assign team | People tab | COVERED |
+| B7 Contact groups + add | Contacts tab | COVERED |
+| B8 Assign team | Contacts tab | COVERED |
 | B9 Invoices & Payments panel + create | **absent** | GAP G4 (Billing tab) |
 | B10 AI suggestions strip | Agent pane owns suggestions | RETIRE (heuristic chips; the agent pane is the strictly better surface) |
 | C1 Open workspace | n/a | FACE |
@@ -269,8 +269,8 @@ Disposition legend:
 | C3 Print checklist | Documents tab | COVERED (also added to header overflow, §6.5) |
 | C4 History panel | Activity tab (inline, richer) | COVERED, `HistoryPanel` retires |
 | C5 Communications panel | Activity tab (mounts the same panel) | COVERED |
-| C6 Client access | People tab | COVERED |
-| C7 Client Q&A + unanswered dot | People tab has the drawer; **no unanswered dot** | GAP G5 (dot on People trigger + card face chip) |
+| C6 Client access | Contacts tab | COVERED |
+| C7 Client Q&A + unanswered dot | Contacts tab has the drawer; **no unanswered dot** | GAP G5 (dot on Contacts trigger + card face chip) |
 | C8 Invoice deal | with G4 | COVERED after G4 |
 | C9 Delete transaction | **absent** | GAP G6 (header overflow menu) |
 | Exports, filters, sort, search, team filter, AdSlot, AskAiFab | portfolio-level | LIST |
@@ -385,17 +385,17 @@ invoice capability sees the list but no Create button.
 
 ### 6.5 G5: Client Q&A unanswered signal
 
-- People tab: amber dot on the "Client Q&A" button when this deal's client
+- Contacts tab: amber dot on the "Client Q&A" button when this deal's client
   has an unanswered question. Data: reuse `useClientThreadSummary` (one
   cheap tenant-wide call, already cached for the list page) and filter by
   this transaction id. No backend change.
-- Deep-link params on the People tab: `?tab=people&qa=1` auto-opens the
-  Client Q&A drawer; `?tab=people&access=1` auto-opens Manage client
+- Deep-link params on the Contacts tab: `?tab=contacts&qa=1` auto-opens the
+  Client Q&A drawer; `?tab=contacts&access=1` auto-opens Manage client
   access. One-shot: strip the param after opening (mirror the list page's
   `clientqa`/`clientaccess` handling). These params are what §7 retargets
   the Clients-hub links to.
 
-Accept: ask a question as the portal client, open the deal as staff: People
+Accept: ask a question as the portal client, open the deal as staff: Contacts
 tab button carries the dot; the Clients-hub "Q&A" button lands directly in
 the open drawer.
 
@@ -485,7 +485,7 @@ badges, stat cluster (days to close / overdue / price). Changes:
    page stops mounting TaskEmailFlow.
 4. **Client-question chip.** When the deal has an unanswered client
    question, an amber "Client question" why-badge appears and deep-links to
-   `?tab=people&qa=1` (replaces the footer dot).
+   `?tab=contacts&qa=1` (replaces the footer dot).
 
 ### 8.2 The peek row (replaces the drawer)
 
@@ -499,7 +499,7 @@ a 3-column workspace clone:
   action in this product).
 - **Counts line**: open tasks, docs, missing docs.
 - **"Open workspace" primary button** plus a lucide `MoreVertical` kebab
-  with: Tasks, Documents, People, Billing (deep links), Print checklist,
+  with: Tasks, Documents, Contacts, Billing (deep links), Print checklist,
   and Delete… (TeamLead/Admin, red, confirm). All kebab items are either
   navigation or the two whole-deal actions; nothing mounts a form.
 
@@ -646,7 +646,7 @@ NEW click path. Sample rows:
 | Change Closing on the card | Open the deal, Timeline: Closing chip shows a preview of everything that moves before I apply |
 | Click 💳 Invoice on the card | Open the deal, Billing tab, Create Invoice |
 | Click 🗑 Delete on the card | Open the deal, "⋯" menu, Delete transaction |
-| Click 💬 Client Q&A | Amber "Client question" chip on the card, or People tab |
+| Click 💬 Client Q&A | Amber "Client question" chip on the card, or Contacts tab |
 
 ### 10.2 Regression scripts
 
@@ -654,7 +654,7 @@ NEW click path. Sample rows:
    the right workspace tab with the right row flashed; one legacy
    `?expand=` URL redirects.
 2. **Role gates**: Agent / TC / TeamLead / Admin each walk the kebab, the
-   header overflow, Billing, and People: only permitted actions render
+   header overflow, Billing, and Contacts: only permitted actions render
    (matrix in the guide). Attorney still gets the Matter Workspace.
 3. **Mobile pass** (390 px): card tap opens the workspace; list chrome
    usable; workspace tabs scroll.
@@ -819,7 +819,7 @@ Jake's §8.3 approval gate.
 - `components/workspace/BillingTab.tsx` — new (G4), read for all internal
   roles, Create gated on `canCreateInvoice`.
 - `components/workspace/TimelineTab.tsx` — mounts the tracking rail (G3).
-- `components/workspace/PeopleTab.tsx` — unanswered-question dot and the
+- `components/workspace/ContactsTab.tsx` — unanswered-question dot and the
   `?qa=1` / `?access=1` one-shot deep links (G5).
 - `pages/transactions/TransactionWorkspacePage.tsx` — Billing tab, header
   stats/strip/overflow, delete flow with `useConfirm`, TaskEmailFlow mount.
@@ -904,7 +904,7 @@ needed them whether or not the card kept its drawer:
   nowhere, and closing/possession now route through the cascade there.
 - **Header stats + next-step strip** — the data was already in the aggregate.
 - **Delete + Print in a "⋯" menu** — the workspace could not delete a deal.
-- **Client-Q&A dot and the `?qa=1` / `?access=1` deep links on People.**
+- **Client-Q&A dot and the `?qa=1` / `?access=1` deep links on Contacts.**
 - **`ai_next_step.task_id` + `task_label`** on the plan header (backend).
 - **`workspaceUrl()` and the 19 retargeted producers** — a link that is about
   one deal should open that deal's page. `?expand=` still works for the list.
@@ -918,7 +918,7 @@ Standard record-detail shape, verified by screenshot before being called done
 | --- | --- |
 | AI pane fixed at 55% of the page, open by default | A 400px panel docked right, **closed by default**, opened from a header "Ask AI" button, remembered per user |
 | Sections inside a bordered card, inside a grid, inside a padded body | ONE content column (max 1180px) on the page background; tabs live on the header surface |
-| Landed on Timeline — a plan editor before any orientation | Lands on **Overview**: Needs you · Key dates · Progress · People, each handing off to its tab |
+| Landed on Timeline — a plan editor before any orientation | Lands on **Overview**: Needs you · Key dates · Progress · Contacts, each handing off to its tab |
 | Nine tabs including Compliance | Seven (+Email/Agent with the flag). Compliance became the **Checklist view of Documents**; `?tab=compliance` still resolves |
 | Header: breadcrumb, identity, stats, posture, next-step strip stacked | Breadcrumb, identity + stage, one facts line, posture, then tabs; the next action moved into the body where the eye lands |
 

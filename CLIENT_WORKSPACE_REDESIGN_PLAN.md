@@ -6,12 +6,12 @@ represented-client portal (shipped per `CLIENT_WORKSPACE_PLAN.md` rev 1, 2026-05
 and the FSBO/Attorney sibling builds.*
 
 > **STATUS: IMPLEMENTED 2026-05-30 (this plan).** Decisions taken: **D1** new
-> `/client/home` landing + nav `Home · Timeline · Documents · Payments · Agent Info`
-> (comp's Next Steps/Updates folded into Home cards); **D2** additive `home` block
+> `/client/home` landing; **D2** additive `home` block
 > on `GET /api/v1/dashboard/client` (no new endpoint); **D3** "What Velvet Is
-> Handling" derived from real deal state; **D4** "Ask Velvet" reuses the existing
-> two-way `is_client_visible` thread (no new LLM — an AI answerer remains a
-> separate slice); **D5** Recent Updates from client-visible comms; **D6** warm
+> Handling" derived from real deal state; **D4** "Ask Velvet" / now **Ask your team**
+> reuses the existing two-way `is_client_visible` thread (no new LLM — an AI
+> answerer remains a separate slice); **D5** Recent Updates from client-visible
+> events (implemented in the 2026-08-17 operational rebuild); **D6** warm
 > concierge look kept for Home via named `concierge-*` Tailwind tokens.
 >
 > **rev 2 (2026-05-30) — D7 REVERSED per Jake's review.** Jake wants a *pixel-exact*
@@ -20,18 +20,11 @@ and the FSBO/Attorney sibling builds.*
 > navy (`concierge-navy`) sidebar with VE branding + `Home · Next Steps · Timeline
 > · Documents · Updates` nav + bottom user chip, the desktop topbar (Message Agent
 > / View Timeline / Closing Day Info, on the Home), and the mobile off-canvas
-> drawer + 5-slot bottom nav. The Client-only routes (`/client/home`,
-> `/client/transactions`, `/client/documents`, `/client/milestones`,
-> `/client/agent`) are mounted under this layout in `App.tsx`, **outside**
-> `AppLayout`. "Next Steps"/"Updates" scroll to the Next Best Action / Ask Velvet
-> sections on Home; Timeline→milestones, Documents→documents are real pages.
-> Backend: 8 pure projections in `client_workspace.py` + a `ClientHome`
-> schema, 12 new pytest cases (52 client tests green). Frontend: `ClientHomePage`
-> + 8 decomposed cards under `components/client/home/`; `tsc`, `eslint`, and
-> `vite build` clean. **Scope note (boundary):** the represented-client document
-> surface stays own-uploads-scoped, so "Documents Needing Attention" surfaces the
-> client's own uploads bounced back for review / out for signature — not
-> agent-internal documents (kept the document boundary unchanged).
+> drawer + 5-slot bottom nav.
+>
+> **2026-08-17 operational rebuild — document boundary changed.** Represented
+> clients now see own uploads **or** `documents.is_client_visible` packets staff
+> shared (O1 in `CLIENT_PORTAL_OPERATIONAL_REBUILD_PLAN.md`). D4 is still no LLM.
 
 > **What this is.** Jake had Codex generate a brand-new, "light-hearted and warm"
 > Client landing screen (`VelvetElvesClientHomeScreen.tsx`, 700 lines, all mock

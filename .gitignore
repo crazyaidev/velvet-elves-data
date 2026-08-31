@@ -41,6 +41,16 @@ logs/
 *.swp
 *.swo
 
+# CASA AL1 scan dumps (keep configs + summaries; drop crawler output)
+casa_al1_evidence/**/__MACOSX/
+casa_al1_evidence/**/*.csv
+casa_al1_evidence/**/*.xml
+casa_al1_evidence/**/zap-report*.html
+casa_al1_evidence/tools/
+casa_al1_evidence/**/dast/
+casa_al1_evidence/**/*.zip
+casa_al1_evidence/**/extracted/
+
 # OS files
 .DS_Store
 Thumbs.db
