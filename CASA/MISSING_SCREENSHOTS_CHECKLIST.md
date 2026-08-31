@@ -46,8 +46,8 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 
 | Pri | ID | Missing shot | Who | Folder count now |
 | --- | --- | --- | --- | ---: |
-| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Login log sample | Owner (CloudWatch) | 4 |
-| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Payment log sample | Owner (CloudWatch or Stripe) | 4 |
+| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Login log sample | Owner — **done 31 Aug** | 5 |
+| P0 | [6.5.1](#651--do-not-log-credentials-or-payment-details) | Payment log sample | Owner (CloudWatch or Stripe) | 5 |
 | P1 | [6.4.1](#641--subdomain-takeover) | Route 53 hosted zone | Owner — **done 31 Aug** | 5 |
 | P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner | 3 |
 | P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
@@ -330,7 +330,7 @@ Log group: `/ecs/velvet-elves/stage/backend` (prefer) or `/ecs/velvet-elves/prod
 **Must not show:** password, JWT, MFA secret.  
 **Save as:** `tac_images/6.5.1/CASA_6_5_1_login_log.png`
 
-- [ ] Login log sample PNG
+- [x] Login log sample PNG (`CASA_6_5_1_login_log.png`)
 
 ### B. Payment log
 
@@ -346,7 +346,7 @@ Log group: `/ecs/velvet-elves/stage/backend` (prefer) or `/ecs/velvet-elves/prod
 
 - [ ] Payment log sample PNG
 
-After both exist: edit `CASA_PORTAL_PACK.md` 6.5.1 **Missing** and the portal comment so they no longer say the samples were not obtained.
+After the payment sample exists: edit `CASA_PORTAL_PACK.md` 6.5.1 **Missing** and the portal comment so they no longer say the payment sample was not obtained.
 
 ---
 

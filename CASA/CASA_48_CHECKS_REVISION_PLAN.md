@@ -190,6 +190,6 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 43 | 6.2.1 | Packed 31 Aug (prod docs 404; staging docs 200; ECS APP_DEBUG=false) | CASA_6_2_1 | [ ] |
 | 44 | 6.3.1 | Packed 31 Aug (foreign Origin /users/me 401) | CASA_6_3_1 | [ ] |
 | 45 | 6.4.1 | Packed 31 Aug (live DNS + Route 53 app/api/help to CloudFront/ALB) | CASA_6_4_1 | [ ] |
-| 46 | 6.5.1 | Packed 31 Aug (code mask). CloudWatch login/payment logs NOT captured | CASA_6_5_1 | [ ] |
+| 46 | 6.5.1 | Packed 31 Aug (code mask + staging CloudWatch login). Payment log NOT captured | CASA_6_5_1 | [ ] |
 | 47 | 6.6.1 | Packed 31 Aug (token keys gone after Log Out; return_location remains) | CASA_6_6_1 | [ ] |
 | 48 | 6.7.1 | Packed 31 Aug (Secrets Manager + Fernet). AWS console NOT captured | CASA_6_7_1 | [ ] |

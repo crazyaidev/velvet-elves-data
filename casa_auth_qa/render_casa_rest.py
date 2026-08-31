@@ -354,8 +354,8 @@ Route 53 console: not captured.""",
         [
             ("Source", "ADA AL1 and AL2: written description, a login log sample, and a payment log sample if applicable. Session tokens in logs only as irreversible hashes."),
             ("Code", "Login takes the password in the POST body; handlers do not log it. Gmail paths mask emails (ab***@domain). JSON logs carry request_id, not Authorization. Payment card data is Stripe-hosted; we store Stripe ids, not PAN/CVV."),
-            ("Obtained", "Write-up and code PNGs; _mask_email snippet."),
-            ("Not obtained", "A CloudWatch (or other sink) sample captured during a real login. A sample captured during a real payment. AWS console is owner-captured. Do not claim those samples exist in this folder."),
+            ("Obtained", "Write-up and code PNGs; _mask_email snippet; staging CloudWatch login sample (INFO Login user id plus request_id; no password field)."),
+            ("Not obtained", "A CloudWatch (or other sink) sample captured during a real payment. Cards stay on Stripe Checkout; we store Stripe ids, not PAN/CVV."),
         ],
     )
     save_page2(
@@ -364,21 +364,23 @@ Route 53 console: not captured.""",
         "6.5.1 AL1 verification mapping",
         [
             ("Written description", "This page plus M9g_logging.md."),
-            ("Login log sample", "NOT captured from CloudWatch this session."),
+            ("Login log sample", "Staging CloudWatch /ecs/velvet-elves/stage/backend 31 Aug 2026: INFO Login user id=<uuid> plus request_id. No password, no Authorization."),
             ("Payment log sample", "NOT captured. Cards are on Stripe Checkout."),
         ],
-        "Code masks emails and does not log passwords or PAN. Live login and payment log extracts from CloudWatch were not obtained.",
+        "Code masks emails and does not log passwords or PAN. Staging CloudWatch login extract obtained 31 Aug 2026. A payment log extract was not obtained.",
     )
     save_code(
         d,
         "CASA_6_5_1_logs",
-        "6.5.1 Email mask; no password logger",
+        "6.5.1 Email mask; login logs user id only",
         """# app/services/email/gmail_provider.py
 def _mask_email(value):
     local_mask = local[:2] + '***'
     return f'{local_mask}@{domain}'
 
-# Login: OAuth2 password form. Password is not written to the logger.
+# app/services/auth_service.py
+logger.info("Login user id=%s", supabase_user_id)
+# Password is not written to the logger.
 # Stripe: checkout_url / session ids, not PAN/CVV.""",
     )
 

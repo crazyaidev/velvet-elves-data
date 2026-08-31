@@ -71,7 +71,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 43 | 6.2.1 | Debug off in production | 6 | pack 6.2.1 |
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 5 | pack 6.4.1 |
-| 46 | 6.5.1 | No credential logs | 4 | pack 6.5.1 — log samples missing |
+| 46 | 6.5.1 | No credential logs | 5 | pack 6.5.1 — payment log missing |
 | 47 | 6.6.1 | Logout clears storage | 5 | pack 6.6.1 |
 | 48 | 6.7.1 | Server secrets | 3 | pack 6.7.1 — no AWS console |
 
@@ -1565,23 +1565,24 @@ Live DNS on 31 Aug 2026: app.velvetelves.com and app.stage.velvetelves.com resol
 
 **ADA:** Written description PLUS a login log sample PLUS a payment log sample.
 
-**Claimed:** Code does not log passwords; emails masked; Stripe holds PAN.
+**Claimed:** Code does not log passwords; emails masked; Stripe holds PAN. Staging CloudWatch login event logs user id + request_id only.
 
-**Missing (ADA-named):** CloudWatch (or other sink) sample from a real login. Sample from a real payment. These were NOT obtained.
+**Missing (ADA-named):** Sample from a real payment. Login sample is obtained.
 
 ### Images
 
 | File | Description |
 | --- | --- |
-| [`tac_images/6.5.1/CASA_6_5_1_logs_page1.png`](tac_images/6.5.1/CASA_6_5_1_logs_page1.png) | Write-up; states log samples missing |
+| [`tac_images/6.5.1/CASA_6_5_1_logs_page1.png`](tac_images/6.5.1/CASA_6_5_1_logs_page1.png) | Write-up |
 | [`tac_images/6.5.1/CASA_6_5_1_logs_page2.png`](tac_images/6.5.1/CASA_6_5_1_logs_page2.png) | AL1 mapping |
-| [`tac_images/6.5.1/CASA_6_5_1_logs_code.png`](tac_images/6.5.1/CASA_6_5_1_logs_code.png) | _mask_email |
-| [`tac_images/6.5.1/CASA_6_5_1_mask.png`](tac_images/6.5.1/CASA_6_5_1_mask.png) | Mask helper only, not CloudWatch |
+| [`tac_images/6.5.1/CASA_6_5_1_logs_code.png`](tac_images/6.5.1/CASA_6_5_1_logs_code.png) | _mask_email; Login user id logger |
+| [`tac_images/6.5.1/CASA_6_5_1_mask.png`](tac_images/6.5.1/CASA_6_5_1_mask.png) | Mask helper |
+| [`tac_images/6.5.1/CASA_6_5_1_login_log.png`](tac_images/6.5.1/CASA_6_5_1_login_log.png) | Staging Insights: Login user id, no password |
 
 ### Portal comment
 
 ```
-Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. A CloudWatch (or other sink) extract captured during a live login was not obtained. A payment-process log extract was not obtained.
+Login passwords are not written to the application logger. Gmail paths mask emails (local-part prefix plus ***). JSON logs include a request id, not the Authorization header. Card data is collected on Stripe Checkout; we store Stripe ids, not PAN or CVV. Staging CloudWatch log group /ecs/velvet-elves/stage/backend on 31 Aug 2026 recorded INFO Login user id=<uuid> with a request_id; the event has no password field and no Authorization header. A payment-process log extract was not obtained.
 ```
 
 ---
