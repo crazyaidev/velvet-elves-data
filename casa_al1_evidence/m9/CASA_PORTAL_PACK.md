@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -45,6 +45,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 18 | 3.1.1 | Least privilege access control on a trusted service layer | 5 | `CASA_3_1_1_least_privilege.md` |
 | 19 | 3.1.2 | Users cannot manipulate access-control attributes | 5 | `CASA_3_1_2_policy_attrs.md` |
 | 20 | 3.1.3 | Access controls fail securely | 5 | `CASA_3_1_3_fail_secure.md` |
+| 21 | 3.1.4 | Sensitive resources protected against IDOR | 5 | `CASA_3_1_4_idor.md` |
 
 ---
 
@@ -722,6 +723,39 @@ Access control fails closed. Missing Authorization returns 401. An invalid JWT r
 
 ---
 
+## 3.1.4 — Sensitive resources protected against IDOR
+
+**ADA:** protect sensitive resources against IDOR on create/read/update/delete (ASVS 4.2.1). AL1: list APIs that take a user-supplied URL or parameter ID, and describe how they are protected. Verification: a process is in place to mitigate IDOR.
+
+**Claimed controls**
+
+- Path IDs include `/users/{id}`, `/tenants/{id}`, `/transactions/{id}` (and nested deal routes), `/documents/{id}`, `/invoices/{id}`, `/payments/{id}`, `/tasks/{id}`, `/teams/{id}`, `/audit-logs/{type}/{id}`, and `/platform/.../{id}`. Lists are tenant-scoped.
+- After JWT verification the API loads the row and calls `require_tenant_access` (**403** other tenant). Deals also use `require_transaction_access` (Agent must be creator or assigned). Tenant Admin is not cross-tenant.
+- Cross-owner FSBO and unrelated documents often **404**. Audit entity reads filter `current_user.tenant_id`.
+- Staging 31 Aug 2026: unsigned GET of a placeholder UUID on `/transactions`, `/users`, `/tenants`, `/documents`, `/invoices` → **401**. No other tenant was queried.
+
+**Do not claim:** a live authenticated two-tenant IDOR replay this session; that ZAP ran WSTG-ATHZ-04; that every object route uses `require_tenant_access` (`GET /contacts/{id}` currently skips the tenant deny when `role == Admin`); RLS as the primary control.
+
+**Helpers:** `casa_auth_qa/render_casa_314_pages.py`, `casa_314_deny.py`. Do **not** attach `/login`. Do **not** register a staging user. Do **not** query another tenant.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.1.4/CASA_3_1_4_page1.png`](tac_images/3.1.4/CASA_3_1_4_page1.png) | Written evidence page 1 of 2. ID-parameter API families; IDOR process; staging unsigned 401. |
+| [`tac_images/3.1.4/CASA_3_1_4_page2.png`](tac_images/3.1.4/CASA_3_1_4_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.1.4/CASA_3_1_4_code.png`](tac_images/3.1.4/CASA_3_1_4_code.png) | require_transaction_access; GET /users/{id} tenant check; audit tenant filter. |
+| [`tac_images/3.1.4/CASA_3_1_4_tests.png`](tac_images/3.1.4/CASA_3_1_4_tests.png) | Named isolation tests (403/404/empty). |
+| [`tac_images/3.1.4/CASA_3_1_4_deny.png`](tac_images/3.1.4/CASA_3_1_4_deny.png) | Staging unsigned GET of placeholder UUIDs on five ID paths → 401. |
+
+### Portal comment
+
+```
+User-supplied object IDs appear in paths such as /users/{id}, /tenants/{id}, /transactions/{id}, /documents/{id}, /invoices/{id}, /tasks/{id}, /teams/{id}, and /audit-logs/{type}/{id}. Knowing a UUID is not enough. After JWT verification the API loads the row and checks tenant (require_tenant_access) and, for deals, assignment (require_transaction_access). Lists are tenant-scoped. A tenant Admin cannot read or change another org's tenant or users (403). Cross-owner FSBO and unrelated document reads return 404. Staging unsigned GET of those ID paths with a placeholder UUID returns 401.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -748,5 +782,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.1 | `python render_casa_311_pages.py` then `python casa_311_deny.py`. Do **not** attach `/login`. Do **not** query another tenant. |
 | 3.1.2 | `python render_casa_312_pages.py` then `python casa_312_ignore.py`. Do **not** attach `/login`. Do **not** register a staging user to prove tenant_id ignore. |
 | 3.1.3 | `python render_casa_313_pages.py` then `python casa_313_fail.py`. Do **not** attach `/login`. Do **not** call the tick with a valid secret. |
+| 3.1.4 | `python render_casa_314_pages.py` then `python casa_314_deny.py`. Do **not** attach `/login`. Do **not** register a staging user. Do **not** query another tenant. |
 
 Eyeball every PNG for cut-off text before re-upload.
