@@ -31,17 +31,19 @@ Staging still serves `/api/docs` (OpenAPI UI). That is a documented API page, no
 | API | `a9d78f05` |
 | Authenticated API | `33afa2aa` |
 
-`DAST_SUMMARY.md` (21 Aug 2026) alert lists did **not** include Directory Browsing (plugin 0). Do not recapture ZAP UI or the AWS console.
+`DAST_SUMMARY.md` (21 Aug 2026) alert lists did **not** include Directory Browsing (plugin 0). Do not recapture ZAP UI.
+
+Production S3 `velvet-elves-prod-frontend-388482955098` (us-east-2, 31 Aug 2026): **Block all public access = On** (all four settings). See `CASA_3_1_6_s3_block.png`. CloudFront OAC console was not captured.
 
 ## Do not claim
 
 - That missing `/assets/*` files return 403 on staging (they return the SPA shell).
-- An AWS console / S3 listing screenshot (owner-captured if TAC asks).
+- A CloudFront OAC console screenshot (optional; not captured).
 - That Burp 6291712 ran.
 - HttpOnly cookies; MFA for all users.
 
 ## Portal comment
 
 ```
-Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin via OAC), not an Apache or nginx autoindex. Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / or an S3 ListBucketResult. The API does not mount static files; GET /, /api/v1/, and /static/ return JSON 404. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Directory Browsing. We did not run Burp 6291712.
+Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin via OAC), not an Apache or nginx autoindex. Production bucket velvet-elves-prod-frontend-388482955098 has Block all public access On. Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / or an S3 ListBucketResult. The API does not mount static files; GET /, /api/v1/, and /static/ return JSON 404. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Directory Browsing. We did not run Burp 6291712.
 ```

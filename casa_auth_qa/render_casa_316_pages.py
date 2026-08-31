@@ -112,7 +112,7 @@ def page1():
         y,
         [
             (
-                "The app is a Vite SPA on CloudFront with an S3 origin via Origin Access Control. There is no Apache or nginx autoindex. Default root is index.html. Extensionless routes rewrite to index.html. Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / and not an S3 ListBucketResult.",
+                "The app is a Vite SPA on CloudFront with an S3 origin via Origin Access Control. There is no Apache or nginx autoindex. Production bucket velvet-elves-prod-frontend-388482955098 has Block all public access On (all four settings). Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / and not an S3 ListBucketResult.",
                 F_BODY,
                 INK,
             ),
@@ -140,7 +140,7 @@ def page1():
         y,
         [
             (
-                "Official ADA ZAP scans SPA 10f54abf, API a9d78f05, and authenticated API 33afa2aa did not list Directory Browsing. We did not run Burp. We did not recapture ZAP UI or the AWS console.",
+                "Official ADA ZAP scans SPA 10f54abf, API a9d78f05, and authenticated API 33afa2aa did not list Directory Browsing. We did not run Burp. We did not recapture ZAP UI.",
                 F_BODY,
                 INK,
             ),
@@ -157,7 +157,7 @@ def page2():
     rows = [
         (
             "No directory listing on the SPA",
-            "Prefix GETs return the HTML shell, not Index of / or ListBucketResult.",
+            "Prefix GETs return the HTML shell, not Index of / or ListBucketResult. S3 Block all public access is On.",
             True,
         ),
         (
@@ -190,7 +190,7 @@ def page2():
         y,
         [
             (
-                "Velvet Elves does not expose directory browsing. The SPA is hashed CloudFront objects. The API returns JSON 404 for directory-like paths. Official ADA ZAP did not report Directory Browsing.",
+                "Velvet Elves does not expose directory browsing. The production frontend S3 bucket blocks all public access. The SPA is hashed CloudFront objects. The API returns JSON 404 for directory-like paths. Official ADA ZAP did not report Directory Browsing.",
                 F_BODY,
                 INK,
             ),

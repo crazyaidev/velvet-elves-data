@@ -60,7 +60,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API | 5 |
 | P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA | 5 |
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
-| P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner | 5 |
+| P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
 | P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner | 5 each |
 | P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner | 8 |
 | P3 | [2.2.3](#223--stateless-tokens-expire-within-24-hours) | Supabase JWT expiry (optional) | Owner — **done 31 Aug** | 6 |
@@ -99,22 +99,12 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 3.1.6 — Directory browsing disabled
 
-**Already packed:** staging SPA prefixes return the HTML shell; API prefixes return JSON 404.
+**Packed:** staging SPA prefixes return the HTML shell; API prefixes return JSON 404; production S3 **Block all public access On** (`CASA_3_1_6_s3_block.png`).
 
-**Still missing (optional):** AWS console proving S3 listing is not public.
+**Done 31 Aug 2026** for the required S3 Permissions shot. Do not recapture the AWS console. Do not claim missing `/assets/*` is 403 (it is the SPA shell). Optional leftover: CloudFront OAC for `app.velvetelves.com` — skip unless TAC asks.
 
-### Capture
-
-1. AWS Console → **S3** → production frontend bucket (`velvet-elves-prod-frontend-<account>`) → **Permissions**.
-2. Screenshot **Block public access** = on, and/or **Access** = not “Objects can be public”.
-3. Optional second frame: CloudFront distribution for `app.velvetelves.com` with **OAC** (not public S3 website).
-
-**Must show:** bucket name, public-access blocked or OAC.  
-**Must not show:** object listing of customer files, access keys.  
-**Save as:** `tac_images/3.1.6/CASA_3_1_6_s3_block.png`  
-**Who:** owner. Do not claim missing `/assets/*` is 403 (it is the SPA shell).
-
-- [ ] S3 / CloudFront listing-off PNG
+- [x] S3 listing-off PNG (`CASA_3_1_6_s3_block.png`)
+- [ ] CloudFront OAC PNG (optional)
 
 ---
 

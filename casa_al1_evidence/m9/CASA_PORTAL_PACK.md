@@ -48,7 +48,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 20 | 3.1.3 | Access controls fail securely | 5 | `CASA_3_1_3_fail_secure.md` |
 | 21 | 3.1.4 | Sensitive resources protected against IDOR | 5 | `CASA_3_1_4_idor.md` |
 | 22 | 3.1.5 | Anti-CSRF / anti-automation | 6 | `CASA_3_1_5_csrf.md` |
-| 23 | 3.1.6 | Directory browsing disabled | 5 | `CASA_3_1_6_directory.md` |
+| 23 | 3.1.6 | Directory browsing disabled | 6 | `CASA_3_1_6_directory.md` |
 | 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
 | 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
@@ -831,11 +831,12 @@ Authenticated APIs use Authorization Bearer, not a cookie session. Login returns
 **Claimed controls**
 
 - SPA is hashed Vite assets on CloudFront (S3 via OAC). Not Apache/nginx autoindex.
+- Production S3 `velvet-elves-prod-frontend-388482955098` (us-east-2, 31 Aug 2026, owner-captured): **Block all public access = On** (all four ACL/policy blocks).
 - Staging 31 Aug 2026: `GET /assets/`, `/static/`, and a missing hashed JS file return the **SPA HTML shell**, not `Index of /` or S3 `ListBucketResult`.
 - API does not mount `StaticFiles`. Staging `GET /`, `/api/v1/`, `/static/` → JSON **404**.
 - Official ZAP SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa` did not list Directory Browsing.
 
-**Do not claim:** missing `/assets/*` returns 403 on staging (it returns the SPA shell); an AWS console listing shot; that Burp 6291712 ran.
+**Do not claim:** missing `/assets/*` returns 403 on staging (it returns the SPA shell); a CloudFront OAC console shot (optional, not captured); that Burp 6291712 ran.
 
 **Helpers:** `casa_auth_qa/render_casa_316_pages.py`, `casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console.
 
@@ -843,16 +844,17 @@ Authenticated APIs use Authorization Bearer, not a cookie session. Login returns
 
 | File | Description |
 | --- | --- |
-| [`tac_images/3.1.6/CASA_3_1_6_page1.png`](tac_images/3.1.6/CASA_3_1_6_page1.png) | Written evidence page 1 of 2. CloudFront SPA; API JSON 404; ZAP. |
+| [`tac_images/3.1.6/CASA_3_1_6_page1.png`](tac_images/3.1.6/CASA_3_1_6_page1.png) | Written evidence page 1 of 2. CloudFront SPA; S3 Block public access; API JSON 404; ZAP. |
 | [`tac_images/3.1.6/CASA_3_1_6_page2.png`](tac_images/3.1.6/CASA_3_1_6_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
 | [`tac_images/3.1.6/CASA_3_1_6_code.png`](tac_images/3.1.6/CASA_3_1_6_code.png) | SPA rewrite function; API has no StaticFiles. |
 | [`tac_images/3.1.6/CASA_3_1_6_zap.png`](tac_images/3.1.6/CASA_3_1_6_zap.png) | Official ADA ZAP directory-browsing rule excerpt. Not a ZAP product screenshot. |
 | [`tac_images/3.1.6/CASA_3_1_6_nolist.png`](tac_images/3.1.6/CASA_3_1_6_nolist.png) | Staging SPA prefixes = HTML shell; API prefixes = JSON 404. |
+| [`tac_images/3.1.6/CASA_3_1_6_s3_block.png`](tac_images/3.1.6/CASA_3_1_6_s3_block.png) | Production S3 Permissions: `velvet-elves-prod-frontend-388482955098`, Block all public access **On**. No object listing. No access keys. |
 
 ### Portal comment
 
 ```
-Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin via OAC), not an Apache or nginx autoindex. Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / or an S3 ListBucketResult. The API does not mount static files; GET /, /api/v1/, and /static/ return JSON 404. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Directory Browsing. We did not run Burp 6291712.
+Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin via OAC), not an Apache or nginx autoindex. Production bucket velvet-elves-prod-frontend-388482955098 has Block all public access On. Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / or an S3 ListBucketResult. The API does not mount static files; GET /, /api/v1/, and /static/ return JSON 404. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Directory Browsing. We did not run Burp 6291712.
 ```
 
 ---
