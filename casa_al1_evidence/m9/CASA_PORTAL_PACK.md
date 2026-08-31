@@ -53,7 +53,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 25 | 3.2.2 | OAuth redirect_uri and state | 6 | `CASA_3_2_2_redirect_state.md` |
 | 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
 | 27 | 4.1.1 | TLS 1.2+ | 9 | `CASA_4_1_1_tls.md` |
-| 28 | 4.1.2 | Trusted TLS certificates | 8 | `CASA_4_1_2_certs.md` |
+| 28 | 4.1.2 | Trusted TLS certificates | 9 | `CASA_4_1_2_certs.md` |
 | 29 | 4.1.3 | No weak crypto on secrets | 6 | `CASA_4_1_3_crypto.md` |
 | 30 | 4.1.4 | Crypto fail securely | 6 | `CASA_4_1_4_fail_closed.md` |
 | 31 | 5.1.1 | HTTP parameter pollution | 5 | `CASA_5_1_1_hpp.md` |
@@ -1017,16 +1017,17 @@ The production SPA (app.velvetelves.com) and API (api.prod.velvetelves.com) term
 - SPA SAN includes `app.velvetelves.com` (CN is `app.stage.velvetelves.com`; one ACM cert covers both SPA names). API CN/SAN is `api.prod.velvetelves.com`.
 - Currently valid (SPA through 13 Jan 2027, API through 14 Jan 2027). Wrong SNI/name does not complete a trusted handshake.
 - Backend has no `verify=False` / `CERT_NONE`.
+- AWS ACM us-east-2 (31 Aug 2026, owner-captured): `api.prod.velvetelves.com` is **Amazon issued**, status **Issued**, **in use**, not after **14 Jan 2027**. DNS validation CNAME name/value redacted.
 
-**Do not claim:** a production-only SPA certificate; SSL Labs of outbound hosts; AWS ACM console shots; that the API is HTTPS-only on port 80.
+**Do not claim:** a production-only SPA certificate; SSL Labs of outbound hosts; an ACM console shot of the SPA/CloudFront cert (us-east-1, not captured); that the API is HTTPS-only on port 80.
 
-**Helpers:** `casa_auth_qa/render_casa_412_pages.py`, `casa_412_certs.py` (copies Qualys PNGs from 4.1.1).
+**Helpers:** `casa_auth_qa/render_casa_412_pages.py`, `casa_412_certs.py` (copies Qualys PNGs from 4.1.1). Do **not** recapture ssllabs.com or the ACM console.
 
 ### Images
 
 | File | Description |
 | --- | --- |
-| [`tac_images/4.1.2/CASA_4_1_2_page1.png`](tac_images/4.1.2/CASA_4_1_2_page1.png) | Written evidence page 1 of 2. Qualys A+, live ACM peer certs, no private CA. |
+| [`tac_images/4.1.2/CASA_4_1_2_page1.png`](tac_images/4.1.2/CASA_4_1_2_page1.png) | Written evidence page 1 of 2. Qualys A+, live ACM peer certs, ACM console. |
 | [`tac_images/4.1.2/CASA_4_1_2_page2.png`](tac_images/4.1.2/CASA_4_1_2_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
 | [`tac_images/4.1.2/CASA_4_1_2_code.png`](tac_images/4.1.2/CASA_4_1_2_code.png) | Live cert fields; no verify=False; ACM on CloudFront/ALB. |
 | [`tac_images/4.1.2/CASA_4_1_2_cert.png`](tac_images/4.1.2/CASA_4_1_2_cert.png) | Live production handshake: Amazon ACM, SAN match, currently valid, not self-signed. |
@@ -1034,11 +1035,12 @@ The production SPA (app.velvetelves.com) and API (api.prod.velvetelves.com) term
 | [`tac_images/4.1.2/CASA_4_1_2_ssllabs_app_chain.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_app_chain.png) | Qualys SPA chain: Amazon RSA 2048 M01, Amazon Root CA 1. |
 | [`tac_images/4.1.2/CASA_4_1_2_ssllabs_api.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_api.png) | Qualys: api.prod.velvetelves.com both endpoints A+. |
 | [`tac_images/4.1.2/CASA_4_1_2_ssllabs_api_chain.png`](tac_images/4.1.2/CASA_4_1_2_ssllabs_api_chain.png) | Qualys API chain: Amazon RSA 2048 M04, Amazon Root CA 1. |
+| [`tac_images/4.1.2/CASA_4_1_2_acm.png`](tac_images/4.1.2/CASA_4_1_2_acm.png) | ACM us-east-2: `api.prod.velvetelves.com` Amazon issued, Issued, in use, valid through 14 Jan 2027. CNAME values redacted. No private key. |
 
 ### Portal comment
 
 ```
-Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. The SPA certificate SAN includes app.velvetelves.com (CN is app.stage.velvetelves.com; one cert covers both SPA names). The API certificate CN and SAN are api.prod.velvetelves.com. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
+Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. The SPA certificate SAN includes app.velvetelves.com (CN is app.stage.velvetelves.com; one cert covers both SPA names). The API certificate CN and SAN are api.prod.velvetelves.com. AWS Certificate Manager in us-east-2 shows that API certificate as Amazon issued, status Issued, in use, valid through 14 January 2027. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
 ```
 
 ---
@@ -1623,7 +1625,7 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Prod UI: `node casa_331_prod_enroll_shots.mjs` (`QA_PASSWORD`). Folder is the upload set only. |
 | 4.1.1 | `python render_casa_411_pages.py` then `python casa_411_tls.py`. SSL Labs: `node casa_411_ssllabs.mjs app` then `node casa_411_ssllabs.mjs api`, then `python casa_411_caption_ssllabs.py` once. |
-| 4.1.2 | `python render_casa_412_pages.py` then `python casa_412_certs.py` (copies Qualys PNGs from 4.1.1; do not recapture ssllabs.com). |
+| 4.1.2 | `python render_casa_412_pages.py` then `python casa_412_certs.py` (copies Qualys PNGs from 4.1.1; do not recapture ssllabs.com or the ACM console). |
 | 4.1.3 | `python render_casa_413_pages.py` then `python casa_413_fernet.py`. Do **not** print or attach ENCRYPTION_KEY. |
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 | 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |

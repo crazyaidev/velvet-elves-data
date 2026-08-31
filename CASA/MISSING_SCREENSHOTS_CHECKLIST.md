@@ -62,7 +62,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
 | P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner — **done 31 Aug** | 6 each |
-| P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner | 8 |
+| P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner — **done 31 Aug** (API cert; SPA/CloudFront ACM optional leftover) | 9 |
 | P3 | [2.2.3](#223--stateless-tokens-expire-within-24-hours) | Supabase JWT expiry (optional) | Owner — **done 31 Aug** | 6 |
 | P3 | [Scanner UI](#scanner-ui--zap--burp-all-dast-rows) | ZAP / Burp product UI | Owner | — |
 
@@ -128,22 +128,12 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 4.1.2 — Trusted TLS certificates
 
-**Already packed:** Qualys A+ + live ACM peer cert (`CASA_4_1_2_cert.png`).
+**Packed:** Qualys A+ + live ACM peer cert (`CASA_4_1_2_cert.png`) + ACM console for the production API cert (`CASA_4_1_2_acm.png`).
 
-**Still missing (optional):** ACM console.
+**Done 31 Aug 2026** for the API ACM shot. Do not recapture ACM. Do not claim the API is HTTPS-only on port 80. Optional leftover: CloudFront SPA cert in **us-east-1** — skip unless TAC asks.
 
-### Capture
-
-1. AWS **us-east-2** (API ALB) and/or **us-east-1** (CloudFront certs often live in us-east-1) → **Certificate Manager**.
-2. Open the cert whose SAN includes `app.velvetelves.com` and/or `api.prod.velvetelves.com`.
-3. Screenshot: **Amazon issued**, status **Issued**, domain names, not expired. No private key (ACM never shows one).
-
-**Must show:** Amazon-issued, matching names, valid.  
-**Must not show:** unrelated account certs with customer apps if you can crop them.  
-**Save as:** `tac_images/4.1.2/CASA_4_1_2_acm.png`  
-Row already has **8** files; this is 9. Stay under 10.
-
-- [ ] ACM console PNG
+- [x] ACM console PNG (`CASA_4_1_2_acm.png`, `api.prod.velvetelves.com`)
+- [ ] SPA/CloudFront ACM PNG (optional, us-east-1)
 
 ---
 

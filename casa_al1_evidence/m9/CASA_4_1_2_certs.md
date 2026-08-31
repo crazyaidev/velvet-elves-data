@@ -28,16 +28,20 @@ The SPA certificate is one ACM cert covering staging and production SPA names. P
 
 Backend HTTPS clients do not set `verify=False` / `CERT_NONE`.
 
+## ACM console (31 Aug 2026)
+
+Owner-captured AWS Certificate Manager **us-east-2** for `api.prod.velvetelves.com`: type **Amazon issued**, status **Issued**, in use **Yes**, not after **14 January 2027**. DNS validation CNAME name and value are redacted. No private key (ACM does not show one). The SPA/CloudFront certificate (often us-east-1) was not captured.
+
 ## Do not claim
 
 - A dedicated production-only SPA certificate (SAN also includes `app.stage.velvetelves.com`).
 - SSL Labs grades of Supabase, Google, or other outbound hosts.
-- AWS ACM console screenshots.
+- An ACM console screenshot of the SPA certificate.
 - That the API is HTTPS-only on port 80 (see 4.1.1).
 - HttpOnly session cookies; MFA for all users.
 
 ## Portal comment
 
 ```
-Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. The SPA certificate SAN includes app.velvetelves.com (CN is app.stage.velvetelves.com; one cert covers both SPA names). The API certificate CN and SAN are api.prod.velvetelves.com. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
+Production TLS certificates are public Amazon ACM, not self-signed. Qualys SSL Labs on 31 Aug 2026 graded app.velvetelves.com and api.prod.velvetelves.com A+; the chain is Amazon RSA 2048 with Amazon Root CA 1. A live handshake with the OS trust store verified both hostnames. The SPA certificate SAN includes app.velvetelves.com (CN is app.stage.velvetelves.com; one cert covers both SPA names). The API certificate CN and SAN are api.prod.velvetelves.com. AWS Certificate Manager in us-east-2 shows that API certificate as Amazon issued, status Issued, in use, valid through 14 January 2027. Both leaves are currently valid. A hostname mismatch does not complete a trusted handshake.
 ```
