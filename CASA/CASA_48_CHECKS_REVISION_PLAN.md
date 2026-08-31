@@ -181,7 +181,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 34 | 5.1.4 | Packed 31 Aug (no Jinja; ZAP no SSTI plugin; health {{7*7}} ignored) | CASA_5_1_4 | [ ] |
 | 35 | 5.1.5 | Packed 31 Aug (assert_safe_url; unsigned 401; authed metadata 400) | CASA_5_1_5 | [ ] |
 | 36 | 5.1.6 | Packed 31 Aug (no XML parser; XML login rejected) | CASA_5_1_6 | [ ] |
-| 37 | 5.1.7 | Packed 31 Aug (XSS closed a9d78f05; CSP Mediums residual) | CASA_5_1_7 | [ ] |
+| 37 | 5.1.7 | Packed 31 Aug (XSS closed a9d78f05; stored name is text; CSP Mediums residual) | CASA_5_1_7 | [ ] |
 | 38 | 5.1.8 | Packed 31 Aug (auth SQLi High FP; unsigned 401) | CASA_5_1_8 | [ ] |
 | 39 | 5.1.9 | Packed 31 Aug (no subprocess; ZAP 90020 not in alerts) | CASA_5_1_9 | [ ] |
 | 40 | 5.1.10 | Packed 31 Aug (path-traversal High FP; ad click 404) | CASA_5_1_10 | [ ] |

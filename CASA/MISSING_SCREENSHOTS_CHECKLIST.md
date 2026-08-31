@@ -54,7 +54,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner | 5 |
 | P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner | 5 |
 | P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
-| P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA | 5 |
+| P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA — **done 31 Aug** | 6 |
 | P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API | 5 |
 | P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API | 4 |
 | P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API | 5 |
@@ -149,9 +149,9 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 
 ## 5.1.7 — XSS
 
-**Already packed:** Gmail callback does not echo a script tag (`CASA_5_1_7_callback.png`). CSP Mediums remain.
+**Already packed:** Gmail callback does not echo a script tag (`CASA_5_1_7_callback.png`). Staging contact `full_name` with a script-looking string rendered as text (`CASA_5_1_7_stored.png`); contact deleted (HTTP 204). CSP Mediums remain.
 
-**Still missing:** authenticated **stored** XSS UI (string stored, then rendered as text).
+**Still missing:** Burp XSS plugin UI only if TAC asks.
 
 ### Capture
 
@@ -164,8 +164,8 @@ Applies to: 2.3.1, 2.3.2, 2.3.4, 3.1.5, 3.1.6, 5.1.1–5.1.10, 6.2.1, 6.3.1.
 **Must not show:** JWT in DevTools, other tenants’ data, `/login`. Do not use production.  
 **Save as:** `tac_images/5.1.7/CASA_5_1_7_stored.png`
 
-- [ ] Stored-XSS escaped UI PNG
-- [ ] Name reverted on staging
+- [x] Stored-XSS escaped UI PNG
+- [x] Name reverted on staging
 
 ---
 

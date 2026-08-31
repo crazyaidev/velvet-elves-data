@@ -62,7 +62,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 34 | 5.1.4 | Template injection | 5 | pack 5.1.4 |
 | 35 | 5.1.5 | SSRF | 6 | pack 5.1.5 |
 | 36 | 5.1.6 | XML / XPath | 5 | pack 5.1.6 |
-| 37 | 5.1.7 | XSS | 5 | pack 5.1.7 |
+| 37 | 5.1.7 | XSS | 6 | pack 5.1.7 |
 | 38 | 5.1.8 | SQLi | 5 | pack 5.1.8 |
 | 39 | 5.1.9 | OS command injection | 4 | pack 5.1.9 |
 | 40 | 5.1.10 | LFI / RFI | 5 | pack 5.1.10 |
@@ -1298,9 +1298,13 @@ Official ADA ZAP scans did not report XXE, XPath, or XML injection (ZAP 90023 FA
 
 **ADA:** AL1 DAST. Burp 2097408 / 2097920 / 2097936-38 shall not be identified.
 
-**Claimed:** OAuth XSS closed on a9d78f05. Callback does not echo script tags. CSP Mediums compensating. Auth JSON XSS Low.
+**Claimed:** OAuth XSS closed on a9d78f05. Callback does not echo script tags. Staging contact `full_name` with a script-looking string renders as React text on `/contacts` (no alert dialog; 0 executable `alert(1)` script nodes). Contact deleted after the shot (HTTP 204). CSP Mediums compensating. Auth JSON XSS Low.
 
-**Missing:** Burp XSS plugins; authenticated stored-XSS UI shot.
+**Missing:** Burp XSS plugins.
+
+**Do not claim:** that Burp XSS plugins ran; that CSP Mediums are gone; that this one contact field covers every XSS sink; that production was tested.
+
+**Helpers:** `casa_auth_qa/casa_517_stored.mjs` then `python casa_517_caption.py` (`QA_PASSWORD`). Do **not** attach `/login`. Do **not** leave the contact on staging.
 
 ### Images
 
@@ -1311,11 +1315,12 @@ Official ADA ZAP scans did not report XXE, XPath, or XML injection (ZAP 90023 FA
 | [`tac_images/5.1.7/CASA_5_1_7_xss_code.png`](tac_images/5.1.7/CASA_5_1_7_xss_code.png) | html.escape callback |
 | [`tac_images/5.1.7/CASA_5_1_7_xss_zap.png`](tac_images/5.1.7/CASA_5_1_7_xss_zap.png) | ZAP XSS plugins |
 | [`tac_images/5.1.7/CASA_5_1_7_callback.png`](tac_images/5.1.7/CASA_5_1_7_callback.png) | Staging callback no script echo |
+| [`tac_images/5.1.7/CASA_5_1_7_stored.png`](tac_images/5.1.7/CASA_5_1_7_stored.png) | Staging contact name is text, not a running script |
 
 ### Portal comment
 
 ```
-Official unauth API ZAP a9d78f05 closed reflected XSS on OAuth callbacks (0 High). SPA 10f54abf was 0 High. Auth scan 33afa2aa reported persistent XSS in JSON at Low confidence; those responses are JSON, not HTML. CSP Mediums (img-src https:, style-src unsafe-inline) remain as compensating residuals. Staging GET gmail callback with a script in error does not put a script tag in the HTML. We did not run Burp XSS plugins 2097408 / 2097920 / 2097936.
+Official unauth API ZAP a9d78f05 closed reflected XSS on OAuth callbacks (0 High). SPA 10f54abf was 0 High. Auth scan 33afa2aa reported persistent XSS in JSON at Low confidence; those responses are JSON, not HTML. CSP Mediums (img-src https:, style-src unsafe-inline) remain as compensating residuals. Staging GET gmail callback with a script in error does not put a script tag in the HTML. Staging contact full_name with a script-looking string rendered as text on /contacts (no alert dialog). That contact was deleted after the shot. We did not run Burp XSS plugins 2097408 / 2097920 / 2097936.
 ```
 
 ---
@@ -1637,6 +1642,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 4.1.4 | `python render_casa_414_pages.py` then `python casa_414_fail.py`. Do **not** print ENCRYPTION_KEY or JWTs. |
 | 5.1.1 | `python render_casa_511_pages.py` then `python casa_511_hpp.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. |
 | 5.1.2 | `python render_casa_512_pages.py` then `python casa_512_deny.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or Google Cloud Console. Do **not** complete OAuth. |
-| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
+| 5.1.3–6.7.1 | `python render_casa_rest.py` then `python casa_rest_live.py`. 5.1.4 extra: `python casa_514_probe.py`. 5.1.7 extra: `node casa_517_stored.mjs` then `python casa_517_caption.py` (`QA_PASSWORD`; deletes the contact). Auth extras: `python casa_rest_auth_extra.py` then `node casa_661_storage.mjs` then `python casa_661_render.py` (`QA_PASSWORD`). Do **not** recapture ZAP, Burp, AWS, or CloudWatch. Do **not** print secrets. |
 
 Eyeball every PNG for cut-off text before re-upload.
