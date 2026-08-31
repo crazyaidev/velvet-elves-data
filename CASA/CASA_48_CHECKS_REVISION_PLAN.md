@@ -192,4 +192,4 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 45 | 6.4.1 | Packed 31 Aug (live DNS + Route 53 app/api/help to CloudFront/ALB) | CASA_6_4_1 | [ ] |
 | 46 | 6.5.1 | Packed 31 Aug (code mask + staging CloudWatch login + Stripe checkout/sessions 200) | CASA_6_5_1 | [ ] |
 | 47 | 6.6.1 | Packed 31 Aug (DevTools Application before/after Log Out; JWT values redacted) | CASA_6_6_1 | [ ] |
-| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager console /velvet-elves/prod/backend, rotation Disabled). CloudTrail NOT captured | CASA_6_7_1 | [ ] |
+| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager console + CloudTrail GetSecretValue; rotation Disabled) | CASA_6_7_1 | [ ] |

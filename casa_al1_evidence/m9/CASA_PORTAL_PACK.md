@@ -73,7 +73,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 45 | 6.4.1 | Subdomain takeover | 5 | pack 6.4.1 |
 | 46 | 6.5.1 | No credential logs | 7 | pack 6.5.1 |
 | 47 | 6.6.1 | Logout clears storage | 7 | pack 6.6.1 |
-| 48 | 6.7.1 | Server secrets | 5 | pack 6.7.1 — CloudTrail missing |
+| 48 | 6.7.1 | Server secrets | 6 | pack 6.7.1 |
 
 ---
 
@@ -1621,9 +1621,9 @@ The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage
 
 **ADA:** Written description plus source/screenshots of secrets management.
 
-**Claimed:** Secrets Manager for ENCRYPTION_KEY; Fernet for Google tokens; production fail-closed; Disconnect soft-deactivate. Console: `/velvet-elves/prod/backend`, KMS `aws/secretsmanager`, Retrieve secret value not used, rotation Disabled.
+**Claimed:** Secrets Manager for ENCRYPTION_KEY; Fernet for Google tokens; production fail-closed; Disconnect soft-deactivate. Console: `/velvet-elves/prod/backend`, KMS `aws/secretsmanager`, Retrieve secret value not used, rotation Disabled. CloudTrail Event history 31 Aug 2026: `GetSecretValue` on that secret ARN; SecretString not in the crop.
 
-**Missing:** CloudTrail secret-access log screenshot. No secret values attached (correct).
+**Missing:** none for ADA AL1 source/screenshots. No secret values attached (correct).
 
 ### Images
 
@@ -1634,11 +1634,12 @@ The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage
 | [`tac_images/6.7.1/CASA_6_7_1_secrets_code.png`](tac_images/6.7.1/CASA_6_7_1_secrets_code.png) | No secret values |
 | [`tac_images/6.7.1/CASA_6_7_1_sm.png`](tac_images/6.7.1/CASA_6_7_1_sm.png) | Secrets Manager overview; Retrieve not clicked |
 | [`tac_images/6.7.1/CASA_6_7_1_sm_rotation.png`](tac_images/6.7.1/CASA_6_7_1_sm_rotation.png) | Rotation Disabled |
+| [`tac_images/6.7.1/CASA_6_7_1_cloudtrail.png`](tac_images/6.7.1/CASA_6_7_1_cloudtrail.png) | Event history GetSecretValue; no SecretString |
 
 ### Portal comment
 
 ```
-API secrets including ENCRYPTION_KEY live in AWS Secrets Manager, not in git. Production fails to start if ENCRYPTION_KEY is missing. Google access and refresh tokens are Fernet-encrypted in the integrations table. Disconnect sets is_active false; ciphertext remains on the row (soft deactivate, not a wipe). The SPA does not hold those secrets. AWS Secrets Manager console on 31 Aug 2026 shows secret /velvet-elves/prod/backend in us-east-2, encryption key aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled. A CloudTrail GetSecretValue screenshot was not taken. No secret values are attached.
+API secrets including ENCRYPTION_KEY live in AWS Secrets Manager, not in git. Production fails to start if ENCRYPTION_KEY is missing. Google access and refresh tokens are Fernet-encrypted in the integrations table. Disconnect sets is_active false; ciphertext remains on the row (soft deactivate, not a wipe). The SPA does not hold those secrets. AWS Secrets Manager console on 31 Aug 2026 shows secret /velvet-elves/prod/backend in us-east-2, encryption key aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled. CloudTrail Event history the same day recorded GetSecretValue for that secret ARN; the captured event record does not include SecretString. No secret values are attached.
 ```
 
 ## Regeneration

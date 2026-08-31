@@ -426,8 +426,8 @@ logger.info("Login user id=%s", supabase_user_id)
             ("Source", "ADA AL1: written description plus source/screenshots of secrets management. Access control, crypto, monitoring."),
             ("Where secrets live", "AWS Secrets Manager for ENCRYPTION_KEY, Supabase JWT material, and other API env. Not in git. Production fails closed if ENCRYPTION_KEY is missing. Google tokens are Fernet-encrypted in integrations."),
             ("Console", "us-east-2 secret /velvet-elves/prod/backend, KMS aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled."),
+            ("Monitoring", "CloudTrail Event history 31 Aug 2026: GetSecretValue on that secret ARN. SecretString is not in the captured JSON."),
             ("Disconnect", "is_active=false. Encrypted tokens remain on the row (soft deactivate). Do not claim a token wipe."),
-            ("Not obtained", "CloudTrail GetSecretValue (or DescribeSecret) screenshot. No secret values are attached."),
         ],
     )
     save_page2(
@@ -437,7 +437,7 @@ logger.info("Login user id=%s", supabase_user_id)
         [
             ("Access control", "ECS task role reads the secret; not in the SPA."),
             ("Crypto", "Fernet for Google tokens; Secrets Manager for the key."),
-            ("Monitoring", "AWS CloudTrail exists for the account; a GetSecretValue event screenshot was not taken."),
+            ("Monitoring", "CloudTrail GetSecretValue event for /velvet-elves/prod/backend. No secret string in the screenshot."),
         ],
         "Server secrets are in AWS Secrets Manager secret /velvet-elves/prod/backend. Google tokens are Fernet-encrypted. Disconnect is soft deactivate. No secret values are in this folder.",
     )

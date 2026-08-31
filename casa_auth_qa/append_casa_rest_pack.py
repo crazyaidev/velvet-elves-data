@@ -405,9 +405,9 @@ The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage
 
 **ADA:** Written description plus source/screenshots of secrets management.
 
-**Claimed:** Secrets Manager for ENCRYPTION_KEY; Fernet for Google tokens; production fail-closed; Disconnect soft-deactivate. Console: `/velvet-elves/prod/backend`, KMS `aws/secretsmanager`, Retrieve secret value not used, rotation Disabled.
+**Claimed:** Secrets Manager for ENCRYPTION_KEY; Fernet for Google tokens; production fail-closed; Disconnect soft-deactivate. Console: `/velvet-elves/prod/backend`, KMS `aws/secretsmanager`, Retrieve secret value not used, rotation Disabled. CloudTrail Event history 31 Aug 2026: `GetSecretValue` on that secret ARN; SecretString not in the crop.
 
-**Missing:** CloudTrail secret-access log screenshot. No secret values attached (correct).
+**Missing:** none for ADA AL1 source/screenshots. No secret values attached (correct).
 
 ### Images
 
@@ -418,11 +418,12 @@ The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage
 | [`tac_images/6.7.1/CASA_6_7_1_secrets_code.png`](tac_images/6.7.1/CASA_6_7_1_secrets_code.png) | No secret values |
 | [`tac_images/6.7.1/CASA_6_7_1_sm.png`](tac_images/6.7.1/CASA_6_7_1_sm.png) | Secrets Manager overview; Retrieve not clicked |
 | [`tac_images/6.7.1/CASA_6_7_1_sm_rotation.png`](tac_images/6.7.1/CASA_6_7_1_sm_rotation.png) | Rotation Disabled |
+| [`tac_images/6.7.1/CASA_6_7_1_cloudtrail.png`](tac_images/6.7.1/CASA_6_7_1_cloudtrail.png) | Event history GetSecretValue; no SecretString |
 
 ### Portal comment
 
 ```
-API secrets including ENCRYPTION_KEY live in AWS Secrets Manager, not in git. Production fails to start if ENCRYPTION_KEY is missing. Google access and refresh tokens are Fernet-encrypted in the integrations table. Disconnect sets is_active false; ciphertext remains on the row (soft deactivate, not a wipe). The SPA does not hold those secrets. AWS Secrets Manager console on 31 Aug 2026 shows secret /velvet-elves/prod/backend in us-east-2, encryption key aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled. A CloudTrail GetSecretValue screenshot was not taken. No secret values are attached.
+API secrets including ENCRYPTION_KEY live in AWS Secrets Manager, not in git. Production fails to start if ENCRYPTION_KEY is missing. Google access and refresh tokens are Fernet-encrypted in the integrations table. Disconnect sets is_active false; ciphertext remains on the row (soft deactivate, not a wipe). The SPA does not hold those secrets. AWS Secrets Manager console on 31 Aug 2026 shows secret /velvet-elves/prod/backend in us-east-2, encryption key aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled. CloudTrail Event history the same day recorded GetSecretValue for that secret ARN; the captured event record does not include SecretString. No secret values are attached.
 ```
 '''
 
@@ -454,7 +455,7 @@ def main():
 | 45 | 6.4.1 | Subdomain takeover | 4 | pack 6.4.1 |
 | 46 | 6.5.1 | No credential logs | 7 | pack 6.5.1 |
 | 47 | 6.6.1 | Logout clears storage | 7 | pack 6.6.1 |
-| 48 | 6.7.1 | Server secrets | 5 | pack 6.7.1 — CloudTrail missing |
+| 48 | 6.7.1 | Server secrets | 6 | pack 6.7.1 |
 
 ---"""
     text = text.replace(
@@ -544,7 +545,7 @@ def main():
         ),
         (
             "| 48 | 6.7.1 server secrets | `M9d_token_storage.md` | Secrets in AWS Secrets Manager Google tokens Fernet encrypted Disconnect is soft deactivate |",
-            "| 48 | 6.7.1 server secrets | `tac_images/6.7.1/` — `CASA_6_7_1_secrets_page1.png`, `secrets_page2.png`, `secrets_code.png`, `sm.png`, `sm_rotation.png` | API secrets including ENCRYPTION_KEY live in AWS Secrets Manager, not in git. Production fails to start if ENCRYPTION_KEY is missing. Google access and refresh tokens are Fernet-encrypted in the integrations table. Disconnect sets is_active false; ciphertext remains on the row (soft deactivate, not a wipe). The SPA does not hold those secrets. AWS Secrets Manager console on 31 Aug 2026 shows secret /velvet-elves/prod/backend in us-east-2, encryption key aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled. A CloudTrail GetSecretValue screenshot was not taken. No secret values are attached. |",
+            "| 48 | 6.7.1 server secrets | `tac_images/6.7.1/` — `CASA_6_7_1_secrets_page1.png`, `secrets_page2.png`, `secrets_code.png`, `sm.png`, `sm_rotation.png`, `cloudtrail.png` | API secrets including ENCRYPTION_KEY live in AWS Secrets Manager, not in git. Production fails to start if ENCRYPTION_KEY is missing. Google access and refresh tokens are Fernet-encrypted in the integrations table. Disconnect sets is_active false; ciphertext remains on the row (soft deactivate, not a wipe). The SPA does not hold those secrets. AWS Secrets Manager console on 31 Aug 2026 shows secret /velvet-elves/prod/backend in us-east-2, encryption key aws/secretsmanager. Retrieve secret value was not used. Rotation is Disabled. CloudTrail Event history the same day recorded GetSecretValue for that secret ARN; the captured event record does not include SecretString. No secret values are attached. |",
         ),
     ]:
         if old not in tac:
@@ -571,7 +572,7 @@ def main():
         "| 45 | 6.4.1 | Verify S9 | M9a + S9 | [ ] |": "| 45 | 6.4.1 | Packed 31 Aug (live DNS). Route 53 console NOT captured | CASA_6_4_1 | [ ] |",
         "| 46 | 6.5.1 | Ready | M9g | [ ] |": "| 46 | 6.5.1 | Packed 31 Aug (code mask + staging CloudWatch login + Stripe checkout/sessions 200) | CASA_6_5_1 | [ ] |",
         "| 47 | 6.6.1 | Ready (verified 27 Aug) | comp | [ ] |": "| 47 | 6.6.1 | Packed 31 Aug (DevTools Application before/after Log Out; JWT values redacted) | CASA_6_6_1 | [ ] |",
-        "| 48 | 6.7.1 | Ready | M9d | [ ] |": "| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager console /velvet-elves/prod/backend, rotation Disabled). CloudTrail NOT captured | CASA_6_7_1 | [ ] |",
+        "| 48 | 6.7.1 | Ready | M9d | [ ] |": "| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager console + CloudTrail GetSecretValue; rotation Disabled) | CASA_6_7_1 | [ ] |",
     }
     for old, new in replacements.items():
         if old not in rev:
@@ -591,7 +592,7 @@ def main():
 - **6.4.1** — Packed live DNS. Route 53 console NOT captured.
 - **6.5.1** — Packed code mask + staging CloudWatch login (user id) + Stripe checkout-session POST/200 (no PAN).
 - **6.6.1** — Packed. Staging DevTools Application: token keys present then gone; return_location remains. JWT values redacted.
-- **6.7.1** — Packed write-up + Secrets Manager console `/velvet-elves/prod/backend` (no values; rotation Disabled). CloudTrail GetSecretValue NOT captured."""
+- **6.7.1** — Packed write-up + Secrets Manager console + CloudTrail GetSecretValue (no secret values; rotation Disabled)."""
     if old not in gap:
         print("GAP miss block")
     else:
