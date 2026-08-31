@@ -68,7 +68,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 40 | 5.1.10 | LFI / RFI | 6 | pack 5.1.10 |
 | 41 | 5.2.1 | Malicious uploads | 6 | pack 5.2.1 |
 | 42 | 6.1.1 | Dependency scan | 7 | pack 6.1.1 |
-| 43 | 6.2.1 | Debug off in production | 5 | pack 6.2.1 |
+| 43 | 6.2.1 | Debug off in production | 6 | pack 6.2.1 |
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 4 | pack 6.4.1 |
 | 46 | 6.5.1 | No credential logs | 4 | pack 6.5.1 — log samples missing |
@@ -1482,9 +1482,11 @@ Local pip-audit of backend requirements.txt on 31 Aug 2026 reported one finding:
 
 **ADA:** AL1 DAST. Burp 1050624 ASP.NET debugging.
 
-**Claimed:** Prod /api/docs /redoc /openapi.json 404. Staging docs 200. APP_DEBUG false in production.
+**Claimed:** Prod `/api/docs` `/redoc` `/openapi.json` **404**. Staging docs **200**. ECS task `velvet-elves-prod-backend` revision **52**: `APP_DEBUG=false`, `APP_ENV=production` (plain env). Secrets are `valueFrom` Secrets Manager ARNs, not plaintext.
 
-**Missing:** Burp 1050624 (N/A ASP.NET); env var console screenshot.
+**Missing:** Burp 1050624 (N/A ASP.NET).
+
+**Do not claim:** that Burp 1050624 ran; that secret **values** are shown (only ARNs).
 
 ### Images
 
@@ -1495,11 +1497,12 @@ Local pip-audit of backend requirements.txt on 31 Aug 2026 reported one finding:
 | [`tac_images/6.2.1/CASA_6_2_1_debug_code.png`](tac_images/6.2.1/CASA_6_2_1_debug_code.png) | docs off in prod |
 | [`tac_images/6.2.1/CASA_6_2_1_debug_zap.png`](tac_images/6.2.1/CASA_6_2_1_debug_zap.png) | ZAP 10023 |
 | [`tac_images/6.2.1/CASA_6_2_1_docs.png`](tac_images/6.2.1/CASA_6_2_1_docs.png) | Prod 404 / staging 200 |
+| [`tac_images/6.2.1/CASA_6_2_1_ecs_env.png`](tac_images/6.2.1/CASA_6_2_1_ecs_env.png) | Prod task rev 52: APP_DEBUG=false, APP_ENV=production |
 
 ### Portal comment
 
 ```
-Production FastAPI hides OpenAPI UI: GET https://api.prod.velvetelves.com/api/docs, /api/redoc, and /api/openapi.json are 404. Staging still serves /api/docs (200). APP_DEBUG must be false when APP_ENV=production. Official ZAP listed generic JSON 500 application-error as Low, not a debug console. We did not run Burp 1050624 (ASP.NET debugging); this app is FastAPI.
+Production FastAPI hides OpenAPI UI: GET https://api.prod.velvetelves.com/api/docs, /api/redoc, and /api/openapi.json are 404. Staging still serves /api/docs (200). ECS task definition velvet-elves-prod-backend revision 52 sets APP_DEBUG=false and APP_ENV=production as plain environment values. API keys and APP_SECRET_KEY are valueFrom AWS Secrets Manager ARNs, not plaintext in the task. Official ZAP listed generic JSON 500 application-error as Low, not a debug console. We did not run Burp 1050624 (ASP.NET debugging); this app is FastAPI.
 ```
 
 ---

@@ -52,7 +52,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P1 | [6.7.1](#671--server-side-secrets) | Secrets Manager console | Owner | 3 |
 | P1 | [6.7.1](#671--server-side-secrets) | CloudTrail secret-access | Owner | 3 |
 | P1 | [6.1.1](#611--no-known-exploitable-components) | Production image scan | Owner — **done 31 Aug** (linux/amd64 child of prod-latest) | 7 |
-| P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner | 5 |
+| P1 | [6.2.1](#621--debug-off-in-production) | ECS env (`APP_DEBUG`) | Owner — **done 31 Aug** | 6 |
 | P2 | [5.1.4](#514--template-injection) | Live SSTI probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA — **done 31 Aug** | 6 |
 | P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API — **done 31 Aug** | 6 |
@@ -252,9 +252,9 @@ Do not scan production. Do not write a new exploit.
 
 ## 6.1.1 — No known exploitable components
 
-**Already packed:** `npm audit --omit=dev` 0 vulns; `pip-audit` `ecdsa` 0.19.2 CVSS 7.4, no fix. Production linux/amd64 child of `prod-latest` ECR scan **Complete** 29 Aug 2026: **48 Critical, 174 High** (`CASA_6_1_1_ecr.png`). Index itself is not scannable (`CASA_6_1_1_ecr_index.png`).
+**Already packed:** `npm audit --omit=dev` 0 vulns; `pip-audit` `ecdsa` 0.19.2 CVSS 7.4, no fix. Production linux/amd64 child of `prod-latest` ECR scan **Complete** 29 Aug 2026: **48 Critical, 174 High** (`CASA_6_1_1_ecr.png`). Index itself is not scannable (`CASA_6_1_1_ecr_index.png`). ECS `velvet-elves-prod-backend` rev 52 runs `prod-9b0b8c4c…` (same companion tag as the index).
 
-**Still missing:** ECS task digest confirmation (optional). Do not recapture AWS unless TAC asks.
+**Still missing:** none for this capture. Do not recapture AWS unless TAC asks.
 
 ### Capture
 
@@ -268,15 +268,15 @@ Do not scan production. Do not write a new exploit.
 **Who:** owner. OWASP dependency-check is optional if ECR/Inspector is in frame.
 
 - [x] Production image scan PNG
-- [ ] (optional) Confirm ECS task uses that same digest
+- [x] (optional) Confirm ECS task uses that same digest
 
 ---
 
 ## 6.2.1 — Debug off in production
 
-**Already packed:** prod `/api/docs` `/redoc` `/openapi.json` **404**; staging docs **200**.
+**Already packed:** prod `/api/docs` `/redoc` `/openapi.json` **404**; staging docs **200**. ECS `velvet-elves-prod-backend` rev 52: `APP_DEBUG=false`, `APP_ENV=production` (`CASA_6_2_1_ecs_env.png`).
 
-**Still missing:** task definition / env showing `APP_DEBUG=false`.
+**Still missing:** none for this capture.
 
 ### Capture
 
@@ -288,7 +288,7 @@ Do not scan production. Do not write a new exploit.
 **Must not show:** `ENCRYPTION_KEY`, JWT secret, database URLs with passwords.  
 **Save as:** `tac_images/6.2.1/CASA_6_2_1_ecs_env.png`
 
-- [ ] ECS env PNG
+- [x] ECS env PNG
 
 ---
 
