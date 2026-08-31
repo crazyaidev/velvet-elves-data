@@ -170,7 +170,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 23 | 3.1.6 | Ready (SPA HTML shell not Index of; API JSON 404; ZAP no plugin 0) | CASA_3_1_6 | [ ] |
 | 24 | 3.2.1 | Ready (authorization code + PKCE S256; no implicit/ROPC; staging start 200) | CASA_3_2_1 | [ ] |
 | 25 | 3.2.2 | Ready (redirect_to origin allowlist; Fernet state TTL; staging 400s) | CASA_3_2_2 | [ ] |
-| 26 | 3.3.1 | Option A landed → deploy, enroll admins | CASA_3_3_1 | [ ] |
+| 26 | 3.3.1 | Ready (platform TOTP aal2; staging/prod UI; unsigned 401) | CASA_3_3_1 | [ ] |
 | 27 | 4.1.1 | Ready + S5/S6 | M9a + SSL Labs | [ ] |
 | 28 | 4.1.2 | Ready + S5/S6 | M9a + SSL Labs | [ ] |
 | 29 | 4.1.3 | Ready | M9e | [ ] |

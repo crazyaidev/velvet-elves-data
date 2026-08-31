@@ -41,6 +41,7 @@
 - **3.1.6** — **Verified 31 Aug 2026.** SPA prefix GETs return the HTML shell (not `Index of /` / ListBucket). API directory-like paths JSON **404**. Official ZAP did not list plugin 0. Packed in `CASA_PORTAL_PACK.md`. Do not claim missing `/assets/*` is 403 on staging.
 - **3.2.1** — **Verified 31 Aug 2026.** Authorization code + PKCE S256 on sign-in, Gmail/Outlook/Calendar, and DocuSign. Staging Google start returned `s256`; flow not completed. Packed in `CASA_PORTAL_PACK.md`. Do not claim implicit or Google ROPC.
 - **3.2.2** — **Verified 31 Aug 2026.** Sign-in `redirect_to` origin-checked vs CORS; Fernet `state` 10 min TTL; integration `redirect_uri` server-set; postMessage not `*`. Staging foreign `redirect_to` **400**; garbage exchange state **400**. Packed in `CASA_PORTAL_PACK.md`. Do not claim WSTG-ATHZ-05 or exact-path match on sign-in.
+- **3.3.1** — **Verified 31 Aug 2026.** Platform console requires TOTP (`aal2` + live factor). Staging/prod two-step prompt and Security on. Unsigned platform GETs **401**. Packed in `CASA_PORTAL_PACK.md`. Do not claim MFA for all users. Do not attach enroll QR PNGs (TOTP secret in frame).
 - **4.1.3 / 4.1.4** — Fernet for tokens/PII; SHA-1 is a non-security proposal id (Fluid Low, compensating); decrypt failures return generic errors.
 - **5.1.1–5.1.10** — SAST 0 High/Critical/Medium + three ZAP XMLs; XSS callback fix verified; SQLi and path-traversal Highs written up as false positives with replays.
 - **5.2.1** — Uploads to object storage, never executed.

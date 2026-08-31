@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6, 3.2.1, 3.2.2, 3.3.1  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -50,6 +50,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 23 | 3.1.6 | Directory browsing disabled | 5 | `CASA_3_1_6_directory.md` |
 | 24 | 3.2.1 | OAuth authorization code + PKCE | 5 | `CASA_3_2_1_oauth_pkce.md` |
 | 25 | 3.2.2 | OAuth redirect_uri and state | 5 | `CASA_3_2_2_redirect_state.md` |
+| 26 | 3.3.1 | Admin MFA on platform console | 10 | `CASA_3_3_1_admin_mfa.md` |
 
 ---
 
@@ -895,6 +896,46 @@ OAuth redirect_uri and state are validated to prevent open redirect and OAuth CS
 
 ---
 
+## 3.3.1 — Admin MFA on the platform console
+
+**ADA:** application administrative interfaces shall enforce MFA for administrative accounts. Cloud infrastructure consoles are out of this check.
+
+**Claimed controls**
+
+- Administrative interface = platform console (`/platform/*`, `/api/v1/platform/*`).
+- `require_platform_admin`: `is_platform_admin` + JWT `aal2` + live verified TOTP. `PLATFORM_ADMIN_MFA_REQUIRED` defaults true.
+- Login of an enrolled account returns `mfa_required` (AAL1, no refresh) until `POST /users/mfa/verify`.
+- SPA `PlatformMfaGate` blocks the console until a code (or enrollment in Security).
+- Staging and production UI: two-step login prompt; console code gate; Security authenticator on.
+- Staging unsigned `GET /platform/users`, `GET /platform/registrations`, and `GET /users/mfa/factors` → **401**.
+
+**Do not claim:** MFA for all users or all tenant Admins; GCP/AWS MFA; that the emergency env flag cannot be turned off.
+
+**Helpers:** `casa_auth_qa/render_casa_331_pages.py`, `casa_331_deny.py`. Reuse existing UI shots. Do **not** recapture. Do **not** attach `*_security_enroll.png` (TOTP secret), `*_login.png`, `*_security_off.png`, `*_platform_unlocked.png`, `*_platform_setup.png`.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.3.1/CASA_3_3_1_page1.png`](tac_images/3.3.1/CASA_3_3_1_page1.png) | Written evidence page 1 of 2. Platform console MFA; aal2 gate. |
+| [`tac_images/3.3.1/CASA_3_3_1_page2.png`](tac_images/3.3.1/CASA_3_3_1_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.3.1/CASA_3_3_1_code.png`](tac_images/3.3.1/CASA_3_3_1_code.png) | require_platform_admin aal2 + TOTP check. |
+| [`tac_images/3.3.1/CASA_3_3_1_tests.png`](tac_images/3.3.1/CASA_3_3_1_tests.png) | Named tests for aal1 deny, aal2 allow, stale aal2, login mfa_required. |
+| [`tac_images/3.3.1/CASA_3_3_1_deny.png`](tac_images/3.3.1/CASA_3_3_1_deny.png) | Staging unsigned platform/MFA GETs return 401. |
+| [`tac_images/3.3.1/CASA_3_3_1_stage_mfa_prompt.png`](tac_images/3.3.1/CASA_3_3_1_stage_mfa_prompt.png) | Staging login two-step verification. |
+| [`tac_images/3.3.1/CASA_3_3_1_stage_platform_code.png`](tac_images/3.3.1/CASA_3_3_1_stage_platform_code.png) | Staging platform console code gate. |
+| [`tac_images/3.3.1/CASA_3_3_1_stage_security_on.png`](tac_images/3.3.1/CASA_3_3_1_stage_security_on.png) | Staging Security: authenticator app is on. |
+| [`tac_images/3.3.1/CASA_3_3_1_prod_mfa_prompt.png`](tac_images/3.3.1/CASA_3_3_1_prod_mfa_prompt.png) | Production login two-step verification. |
+| [`tac_images/3.3.1/CASA_3_3_1_prod_security_on.png`](tac_images/3.3.1/CASA_3_3_1_prod_security_on.png) | Production Security: authenticator app is on. |
+
+### Portal comment
+
+```
+The application administrative interface is the platform console (/api/v1/platform/*). Those routes require is_platform_admin plus a JWT aal2 claim and a live verified TOTP factor (PLATFORM_ADMIN_MFA_REQUIRED defaults true). Login of an enrolled admin returns mfa_required until the authenticator code is verified. The SPA PlatformMfaGate blocks the console until a code is entered. Staging and production both show the two-step prompt and Security authenticator app is on. Unsigned GET /platform/users returns 401. Tenant Admin is a workspace role and is not this interface; MFA is not required for all users.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -926,5 +967,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.6 | `python render_casa_316_pages.py` then `python casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console. |
 | 3.2.1 | `python render_casa_321_pages.py` then `python casa_321_pkce.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
 | 3.2.2 | `python render_casa_322_pages.py` then `python casa_322_deny.py`. Do **not** attach `/login`. Do **not** recapture Google Cloud Console. Do **not** complete OAuth. |
+| 3.3.1 | `python render_casa_331_pages.py` then `python casa_331_deny.py`. Reuse existing UI shots. Do **not** recapture. Do **not** attach enroll/login/security_off/unlocked/setup PNGs. |
 
 Eyeball every PNG for cut-off text before re-upload.
