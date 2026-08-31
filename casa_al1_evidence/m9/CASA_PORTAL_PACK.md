@@ -72,7 +72,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 5 | pack 6.4.1 |
 | 46 | 6.5.1 | No credential logs | 7 | pack 6.5.1 |
-| 47 | 6.6.1 | Logout clears storage | 5 | pack 6.6.1 |
+| 47 | 6.6.1 | Logout clears storage | 7 | pack 6.6.1 |
 | 48 | 6.7.1 | Server secrets | 3 | pack 6.7.1 — no AWS console |
 
 ---
@@ -1593,9 +1593,9 @@ Login passwords are not written to the application logger. Gmail paths mask emai
 
 **ADA:** AL1 written description of what remains in the browser after logout.
 
-**Claimed:** clearTokens removes velvet_elves_token and velvet_elves_refresh_token; POST /users/logout revokes. Staging 31 Aug 2026: both token keys present before Log Out, both absent after. UI is staging /login.
+**Claimed:** clearTokens removes velvet_elves_token and velvet_elves_refresh_token; POST /users/logout revokes. Staging 31 Aug 2026 Chrome DevTools Application: both token keys present while signed in; both gone on /login after Log Out. velvet_elves_return_location remains.
 
-**Missing:** Chrome DevTools Application panel (Playwright evaluate used instead). velvet_elves_return_location remains after logout (path key, not a token).
+**Missing:** none for ADA AL1 written description. JWT **values** were redacted on the before shot.
 
 ### Images
 
@@ -1604,13 +1604,15 @@ Login passwords are not written to the application logger. Gmail paths mask emai
 | [`tac_images/6.6.1/CASA_6_6_1_logout_page1.png`](tac_images/6.6.1/CASA_6_6_1_logout_page1.png) | Write-up |
 | [`tac_images/6.6.1/CASA_6_6_1_logout_page2.png`](tac_images/6.6.1/CASA_6_6_1_logout_page2.png) | AL1 mapping |
 | [`tac_images/6.6.1/CASA_6_6_1_logout_code.png`](tac_images/6.6.1/CASA_6_6_1_logout_code.png) | clearTokens |
-| [`tac_images/6.6.1/CASA_6_6_1_after_logout.png`](tac_images/6.6.1/CASA_6_6_1_after_logout.png) | Staging /login after Log Out (this session) |
-| [`tac_images/6.6.1/CASA_6_6_1_storage.png`](tac_images/6.6.1/CASA_6_6_1_storage.png) | Token keys present then absent; return_location remains |
+| [`tac_images/6.6.1/CASA_6_6_1_after_logout.png`](tac_images/6.6.1/CASA_6_6_1_after_logout.png) | Staging /login after Log Out |
+| [`tac_images/6.6.1/CASA_6_6_1_storage.png`](tac_images/6.6.1/CASA_6_6_1_storage.png) | Playwright key presence (values not shown) |
+| [`tac_images/6.6.1/CASA_6_6_1_devtools_before.png`](tac_images/6.6.1/CASA_6_6_1_devtools_before.png) | Application localStorage signed-in; JWT values redacted |
+| [`tac_images/6.6.1/CASA_6_6_1_devtools_after.png`](tac_images/6.6.1/CASA_6_6_1_devtools_after.png) | Application localStorage after Log Out; token keys gone |
 
 ### Portal comment
 
 ```
-The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage. Logout calls POST /users/logout (revokes the Supabase session) then clearTokens(), which removes both keys. Staging after Log Out: those two keys are gone; velvet_elves_return_location remains; the browser is on /login. Google tokens are not in the browser. A Chrome DevTools Application panel was not captured (Playwright evaluate of key presence only; values not shown).
+The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage. Logout calls POST /users/logout (revokes the Supabase session) then clearTokens(), which removes both keys. Staging Chrome DevTools Application on 31 Aug 2026: those two keys are present while signed in (JWT values redacted in evidence) and gone after Log Out. Remaining keys include velvet_elves_return_location and a last_visit key. The browser is on /login. Google tokens are not in the browser.
 ```
 
 ---

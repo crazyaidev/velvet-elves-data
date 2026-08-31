@@ -393,7 +393,7 @@ logger.info("Login user id=%s", supabase_user_id)
         [
             ("Source", "ADA AL1: written description of confidential data in the browser after logout."),
             ("What is stored", "velvet_elves_token and velvet_elves_refresh_token in localStorage. Not Google tokens."),
-            ("Logout", "POST /users/logout revokes the Supabase session, then clearTokens() removes both token keys. Staging 31 Aug 2026: both token keys present before Log Out, both absent after. velvet_elves_return_location remains."),
+            ("Logout", "POST /users/logout revokes the Supabase session, then clearTokens() removes both token keys. Staging 31 Aug 2026 Chrome DevTools Application: velvet_elves_token and velvet_elves_refresh_token present while signed in (JWT values redacted); both keys gone on /login after Log Out. velvet_elves_return_location and a last_visit key remain."),
             ("Honest", "Short-lived access JWT can still work until expiry if stolen before logout revoke. Refresh replay after logout is 401 (2.2.1)."),
         ],
     )
@@ -404,7 +404,7 @@ logger.info("Login user id=%s", supabase_user_id)
         [
             ("Keys removed", "clearTokens removes velvet_elves_token and velvet_elves_refresh_token."),
             ("Server revoke", "POST /users/logout signs out the Supabase session."),
-            ("UI shot", "Fresh staging Log Out this session: /login. Key-presence PNG from Playwright evaluate (not DevTools Application panel)."),
+            ("UI shot", "Staging Chrome DevTools Application localStorage before and after Log Out. JWT values redacted. After: /login; token keys gone; return_location remains."),
         ],
         "Logout clears the SPA token keys in localStorage and revokes the refresh session. velvet_elves_return_location remains after logout.",
     )

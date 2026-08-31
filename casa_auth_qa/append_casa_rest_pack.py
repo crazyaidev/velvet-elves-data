@@ -377,9 +377,9 @@ Login passwords are not written to the application logger. Gmail paths mask emai
 
 **ADA:** AL1 written description of what remains in the browser after logout.
 
-**Claimed:** clearTokens removes velvet_elves_token and velvet_elves_refresh_token; POST /users/logout revokes. UI copied from 2.2.1 after_logout.
+**Claimed:** clearTokens removes velvet_elves_token and velvet_elves_refresh_token; POST /users/logout revokes. Staging Chrome DevTools Application: token keys present then gone.
 
-**Missing:** Fresh logout Chrome DevTools shot this session (QA login not re-run). Using the 2.2.1 capture.
+**Missing:** none for ADA AL1 written description. JWT values redacted on the before shot.
 
 ### Images
 
@@ -388,12 +388,15 @@ Login passwords are not written to the application logger. Gmail paths mask emai
 | [`tac_images/6.6.1/CASA_6_6_1_logout_page1.png`](tac_images/6.6.1/CASA_6_6_1_logout_page1.png) | Write-up |
 | [`tac_images/6.6.1/CASA_6_6_1_logout_page2.png`](tac_images/6.6.1/CASA_6_6_1_logout_page2.png) | AL1 mapping |
 | [`tac_images/6.6.1/CASA_6_6_1_logout_code.png`](tac_images/6.6.1/CASA_6_6_1_logout_code.png) | clearTokens |
-| [`tac_images/6.6.1/CASA_6_6_1_after_logout.png`](tac_images/6.6.1/CASA_6_6_1_after_logout.png) | Copy of 2.2.1 after_logout |
+| [`tac_images/6.6.1/CASA_6_6_1_after_logout.png`](tac_images/6.6.1/CASA_6_6_1_after_logout.png) | Staging /login after Log Out |
+| [`tac_images/6.6.1/CASA_6_6_1_storage.png`](tac_images/6.6.1/CASA_6_6_1_storage.png) | Playwright key presence |
+| [`tac_images/6.6.1/CASA_6_6_1_devtools_before.png`](tac_images/6.6.1/CASA_6_6_1_devtools_before.png) | Application localStorage signed-in; JWT values redacted |
+| [`tac_images/6.6.1/CASA_6_6_1_devtools_after.png`](tac_images/6.6.1/CASA_6_6_1_devtools_after.png) | Application localStorage after Log Out; token keys gone |
 
 ### Portal comment
 
 ```
-The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage. Logout calls POST /users/logout (revokes the Supabase session) then clearTokens(), which removes both keys. After logout those keys are gone from localStorage (same capture as 2.2.1). Google tokens are not in the browser.
+The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage. Logout calls POST /users/logout (revokes the Supabase session) then clearTokens(), which removes both keys. Staging Chrome DevTools Application on 31 Aug 2026: those two keys are present while signed in (JWT values redacted in evidence) and gone after Log Out. Remaining keys include velvet_elves_return_location and a last_visit key. The browser is on /login. Google tokens are not in the browser.
 ```
 
 ---
@@ -448,7 +451,7 @@ def main():
 | 44 | 6.3.1 | Origin not authz | 5 | pack 6.3.1 |
 | 45 | 6.4.1 | Subdomain takeover | 4 | pack 6.4.1 |
 | 46 | 6.5.1 | No credential logs | 7 | pack 6.5.1 |
-| 47 | 6.6.1 | Logout clears storage | 4 | pack 6.6.1 |
+| 47 | 6.6.1 | Logout clears storage | 7 | pack 6.6.1 |
 | 48 | 6.7.1 | Server secrets | 3 | pack 6.7.1 — no AWS console |
 
 ---"""
@@ -535,7 +538,7 @@ def main():
         ),
         (
             "| 47 | 6.6.1 clear browser storage on logout | `compensating_controls.md` | Logout clears velvet elves token keys in localStorage |",
-            "| 47 | 6.6.1 clear browser storage on logout | `tac_images/6.6.1/` | clearTokens plus POST /users/logout. after_logout copied from 2.2.1. |",
+            "| 47 | 6.6.1 clear browser storage on logout | `tac_images/6.6.1/` — `CASA_6_6_1_logout_page1.png`, `logout_page2.png`, `logout_code.png`, `after_logout.png`, `storage.png`, `devtools_before.png`, `devtools_after.png` | The SPA stores velvet_elves_token and velvet_elves_refresh_token in localStorage. Logout calls POST /users/logout (revokes the Supabase session) then clearTokens(), which removes both keys. Staging Chrome DevTools Application on 31 Aug 2026: those two keys are present while signed in (JWT values redacted in evidence) and gone after Log Out. Remaining keys include velvet_elves_return_location and a last_visit key. The browser is on /login. Google tokens are not in the browser. |",
         ),
         (
             "| 48 | 6.7.1 server secrets | `M9d_token_storage.md` | Secrets in AWS Secrets Manager Google tokens Fernet encrypted Disconnect is soft deactivate |",
@@ -565,7 +568,7 @@ def main():
         "| 44 | 6.3.1 | Ready | M9f | [ ] |": "| 44 | 6.3.1 | Packed 31 Aug (foreign Origin /users/me 401) | CASA_6_3_1 | [ ] |",
         "| 45 | 6.4.1 | Verify S9 | M9a + S9 | [ ] |": "| 45 | 6.4.1 | Packed 31 Aug (live DNS). Route 53 console NOT captured | CASA_6_4_1 | [ ] |",
         "| 46 | 6.5.1 | Ready | M9g | [ ] |": "| 46 | 6.5.1 | Packed 31 Aug (code mask + staging CloudWatch login + Stripe checkout/sessions 200) | CASA_6_5_1 | [ ] |",
-        "| 47 | 6.6.1 | Ready (verified 27 Aug) | comp | [ ] |": "| 47 | 6.6.1 | Packed 31 Aug (clearTokens; after_logout copy from 2.2.1) | CASA_6_6_1 | [ ] |",
+        "| 47 | 6.6.1 | Ready (verified 27 Aug) | comp | [ ] |": "| 47 | 6.6.1 | Packed 31 Aug (DevTools Application before/after Log Out; JWT values redacted) | CASA_6_6_1 | [ ] |",
         "| 48 | 6.7.1 | Ready | M9d | [ ] |": "| 48 | 6.7.1 | Packed 31 Aug (Secrets Manager + Fernet). AWS console NOT captured | CASA_6_7_1 | [ ] |",
     }
     for old, new in replacements.items():
@@ -585,7 +588,7 @@ def main():
 - **6.3.1** — Packed. Foreign Origin /users/me 401.
 - **6.4.1** — Packed live DNS. Route 53 console NOT captured.
 - **6.5.1** — Packed code mask + staging CloudWatch login (user id) + Stripe checkout-session POST/200 (no PAN).
-- **6.6.1** — Packed. after_logout copied from 2.2.1.
+- **6.6.1** — Packed. Staging DevTools Application: token keys present then gone; return_location remains. JWT values redacted.
 - **6.7.1** — Packed write-up. AWS Secrets Manager console NOT captured."""
     if old not in gap:
         print("GAP miss block")

@@ -59,7 +59,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API — **done 31 Aug** | 6 |
 | P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA — **done 31 Aug** | 6 |
-| P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
+| P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA — **done 31 Aug** (JWT values redacted) | 7 |
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
 | P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner — **done 31 Aug** | 6 each |
 | P3 | [4.1.2](#412--trusted-tls-certificates) | ACM console | Owner — **done 31 Aug** | 10 |
@@ -352,9 +352,9 @@ Packed 31 Aug 2026: staging Insights `filter @message like /Stripe/` after Buy o
 
 ## 6.6.1 — Clear browser storage on logout
 
-**Already packed:** Playwright key presence — `velvet_elves_token` / `velvet_elves_refresh_token` true then false; `velvet_elves_return_location` remains; `/login` after Log Out.
+**Already packed:** Playwright key presence — `velvet_elves_token` / `velvet_elves_refresh_token` true then false; `velvet_elves_return_location` remains; `/login` after Log Out. Chrome DevTools Application before/after Log Out (JWT values redacted).
 
-**Still missing:** Chrome **DevTools → Application** panel (what ADA reviewers often expect).
+**Still missing:** none.
 
 ### Capture
 
@@ -365,9 +365,9 @@ Packed 31 Aug 2026: staging Insights `filter @message like /Stripe/` after Buy o
 
 **Must show:** Application localStorage, key **names**, Values column redacted.  
 **Must not show:** JWT strings, password field filled.  
-**Save as:** `tac_images/6.6.1/CASA_6_6_1_devtools.png` (before+after can be one stacked PNG or `_devtools_before` / `_devtools_after`). Row is at 5 files; two more stay under 10.
+**Save as:** `tac_images/6.6.1/CASA_6_6_1_devtools.png` (before+after can be one stacked PNG or `_devtools_before` / `_devtools_after`).
 
-- [ ] DevTools Application PNG (values redacted)
+- [x] DevTools Application PNG (values redacted) — `CASA_6_6_1_devtools_before.png`, `CASA_6_6_1_devtools_after.png`
 
 ---
 
