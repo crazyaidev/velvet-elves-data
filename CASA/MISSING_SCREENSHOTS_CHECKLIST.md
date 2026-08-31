@@ -58,7 +58,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API — **done 31 Aug** | 6 |
 | P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API — **done 31 Aug** | 5 |
 | P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API — **done 31 Aug** | 6 |
-| P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA | 5 |
+| P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA — **done 31 Aug** | 6 |
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
 | P3 | [3.2.1](#321--oauth-authorization-code--pkce) / [3.2.2](#322--oauth-redirect_uri-and-state) | GCP OAuth client (read-only) | Owner — **done 31 Aug** | 6 each |
@@ -232,9 +232,9 @@ Do not scan production. Do not write a new exploit.
 
 ## 5.2.1 — Malicious file uploads
 
-**Already packed:** MIME allowlist code; unsigned **401**; authenticated `probe.exe` **415** (`CASA_5_2_1_415.png`).
+**Already packed:** MIME allowlist code; unsigned **401**; authenticated `probe.exe` **415** (`CASA_5_2_1_415.png`). Staging Compliance picker lists allowed types (`CASA_5_2_1_picker.png`). No malware uploaded.
 
-**Still missing:** SPA upload picker showing the deny (or the accept list).
+**Still missing:** none for this capture (malware sample is not attempted).
 
 ### Capture
 
@@ -246,7 +246,7 @@ Do not scan production. Do not write a new exploit.
 **Must not show:** other clients’ documents, tokens.  
 **Save as:** `tac_images/5.2.1/CASA_5_2_1_picker.png`
 
-- [ ] Upload-picker UI PNG
+- [x] Upload-picker UI PNG
 
 ---
 
