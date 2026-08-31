@@ -167,7 +167,7 @@ Verdicts from `GAP_ANALYSIS_48_CHECKS.md`. Comments: §7 of the portal guide.
 | 20 | 3.1.3 | Ready (fail closed 401/403; cron secret unset is unreachable; generic 500) | CASA_3_1_3 | [ ] |
 | 21 | 3.1.4 | Ready (ID-parameter APIs + tenant/assignment guards; staging unsigned ID paths 401) | CASA_3_1_4 | [ ] |
 | 22 | 3.1.5 | Ready (Bearer not cookie; CORS origin allowlist; register 5/min; ZAP no 10202) | CASA_3_1_5 | [ ] |
-| 23 | 3.1.6 | Ready | M9a | [ ] |
+| 23 | 3.1.6 | Ready (SPA HTML shell not Index of; API JSON 404; ZAP no plugin 0) | CASA_3_1_6 | [ ] |
 | 24 | 3.2.1 | Ready | oauth | [ ] |
 | 25 | 3.2.2 | Ready | oauth | [ ] |
 | 26 | 3.3.1 | Option A landed → deploy, enroll admins | CASA_3_3_1 | [ ] |

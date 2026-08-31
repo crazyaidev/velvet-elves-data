@@ -2,7 +2,7 @@
 
 **Filename (fixed):** `casa_al1_evidence/m9/CASA_PORTAL_PACK.md` — do not rename. Append new rows here; update the scope line only.  
 **Updated:** 31 Aug 2026  
-**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5  
+**Rows in this file:** 1.1.1, 1.1.2, 1.1.3, 1.2.1, 1.3.1, 1.3.2, 1.3.3, 1.3.4, 2.1.1, 2.2.1, 2.2.2, 2.2.3, 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.4.1, 3.1.1, 3.1.2, 3.1.3, 3.1.4, 3.1.5, 3.1.6  
 **Portal:** https://casa.tacsecurity.com/ — per-row **Upload Evidences** (PNG/JPG/JPEG, max 10). Do not upload this markdown.  
 **Images:** `casa_al1_evidence/m9/tac_images/<check-id>/` — one folder per row. MFA shots for later row 3.3.1 are in `tac_images/3.3.1/` (do not attach those on 1.1.x / 1.2.1).  
 **Operating guide:** `CASA/TAC_ESOF_PORTAL_GUIDE.md` §7  
@@ -47,6 +47,7 @@ Global do-not-claim (these rows): HttpOnly session cookies; MFA default for **al
 | 20 | 3.1.3 | Access controls fail securely | 5 | `CASA_3_1_3_fail_secure.md` |
 | 21 | 3.1.4 | Sensitive resources protected against IDOR | 5 | `CASA_3_1_4_idor.md` |
 | 22 | 3.1.5 | Anti-CSRF / anti-automation | 6 | `CASA_3_1_5_csrf.md` |
+| 23 | 3.1.6 | Directory browsing disabled | 5 | `CASA_3_1_6_directory.md` |
 
 ---
 
@@ -792,6 +793,39 @@ Authenticated APIs use Authorization Bearer, not a cookie session. Login returns
 
 ---
 
+## 3.1.6 — Directory browsing disabled
+
+**ADA:** directory browsing shall be disabled unless deliberately desired (ASVS 4.3.2). AL1 evidence is ADA DAST. Verification: the scan shall not identify Burp **6291712**. Official scans were ZAP (SPA plugin **0** = FAIL).
+
+**Claimed controls**
+
+- SPA is hashed Vite assets on CloudFront (S3 via OAC). Not Apache/nginx autoindex.
+- Staging 31 Aug 2026: `GET /assets/`, `/static/`, and a missing hashed JS file return the **SPA HTML shell**, not `Index of /` or S3 `ListBucketResult`.
+- API does not mount `StaticFiles`. Staging `GET /`, `/api/v1/`, `/static/` → JSON **404**.
+- Official ZAP SPA `10f54abf`, API `a9d78f05`, auth `33afa2aa` did not list Directory Browsing.
+
+**Do not claim:** missing `/assets/*` returns 403 on staging (it returns the SPA shell); an AWS console listing shot; that Burp 6291712 ran.
+
+**Helpers:** `casa_auth_qa/render_casa_316_pages.py`, `casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console.
+
+### Images
+
+| File | Description |
+| --- | --- |
+| [`tac_images/3.1.6/CASA_3_1_6_page1.png`](tac_images/3.1.6/CASA_3_1_6_page1.png) | Written evidence page 1 of 2. CloudFront SPA; API JSON 404; ZAP. |
+| [`tac_images/3.1.6/CASA_3_1_6_page2.png`](tac_images/3.1.6/CASA_3_1_6_page2.png) | Written evidence page 2 of 2. AL1 mapping. |
+| [`tac_images/3.1.6/CASA_3_1_6_code.png`](tac_images/3.1.6/CASA_3_1_6_code.png) | SPA rewrite function; API has no StaticFiles. |
+| [`tac_images/3.1.6/CASA_3_1_6_zap.png`](tac_images/3.1.6/CASA_3_1_6_zap.png) | Official ADA ZAP directory-browsing rule excerpt. Not a ZAP product screenshot. |
+| [`tac_images/3.1.6/CASA_3_1_6_nolist.png`](tac_images/3.1.6/CASA_3_1_6_nolist.png) | Staging SPA prefixes = HTML shell; API prefixes = JSON 404. |
+
+### Portal comment
+
+```
+Directory browsing is disabled. The SPA is hashed CloudFront assets (S3 origin via OAC), not an Apache or nginx autoindex. Staging GET /assets/, /static/, and a missing hashed JS file return the SPA HTML shell, not Index of / or an S3 ListBucketResult. The API does not mount static files; GET /, /api/v1/, and /static/ return JSON 404. Official ADA ZAP scans (SPA 10f54abf, API a9d78f05, auth 33afa2aa) did not report Directory Browsing. We did not run Burp 6291712.
+```
+
+---
+
 ## Regeneration
 
 From `casa_auth_qa/` (headless Chrome; one page at a time):
@@ -820,5 +854,6 @@ From `casa_auth_qa/` (headless Chrome; one page at a time):
 | 3.1.3 | `python render_casa_313_pages.py` then `python casa_313_fail.py`. Do **not** attach `/login`. Do **not** call the tick with a valid secret. |
 | 3.1.4 | `python render_casa_314_pages.py` then `python casa_314_deny.py`. Do **not** attach `/login`. Do **not** register a staging user. Do **not** query another tenant. |
 | 3.1.5 | `python render_casa_315_pages.py` then `python casa_315_cors.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI. Do **not** mint staging users for a fresh 429. |
+| 3.1.6 | `python render_casa_316_pages.py` then `python casa_316_list.py`. Do **not** attach `/login`. Do **not** recapture ZAP UI or the AWS console. |
 
 Eyeball every PNG for cut-off text before re-upload.
