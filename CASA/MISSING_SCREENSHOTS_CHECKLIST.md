@@ -57,7 +57,7 @@ Priority: **P0** ADA-named samples · **P1** owner consoles ADA asks for · **P2
 | P2 | [5.1.7](#517--xss) | Stored-XSS UI (escaped) | Staging SPA — **done 31 Aug** | 6 |
 | P2 | [5.1.8](#518--sql-injection) | Authenticated SQLi replay | Staging API — **done 31 Aug** | 6 |
 | P2 | [5.1.9](#519--os-command-injection) | Live OS-command probe | Staging API — **done 31 Aug** | 5 |
-| P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API | 5 |
+| P2 | [5.1.10](#5110--file-inclusion) | Authenticated path-replay | Staging API — **done 31 Aug** | 6 |
 | P2 | [5.2.1](#521--malicious-file-uploads) | Upload-picker UI | Staging SPA | 5 |
 | P2 | [6.6.1](#661--clear-browser-storage-on-logout) | DevTools Application panel | Staging SPA | 5 |
 | P3 | [3.1.6](#316--directory-browsing-disabled) | S3 / CloudFront listing off | Owner — **done 31 Aug** (S3; CloudFront OAC optional leftover) | 6 |
@@ -212,9 +212,9 @@ Do not scan production. Do not write a new exploit.
 
 ## 5.1.10 — File inclusion
 
-**Already packed:** `GET /ads/../etc/passwd/click` → **404**. Auth ZAP path-traversal Highs (plugin **6**, four alerts) were path segments `team` / `templates` / `settings`.
+**Already packed:** `GET /ads/../etc/passwd/click` → **404**. Auth ZAP path-traversal Highs (plugin **6**, four alerts) were path segments `team` / `templates` / `settings`. Authenticated replay of all 4 URIs (`CASA_5_1_10_auth_replay.png`): 200 JSON / 422 / 403 MFA, no local file dump.
 
-**Still missing:** authenticated replay of those four ZAP URIs.
+**Still missing:** Burp LFI UI only if TAC asks.
 
 ### Capture
 
@@ -226,7 +226,7 @@ Do not scan production. Do not write a new exploit.
 **Must not show:** Bearer, local file dumps.  
 **Save as:** `tac_images/5.1.10/CASA_5_1_10_auth_replay.png`
 
-- [ ] Authenticated plugin-6 replay PNG (all 4 URIs)
+- [x] Authenticated plugin-6 replay PNG (all 4 URIs)
 
 ---
 
