@@ -181,7 +181,7 @@ Click your name (or avatar) in the top right → **Settings** → the **Email & 
 
 \> \> \_Comments:\_ Unable to get the “Test Connection” to work. I can click it but the email never comes through. I’ve checked inbox and spam.
 
-**Jan:** This is not a miss on send. **Test connection does not send an email.** It only checks the saved Gmail or Outlook credentials. The result is the line under the provider on that Settings page (success or failure), not a message in inbox or spam. I will make that on-page result more obvious so the button does not look dead. If you clicked it and the page never showed a success or failure line, tell me — that would be a real Fail. 
+**Jan:** This is not a miss on send. **Test connection does not send an email.** It only checks the saved Gmail or Outlook credentials. The result is the line under the provider on that Settings page (success or failure), not a message in inbox or spam. I will make that on-page result more obvious so the button does not look dead. If you clicked it and the page never showed a success or failure line, tell me — that would be a real Fail. (Not part of the Feature 2–4 copy / inbox-match pass.) 
 
 ## **2\. How it runs — Manual, Assisted, Autopilot**
 
@@ -211,7 +211,7 @@ Admin or workspace owner only. If you are an Agent, write Skip and go to Feature
 
 \- Manual: \*AI suggests. You click to apply anything.\*
 
-\- Assisted: \*Routine work runs. Named letters are drafted — you tap Send.\*
+\- Assisted: \*Routine work runs. Named emails are drafted — you tap Send.\*
 
 \- Autopilot: \*Authorized letters send when confidence is high enough. No tap.\*
 
@@ -246,7 +246,7 @@ Lastly, please switch the word letter(s) to email(s).
 2. Turning off Notifications stops mail to you. Due dates on the file stay. The 3-day “step in” nags are not this switch and are not on staging.
 3. How it runs (and matching captions) now say **named emails** / **authorized emails**. Autopilot still only sends welcomes, title order, pending reminder, and the inspection deadline reminder.
 
-Local browser check (1 Sep 2026, Shyna): How it runs, Overnight, Always true, and Email replies all use **emails**. Overnight label is **Inspection deadline reminder** (deadline email to you only). Old “letters” / “Inspection reminders” labels are gone.
+Local (1 Sep 2026, Shyna) and staging (`crazyaidev20500519@gmail.com`): How it runs, Overnight, Always true, and Email replies use **emails**. Overnight switch is **Inspection deadline reminder**. Old “letters” / “Inspection reminders” labels are gone.
 
 ## **3\. Overnight switches and Always true**
 
@@ -299,7 +299,7 @@ Same page as Feature 2, the **Overnight** card, then **Always true** underneath 
 
 **Jan:** Copy only. “Tick” was the hourly automation run. Overnight now says **Last run** / **Preview next run**. The preview dialog says **This run would send**. API names are unchanged.
 
-Local browser check (1 Sep 2026, Shyna): chip **last run**; clocks **Last run** / **Last draft sweep**; button **Preview next run**; dialog **This run would send 0 emails** → Got it. Old “tick” labels are gone.
+Local (Shyna) and staging (crazyaidev, 1 Sep 2026): **Last run** / **Last draft sweep**; **Preview next run**; dialog **This run would send 0 emails** → Got it. Old “tick” labels are gone.
 
 ## **4\. Preview, Draft due emails, and Run AI tasks**
 
@@ -345,15 +345,15 @@ Preview, Draft, Run, and Digest are **one row** on the Overnight card (Settings 
 
 ![][image1]
 
-**Jan:** Steps 3–6 are still on **Overnight** (Settings → AI & Automation → How it runs), on the same card as **Preview next run**: **Draft due emails**, then the quieter **Run AI tasks (sends deal email)** and **Send me my digest**. They are not on Intelligence → Email and not on the deal Inbox. Please stay on Overnight for those clicks, then open Intelligence → Email only to confirm drafts from step 3.
+**Jan:** Two separate issues. Overnight send was not the Fail.
 
-Staging check (1 Sep 2026, platform admin `crazyaidev20500519@gmail.com`): Preview / Draft / Run / Digest all exist on Overnight. Staging still labeled the button **Preview next tick** (Feature 3 copy is not on staging yet). The four buttons sat below the first viewport because the How it runs cards fill the fold — scroll down the same page. Preview said “This tick would send 0 emails” → Got it. Nothing sent. Do not Fail Overnight if Preview sent nothing.
+1. Steps 3–6 stay on **Overnight** (same card as **Preview next run**): **Draft due emails**, **Run AI tasks (sends deal email)**, **Send me my digest**. Scroll past Manual / Assisted / Autopilot if they sit below the fold. They are not on Intelligence → Email. Staging (1 Sep 2026, crazyaidev): all four buttons on that card; **Preview next run** → **This run would send 0 emails** → Got it. Nothing sent. Do not Fail Overnight if Preview sent nothing.
 
-The screenshot is Intelligence → Email Inbox, not Overnight. That inbox can show inbound that has **not** matched a Velvet Elves file, so you can file or discard it. Aime must not send a reply to unmatched personal mail. The **deal** Email → Inbox should stay that file only.
+2. The screenshot is Intelligence → Email, not Overnight. Unmatched personal mail can appear there so you can file or discard it. The **deal** Email tab stays that file only. What was wrong: unique-party mail about **Willowbrook** filed on **Sycamore**, and a Gmail sent-copy (From the connected mailbox) drafted a reply to yourself. Both showed **Reply ready** and **Approve & send**.
 
-Worse than “personal mail in VE”: this workspace had **0 Unlinked** chips, but mail was filed on the **wrong** deal. James Selman wrote about **1842 Willowbrook Lane** and Aime filed it on **9052 Sycamore Ridge** (unique party email on that file). Outbound library mail CC’d the connected Gmail, Gmail delivered that copy back as inbound **From** the same mailbox, and Aime drafted a reply to yourself on **12 Guide Test Way**. Both rows showed **Reply ready** and **Approve & send**. The pane even quoted the other file’s closing date.
+Addressed on staging (1 Sep 2026): new mail From the connected mailbox is skipped; a unique party who names another **file** files on that street, not the party’s other deal; a unique party who names a street that is **not** a file stays unmatched (**Needs a deal**, no Approve & send; server 400 if you try). **Reply ready** only when the row is on a deal.
 
-Fixes in code (not on staging until deploy): skip inbound **From** the connected mailbox; if a unique party names a different street, leave the row unmatched; chip **Needs a deal** (never Reply ready) until linked; hide **Approve & send** until linked; server refuse send with no deal. Please do not Fail Overnight for the inbox issue — re-check Intelligence → Email after deploy.
+Not rewritten: the old James / self-CC threads. File or discard those. Matcher rules do not rematch existing rows.
 
 # **Section 2 — Needs You and intake**
 
@@ -439,6 +439,8 @@ Left sidebar → **Workflow** → **Needs You** /needs-you
 
 \- If the banner is missing, the read was not high confidence (a messy scan, missing dates, low confidence). **Skip** — not a Fail.
 
+\- After a new account, **Create your first transaction** opens the same full-screen New Transaction as the dashboard, not a window on the onboarding cards.
+
 **Feedback**
 
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
@@ -451,9 +453,9 @@ Also, please update the wizard  if the user chooses to upload a transaction righ
 
 ![][image2]
 
-**Jan:** The stepper label is **Verification**. The page title on that step is **Confirm Details**. Fast intake is not a control on upload. It is only the orange **✦ Fast intake** banner at the **top of Verification / Confirm Details**, and only when the read is high confidence. If the banner is missing, that is **Skip**, not Fail (messy scan, missing dates, or low confidence). Please walk to Verification and look at the top of that page once on a clean signed contract.
+**Jan:** The stepper label is **Verification**. The page title on that step is **Confirm Details** (it previously repeated Verification, which is why Confirm Details was invisible). Fast intake is not a control on upload. It is only the orange **✦ Fast intake** banner directly under Confirm Details, and only when the read is high confidence. If the banner is missing, that is **Skip**, not Fail (messy scan, missing dates, or low confidence).
 
-The nested wizard after sign-up is a real miss. First-file upload from onboarding should be the same **full-screen** New Transaction flow as the dashboard, not a window on the onboarding cards. Recorded.
+The nested wizard after sign-up is fixed. **Create your first transaction** finishes onboarding and opens the same full-screen `/transactions/new` as the dashboard **+ New Transaction**, not a window on the onboarding cards.
 
 ## **7\. Register and onboarding — the three cards**
 
@@ -477,7 +479,7 @@ Only if you can do this without disturbing a live account. A private window is s
 
 \- Same promises as Feature 2\.
 
-\- Example: a brand-new sign-up that never changes this control lands on Manual. Named letters will not send until someone chooses Assisted or Autopilot **and** a mailbox is connected.
+\- Example: a brand-new sign-up that never changes this control lands on Manual. Named emails will not send until someone chooses Assisted or Autopilot **and** a mailbox is connected.
 
 **Feedback**
 
@@ -487,7 +489,9 @@ Only if you can do this without disturbing a live account. A private window is s
 
 \> \> \_Comments:\_ Please update “Letters” to “Emails”
 
-**Jan:** Recorded — same as Feature 2. Register / onboarding cards will say **email** / **named emails**, and Autopilot will still mean only the authorized set.
+**Jan:** Copy only, same as Feature 2. Register and onboarding share `PostureChoice`. The cards already say **named emails** / **authorized emails** (not letters). Manual stays the default. Autopilot still means only the authorized set. Feature 8’s Manual caption is a separate item — we did not rewrite Manual as “you manually send the emails.”
+
+Local (1 Sep 2026, `/register` on Vite) and staging (`https://app.stage.velvetelves.com/register`): Manual is selected. Assisted: *Named emails are drafted — you tap Send.* Autopilot: *Authorized emails send when confidence is high enough. No tap.* Footnote uses named emails. No named/authorized/library letters on the cards.
 
 # **Section 3 — A file you created**
 
@@ -501,7 +505,7 @@ Open 100 Test Oak Lane (or your financed file) → the control in the workspace 
 
 **How To Test**
 
-1\. Open the file. Find Manual / Assisted / Autopilot in the header. Read the caption under it. Example on Assisted: \*Routine work runs. Named letters are drafted — you tap Send.\*
+1\. Open the file. Find the Autopilot / Assisted / Manual control in the header (zap icon). The one-line caption is **inside that menu**, not printed under the chip. Open the menu and read the caption on the current choice. Example on Assisted: \*Routine work runs. Named emails are drafted — you tap Send.\*
 
 2\. Open the menu. If **Use workspace default** is listed, click it once. Example toast: “This deal follows the workspace default (assisted).”
 
@@ -509,11 +513,11 @@ Open 100 Test Oak Lane (or your financed file) → the control in the workspace 
 
 **Expected Result**
 
-\- Manual: \*You apply AI proposals. Named letters wait until you switch this deal off Manual.\*
+\- Manual: \*AI suggests. You click to apply anything. Named emails wait until you switch this deal off Manual.\*
 
-\- Assisted: \*Routine work runs. Named letters are drafted — you tap Send.\*
+\- Assisted: \*Routine work runs. Named emails are drafted — you tap Send.\*
 
-\- Autopilot: \*Authorized letters send without a tap when confidence is high enough. Everything else is drafted for you.\*
+\- Autopilot: \*Authorized emails send without a tap when confidence is high enough. Everything else is drafted for you.\*
 
 \- Use workspace default clears the custom pin. Changing How it runs in Settings later applies to this file again.
 
@@ -531,9 +535,11 @@ Open 100 Test Oak Lane (or your financed file) → the control in the workspace 
 
 Also, can you please confirm how the settings work if you change it in settings? I’m assuming changing it deal to deal will override the settings feature, but it will default to the settings feature until the user chooses to change it within a transaction?
 
-**Jan:** Named letters → **named emails**, same as Feature 2. Manual will not read “you manually send the emails.” On Manual, named emails **do not go out** until you take the file off Manual (or you send one yourself from Complete this task). Caption we will keep: AI suggests; you click to apply anything; named emails wait until this file is off Manual.
+**Jan:** Named letters → **named emails**, same as Feature 2. Manual will not read “you manually send the emails.” On Manual, named emails **do not go out** until you take the file off Manual (or you send one yourself from Complete this task). Caption we will keep: *AI suggests. You click to apply anything. Named emails wait until you switch this deal off Manual.*
 
 Your settings assumption is correct. **How it runs** is the workspace default. A pin on the file overrides that default until you choose **Use workspace default**. Changing How it runs later applies again to files that are still on the default.
+
+Local (1 Sep 2026) and staging: captions are inside the zap menu. Manual does not say “you manually send.” Letters are gone.
 
 ## **9\. Contacts**
 
@@ -549,13 +555,15 @@ Same file → **Contacts** tab (the workbench tabs are Overview, Timeline, Compl
 
 3\. Do not invent an address Aime “should have guessed” (do not look for info@titlecompany.com unless you typed it). If the buyer has no email, leave it. Feature 18 uses a dedicated file for wait-not-send.
 
-4\. Adding uses the group buttons (**Add buyer**, **Add seller**, **Add agent**, **Add loan officer**, **Add title contact**). Clicking an existing card does not open an editor.
+4\. Adding uses the group buttons (**Add buyer**, **Add seller**, **Add agent**, **Add loan officer**, **Add title contact**). Clicking an existing card expands it so you can see and edit that party. The Mail icon, when the party has an email, composes **to that party only**.
 
 **Expected Result**
 
 \- Every party Aime might email lives on this tab. Aime does not invent info@titlecompany.com.
 
 \- Blank email is allowed (no Mail icon). That letter should wait, not send.
+
+\- Clicking a card expands it (email / phone / company + Edit). The Mail icon composes to that party only.
 
 \- Fail: the workspace tab is still labeled People; a Mail icon on Title when you never added a title email.
 
@@ -569,7 +577,9 @@ Same file → **Contacts** tab (the workbench tabs are Overview, Timeline, Compl
 
 ![][image4]
 
-**Jan:** Recorded. On the deal **Contacts** tab, clicking a card should expand so you can see and edit that party (same idea as the directory). Clicking the card must not open compose. The Mail icon, when the party has an email, composes **to that party only**.
+**Jan:** Recorded. On the deal **Contacts** tab, clicking a card expands so you can see and edit that party (same idea as the directory). Clicking the card must not open compose. The Mail icon, when the party has an email, composes **to that party only**.
+
+Local (1 Sep 2026): expand + Edit + Mail-icon preselect are in the product. Unit tests lock them.
 
 ## **10\. Email tab**
 
@@ -587,7 +597,7 @@ Same file → **Email** tab
 
 **Expected Result**
 
-\- Exact sentence: \*Nothing sends until you tap Send. On Autopilot, named welcome / title / inspection-reminder letters may already have gone out on their own. On Assisted they wait here for Send.\*
+\- Exact sentence: \*Nothing sends until you tap Send. On Autopilot, named welcome / title / inspection-deadline emails may already have gone out on their own. On Assisted they wait here for Send. Drafts you prepare land on Outbox — Inbox is mail that arrived.\*
 
 \- Three folders: Outbox, Sent, Inbox.
 
@@ -614,7 +624,9 @@ They should also be able to add a recipient  not associated with the transaction
 1. Mail icon preselects that contact. Compose is not a draft to everyone else on the file.
 2. Drafts live on **Outbox** (and Intelligence → Email), not Inbox. Inbox is inbound. After you draft, we should land you on Outbox. Today: Email tab → **Outbox**.
 3. Edit / add recipients on the draft: yes.
-4. A one-off To that is not on the file: yes, as a compose option you type. Autopilot still never invents an address and never sends to someone who is not on **Contacts**. 
+4. A one-off To that is not on the file: yes, as a compose option you type. Autopilot still never invents an address and never sends to someone who is not on **Contacts**.
+
+Shipped: Mail icon preselects that party; compose lands on this deal's **Outbox**; you can type a one-off To; Edit on a draft lets you change To / Cc. 
 
 ## **11\. Complete this task stays on screen**
 
@@ -672,13 +684,13 @@ Same Complete this task dialog, plus **Documents** on the file
 
 4\. Repeat for Seller Closing Information, Seller's Agent Closing Information, and Buyer's Agent Closing Information if they exist on this file.
 
-5\. If you have a task named **Closing Disclosure Delivered**, open it separately — that letter **may** attach the CD. Do not treat that as a fail for this feature.
+5\. If you have a task named **Closing Disclosure Delivered**, open it separately — That email is an inquiry to the lender (has it been sent and signed). It should **not** attach the CD.
 
 6\. Close without sending.
 
 **Expected Result**
 
-\- Buyer / seller / agent **closing information** letters never list a Closing Disclosure (or CD).
+\- Buyer / seller / agent **closing information** emails never list a Closing Disclosure (or CD).
 
 \- If Documents has a CD, it still must not appear here. If Documents has no CD, the plan must not invent one. No attachment list at all is fine.
 
@@ -692,7 +704,7 @@ Same Complete this task dialog, plus **Documents** on the file
 
 \> \> \_Comments:\_Tested the best I could because I didn’t have a CD file. But nothing was attached to the Closing Disclosure Delivered task. Remember, this is a request/inquiry task. We aren’t delivering it. We are asking the lender if it’s been sent and signed by the buyer.
 
-**Jan:** Closing-information with no CD on the plan is a Pass even when Documents has no CD. **Closing Disclosure Delivered** is an inquiry to the lender (has it been sent and signed), not a delivery of the CD, and it should **not** attach the CD. The test step that said that letter may attach the CD was wrong. I will correct it. Thank you.
+**Jan:** Closing-information with no CD on the plan is a Pass even when Documents has no CD. **Closing Disclosure Delivered** is an inquiry to the lender (has it been sent and signed), not a delivery of the CD, and it should **not** attach the CD. The test step is corrected. Thank you.
 
 ## 
 
@@ -720,7 +732,7 @@ Same Complete this task dialog, plus **Documents** on the file
 
 \- Completed: \*Closing day is not the end of the file. Mark Completed when post-closing work is done (lockbox, MLS Sold, thank-you). Keep the file Active until then.\*
 
-\- Terminated: \*The deal fell through. Automatic letters stop. History stays. This is not a closed sale.\*
+\- Terminated: \*The deal fell through. Automatic emails stop. History stays. This is not a closed sale.\*
 
 \- Closed: \*Moves the deal off the active board and asks for post-closing feedback. Use after the file is done — not for a deal that fell through.\*
 
@@ -743,6 +755,8 @@ I’m in an admin account and I don’t have the option of “Terminated”. I o
 ![][image7]
 
 **Jan:** Letters → emails, same as Feature 2. Terminated copy will say automatic **emails** stop.
+
+Local (1 Sep 2026): the status dialog now says automatic **emails** stop. Terminated is on the file header pill and the Transactions tab, not on the create form.
 
 Terminated: on the **file**, open the status pill in the workspace header (Active / Completed / Closed / Terminated). On **Transactions**, use the **Terminated** tab. Admin home → Pipeline “Deals by stage” also has Terminated. The create-transaction form does **not** offer Terminated — you do not open a file as fallen-through. If the **deal header pill** itself has no Terminated, that is a Fail; please confirm that was the control in the screenshot. Do not mark a live client file Terminated for this test; read the dialog and close.
 

@@ -45,10 +45,10 @@ Four shells exist. Portal users never see AppLayout.
   - **Deals** — Active Transactions, Drafts & Paused, Closed, All Transactions, Clients, Contacts
   - **Workflow** — Needs You, My Task Queue, All Documents, Closing Calendar (`/calendar`)
   - **Payments** — Invoices & Payments (+ Commission Payouts when `can_trigger_payout`)
-  - **Vendors** — Vendor Directory
+    - **Vendors** — Vendor Directory
   - **Intelligence** — AI Suggestions, Email (`/ai-emails`), Vendor Proposals, Analytics (`/reports`) (+ locked AI Coach teaser on a team)
   - **Team** (Team Lead + Admin) — Team Overview, Teams
-  - **Oversight** (Admin) — Communication Audit, Audit Log
+    - **Oversight** (Admin) — Communication Audit, Audit Log
   - **Platform** (`is_platform_admin`) — Tenants, Users, Waitlist, AI usage, Costs & pricing, Help center
 - **Footer:** `+ New Transaction` (Agent/TC/Team Lead) | profile card → Settings / Log out
 - **Settings:** `/settings` hub from the avatar menu — not a sidebar group
