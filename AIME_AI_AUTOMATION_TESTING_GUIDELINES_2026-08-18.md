@@ -101,13 +101,13 @@ Do not hunt for these in the product, and do not report them as misses.
 ### Safety before any send
 
 - Open **Contacts** before Send. If a party is a real outside mailbox (a co-op at another brokerage, a real lender), stop at the plan. Do not press Send.
-- **Preview next tick** sends nothing. Prefer it. Example: the dialog says this tick would send 3 emails. Read who they are. Click **Got it**. Nobody is mailed.
+- **Preview next run** sends nothing. Prefer it. Example: the dialog says this run would send 3 emails. Read who they are. Click **Got it**. Nobody is mailed.
 - **Draft due emails** writes drafts. It does not send. Example: toast says prepared 4 emails in Email review. Check Intelligence → Email. The drafts are there. Inboxes are unchanged.
 - **Run AI tasks (sends deal email)** can send named letters on **every Active Autopilot file in your workspace**, not only the file you have open. Confirm only after Preview lists addresses you own. Example: Preview lists `you+buyer@gmail.com` only → you may confirm. Preview lists `otheragent@somebroker.com` → cancel.
 - **Send** / **Send all ready** — only to mailboxes you control.
 - **Try now (this deal only)** retries one deal. It can send named letters on that Autopilot file. Admin only.
 - When a step asks you to open **Completed** or **Terminated**, read the copy. Do not click **Change status** unless you created that file only for this test.
-- If you toggle Hourly automation, Named letters, Aime signature, Inspection reminders, or How it runs, put them back when you are done.
+- If you toggle Hourly automation, Named emails, Aime signature, Inspection deadline reminder, or How it runs, put them back when you are done.
 
 ### Suggested order of testing
 
@@ -175,15 +175,15 @@ Admin or workspace owner only. If you are an Agent, write Skip and go to Feature
 
 - Card promises, word for word:
   - Manual: *AI suggests. You click to apply anything.*
-  - Assisted: *Routine work runs. Named letters are drafted — you tap Send.*
-  - Autopilot: *Authorized letters send when confidence is high enough. No tap.*
+  - Assisted: *Routine work runs. Named emails are drafted — you tap Send.*
+  - Autopilot: *Authorized emails send when confidence is high enough. No tap.*
 - Comparison table:
 
 | | Manual | Assisted | Autopilot |
 | --- | --- | --- | --- |
 | Routine actions | You click | Runs | Runs |
 | Email drafts | You ask | Prepared — you tap Send | Ready, or Needs You if confidence is low |
-| Welcome / title letters | Never auto | Drafted — you tap Send | Sends without a tap |
+| Welcome / title emails | Never auto | Drafted — you tap Send | Sends without a tap |
 | Dates, waives, legal | You | You | You |
 
 - Fail examples: Assisted and Autopilot still describe the same send behavior; Autopilot still says you tap Send; the page says “library letters.”
@@ -209,29 +209,29 @@ Admin or workspace owner only.
 
 **How To Test**
 
-1. Read the Overnight description at the top of the card. Example when everything is on: hourly automation is on; named welcome and title-order letters may send on Autopilot; on Assisted they are drafted for you to tap Send.
-2. Note the clocks: **Last tick** (for example “12 minutes ago”) and **Last draft sweep**. Note **Mailboxes · 1 healthy / 1 connected**, or a **Connect Gmail or Outlook** link.
+1. Read the Overnight description at the top of the card. Example when everything is on: hourly automation is on; named welcome and title-order emails may send on Autopilot; on Assisted they are drafted for you to tap Send.
+2. Note the clocks: **Last run** (for example “12 minutes ago”) and **Last draft sweep**. Note **Mailboxes · 1 healthy / 1 connected**, or a **Connect Gmail or Outlook** link.
 3. Write down the four switches as they are now, then leave them (or restore when a later feature is done):
 
 | Switch | What you click | Example of Allowed / On | Example of Paused / Off |
 | --- | --- | --- | --- |
 | Hourly automation | Off / On | Overnight prep runs | Overnight prep will not run until you turn it on |
-| Named letters | Paused / Allowed | Welcome and title-order letters may send on Autopilot; Assisted = tap Send | Those letters will not send |
-| Aime signature | Agent / Aime | Automatic named letters sign as Aime, Assistant to the agent | Automatic letters use the agent’s signature |
-| Inspection reminders | Paused / Allowed | Deadline reminder may send on Autopilot | Those reminders will not send |
+| Named emails | Paused / Allowed | Welcome and title-order emails may send on Autopilot; Assisted = tap Send | Those emails will not send |
+| Aime signature | Agent / Aime | Automatic named emails sign as Aime, Assistant to the agent | Automatic emails use the agent’s signature |
+| Inspection deadline reminder | Paused / Allowed | Deadline reminder to you may send on Autopilot. Not other reminder tasks; not Inspection Negotiated | That reminder will not send |
 
-4. Inspection reminders is **Paused** on a brand-new workspace. On a workspace that is already in use it may already be **Allowed** — write down what you see, and put it back if you change it. Named letters is **Allowed** unless you turned it off.
+4. Inspection deadline reminder is **Paused** on a brand-new workspace. On a workspace that is already in use it may already be **Allowed** — write down what you see, and put it back if you change it. Named emails is **Allowed** unless you turned it off.
 5. Read **Always true** (four lines, with a red X on the wire line).
 
 **Expected Result**
 
-- The Overnight story matches the switches. Example: if Named letters is Paused, the card should not promise that welcomes may send.
+- The Overnight story matches the switches. Example: if Named emails is Paused, the card should not promise that welcomes may send.
 - Always true, word for word:
-  - Named welcome, title-order, and inspection-reminder letters may send on Autopilot when confidence is high enough. On Assisted they are drafted for one tap. Every other email is drafted for you to send.
+  - Named welcome, title-order, and inspection-deadline emails may send on Autopilot when confidence is high enough. On Assisted they are drafted for one tap. Every other email is drafted for you to send.
   - Deadlines never move themselves.
   - Waives, legal calls, and packet release stay human.
   - Wire and funds mail is never drafted.
-- Fail: Named letters still labelled Autopilot; Inspection reminders promises to send repair or negotiation mail.
+- Fail: Named emails still labelled Autopilot; Inspection deadline reminder promises to send repair or negotiation mail.
 
 **Feedback**
 
@@ -252,20 +252,23 @@ Admin or workspace owner only.
 
 **How To Test**
 
-1. Click **Preview next tick**. Example of a safe dialog: “This tick would send 0 emails” or a small number to addresses you recognize. Click **Got it**. Open your mailbox — nothing new from this click.
+Preview, Draft, Run, and Digest are **one row** on the Overnight card (Settings → AI & Automation → How it runs). They are not on Intelligence → Email and not on the deal Inbox. Scroll past the Manual / Assisted / Autopilot cards if the Overnight buttons are below the fold.
+
+1. Click **Preview next run**. Example of a safe dialog: “This run would send 0 emails” or a small number to addresses you recognize. Click **Got it**. Open your mailbox — nothing new from this click.
 2. If the count is greater than 0, screenshot or write the addresses. Example: `you+buyer@gmail.com` is fine. `lender@bigbank.com` means you must not Run later.
-3. Click **Draft due emails**. Wait for the toast. Example: title **Draft sweep ran**, description “Prepared 4 emails in Email review. Nothing was sent.” The toast still says Email review; the page is Intelligence → **Email**.
-4. Open **Intelligence → Email** (sidebar Intelligence group, item **Email**). Confirm new drafts. Open **Needs You** and look for **To review** or **Ready to send**.
-5. Click **Run AI tasks (sends deal email)**. Read the confirm. It should repeat the Preview. Click the cancel control — **do not** confirm unless every address is yours.
+3. Click **Draft due emails**. Wait for the toast. Example: title **Draft sweep ran**, description “Prepared 4 emails in Intelligence → Email. Nothing was sent.”
+4. Open **Intelligence → Email** (sidebar Intelligence group, item **Email**). Confirm new drafts. Unlinked rows (no Velvet Elves file) should say **Needs a deal**, not **Reply ready**, and the pane must not offer **Approve & send**. Open **Needs You** and look for **To review** or **Ready to send**.
+5. Stay on Overnight. Click **Run AI tasks (sends deal email)**. Read the confirm. It should repeat the Preview. Click the cancel control — **do not** confirm unless every address is yours.
 6. Optional: **Send me my digest** only if Settings → Notifications has your morning digest on. That email is to **you**, not a client.
 
 **Expected Result**
 
 - Preview is this workspace only. Got it sends nothing.
-- On Assisted, named letters that would otherwise send are **not** counted as would-send; they wait for a tap.
+- On Assisted, named emails that would otherwise send are **not** counted as would-send; they wait for a tap.
 - Draft due emails prepares drafts only. Inboxes unchanged.
 - Run AI tasks confirm is clearly a send (“real emails to real people”). Cancel sends nothing.
-- Fail: Preview or Draft puts a letter in a client inbox; Run has no confirm; Cancel still sends.
+- Intelligence → Email may show inbound that has not matched a deal yet so you can file or discard it. Aime must not send a reply until it is linked. The **deal** Email → Inbox stays that file only.
+- Fail: Preview or Draft puts an email in a client inbox; Run has no confirm; Cancel still sends; unlinked mail shows **Reply ready** or **Approve & send**.
 
 **Feedback**
 
@@ -299,8 +302,8 @@ Left sidebar → **Workflow** → **Needs You**
 
 - Breadcrumb: Workflow › Needs You. Title: Needs You, with a pill like **31 waiting · 8 ready to send** (the number is live; Loading must go away).
 - Kind tiles as named above. Row pills may say Ready to send, AI proposal, Draft to review, Decision, AI task blocked.
-- Empty and healthy: *Overnight prep ran. Nothing needs you. Named letters may still send on Autopilot deals; on Assisted they wait for Send.* (The empty card may say “wait for you to tap Send.”)
-- Not empty: *These items still need a person. Named letters may send on Autopilot deals; on Assisted they wait here for Send.* Fail if the page says nothing needs you while cards are still visible.
+- Empty and healthy: *Overnight prep ran. Nothing needs you. Named emails may still send on Autopilot deals; on Assisted they wait for Send.* (The empty card may say “wait for you to tap Send.”)
+- Not empty: *These items still need a person. Named emails may send on Autopilot deals; on Assisted they wait here for Send.* Fail if the page says nothing needs you while cards are still visible.
 - Scheduler down: banner **Automation is not running** or **Automation has stopped**. Admin sees **Open AI & Automation**. There is no **Run AI tasks** button on this page.
 - Ready to send still needs Send. Example: expanding a Ready row shows Send; the party inbox does not have that letter yet.
 - Recovery verbs that exist on the card: **Add contact** (opens that deal’s **Contacts** tab, not the sidebar directory), **Upload document**, **Reconnect mailbox** / **Connect mailbox**, **Change due date**, **Switch this deal off Manual**. A more-than-30-days-overdue card also shows **Use today's date and retry**. Other cards may say **Review signatures**, **Open tasks**, or **Complete your profile** — use the verb on the card. The white box under **Why the AI is asking** is the reason; the muted line under it can be shorter. Do not Fail if both are present.
@@ -370,7 +373,7 @@ Only if you can do this without disturbing a live account. A private window is s
 **Expected Result**
 
 - Same promises as Feature 2.
-- Example: a brand-new sign-up that never changes this control lands on Manual. Named letters will not send until someone chooses Assisted or Autopilot **and** a mailbox is connected.
+- Example: a brand-new sign-up that never changes this control lands on Manual. Named emails will not send until someone chooses Assisted or Autopilot **and** a mailbox is connected.
 
 **Feedback**
 
@@ -394,17 +397,17 @@ Open 100 Test Oak Lane (or your financed file) → the control in the workspace 
 
 **How To Test**
 
-1. Open the file. Find the **Autopilot / Assisted / Manual** control in the header (zap icon). The one-line caption is **inside that menu**, not printed under the chip. Open the menu and read the caption on the current choice. Example on Autopilot: *Authorized letters send without a tap when confidence is high enough. Everything else is drafted for you.*
+1. Open the file. Find the **Autopilot / Assisted / Manual** control in the header (zap icon). The one-line caption is **inside that menu**, not printed under the chip. Open the menu and read the caption on the current choice. Example on Autopilot: *Authorized emails send without a tap when confidence is high enough. Everything else is drafted for you.*
 2. In the same menu, if **Use workspace default** is listed, you may click it once. Example toast: “This deal follows the workspace default (autopilot).” Put the pin back if you need a custom posture for later features.
 3. Open the menu again only to read the other captions, then press Escape. Do not leave a live client file on Manual.
 
 **Expected Result**
 
-- Manual: *You apply AI proposals. Named letters wait until you switch this deal off Manual.*
-- Assisted: *Routine work runs. Named letters are drafted — you tap Send.*
-- Autopilot: *Authorized letters send without a tap when confidence is high enough. Everything else is drafted for you.*
+- Manual: *You apply AI proposals. Named emails wait until you switch this deal off Manual.*
+- Assisted: *Routine work runs. Named emails are drafted — you tap Send.*
+- Autopilot: *Authorized emails send without a tap when confidence is high enough. Everything else is drafted for you.*
 - Use workspace default clears the custom pin. Changing How it runs in Settings later applies to this file again.
-- Fail: Autopilot’s caption still says you tap Send on named letters; Manual still promises unattended send.
+- Fail: Autopilot’s caption still says you tap Send on named emails; Manual still promises unattended send.
 
 **Feedback**
 
@@ -459,7 +462,7 @@ Same file → **Email** tab. Folders are **tabs** labeled Outbox, Sent, Inbox (n
 
 **Expected Result**
 
-- Exact sentence: *Nothing sends until you tap Send. On Autopilot, named welcome / title / inspection-reminder letters may already have gone out on their own. On Assisted they wait here for Send.*
+- Exact sentence: *Nothing sends until you tap Send. On Autopilot, named welcome / title / inspection-deadline emails may already have gone out on their own. On Assisted they wait here for Send.*
 - Three folders: Outbox, Sent, Inbox.
 - Fail: a sent body says “written by AI” or “generated by ChatGPT.”
 
@@ -625,7 +628,7 @@ Letters that may send without a tap — **Autopilot only**, Named letters **Allo
 | Loan officer welcome | Lender | Email and the purchase agreement |
 | Order Title / Confirm Title Order | Title company or title rep | Email and the purchase agreement. Wizard chooses **Order Title** when your side orders title, **Confirm Title Order** when the co-op orders. Confirm Title Order is the courtesy-order letter (“as a courtesy to … engage you as the escrow agent”), not a “has title been ordered?” follow-up. Both withhold personal-property and monetary addenda / amendments. |
 | Pending reminder | You (the account holder), not a client | MLS pending nudge |
-| Inspection response reminder | You (the account holder) | Inspection reminders **Allowed**. Deadline only. No repair or negotiation language |
+| Inspection response reminder | You (the account holder) | Inspection deadline reminder **Allowed**. Deadline only. No repair or negotiation language |
 
 Review Documentation completes with no email when the packet is signed. If signatures are missing, it drafts a chase — that chase waits for Send.
 
@@ -636,13 +639,13 @@ Order Home Warranty is an **internal reminder** to the transaction agent (TC on 
 **Route / Location**
 
 Create **200 Test Maple Ave** (Buyer, financed, emails you control, contract on the file). Header posture → **Manual**.  
-Admin: Settings → AI & Automation → Preview next tick
+Admin: Settings → AI & Automation → Preview next run
 
 **How To Test**
 
 1. Finish the wizard. In the header, pin **Manual**. Caption should match Feature 8.
 2. Open Tasks. **Buyer Welcome** (and Seller / Co-op if you captured them) should still be open, not completed.
-3. Admin: Preview next tick. 200 Test Maple Ave must not be in would-send. Example: “This tick would send 0 emails,” or the list is other Autopilot files only.
+3. Admin: Preview next run. 200 Test Maple Ave must not be in would-send. Example: “This run would send 0 emails,” or the list is other Autopilot files only.
 4. Do **not** Run AI tasks for this feature.
 5. Check Email → Sent. No new buyer welcome from this pin.
 
@@ -679,7 +682,7 @@ _Please note: Status (Pass / Fail / Needs Work), and any comments or issues you 
 **Expected Result**
 
 - To is the buyer. The letter waits. Assisted does not send with no tap.
-- Why the AI is asking can say: *This deal is on Assisted, so Aime drafted the letter for you to tap Send. Autopilot is the setting that sends authorized letters without a tap.*
+- Why the AI is asking can say: *This deal is on Assisted, so Aime drafted the email for you to tap Send. Autopilot is the setting that sends authorized emails without a tap.*
 - **Give this back to the AI** should not appear on that Assisted letter. If it does, do not click it; note Needs Work and use Send or close.
 - After one Send from Complete this task: one message, right To, address + closing date in the body, **agent’s** signature (your name), no “written by AI.” If the body says a file is attached, that file is on the email.
 - A Ready named-letter draft Aime prepared overnight (Intelligence → Email, not this dialog) may still sign as Aime when Aime signature is On. That is a different path. Note it; do not Fail Complete this task for it.
@@ -699,13 +702,13 @@ _Please note: Status (Pass / Fail / Needs Work), and any comments or issues you 
 **Route / Location**
 
 Create **300 Test Pine Ct** (Buyer, financed, tester emails, contract uploaded). Pin **Autopilot**.  
-Admin: Preview next tick, then **Run AI tasks (sends deal email)** only if would-send is entirely yours.
+Admin: Preview next run, then **Run AI tasks (sends deal email)** only if would-send is entirely yours.
 
 **How To Test**
 
 1. Settings → AI & Automation: Named letters **Allowed**, Hourly automation **On**.
 2. Create 300 Test Pine Ct. On **Contacts**: buyer / co-op / lender / title = inboxes you own. Pin Autopilot.
-3. Preview next tick. Example of a go: would-send lists `you+buyer@gmail.com` (Buyer Welcome) only. Example of a stop: would-send lists a live lender you do not control → **Got it** / cancel Run.
+3. Preview next run. Example of a go: would-send lists `you+buyer@gmail.com` (Buyer Welcome) only. Example of a stop: would-send lists a live lender you do not control → **Got it** / cancel Run.
 4. If the list is only yours, confirm **Run AI tasks (sends deal email)**.
 5. Check Tasks: Buyer Welcome may be completed. Check the buyer inbox: at most **one** welcome.
 6. Preview again. That welcome must not be in would-send. Do not expect a second copy if you Run again.
@@ -774,17 +777,17 @@ _Please note: Status (Pass / Fail / Needs Work), and any comments or issues you 
 
 **Route / Location**
 
-Settings → AI & Automation → Inspection reminders (Admin / owner)  
+Settings → AI & Automation → Inspection deadline reminder (Admin / owner)  
 A file with an inspection response deadline → Tasks
 
 **How To Test**
 
-1. On Overnight, write down Inspection reminders as you find it (**Paused** or **Allowed**). A workspace already in use may already be **Allowed**.
+1. On Overnight, write down Inspection deadline reminder as you find it (**Paused** or **Allowed**). A workspace already in use may already be **Allowed**.
 2. If it is Paused, switch to **Allowed** for this feature. You will restore the original setting when you finish.
 3. Open a file that has an inspection response deadline (your financed test file if the contract had one). Find **Inspection Response Reminder** (or the same name on Tasks).
 4. On Autopilot, open the plan / wait for overnight. Read the body: it should be a deadline nudge to **you**.
 5. Pin the same file **Assisted** and confirm that letter is a draft for Send, not already in your inbox.
-6. Put Inspection reminders back to what you wrote in step 1. Do not leave it Paused if it was already Allowed.
+6. Put Inspection deadline reminder back to what you wrote in step 1. Do not leave it Paused if it was already Allowed.
 
 **Expected Result**
 
@@ -814,7 +817,7 @@ Then 300 Test Pine Ct (Autopilot) → Tasks / Needs You
 **How To Test**
 
 1. Disconnect Gmail or Outlook. Confirm the page now shows not connected.
-2. Preview next tick or open a named letter that was waiting on 300 Test Pine Ct. Needs You may show **Reconnect mailbox** or **Connect mailbox**.
+2. Preview next run or open a named letter that was waiting on 300 Test Pine Ct. Needs You may show **Reconnect mailbox** or **Connect mailbox**.
 3. Confirm no new named letter arrived in a party inbox during the disconnected window.
 4. **Connect** again and Test connection before you leave this feature.
 
@@ -997,8 +1000,8 @@ Settings → AI & Automation → Fine-tune: **AI model**, **Email replies**, **A
 
 1. Settings → Notifications. Note whether morning digest is on or off **for you**. Change How it runs (Manual ↔ Assisted) and come back — digest should be unchanged. Posture is not a team-wide digest switch.
 2. Overnight → **Send me my digest**. If digest is off, expect “Nothing to send” / turn it on in Notifications. If digest is on, you (not a client) get the email.
-3. Fine-tune: open Email replies, Automation rules, Confidence gates. Confirm there is **no** Preview next tick / Run AI tasks here. On Automation rules, wait until the **Ask me / Always** rows load (not a grey placeholder). Then read **Never automatic** — dates (cascade), auto-send email, waives, legal, and packet release still need a person.
-4. On 300 Test Pine Ct, pin **Paused**. Admin: Preview next tick. This file must not be in would-send. Named letters must not keep going.
+3. Fine-tune: open Email replies, Automation rules, Confidence gates. Confirm there is **no** Preview next run / Run AI tasks here. On Automation rules, wait until the **Ask me / Always** rows load (not a grey placeholder). Then read **Never automatic** — dates (cascade), auto-send email, waives, legal, and packet release still need a person.
+4. On 300 Test Pine Ct, pin **Paused**. Admin: Preview next run. This file must not be in would-send. Named letters must not keep going.
 
 **Expected Result**
 

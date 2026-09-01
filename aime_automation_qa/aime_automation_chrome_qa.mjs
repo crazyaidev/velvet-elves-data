@@ -334,7 +334,7 @@ async function run() {
 
     // ── Feature 3 Overnight ────────────────────────────────────────────
     log('f3.overnight_title', /Overnight/i.test(how) ? 'PASS' : 'FAIL')
-    log('f3.last_tick', /Last tick/i.test(how) ? 'PASS' : 'FAIL')
+    log('f3.last_run', /Last run/i.test(how) ? 'PASS' : 'FAIL')
     log('f3.last_draft_sweep', /Last draft sweep/i.test(how) ? 'PASS' : 'FAIL')
     log('f3.hourly', /Hourly automation/i.test(how) ? 'PASS' : 'FAIL')
     log('f3.named_letters', /Named letters/i.test(how) ? 'PASS' : 'FAIL')
@@ -362,7 +362,7 @@ async function run() {
 
     // ── Feature 4 Preview / Run (cancel) ───────────────────────────────
     await closeAime(page)
-    const previewBtn = page.getByRole('button', { name: /Preview next tick/i })
+    const previewBtn = page.getByRole('button', { name: /Preview next run/i })
     const previewClicked = await clickVisible(previewBtn, 'f4.preview_button')
     if (previewClicked) {
       const previewDlg = modal(page).first()
@@ -372,7 +372,7 @@ async function run() {
         writeFileSync(path.join(OUT, 'f4_preview.txt'), ptxt)
         log(
           'f4.preview_dialog',
-          /This tick would send/i.test(ptxt) ? 'PASS' : 'FAIL',
+          /This run would send/i.test(ptxt) ? 'PASS' : 'FAIL',
           ptxt.slice(0, 500),
         )
         log('f4.preview_got_it', /Got it/i.test(ptxt) ? 'PASS' : 'FAIL')
@@ -435,8 +435,8 @@ async function run() {
         if (label === 'Automation rules') await dump(page, 'f25_automation_rules')
         log(
           `f25.finetune.${label.replace(/\s+/g, '_').toLowerCase()}`,
-          /Preview next tick|Run AI tasks/i.test(t) ? 'FAIL' : 'PASS',
-          /Preview next tick|Run AI tasks/i.test(t) ? 'send controls leaked into Fine-tune' : 'no send console',
+          /Preview next run|Preview next tick|Run AI tasks/i.test(t) ? 'FAIL' : 'PASS',
+          /Preview next run|Preview next tick|Run AI tasks/i.test(t) ? 'send controls leaked into Fine-tune' : 'no send console',
         )
         if (label === 'Automation rules') {
           log(
