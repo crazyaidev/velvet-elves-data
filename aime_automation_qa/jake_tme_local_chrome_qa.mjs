@@ -180,6 +180,8 @@ async function run() {
       log('settings.trusted_ready', 'FAIL', 'Contract dates radios never painted')
     }
     await dismissOverlays(page)
+    const dateGroupEarly = page.getByRole('radiogroup', { name: /^Contract dates$/i })
+    await dateGroupEarly.scrollIntoViewIfNeeded().catch(() => {})
     const settingsText = await dump(page, 'how_it_runs')
     await shot(page, 'how_it_runs')
     log(
@@ -206,7 +208,17 @@ async function run() {
     )
 
     const dateGroup = page.getByRole('radiogroup', { name: /^Contract dates$/i })
-    const trustedDate = dateGroup.getByRole('radio', { name: /^Trusted/i })
+    const youConfirm = dateGroup.getByRole('radio', { name: /^You confirm$/i })
+    const trustedDate = dateGroup.getByRole('radio', { name: /^Trusted$/i })
+    const assistedDate = dateGroup.getByRole('radio', { name: /^Assisted$/i })
+    log(
+      'settings.two_date_choices',
+      (await youConfirm.count()) === 1 &&
+        (await trustedDate.count()) === 1 &&
+        (await assistedDate.count()) === 0
+        ? 'PASS'
+        : 'FAIL',
+    )
     await trustedDate.click()
     const saveDates = page.getByRole('button', { name: /^Save dates$/i })
     const saveEnabled = await saveDates.isEnabled().catch(() => false)
@@ -225,12 +237,12 @@ async function run() {
         put ? `http ${put.status()}` : 'no PUT /automation/settings',
       )
     }
-    await dateGroup.getByRole('radio', { name: /^Manual/i }).click()
+    await dateGroup.getByRole('radio', { name: /^You confirm$/i }).click()
     if (await saveDates.isEnabled().catch(() => false)) {
       await saveDates.click()
       await page.waitForTimeout(500)
     }
-    log('settings.restore_manual_dates', 'PASS', 'clicked Manual date authority')
+    log('settings.restore_manual_dates', 'PASS', 'clicked You confirm')
 
     // ── Wizard skip-upload is present (do not complete; RAM) ──
     await page.goto(`${APP}/transactions/new`, { waitUntil: 'domcontentloaded', timeout: 45000 })
@@ -276,7 +288,7 @@ async function run() {
     )
     log(
       'deal.menu.trusted_separate',
-      /Dates: Trusted/i.test(menu) && /This is not email send/i.test(menu) ? 'PASS' : 'FAIL',
+      /On for this deal/i.test(menu) && /This is not email send/i.test(menu) ? 'PASS' : 'FAIL',
     )
     log(
       'deal.menu.autopilot_caption',
@@ -287,7 +299,7 @@ async function run() {
         r.url().includes(`/transactions/${DEAL}/automation`) && r.request().method() === 'PUT',
       { timeout: 15000 },
     )
-    await page.getByText('Dates: Trusted', { exact: true }).click()
+    await page.getByText('On for this deal', { exact: true }).click()
     const pinPut = await pinWait.catch(() => null)
     log(
       'deal.pin_trusted',
@@ -298,8 +310,8 @@ async function run() {
 
     await postureBtn.click().catch(() => {})
     await page.waitForTimeout(300)
-    const inheritDates = page.getByRole('menuitem', { name: /Use workspace date setting/i })
-    if (await inheritDates.isVisible().catch(() => false)) {
+    const inheritDates = page.getByRole('menuitem', { name: /Follow the workspace/i })
+    if (await inheritDates.waitFor({ timeout: 8000 }).then(() => true).catch(() => false)) {
       await inheritDates.click()
       log(
         'deal.inherit_copy',

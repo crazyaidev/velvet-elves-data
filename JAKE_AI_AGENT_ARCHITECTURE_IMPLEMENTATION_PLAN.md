@@ -9,6 +9,8 @@
 
 This plan is how I close the gap between the **execution product** already on staging and Jake’s **intelligence architecture**. The bar is Jake §35 (the 30 acceptance principles), interpreted with Jake §37 (smallest technical architecture that honors the product rules).
 
+**Revision, 2 Sep 2026 evening.** The first wrap is built and I tested it in a real browser. The two-grant law held: Autopilot is email, Trusted is dates, and neither implies the other. But I shipped the Contract dates control as three cards (Manual / Assisted / Trusted), and that was an error in this plan, not in Jake's rules. Manual and Assisted behave identically at the only moment that matters (a person clicks before a later date goes live), and those two words already mean something else one card up on the email control. Users read three choices as three behaviors and got confused. §5.2 and Phase 4 are corrected below to a two-state control: **You confirm** (default) and **Trusted**. The rule this adds for every later phase: a user-facing choice exists only when the behavior actually differs. Mirroring the spec's internal vocabulary on screen is not a goal; fewer, clearer controls are.
+
 ---
 
 ## 0. Verdict this plan starts from
@@ -45,11 +47,11 @@ Companion files this plan does not replace:
 | `VE_Transaction_Management_Engine_AI_Agent_Architecture.md` | Product constitution |
 | `JAKE_AI_AGENT_ARCHITECTURE_STAGING_REVIEW.md` | What staging honors vs misses (2 Sep 2026) |
 | `TME_AI_ARCHITECTURE_AND_SMART_AUTOMATION_PLAN.md` | Wrap-engines thesis. Stale on Assisted send and task 235. |
-| `AIME_AI_AUTOMATION_TESTING_GUIDELINES_2026-08-18.md` | Current test law (client Aime chat = fail **this round**) |
+| `AIME_AI_AUTOMATION_TESTING_GUIDELINES_2026-08-18.md` | Testing documentation I write for Audri each round. Describes what shipped so she can test it. **Not a requirements source** |
 | `AUDRI_UPDATED_TASK_LIST_ANSWERS.md` | Dual / utility / title (Q1). Also Q3 extra Autopilot letters and Q13 drop 235. |
 | `IMPLEMENTED_CORE_FUNCTIONS_CHECKLIST.md` | Shipped-function test list (execution layer) |
 
-Audri’s current testing guideline that treats client-facing Aime as a fail is a **round constraint**, not a Jake requirement. Phase 7 ships client Aime only after that guideline is rewritten and the refusal boundary is proven on staging.
+One relationship this plan must never invert: the testing guidelines are **point-in-time documentation of shipped features**. I write them so Audri can test a round. They are not requirements, and nothing in this plan may be justified or gated by them. Requirements come from Jake's architecture document and the answered Jake/Audri questions. Example: the guidelines mark a client-facing Aime chat as a fail this round only because that chat is not in the product yet. That line does not forbid Phase 7. When a phase changes what a tester should see, I update the guidelines to match the product. The guidelines follow the product, never the other way around.
 
 ---
 
@@ -139,7 +141,7 @@ Today Autopilot is send authority. Jake’s **Trusted Mode** is deadline-activat
 | Axis | Values | Owns |
 |---|---|---|
 | **Deal posture** (exists) | Manual / Assisted / Autopilot | Whether routine *actions* auto-apply, whether named *mail* may send **unattended** (Autopilot only), whether drafts arrive Ready |
-| **Obligation autonomy** (new) | Manual / Assisted / Trusted | Whether a contract-derived deadline becomes an **authoritative task** without a human tick |
+| **Contract dates** (shipped 2 Sep, corrected same day) | **You confirm / Trusted** on screen (stored as `obligation_autonomy`) | Whether a contract-derived deadline becomes an **authoritative task** without a human tick |
 
 ### 5.1 Deal posture (keep)
 
@@ -149,17 +151,25 @@ Today Autopilot is send authority. Jake’s **Trusted Mode** is deadline-activat
 
 New tenants stay **Manual** in code (`DEFAULT_TENANT_POSTURE`). The QA tenant on staging is Autopilot by choice; that is not the product default.
 
-### 5.2 Obligation autonomy (add)
+### 5.2 Contract dates (corrected to two states)
 
-Jake §8:
+Jake §8 names Manual, Assisted, and Trusted for deadline verification. In this product, Manual and Assisted are the same at the only moment that matters: a person clicks before a later date becomes official. Jake's Assisted differs only in how much Aime prepares automatically, and Aime prepares either way here. Three cards where two behave the same confused testers on 2 Sep, and Manual / Assisted already mean something else on the email card beside it.
 
-- **Manual:** extract + proposed obligation. Human verifies before authoritative activation.
-- **Assisted:** prepare automatically. Authoritative deadlines still need verification unless a narrower written grant exists.
-- **Trusted:** may auto-activate **high-confidence, explicit, complete, non-conflicting** contract obligations when the user has granted it. Fuzzy, missing, conflicting, or superseding context always returns to a human.
+**The product shows two states:**
 
-Until the setting ships, `amendment_date_gate.py` maps Autopilot to a weak Trusted (explicit, complete, non-conflicting dates auto-apply). Phase 4 **splits** that: Autopilot does not imply Trusted. Trusted is an explicit grant (tenant default plus optional per-deal pin, same shape as posture) with copy that says it activates dates, not mail.
+- **You confirm** (default). Aime prepares the change: old date, new date, source document. A person clicks before the date is official. This covers Jake's Manual and Assisted.
+- **Trusted.** An explicit grant. Clear, complete, non-conflicting contract dates may go live on their own. Unclear, incomplete, conflicting, or superseding context always returns to a person. Trusted never sends mail.
 
-Phase 2 Conductor must use that **same interim mapping** (Autopilot ≈ weak Trusted) so amendment_date_gate and the Conductor do not disagree. Phase 4 is the only place that mapping is removed. Existing Autopilot workspaces that relied on auto-applied amendment dates need an explicit prompt to turn Trusted on; do not silently keep the mapping after the split.
+Jake's Assisted row returns as a third state only if Jake writes the narrower automated-verification grant from §8.2. Do not build it ahead of that call.
+
+**Implementation notes**
+
+- Storage and API keep `obligation_autonomy` with `manual | assisted | trusted` so nothing breaks. Only `trusted` activates; a stored `assisted` already behaves exactly like `manual` (`can_auto_activate_deadlines`). The UI writes `manual` or `trusted` and renders any legacy `assisted` as You confirm. No migration.
+- User-facing words are **Contract dates**, **You confirm**, **Trusted**. Never "obligation autonomy."
+- One card in Settings with one Save. On the deal, a small **Trusted dates** group inside the existing automation menu: on for this deal, off for this deal, follow the workspace. Not a second Manual / Assisted / Trusted block.
+- Every surface that shows this setting repeats the always-true line: unclear or conflicting contract dates never go live on their own.
+
+The split itself shipped and stays law: Autopilot is email, Trusted is dates, and the old interim mapping (Autopilot treated as weak Trusted in `amendment_date_gate` and the Conductor) is gone. Do not reintroduce it. Existing Autopilot workspaces that relied on auto-applied amendment dates wait unless they turn Trusted on. Jake confirms that cutover in Question 1 of `AIME_INTELLIGENCE_WORKFLOWS_FOR_JAKE_AND_AUDRI.md`. The two-state dates control (You confirm / Trusted) is my call, not a Jake question.
 
 Silence, no-edit drafts, and “the wizard already confirmed intake” do not turn on Trusted for later documents.
 
@@ -318,7 +328,7 @@ Workspace header may show one lifecycle line (“Inspection · Financing”) bes
 
 ## 10. Build sequence
 
-Phases land on staging one at a time. They are **not** independently startable: Phase 2 needs Phase 1 facts, Phase 4 needs the Phase 2 Conductor (and the interim Autopilot≈Trusted mapping until the split), Phase 7 needs Phase 2. Parallel *module* work is fine if it does not destabilize named-letter send, Dual Q1, or chat-cannot-send.
+Phases land on staging one at a time. They are **not** independently startable: Phase 2 needs Phase 1 facts, Phase 4 needs the Phase 2 Conductor (the interim Autopilot≈Trusted mapping bridged them until the Phase 4 split removed it), Phase 7 needs Phase 2. Parallel *module* work is fine if it does not destabilize named-letter send, Dual Q1, or chat-cannot-send.
 
 Safety while building on staging: do not Send, confirm Run AI tasks, Send all ready, Disconnect, or Change status on live files. Do not staff `elf@cbstiles.com` on QA files.
 
@@ -358,7 +368,7 @@ Safety while building on staging: do not Send, confirm Run AI tasks, Send all re
 3. Backfill facts from current transaction columns. `verified_fact` only when the wizard or an explicit edit committed the field. Everything else is `reported_fact`.
 4. Packet parse and inbound extract write `reported_fact` (or `hypothesis` when the message is “it looks like”). They do **not** write projection columns. Fast intake still **fills Confirm Details** so the human is not re-typing.
 5. Wizard Confirm Details and explicit field edits promote matching keys to `verified_fact` and then update the projection.
-6. `amendment_date_gate` records proposed obligations as `obligation` + `reported_fact` until confirm. Confirm promotes. Through Phase 3, Autopilot may still auto-apply explicit complete non-conflicting dates (today’s weak Trusted). Phase 4 removes that shortcut.
+6. `amendment_date_gate` records proposed obligations as `obligation` + `reported_fact` until confirm. Confirm promotes. (Sequencing note, now history: through Phase 3, Autopilot could still auto-apply explicit complete non-conflicting dates. The Phase 4 split removed that shortcut on 2 Sep.)
 7. Feature 24 stays: dates-from-email do not auto-move verified dates.
 
 **Frontend**
@@ -372,7 +382,7 @@ Safety while building on staging: do not Send, confirm Run AI tasks, Send all re
 - Inbound “appraisal Tuesday” creates `reported_fact`, leaves `appraisal_date` null, Aime asks (Clarify copy is enough before the Conductor exists).
 - Wizard confirm writes `verified_fact` and projection together. Fast intake still shows extracted dates on Confirm Details before that write.
 - Conflicting amendment does not overwrite; opens Verify deadline.
-- Explicit Autopilot amendment still auto-applies until Phase 4 (document that as current behavior, not a Phase 1 bug).
+- Explicit Autopilot amendment still auto-applies until Phase 4 (sequencing history, like item 6; the Phase 4 split has since removed it).
 
 **Jake closed:** §3.4–3.5, §6.1, §35.3–4 (foundation).
 
@@ -386,7 +396,7 @@ Safety while building on staging: do not Send, confirm Run AI tasks, Send all re
 
 1. `app/services/aime_conductor.py`:
    - Input: `event_type`, `transaction_id`, `actor_id` (nullable for tick).
-   - Load: plan, parties, facts, posture, mailbox, open Needs You, recent decisions. Obligation autonomy: until Phase 4, treat Autopilot as weak Trusted (same rule as `amendment_date_gate`). After Phase 4, load the real setting.
+   - Load: plan, parties, facts, posture, mailbox, open Needs You, recent decisions, and the contract-dates setting. (The interim Autopilot-as-weak-Trusted mapping lived here until the Phase 4 split removed it on 2 Sep. Do not reintroduce it.)
    - Output: `{risk, ladder, specialist_findings, action}` where `action` is call an existing function, open Needs You, open an exception (Escalate), chat reply, or noop.
    - Advisory in this phase is a stub: reuse `suggestion_engine` / `agent_issues`. The Phase 5 object is not required for the tick to route.
 2. Risk classifier: deterministic rules first (overdue, missing doc, legal/wire topic, inspection negotiated, multi-party unsigned). LLM wording only after the bucket is set.
@@ -470,31 +480,34 @@ Each detector emits `{condition, evidence, risk_hint, ladder_hint}`. Conductor r
 
 ### Phase 4 — Contract & Document Intelligence + Trusted Mode
 
-**Goal:** Extract stays literal. Authoritative deadlines stay human-verified by default. Higher autonomy is an explicit grant.
+**Goal:** Extract stays literal. Authoritative deadlines stay human-verified by default. Higher autonomy is an explicit grant that stays simple on screen.
 
-Already in place: packet parse, wizard confirm at create, `contract_resolution` (historical + current controlling), `amendment_date_gate` (Manual/Assisted wait; Autopilot applies only if explicit, complete, non-conflicting). That Autopilot shortcut is the interim mapping Phase 4 removes.
+**Status 2 Sep 2026:** the split shipped in the first wrap. Autopilot no longer auto-applies later dates; only Trusted does, and fuzzy still waits. Packet parse, wizard confirm, `contract_resolution`, and `amendment_date_gate` reading the real setting are all in place. What shipped wrong first was the UI: three date cards (Manual / Assisted / Trusted) plus a second three-option block in the deal menu. Local testing found that confusing, so the same evening I rebuilt it to the two-state control from §5.2 and click-verified it in the browser: one card with You confirm / Trusted, a Trusted dates on / off / follow group in the deal menu, and legacy `assisted` rendering as You confirm.
 
 **Work**
 
-1. **Obligation autonomy setting** on the tenant (default Manual) and optional per-deal pin, independent of posture. Copy: “Let Aime activate clear contract dates without asking me.” Not “send mail.”
-2. Candidate obligation diffs for any controlling later document (not only closing/possession). Needs You “Verify deadline” on Manual/Assisted and on Trusted when any hard-boundary flag is set.
-3. Trusted auto-activate **only if** all are true: language explicit, data complete, no conflicting document, no amendment ambiguity, authority valid, grant present. Else human.
-4. **Cutover:** when Trusted ships, stop treating Autopilot as Trusted. Prompt Autopilot workspaces to choose obligation autonomy. Default the new setting to Manual so amendment dates wait until they opt in. Do not silently preserve today’s auto-apply.
-5. Interpretation requests (“what does this clause mean legally?”) → Request decision / Refuse legal advice. Quote literal text if present.
-6. Conflicts already block send (`**[CONFLICT: …]**`). They must also block Trusted activation.
-7. Human does not re-type extracted dates. Aime prepares the obligation; the human ticks.
+1. **Contract dates setting** on the tenant, default **You confirm**, optional per-deal pin, independent of posture. Two states on screen: **You confirm** and **Trusted**. Copy is about when a date from the contract becomes official. Never “send mail,” never “obligation autonomy.”
+2. Storage keeps `obligation_autonomy` (`manual | assisted | trusted`). Only `trusted` activates. The UI writes `manual` or `trusted`; a legacy `assisted` renders and behaves as You confirm. No migration.
+3. Candidate obligation diffs for any controlling later document (not only closing/possession). Needs You “Verify deadline” whenever dates are You confirm, and on Trusted when any hard-boundary flag is set.
+4. Trusted auto-activate **only if** all are true: language explicit, data complete, no conflicting document, no amendment ambiguity, authority valid, grant present. Else human.
+5. **Cutover** (shipped): Autopilot stopped implying Trusted. Do not silently preserve the old auto-apply. Jake confirms existing Autopilot offices in the questions doc (Question 1). The on-screen dates control is two states, You confirm and Trusted; that is not a Jake question.
+6. Interpretation requests (“what does this clause mean legally?”) → Request decision / Refuse legal advice. Quote literal text if present.
+7. Conflicts already block send (`**[CONFLICT: …]**`). They must also block Trusted activation.
+8. Human does not re-type extracted dates. Aime prepares the obligation; the human ticks.
 
 **Frontend**
 
-- Settings → AI & Automation: Obligation autonomy cards (Manual / Assisted / Trusted) separate from deal posture.
+- Settings → AI & Automation: one **Contract dates** card beside Automation posture. Two choice tiles (You confirm / Trusted), the always-true line (“Unclear or conflicting contract dates never go live on their own”), one **Save dates** button. Not three cards.
+- Deal header: a small **Trusted dates** group inside the existing automation menu: on for this deal, off for this deal, follow the workspace. Not a second Manual / Assisted / Trusted block.
 - Verify deadline Needs You: old value, new value, source document, Confirm / Keep current / Edit.
 
 **Tests**
 
-- Addendum that moves closing does not silently rewrite `closing_date` on Assisted.
+- Addendum that moves closing does not silently rewrite `closing_date` on You confirm.
 - Same addendum on Trusted with explicit complete language auto-activates and writes `verified_fact` + provenance.
 - Fuzzy addendum on Trusted still waits.
-- Autopilot + Obligation Manual after cutover: library letters may send; new amendment dates wait. This is an intentional behavior change from today’s Autopilot auto-apply.
+- A stored legacy `assisted` value behaves exactly like You confirm and renders as You confirm.
+- Autopilot + dates You confirm: library letters may send; new amendment dates wait.
 
 **Jake closed:** §5.4, §8, §24, §35.5–8.
 
@@ -558,7 +571,7 @@ Email is live. SMS, calls, voice notes, and platform messages are not.
 
 **Goal:** Buyers and sellers can ask Aime for status, next steps, and reassurance without legal advice, negotiation, manufactured consensus, or internal risk workflow.
 
-**Gating:** Phase 2 Conductor + client policy module must exist. Rewrite `AIME_AI_AUTOMATION_TESTING_GUIDELINES_2026-08-18.md` so a bounded client Aime is an expected pass, not a fail. Until that rewrite, do not ship the chat on staging in a way that fails the current round.
+**Gating:** Phase 2 Conductor + the client policy module must exist, and Jake makes the timing call (Question 2 in `AIME_INTELLIGENCE_WORKFLOWS_FOR_JAKE_AND_AUDRI.md`). The testing guidelines are not a gate: their current client-chat fail line only records that the chat is not in the product yet. When this phase ships, I update the guidelines so Audri tests the bounded chat as an expected pass.
 
 **Allows (Jake §4.3, §5.6)**
 
@@ -766,7 +779,7 @@ On Terminated, Aime may **offer** LSE as a paid capability. TME must not silentl
 | Risk / ladder | Conductor + `agent_issues.py` hints | Inform / Clarify / Decide copy |
 | Lifecycle | `tme_stages` overlay on Active files; status Completed/Closed stay terminal | header line |
 | Parties | `party_roles.py` + flags on `transaction_parties` | Contacts checkboxes |
-| Trusted Mode | `automation_posture_service.py` sibling setting; `amendment_date_gate.py` reads it | Settings cards |
+| Trusted Mode | `automation_posture_service.py` sibling setting; `amendment_date_gate.py` reads it | One Contract dates card (You confirm / Trusted); Trusted dates on / off / follow group in the deal menu |
 | Advisory | `suggestion_engine.py` recommendation object + ranker | “Do this next”; challenge card |
 | Channels | adapter over inbound email; stubs for SMS/call | Clarify hypothesis card |
 | Client Aime | new policy module; portal chat endpoint; still no `send_email` from chat | portal Aime + team thread |
@@ -788,7 +801,7 @@ Execution cage files that this plan must not bypass: `ai_task_executor.py`, `ai_
 | 2 | Specialists stay hidden | 2 | No specialist strings in UI fixtures |
 | 3 | Provenance-aware truth | 1 | `transaction_facts` types |
 | 4 | Inference ≠ fact | 1, 6 | Inbound date does not write projection |
-| 5 | Deadlines human-verified by default | 4 | Verify deadline on Assisted |
+| 5 | Deadlines human-verified by default | 4 | Verify deadline on You confirm |
 | 6 | Higher deadline autonomy is explicit | 4 | Trusted toggle; Autopilot ≠ Trusted |
 | 7 | Ambiguity increases human involvement | 4 | Fuzzy addendum waits on Trusted |
 | 8 | Literal language, no legal interpretation | 2, 4, 7 | Chat / client refusal fixtures |
@@ -821,7 +834,7 @@ Execution cage files that this plan must not bypass: `ai_task_executor.py`, `ai_
 
 ## 14. Testing strategy
 
-Automated tests first, then staging Chrome with the same safety rules as Features 14–32.
+Automated tests first, then staging Chrome with the same send-safety practice used in the Aime testing rounds.
 
 | Phase | Must-have automated coverage | Staging check (no Send unless the case is a named letter on a plus-address I own) |
 |---|---|---|
@@ -829,7 +842,7 @@ Automated tests first, then staging Chrome with the same safety rules as Feature
 | 1 | reported vs verified writes | inbound date does not move closing |
 | 2 | tick idempotency; legal refusal | Needs You shows Clarify vs Decide |
 | 3 | Active through post-close; Closed still skips executor; consent flags | header lifecycle line |
-| 4 | Trusted vs Autopilot split; fuzzy wait | Verify deadline after addendum |
+| 4 | Trusted vs Autopilot split; fuzzy wait; legacy `assisted` behaves as You confirm | Verify deadline after addendum |
 | 5 | obligation outranks suggestion; strong challenge | “Do this next” |
 | 6 | hypothesis not written as fact | Clarify copy |
 | 7 | client “can I back out?”; no-edit ≠ grant | portal Aime + team thread |
@@ -838,7 +851,7 @@ Automated tests first, then staging Chrome with the same safety rules as Feature
 | 10 | no vendor claim below floor | admin-only Product Intelligence |
 | 11 | Terminated emits handoff JSON | Offer LSE stays inert |
 
-Do not re-test CASA AL1. Do not treat current Audri “client Aime = fail” as Jake acceptance after Phase 7’s guideline rewrite.
+Do not re-test CASA AL1. The Aime testing guidelines are round documentation, not acceptance criteria for this plan: their current client-Aime fail line neither blocks Phase 7 nor records a Jake decision about it. I update the guidelines when a phase ships.
 
 ---
 
@@ -847,8 +860,8 @@ Do not re-test CASA AL1. Do not treat current Audri “client Aime = fail” as 
 Do not guess these in code. Default in brackets is the interim I will implement if the call does not land first.
 
 1. **Naming.** Keep Manual / Assisted / Autopilot for **send**. Add Trusted for **deadlines**, or brand all three with Aime. [Keep Autopilot for send; add Trusted as a separate setting.]
-2. **Obligation autonomy vs posture.** Separate controls or mapped. [Separate. Autopilot ≠ Trusted.]
-3. **Client Aime timing vs current Audri fail.** [Phase 7 after guideline rewrite. Do not ship a client chatbot that fails the current round.]
+2. **Obligation autonomy vs posture.** Separate controls or mapped. [Separate. Autopilot ≠ Trusted. On screen the dates control is two states, You confirm and Trusted. Assisted returns only if Jake writes the §8.2 narrower grant.]
+3. **Client Aime timing.** When do buyers and sellers get the bounded chat. Jake's call (workflows doc Question 2). [Phase 7 in order, after the client policy module exists. The testing guidelines follow the product and get updated when it ships; they are not part of this question.]
 4. **Vendor sample floor.** A number or “do not claim.” [Do not claim until Jake sets a number. Store counts anyway.]
 5. **Escalation threshold.** [Interim in Phase 8; confirm before production brokerage-visible exceptions.]
 6. **Closing vs Complete vs Closed.** Jake Complete is a **stage**. Do not rename status Closed to mean “closing happened, keep working.” [Keep Completed/Closed as terminal history. Stay Active through post-close. Suggest archive when obligations are done. Do not bulk-reopen Closed files.]
@@ -870,7 +883,7 @@ Dependency order, not a calendar. Each phase should land on staging and stay the
 5. Phase 4 Trusted Mode + obligation diffs  
 6. Phase 5 advisory ranker + strong challenge  
 7. Phase 6 communication hypotheses  
-8. Phase 7 client Aime + earned updates (after testing-guideline rewrite)  
+8. Phase 7 client Aime + earned updates (after Jake's timing call; I update the testing guidelines when it ships)  
 9. Phase 8 brokerage exceptions  
 10. Phase 9 preferences travel rules  
 11. Phase 10 learning / vendors (claims off until floor exists)  

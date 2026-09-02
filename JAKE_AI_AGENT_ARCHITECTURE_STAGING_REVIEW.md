@@ -53,7 +53,7 @@ Staging maps those **ideas** onto existing modules. There is no Conductor servic
 | **Transaction Intelligence** (§5.3) | Transaction row + tasks + `compute_stage_pill` + workspace plan + Dual filter | Partial. Stage is a **health pill** (Critical / On Track / In Inspection), not Jake’s 13 lifecycle stages. Dual agency is a use-case + library flags, not a specialist diagnosis. |
 | **Contract & Document Intelligence** (§5.4) | Wizard Fast intake, Textract + LLM extract, `document_packet_parsing`, `contract_resolution` (amendments can supersede), `amendment_date_gate` | Strong extract. Literal-language boundary is in chat/email prompts. Human verification of extracted deadlines is the wizard Confirm Details screen, not a typed “proposed obligation.” |
 | **Advisory Intelligence** (§5.5) | AI Suggestions (`GET /api/v1/ai/suggestions`), briefing `suggested_focus`, Task Queue focus, Needs You | Partial. Detectors are deterministic (financing window, stale comms, missing docs, predicted miss, closing gift). No strong-challenge, no recommendation competition, no talking-points pack. |
-| **Client Interaction Intelligence** (§5.6) | Client portal (Home, Next Steps, Timeline, Documents, Updates) with **no Aime chat**. FSBO has a comment about FloatingAskAi; represented clients do not. | Weak vs Jake. Aligned with current Audri testing rule: a client-facing Aime chat is treated as a fail. |
+| **Client Interaction Intelligence** (§5.6) | Client portal (Home, Next Steps, Timeline, Documents, Updates) with **no Aime chat**. FSBO has a comment about FloatingAskAi; represented clients do not. | Weak vs Jake. Not built yet; the current testing guidelines document that (a client-facing Aime chat is a fail this round). |
 | **Memory & Provenance** (§6.1) | Documents + extract fields + audit log + communication logs. Extract has source strings. No typed fact model (verified / reported / inference / hypothesis / obligation). | Weak. Inference can sit in extracted fields until a person edits them. |
 | **Learning & Pattern** (§6.2) | Analytics extras (avg response time), suggestion feedback endpoint, post-close suggestion detectors | Weak. No governed promotion of patterns. No vendor sample-size claims. |
 | **Product Intelligence** (§6.3) | Platform AI usage / costs consoles | Out of TME file-running. Not Jake’s product-learning loop. |
@@ -138,7 +138,7 @@ Watch, strong challenge, and brokerage-visible exception escalation are **missin
 | 8 | Literal contract language, no legal interpretation | **Honored** | Chat + email policy. |
 | 9 | Perform routine admin when authorized | **Partial** | Named Autopilot letters + drafts. Not general admin. |
 | 10 | Agent and authorized TC share the file | **Honored** | Same workspace when assigned. |
-| 11 | Clients interact with Aime under client rules | **Not honored** | Portal has no Aime. Current Audri test rule also forbids a client Aime chat this round. |
+| 11 | Clients interact with Aime under client rules | **Not honored** | Portal has no Aime yet. The current testing guidelines document that state (a client chat is a fail this round). |
 | 12 | Multiple decision-makers stay individual | **Partial** | Multiple buyer/seller party rows exist. No unanimity / “who approved” model. |
 | 13 | Proactive deadlines and friction | **Partial** | Tasks, briefing, Needs You, suggestions. Not a full friction diagnosis. |
 | 14 | Communication gaps are hypotheses, not invented history | **Partial** | Absence of a call is not treated as “it did not happen.” Missing-channel clarification copy is not built. |
@@ -202,7 +202,7 @@ These are the holes I would treat as “not yet Jake,” not as CASA or polish.
 
 Jake: buyers/sellers may ask Aime for status, next steps, reassurance, and routing. Aime must not give legal advice or negotiate.
 
-Staging: represented client portal has **no assistant**. That is a product choice in the current Aime testing guidelines (client Aime chat = fail this round). It is still a **gap vs Jake**. Building it later must keep the refusal boundary or it will violate §24/§25.
+Staging: represented client portal has **no assistant**, because the chat has not been built. The current Aime testing guidelines document that state (client Aime chat = fail this round); they do not decide it. It is still a **gap vs Jake**. Building it later must keep the refusal boundary or it will violate §24/§25.
 
 ### Parties and consensus (§4.4, §12, §35.12)
 
