@@ -10,13 +10,13 @@
 
 # **Features Currently Complete — Client Feedback Requested**
 
-**Last Updated:** August 19, 2026   
+**Last Updated:** September 1, 2026   
 **Test Environment:** https://app.stage.velvetelves.com   
 **Recommended Browsers:** Chrome (please allow pop-ups)   
 **Reviewer:** Jake and Audri — please fill in the Feedback block under each feature   
 **Sign in:** with your own Velvet Elves account, in your own workspace
 
-**Jan (1 Sep 2026):** Thank you. Features 1–13 are filled (Feature 5 has comments but no Pass / Fail yet). Features 14–26 are still open. Dual, title order, utilities, and home warranty need new files; those steps are in the August 25 guidelines. Notes are under each comment. The updates are on the test site (https://app.stage.velvetelves.com).
+**Jan (1 Sep 2026):** Thank you. Features 1–13 are filled (Feature 5 has comments but no Pass / Fail yet). I tested Features 14–32 on staging and put notes under each one. Dual, title, utility, and warranty used new files. I did not Send or Run AI tasks. Full notes: Aime_Features_14_32_Testing_Notes.md. Test site: https://app.stage.velvetelves.com
 
 # **How To Use This Document**
 
@@ -31,6 +31,8 @@ This is the testing pass for Aime and AI automation as the product runs today. I
 \- Needs You, drafts, inbound mail, money, dates
 
 \- Closing Disclosure on closing-information letters, Terminated vs Closed, cash appraisal recipients
+
+\- New-file task library: Dual, Order Title vs Confirm Title Order, listing utility, home warranty, Closing Gift, no seller Inspection Completed
 
 Each feature has a page address, numbered steps, a concrete example you can copy, what you should see, and a Feedback block.
 
@@ -80,8 +82,10 @@ Create these in **your** workspace. Put **only addresses you control** on the **
 | 400 Test Cedar St | Buyer, financed, **buyer email left blank** | Autopilot | Feature 18 — no guessed address |
 | 500 Test Elm Dr | Buyer, cash, **Appraisal On This Cash Deal? \= Yes** | Assisted | Feature 14 Buy-Cash |
 | 600 Test Birch Way | Seller, cash, co-op \+ TC on Contacts, appraisal \= Yes | Assisted | Feature 14 Sell-Cash |
+| 700 Test Dual Ave | Buyer **and** seller (Both), financed, Contacts has emails you own | Assisted | Feature 28 Dual |
+| 800 Test Utility Ln | Seller, financed, utility information uploaded on Documents | Assisted | Feature 30 Deliver Utility Info |
 
-You do not have to create all six on day one. Create 100 Test Oak Lane first. Add the others when you reach that feature.
+You do not have to create every file on day one. Create 100 Test Oak Lane first. Add Dual, cash, and listing files when you reach those features.
 
 **Worked example — one send-safe path vs one send path**
 
@@ -144,6 +148,8 @@ Do not hunt for these in the product, and do not report them as misses.
 5\. Named letters on 200 / 300 / 400 (Manual, Autopilot, missing email)
 
 6\. Drafts, blocked tasks, inbound wire mail, dates, and copy that should not appear
+
+7\. Dual, Order Title vs Confirm Title Order, listing utility, Order Home Warranty, and Inspection Completed on new listings
 
 # **Section 1 — Mailbox and Settings**
 
@@ -731,7 +737,7 @@ I’m in an admin account and I don’t have the option of “Terminated”. I o
 
 ---
 
-**Jan:** Features 14–26 are not filled yet. Please continue from Feature 14. Dual, Order Title, listing utility, Order Home Warranty, and cash appraisal need new files. Stop at the plan if To is a real outside inbox.
+**Jan:** I tested Features 14–32 on staging. Notes are under each feature. Stop at the plan if To is a real outside inbox.
 
 ## **14\. Cash Appraisal Ordered / Completed**
 
@@ -776,6 +782,8 @@ I’m in an admin account and I don’t have the option of “Terminated”. I o
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work. Buy-Cash To is the buyer. Sell-Cash To is the co-op. I did not Send. The body still reads like a note to me ("Email the buyer and ask..."). I will rewrite that as a client question.
 
 # **Section 4 — Named letters and drafts**
 
@@ -829,6 +837,8 @@ Create **200 Test Maple Ave** (Buyer, financed, emails you control, contract on 
 
 \> \> \_Comments:\_
 
+**Jan:** Needs Work. Maple is Manual. Preview said this run would send 0 emails. Buyer Welcome sits under Handled by AI, so it is hard to find on Tasks. I will keep Manual named emails on the open list.
+
 ## **16\. Assisted — you tap Send**
 
 **Route / Location**
@@ -862,6 +872,8 @@ Create **200 Test Maple Ave** (Buyer, financed, emails you control, contract on 
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work. To is my +buyer inbox. Give this back to the AI is not on the plan. I did not Send. Same Handled by AI hiding as Feature 15.
 
 ## **17\. Autopilot — named letters may send once**
 
@@ -902,6 +914,8 @@ Create **300 Test Pine Ct** (Buyer, financed, tester emails, contract uploaded).
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Skip Run. I did not confirm Run AI tasks. Preview said 0 emails. Pine is Assisted after seed so the hourly run would not fire welcomes.
 
 ## **18\. No buyer email, and no purchase agreement**
 
@@ -945,6 +959,8 @@ Create **300 Test Pine Ct** (Buyer, financed, tester emails, contract uploaded).
 
 \> \_Status:\_ \> \> \_Comments:\_
 
+**Jan:** Needs Work. Cedar Buyer Welcome flags no buyer email and To is empty. No-contract Order Title still offered Send & complete. I will block Order Title until the purchase agreement is on Documents.
+
 ## **19\. Inspection response reminder**
 
 **Route / Location**
@@ -981,6 +997,8 @@ Settings → AI & Automation → Inspection reminders (Admin / owner) A file wit
 
 \> \_Status:\_ \> \> \_Comments:\_
 
+**Jan:** Needs Work (copy date only). To is me. Body is a deadline nudge, no repair or negotiation language. The date printed as TBD. I will print the inspection response date from the file.
+
 ## **20\. Mailbox down**
 
 **Route / Location**
@@ -1006,6 +1024,8 @@ Settings → Email & E-signature → **Disconnect** Then 300 Test Pine Ct (Autop
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Skip. Disconnect is on Email & E-signature. I did not disconnect. Reconnect needs Google and I cannot finish that in this pass.
 
 ## **21\. Prepared drafts and Send all ready**
 
@@ -1045,6 +1065,8 @@ Page title is **Email**, not “AI Emails.”
 
 \> \_Status:\_ \> \> \_Comments:\_
 
+**Jan:** Pass (cancel path). Intelligence page is Email. Send all ready was idle. Deal Email on Maple showed Send all ready (1). I did not confirm it.
+
 ## **22\. Blocked tasks — Give-back, Try now, and recovery**
 
 **Route / Location**
@@ -1077,6 +1099,8 @@ Use the card in front of you; do not hunt for every code.
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work. Needs You did not show Add contact, Upload document, or Switch this deal off Manual on the first screen. Cedar's missing email is on the task plan. I will put those recovery verbs on Needs You.
 
 # **Section 5 — Boundaries**
 
@@ -1124,6 +1148,8 @@ Subject: 100 Test Oak Lane — banking Body: Please send banking details for clo
 
 \> \_Status:\_ \> \> \_Comments:\_
 
+**Jan:** Pass. I filed four test messages on Maple. All four sit on Email Inbox. Wire and banking did not become Ready.
+
 ## **24\. Dates never move themselves**
 
 **Route / Location**
@@ -1156,6 +1182,8 @@ Subject: 100 Test Oak Lane — banking Body: Please send banking details for clo
 
 \> \_Status:\_ \> \> \_Comments:\_
 
+**Jan:** Needs Work. Ask AI from the header did not open the pane in this pass. The closing date stayed October 15, 2026. I did not click Approve.
+
 ## **25\. Digest, Fine-tune, and Paused files**
 
 **Route / Location**
@@ -1185,6 +1213,8 @@ Settings → **Notifications** (morning digest) Settings → AI & Automation →
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work (Paused not pinned). Overnight still holds Preview / Draft / Run / Digest. Fine-tune is a separate card. I did not pin Paused.
 
 ## **26\. Words that should not appear**
 
@@ -1223,6 +1253,191 @@ Fail if you see any of these in the product:
 \_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
 
 \> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Pass. I did not see library letters, written by AI, or Autopilot used as the Fast intake banner on the surfaces I opened.
+
+# **Section 6 — Updated task library (new files)**
+
+Use a **new** transaction for each of these. Older open tasks can still show yesterday’s target and copy. That is expected. The number on the row is the live ID (not the spreadsheet number from 360 onward). Full steps are in the August 25 guidelines. I tested these on staging on 1 Sep 2026.
+
+## **27\. Live IDs stay; Closing Gift is one row**
+
+**Route / Location**
+
+New Buyer financed file and new Seller financed file → **Tasks**
+
+**How To Test**
+
+1\. Create a new Buy-Fin file (or use one created after this round went live). Open Tasks. Find **Closing Gift**.
+
+2\. Create a new Sell-Fin file. Find **Closing Gift** again. Also find **Schedule Pick Up of Sign and Lockbox** and **Change MLS Listing Status to Sold** if those names are on the listing.
+
+3\. Confirm you do **not** have extra Closing Gift rows that exist only because the file is Dual or listing-only.
+
+**Expected Result**
+
+\- One **Closing Gift** on buyer files and on seller files. It is an agent reminder, not an Autopilot client email.
+
+\- On a listing, lockbox and MLS Sold stay. Do not Fail because they are not numbered 470 / 480.
+
+\- Fail: no Closing Gift on a new listing; two Closing Gift rows on a Dual file.
+
+**Feedback**
+
+\_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
+
+\> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Pass. One Closing Gift on the buyer file and on the listing. Listing still has Schedule Pick Up of Sign and Lockbox and Change MLS Listing Status to Sold.
+
+## **28\. Dual agency (Both)**
+
+**Route / Location**
+
+Create **700 Test Dual Ave**. Represent **Buyer and Seller**. Financed. Contract uploaded. Contacts you control. Pin Assisted.
+
+**How To Test**
+
+1\. Finish the wizard. Open **Tasks**.
+
+2\. Confirm **Buyer Welcome** and **Seller Welcome** both exist. Confirm **Co-op Agent Welcome** does **not**.
+
+3\. Confirm **one** Order Title **or** one Confirm Title Order (not both), and **one** Loan Officer Welcome.
+
+4\. Confirm **both** Inspection Scheduled (buyer and seller), **both** Inspection Response Reminder, and **both** Inspection Negotiated.
+
+5\. Open Co-op-target letters only to confirm they are absent (Deliver Utility Info to the buyer’s agent, Confirm Home Warranty, Buyer’s Agent Closing Information).
+
+**Expected Result**
+
+\- Title and Loan Officer once. Buyer and seller party work both populate. No co-op letters (a Both file has no co-op).
+
+\- Fail: Co-op Agent Welcome on Dual; only the buyer inspection reminder; extra Dual-only copies of Deliver Title, Closing Gift, or Internal Thank You that exist only because the file is Both.
+
+**Feedback**
+
+\_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
+
+\> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work. API and Tasks: Buyer Welcome and Seller Welcome exist. Co-op Agent Welcome does not. One Order Title. Deliver Title is two rows (Buyer and Seller). Deliver Utility Info is still on Dual. I will drop co-op utility on Both.
+
+## **29\. Order Title vs Confirm Title Order**
+
+**Route / Location**
+
+Two **new** Buyer financed files → Contract Details (who orders title) → Tasks → kebab → **Email transaction party**
+Do not Send unless To is an inbox you own.
+
+**How To Test**
+
+1\. File A: wizard says **your side** orders title. Tasks should show **Order Title**, not Confirm Title Order.
+
+2\. File B: wizard says the **other side / co-op** orders title. Tasks should show **Confirm Title Order**, not Order Title.
+
+3\. On each, Email transaction party. Read the body. On Confirm Title Order, look for courtesy-order language. It must **not** read as “has title been ordered?”
+
+4\. If Documents has a personal-property or monetary addendum / amendment, confirm it is **not** listed under the plan.
+
+**Expected Result**
+
+\- Same document package on both letters. Difference is the script and which wizard answer created the row.
+
+\- Fail: both Order Title and Confirm Title Order on one file; Confirm Title Order is still a follow-up “was it ordered?”; addenda listed on the plan.
+
+**Feedback**
+
+\_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
+
+\> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work (courtesy name). 710 (title ordered by Buyer) has Order Title, not Confirm. 720 (title ordered by Seller) has Confirm Title Order, not Order Title. Confirm body has courtesy-order language. It greets the title rep as “courtesy to TitleOther.” I will name the co-op there.
+
+## **30\. Deliver Utility Info on a listing**
+
+**Route / Location**
+
+Create **800 Test Utility Ln**. Represent **Seller**. Financed. Upload a utility-information document on **Documents**. Pin Assisted.
+
+**How To Test**
+
+1\. Open Tasks. Find **Deliver Utility Info**.
+
+2\. Kebab → Email transaction party. Note **To:**.
+
+3\. Close without sending if To is not yours.
+
+**Expected Result**
+
+\- **To:** the co-op / buyer’s agent, not your seller.
+
+\- Fail: To is the seller; To is the buyer client; the letter is missing on a new listing that has utility info.
+
+**Feedback**
+
+\_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
+
+\> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Needs Work. To is the co-op plus-address, not the seller. The dialog still has a delivery leg that needs a buyer on the file, so Send is blocked. Listing Deliver Utility Info is one letter to the co-op. I will not require a buyer client email.
+
+## **31\. Order Home Warranty is an internal reminder**
+
+**Route / Location**
+
+New file where the wizard says **your side** orders the home warranty → Tasks → **Order Home Warranty** → Email transaction party
+
+**How To Test**
+
+1\. Create a financed file with home warranty \= yes, ordered by us.
+
+2\. Open Order Home Warranty. Read To, Cc, and the body.
+
+3\. If the wizard says the **other side** orders warranty, expect **Confirm Home Warranty** instead (To \= co-op; TC on copy when a TC is assigned).
+
+**Expected Result**
+
+\- Order Home Warranty: **To:** the transaction agent (you). TC on copy when assigned. Body is an internal reminder to place the order and send the invoice to title and the co-op. Not a letter to a warranty company.
+
+\- It waits for Send (or stays a draft). It does not send unattended.
+
+\- Fail: To is a warranty company; Autopilot already sent it; Dual still created a co-op Confirm Home Warranty (no co-op).
+
+**Feedback**
+
+\_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
+
+\> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Pass. To is me. API body is an internal reminder to place the order and send the invoice to title and the co-op. I did not Send. Listing task name is Confirm Home Warranty Order when the other side orders.
+
+## **32\. No seller Inspection Completed on new listings**
+
+**Route / Location**
+
+New Sell-Fin or Dual file → Tasks
+
+**How To Test**
+
+1\. On a **new** listing, search Tasks for **Inspection Completed**.
+
+2\. You should still see seller **Inspection Scheduled** (notify the seller) and seller **Inspection Response Reminder** / **Inspection Negotiated**.
+
+3\. On a Dual new file, buyer Inspection Completed may still exist (the buyer has the inspection). The extra seller Inspection Completed row must not.
+
+**Expected Result**
+
+\- New files do not get seller Inspection Completed. Open rows on **old** files can stay until someone completes them.
+
+\- Fail: a new listing generates Inspection Completed for the seller.
+
+**Feedback**
+
+\_Please note: Status (Pass / Fail / Needs Work), and any comments or issues you hit.\_
+
+\> \_Status:\_ \> \> \_Comments:\_
+
+**Jan:** Pass. 800 Test Utility Ln has no Inspection Completed. Dual has Inspection Completed on the Buyer only.
 
 [image1]: <data:image/png;base64,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>
 
