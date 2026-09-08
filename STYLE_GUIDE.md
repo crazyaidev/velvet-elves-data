@@ -1,13 +1,15 @@
 # Velvet Elves — UI/UX Style Guide
 
-> The single source of truth for how Velvet Elves looks and feels.
-> Every component, page, modal, dialog, and email template MUST conform to
-> this document. When in doubt, copy an existing pattern that already
-> conforms — don't invent a new one.
+> A working reference for how Velvet Elves looks and feels: tokens,
+> existing patterns, and the shapes we already ship. Copy a live
+> control that already looks right. Do not treat this file as law when
+> it is stale, incomplete, or wrong — branded product UI wins.
 
-This guide is normative. The Tailwind config (`tailwind.config.js`) and
-the global CSS variables (`src/index.css`) are the canonical token
-sources; this document explains **how to compose them**.
+The Tailwind config (`tailwind.config.js`) and the global CSS variables
+(`src/index.css`) are the token sources. This document explains how we
+have composed them. If a rule here would ship a native browser widget,
+a permission-filtered desk, or copy that contradicts current product
+behavior, ignore the rule and fix this file.
 
 ---
 
@@ -600,9 +602,9 @@ or replicate its structure:
 ### 9.3 Selects, datepickers, money inputs — no browser-default controls
 
 **Hard rule: do not ship the browser's default form widgets.** Native
-`<select>`, native `<input type="checkbox|radio|range|color">`, an unstyled
-raw `<textarea>`, and an unstyled raw `<button>` render the OS/Chrome
-control and break the brand. Future UI must use the design-system primitives
+`<select>`, native `<input type="checkbox|radio|range|color|date">`, an
+unstyled raw `<textarea>`, and an unstyled raw `<button>` render the
+OS/Chrome control and break the brand. Use the design-system primitives
 below — not "just this once" native markup with a Tailwind border.
 
 | Need | Use this | Never this |
@@ -614,7 +616,8 @@ below — not "just this once" native markup with a Tailwind border.
 | Primary / secondary actions | `<Button>` (`@/components/ui/button`) | unstyled `<button>` as a form control (icon/hit-area rows that are *not* form fields are still `<button type="button">` with brand classes) |
 | Binary on/off | `<SegmentedControl>` | native checkbox-as-toggle, `Switch`, or a lone custom toggle |
 | File upload | hidden `<input type="file">` **behind** a branded dropzone | a visible native file picker as the UI |
-| Date | native `type="date"` (exception below) | a third-party calendar unless the product already uses one |
+| Date | branded field matching Input chrome; a product calendar popover if the surface already has one | native `type="date"` OS calendar as the visible control |
+| Acknowledgement / multi-select flag | branded check row (`role="checkbox"` button with a drawn box) | native `<input type="checkbox">` |
 
 - Selects: use `<Select>` from `@/components/ui/select` (Radix-based), or
   the `VeSelect` wrapper when the trigger should match `brandedInputClass`.
@@ -624,9 +627,9 @@ below — not "just this once" native markup with a Tailwind border.
   other dropdown in the project. For filter-chip style triggers (e.g.
   the Audit Log filters), override the trigger with `h-9 rounded-full`
   and a `min-w-[160px]` so it reads as a chip, not a boxy form input.
-- Date inputs: native `type="date"` is the **one** allowed browser
-  widget. Use the `min`/`max` HTML attributes for constraints (e.g.,
-  contract acceptance has `max={todayIso}`).
+- Dates: match Input chrome. Do not ship the OS date picker as the
+  visible widget, even if an older revision of this guide called that
+  an exception.
 - Money inputs: use the `<MoneyInput>` helper in
   `NewTransactionWizard.tsx` — `$` prefix + comma formatting + numeric
   internal value.
@@ -758,10 +761,10 @@ These have been explicitly rejected by the client. Don't reintroduce:
 15. **Browser-default form controls.** Never a native `<select>`, never an
     unstyled raw `<textarea>` / `<input>` / checkbox / radio as the visible
     control. Always `<Select>` / `VeSelect`, `<Input>`, `<Textarea>`,
-    `<Button>`, `<SegmentedControl>` from `@/components/ui/*` (or the
-    documented `type="date"` exception). A native widget looks like Chrome,
-    not Velvet Elves, and it will not match the rest of the product. (See
-    § 9.3.)
+    `<Button>`, `<SegmentedControl>` from `@/components/ui/*`, or a branded
+    check row for acknowledgements. A native widget looks like Chrome,
+    not Velvet Elves. There is no leftover exception for `type="date"`.
+    (See § 9.3.)
 16. **Multiple card shapes on one dashboard.** Every block — section
     card, rail card, chart sub-card, KPI card — must share one card
     vocabulary (§ 16.2). Variation in importance is expressed through
@@ -1099,21 +1102,21 @@ decisions on one surface so the cognitive model stays intact.
 
 ---
 
-*Last revised: 2026-08-20 (rev 5 — § 9.3 / anti-pattern 15: no browser-default
-form controls; selectors and other native widgets are forbidden except
-`type="date"`). Rev 4 — 2026-07-09 layout-balance direction from the client's
-AI-wizard Step-1 feedback: § 1 defines "professional = balanced & functional,
-not decorated" (and not flat/characterless); § 4.5 "Layout balance & the
-action bar" makes the Back-left / primary-right rule, the no-lone-control rule,
-and the no-orphaned-disabled-control rule normative; § 13 adds anti-pattern 22.
-Canonical reference: the wizard Upload step's footer-less balanced action bar.)
-Rev 3 (2026-06-23) — flat-modal direction from Jan's
-Task-Templates review: § 6.5 gains the flat header/footer anatomy and a
-clarified edit decision rule, § 6.3 reserves the champagne strip; § 9.3
-adds one-line filter bars + the `SegmentedControl` on/off voice; § 15.4
-adds Collection / list (CRUD) pages; § 13 Anti-Patterns extended with
-items 18–21; canonical refs `TaskTemplateEditModal` /
-`TaskTemplateDetailModal` / `TaskTemplateListPage`). Rev 2 (2026-05-20)
-added § 15 Page Shells and § 16 Dashboard Design. Treat this document as
-the spec; if you disagree with a rule, propose a revision before you ship
-around it.*
+*Last revised: 2026-09-08 (rev 6 — this file is a reference, not law;
+§ 9.3 / anti-pattern 15 drop the native `type="date"` exception; branded
+product UI wins when a rule here is stale or wrong). Rev 5 — 2026-08-20
+§ 9.3 / anti-pattern 15: no browser-default form controls. Rev 4 —
+2026-07-09 layout-balance direction from the client's AI-wizard Step-1
+feedback: § 1 defines "professional = balanced & functional, not
+decorated" (and not flat/characterless); § 4.5 "Layout balance & the
+action bar" makes the Back-left / primary-right rule, the no-lone-control
+rule, and the no-orphaned-disabled-control rule. Canonical reference:
+the wizard Upload step's footer-less balanced action bar. Rev 3
+(2026-06-23) — flat-modal direction from Jan's Task-Templates review:
+§ 6.5 gains the flat header/footer anatomy and a clarified edit decision
+rule, § 6.3 reserves the champagne strip; § 9.3 adds one-line filter bars
++ the `SegmentedControl` on/off voice; § 15.4 adds Collection / list
+(CRUD) pages; § 13 Anti-Patterns extended with items 18–21; canonical
+refs `TaskTemplateEditModal` / `TaskTemplateDetailModal` /
+`TaskTemplateListPage`. Rev 2 (2026-05-20) added § 15 Page Shells and
+§ 16 Dashboard Design.*
