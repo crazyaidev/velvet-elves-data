@@ -178,7 +178,7 @@ Then call the engine via the regenerate endpoint of an existing draft, or run `A
 
 ### A.5.6 `POST /api/v1/ai-emails/{log_id}/edit-and-send` — replace body and send
 
-- **Auth:** Agent token. The Agent must have a connected provider for the actual send to succeed (e.g. iCloud connect first).
+- **Auth:** Agent token. The Agent must have a connected provider for the actual send to succeed (connect Gmail or Outlook first).
 - Path `log_id = <draftId>`, body:
 
   ```json
@@ -298,7 +298,7 @@ Before testing the AI email screens, you need:
 
 1. **A connected email provider** for the logged-in user.
    - Open **Settings → Integrations**.
-   - Click **Connect** under Gmail (or use **iCloud** with an app-specific password if your env has no Google credentials).
+   - Click **Connect** under Gmail (or Outlook if your env has no Google credentials).
    - Stub-mode connect is fine — the UI just needs an active integration row to allow Approve & Send to make a request.
 
 2. **At least one Active transaction owned by this user.**

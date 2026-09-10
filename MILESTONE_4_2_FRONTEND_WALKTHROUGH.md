@@ -59,22 +59,20 @@ The Approve & Send action requires Sarah's account to have at least one connecte
 **What you do:**
 
 1. Click your **avatar in the bottom-left of the sidebar** ➜ **Settings**.
-2. Scroll to **Integrations** (or click the Integrations tab if your build separates them).
-3. Click **Connect** under iCloud (simplest for testing — no OAuth round-trip needed).
-4. In the dialog, enter:
-   - Email: `sarah.chen@icloud.test`
-   - App-specific password: `abcd-efgh-ijkl-mnop` (any 16-character string for stub mode)
-5. Click **Connect**.
+2. Scroll to **Email & E-signature** (or open `/settings/connections`).
+3. Click **Connect** under Gmail (or Outlook).
+4. Complete sign-in in the provider popup.
+5. The row switches to **Connected** with the mailbox address.
 
 **What you should see:**
 
-- The iCloud row flips to **Connected** with a green checkmark.
-- A toast appears: **"iCloud connected."**
+- The Gmail or Outlook row flips to **Connected** with a green checkmark.
+- A toast confirms the mailbox is connected.
 
 **Verify:**
 
-- [ ] An iCloud integration is visible and active for Sarah.
-- [ ] If you prefer Gmail/Outlook and have OAuth credentials in your env, that path also works — the rest of the walkthrough is provider-agnostic.
+- [ ] A Gmail or Outlook integration is visible and active for Sarah.
+- [ ] The rest of the walkthrough is provider-agnostic once a mailbox is connected.
 
 ---
 
@@ -726,7 +724,7 @@ Walk through `/ai-emails` one last time and check:
 - [ ] **Loading skeletons** appear briefly when the list refetches (try the refresh button).
 - [ ] **Mobile / narrow viewport:** resize the browser to ~800px wide. The right "source data" pane stacks below the body pane; everything stays usable.
 - [ ] **Keyboard navigation:** Tab through the list ➜ Enter selects a draft ➜ Tab through the action buttons ➜ Enter triggers the focused action.
-- [ ] **Error toasts** are red-tinted, not green. (Force one by disconnecting the iCloud integration and trying to Approve.)
+- [ ] **Error toasts** are red-tinted, not green. (Force one by disconnecting the mailbox and trying to Approve.)
 - [ ] **Toast positioning** is consistent — bottom-right or wherever your design system places them.
 
 ---
@@ -756,7 +754,7 @@ If you reach the end with all checkboxes ticked:
 | Symptom | Likely cause | Fix |
 |---|---|---|
 | Bell badge doesn't update | Polling delay (60 s) | Refresh the page or wait. |
-| Approve & Send returns 409 | No connected email integration | Reconnect Gmail / iCloud / Outlook in Settings. |
+| Approve & Send returns 409 | No connected email integration | Reconnect Gmail or Outlook in Settings. |
 | Draft never appears after seeding inbound | Inbound hook not registered | Restart the backend; check `app/main.py` startup logs for "register_inbound_hook". |
 | Draft appears but has no transaction context | Marcus's email not on the transaction | Add him as a party (Step 4). |
 | Approve fails with "Draft is in state 'approved'" | Two browser tabs raced | Reload — the first action won. |

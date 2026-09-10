@@ -119,7 +119,7 @@ These walkthroughs use the dev environment (`https://dev.velvetelves.com` or `ht
 ### 3.1 Engine ➜ pending draft (happy path: factual question)
 
 1. Sign in as an Agent who owns at least one Active transaction (e.g. demo "123 Maple St", closing date set).
-2. Connect Gmail (or iCloud) under **Settings → Integrations** so the user has an active provider.
+2. Connect Gmail (or Outlook) under **Settings → Integrations** so the user has an active provider.
 3. Trigger an inbound email by hitting the webhook directly (or actually sending a real email if Gmail Pub/Sub is wired):
 
 ```powershell

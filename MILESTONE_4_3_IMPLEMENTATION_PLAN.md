@@ -94,7 +94,7 @@ These pieces are **reusable** and must not be rebuilt:
 
 | Capability | Where | Notes |
 |---|---|---|
-| Provider-agnostic email send/receive | `app/services/email/{gmail,outlook,icloud}_provider.py`, `factory.py` | Used by AI email approve-and-send. |
+| Provider-agnostic email send/receive | `app/services/email/{gmail,outlook}_provider.py`, `factory.py` | Used by AI email approve-and-send. |
 | Inbound dispatcher + dedupe + transaction matching | `app/services/email/inbound_dispatch.py` | Already calls `ai_email_inbound_hook`. |
 | `vendor_reply` classification | `app/services/ai_email_engine.py:_classify` | Detects `Scheduled: YYYY-MM-DD` and "we can come"/"confirmed for". |
 | Vendor `_draft_vendor_reply` | `ai_email_engine.py` | Extracts ISO date, confidence 0.9 if found, 0.6 otherwise. **Always `pending_review`** (4.2 §5). |

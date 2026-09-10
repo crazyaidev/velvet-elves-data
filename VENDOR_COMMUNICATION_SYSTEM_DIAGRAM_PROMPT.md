@@ -41,7 +41,7 @@ together; nothing in §3 references a stubbed or planned-only path.
 ### 1.3 Compatibility with the rest of the project
 
 - **Reuses Milestone 4.1's email provider abstraction** — outbound goes
-  through `get_email_provider_for_user(...)` so Gmail / Outlook / iCloud
+  through `get_email_provider_for_user(...)` so Gmail / Outlook
   all work without vendor-comm-specific wiring.
 - **Reuses Milestone 4.2's `communication_logs` AI columns** — the proposal
   row links to the existing AI draft via `draft_log_id` and to the vendor's
@@ -91,7 +91,7 @@ CREATE FIVE SWIM LANES, top to bottom:
   1. "Agent / TC / Team Lead" (internal user, signed in)
   2. "Frontend (React)"
   3. "Backend API (FastAPI) + AI Email Engine"
-  4. "Email Provider (Gmail / Outlook / iCloud) + External Vendor"
+  4. "Email Provider (Gmail / Outlook) + External Vendor"
   5. "Postgres (Supabase): communication_logs, vendor_proposals, tasks,
       vendor_colleague_tokens, vendor_background_refreshes"
 
@@ -143,7 +143,7 @@ file/route in a small subtitle when useful.
   B3  [Create single-use vendor_colleague_token (SHA-256 hash stored,
        raw token in URL only)]
   B4  [get_email_provider_for_user() — reuse Milestone 4.1 provider
-       abstraction (Gmail / Outlook / iCloud)]
+       abstraction (Gmail / Outlook)]
   B5  [Provider.send(OutboundEmail)]
   B6  [Insert communication_logs row:
          ai_kind='vendor_request', direction='outbound',
@@ -324,7 +324,7 @@ flowchart TB
         B1["VendorTemplateService.render (deterministic, no LLM)"]
         B2["Substitute tokens + force constrained footer"]
         B3["Create single-use vendor_colleague_token (hash only)"]
-        B4["get_email_provider_for_user (Gmail/Outlook/iCloud)"]
+        B4["get_email_provider_for_user (Gmail/Outlook)"]
         B5["provider.send(OutboundEmail)"]
         B6["Insert communication_logs (outbound, vendor_request)"]
         B7["AuditService.log: vendor_request_sent"]

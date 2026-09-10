@@ -694,7 +694,7 @@ stored (§10 E4). Restore therefore:
    machinery `inbound_hydration.py` already has (`_HYDRATABLE_PROVIDERS =
    {gmail, outlook}`, tenant-mailbox fallback, `_MAX_INTEGRATION_ATTEMPTS`),
 2. inserts it into `communication_logs` and runs the normal inbound hooks,
-3. and when the provider can no longer supply it (disconnected, deleted, iCloud),
+3. and when the provider can no longer supply it (disconnected or deleted),
    inserts what we do have and sets the established `metadata_json.body_preview_only`
    flag so the UI says so honestly rather than showing a blank message,
 4. and records `triage_source = 'user'` so the corpus and telemetry can learn

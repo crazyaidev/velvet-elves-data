@@ -95,7 +95,7 @@ share the link manually.
 Preferred MVP behavior:
 
 - Send from the logged-in user's connected email provider.
-- Supported providers are the existing Gmail, Outlook, and iCloud integrations.
+- Supported providers are the existing Gmail and Outlook integrations.
 - Use the provider email address as the sender where available.
 
 Fallback behavior:
@@ -300,7 +300,7 @@ Frontend should prompt the user to copy the pay link or update the contact.
 
 ### 6.7 Handle Missing User Email Integration
 
-If the user has no Gmail/Outlook/iCloud integration:
+If the user has no Gmail/Outlook integration:
 
 - Create Checkout Session.
 - Mark invoice `open`.
@@ -390,7 +390,7 @@ action that links to the existing email integration settings page.
 Suggested copy:
 
 ```text
-Connect Gmail, Outlook, or iCloud to send invoice emails from your account.
+Connect Gmail or Outlook to send invoice emails from your account.
 ```
 
 ## 8. Stripe Receipt Policy
@@ -465,7 +465,7 @@ src/tests/unit/PaymentComponents.test.tsx
 
 Scenario A: Happy path
 
-1. Connect Gmail/Outlook/iCloud for the sender.
+1. Connect Gmail/Outlook for the sender.
 2. Create invoice with payer contact email.
 3. Click Send.
 4. Confirm invoice status is Open.

@@ -103,17 +103,6 @@ do not spend time writing it up.
 
 ---
 
-### A6. iCloud mailboxes
-
-**Where:** Settings → Email & E-signature.
-
-**Current state:** only **Gmail** and **Outlook** are offered. iCloud is intentionally
-hidden because Apple does not offer a standard one-click sign-in and needs an
-"app-specific password" flow we still want to review. It also has no equivalent of the
-**Test connection** check the other two have.
-
----
-
 ## Section B — Everything else
 
 ### B1. Sharing page (internal staff) — placeholder

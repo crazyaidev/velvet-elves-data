@@ -20,8 +20,8 @@ It complements:
 │   Inbound    │ ──▶ │   Provider   │ ──▶ │  Inbound     │ ──▶ │ Communication│
 │    email     │     │   webhook    │     │  dispatcher  │     │ log (inbound)│
 │  (Gmail/     │     │  /integra-   │     │  + dedupe +  │     │   row #1     │
-│   Outlook/   │     │  tions/email │     │  tx matching │     │              │
-│   iCloud)    │     │  /webhook/{p}│     │              │     │              │
+│   Outlook)   │     │  tions/email │     │  tx matching │     │              │
+│              │     │  /webhook/{p}│     │              │     │              │
 └──────────────┘     └──────────────┘     └──────────────┘     └──────┬───────┘
                                                                        │
                                                                        │ inbound hook
@@ -69,8 +69,8 @@ It complements:
                                                                ▼
                                                   ┌──────────────────────────┐
                                                   │  Email provider .send()  │
-                                                  │  (Gmail / Outlook /      │
-                                                  │   iCloud)                │
+                                                  │  (Gmail / Outlook)       │
+                                                  │                          │
                                                   └────────────┬─────────────┘
                                                                │
                                                                ▼
@@ -95,7 +95,7 @@ It complements:
 
 | Actor | Owns | Cannot do |
 |---|---|---|
-| **Inbound provider** (Gmail/Outlook/iCloud) | Delivering raw messages to our webhook | Decide what we reply with |
+| **Inbound provider** (Gmail/Outlook) | Delivering raw messages to our webhook | Decide what we reply with |
 | **Inbound dispatcher** (`inbound_dispatch.py`) | Persisting one immutable inbound row, tenant resolution, transaction matching, hook fan-out | Generate replies — pure plumbing |
 | **AI Email Engine** (`ai_email_engine.py`) | Classification, drafting, tone safeguards, persisting the outbound draft row | Send the email — that's the API layer's job |
 | **Reviewer** (Agent / TC / TeamLead / Admin who owns the file) | Approving, editing, regenerating, or discarding drafts | Bypass the audit log or send without a connected provider |

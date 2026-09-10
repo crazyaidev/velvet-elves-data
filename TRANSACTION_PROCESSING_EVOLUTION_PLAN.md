@@ -33,7 +33,7 @@ front-loads a verification step instead of guessing.
 **Backend source verified**
 - `app/services/email/` (`base.py` incl. the `EmailAttachment` /
   `InboundEmail` shapes, `gmail_provider.py`, `outlook_provider.py`,
-  `icloud_provider.py`, `inbound_dispatch.py`, `outlook_subscriptions.py`,
+  `inbound_dispatch.py`, `outlook_subscriptions.py`,
   `oauth_state.py`)
 - `app/services/ai_email_engine.py`, `app/api/v1/ai_emails.py` (including
   the full bodies of `run_escalations` and `run_reminders`)
@@ -189,7 +189,7 @@ next", in the same priority order Jake received.
 
 What exists on `develop` today - more than any tester guide describes:
 
-- **Providers and push.** Gmail, Outlook, and iCloud providers under
+- **Providers and push.** Gmail and Outlook providers under
   `app/services/email/`; Gmail Pub/Sub push and Outlook subscriptions
   implemented; users connect mail on Settings - Connections.
 - **Inbound dispatch with basis.** [RC3] `inbound_dispatch.py` persists

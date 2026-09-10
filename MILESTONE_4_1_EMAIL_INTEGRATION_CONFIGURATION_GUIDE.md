@@ -57,7 +57,6 @@ COMMUNICATION_RETENTION_DAYS=730
 Behaviour when the keys are blank:
 
 - Gmail / Outlook OAuth start endpoints return **HTTP 503** with an actionable message ("set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET"). The rest of the app keeps working.
-- iCloud has no env vars — it uses an app-specific password the user pastes into the connect form.
 - `EMAIL_WEBHOOK_SECRET` blank means the inbound webhook accepts unsigned requests. **Always set this in dev and prod** so a public webhook URL cannot be used to flood the communication log.
 - `EMAIL_WEBHOOK_PUBLIC_BASE_URL` blank means webhook URLs are derived from the incoming backend request. Set it to an HTTPS ngrok origin for local inbound testing, or to `https://dev.velvetelves.com` on shared dev if the callback is reached through a different host.
 
@@ -359,25 +358,7 @@ Production troubleshooting:
 
 ---
 
-## Step 3: iCloud (no portal — app-specific password)
-
-Apple does not offer a generic OAuth API for iCloud Mail. The supported pattern is an **app-specific password** against `smtp.mail.me.com:587` (outbound) and `imap.mail.me.com:993` (inbound), implemented in [icloud_provider.py](../velvet-elves-backend/app/services/email/icloud_provider.py).
-
-There is no admin-side configuration for this milestone. Each end user goes through the in-app **Connect iCloud** flow:
-
-1. User signs into https://account.apple.com/.
-2. **Sign-In and Security** → **App-Specific Passwords** → **+** to generate a new password labelled `Velvet Elves`.
-3. Pastes the generated password into the **Connect iCloud** modal in the Velvet Elves frontend along with their iCloud email address.
-4. Backend stores the password Fernet-encrypted in the `integrations.access_token` column.
-
-What you, as the operator, need to confirm:
-
-- The deployment target's outbound network allows TCP `587` to `smtp.mail.me.com` (some VPCs block SMTP). On EC2 dev, confirm the security group permits egress on `587`.
-- The IMAP poller (used because Apple has no push notifications) is scheduled. The MVP path is "user-triggered refresh" — schedule a `POST /api/v1/integrations/email/refresh-inbound?provider=icloud` cron entry every 15 minutes once the endpoint exists; if it doesn't, treat it as a follow-up under Milestone 4.1.
-
----
-
-## Step 4: Inbound webhook secret
+## Step 3: Inbound webhook secret
 
 The webhook receiver uses `EMAIL_WEBHOOK_SECRET` differently per provider ([integrations.py](../velvet-elves-backend/app/api/v1/integrations.py) — `email_inbound_webhook`): Gmail Pub/Sub checks the `X-VE-Webhook-Secret` header, while Microsoft Graph checks each notification's `clientState`.
 
@@ -432,9 +413,8 @@ Before marking Milestone 4.1 complete, walk through this on **both** local and E
 | 2 | Sign in as a test user → **Settings → Integrations → Connect Gmail** | Popup opens to `accounts.google.com`; consent screen lists Velvet Elves and the requested scopes |
 | 3 | Approve consent | Popup closes; integrations list shows Gmail with the connected email |
 | 4 | **Send test email** from the Communication tab on a transaction | Recipient receives the message; `communication_logs` row created with `direction='outbound'`, `status='sent'`, `provider_name='gmail'`, `provider_ref_id` populated |
-| 5 | Reply to that email from the recipient mailbox | Backend logs an inbound row within ~1 minute (Pub/Sub) or after the next poll (iCloud); `transaction_id` is auto-matched by sender address |
+| 5 | Reply to that email from the recipient mailbox | Backend logs an inbound row within ~1 minute (Pub/Sub); `transaction_id` is auto-matched by sender address |
 | 6 | Repeat 2–5 with **Connect Outlook** | Same outcome via Microsoft Graph |
-| 7 | Generate an iCloud app-specific password and run **Connect iCloud** | Modal accepts password; outbound send via iCloud succeeds; IMAP fetch returns recent messages |
 | 8 | Hit `POST /admin/communication-logs/purge-now` with `COMMUNICATION_RETENTION_DAYS=1` and a tenant whose last login is 2 days old | Endpoint returns `{ rows_purged: > 0 }`; reset to 730 afterwards |
 | 9 | Hit a webhook URL with a wrong `X-VE-Webhook-Secret` | Returns 401 |
 | 10 | Disconnect each provider via the UI | Integration row flips `is_active=false`; subsequent send returns 409 with `EmailProviderUnavailable` message |
@@ -461,7 +441,6 @@ These items don't block Milestone 4.1 acceptance but should be tracked as produc
 | Env vars + defaults | [app/core/config.py](../velvet-elves-backend/app/core/config.py) |
 | Gmail OAuth + send/list | [app/services/email/gmail_provider.py](../velvet-elves-backend/app/services/email/gmail_provider.py) |
 | Outlook OAuth + send/list | [app/services/email/outlook_provider.py](../velvet-elves-backend/app/services/email/outlook_provider.py) |
-| iCloud SMTP/IMAP | [app/services/email/icloud_provider.py](../velvet-elves-backend/app/services/email/icloud_provider.py) |
 | Provider factory + token refresh | [app/services/email/factory.py](../velvet-elves-backend/app/services/email/factory.py) |
 | Inbound dispatch + transaction matching | [app/services/email/inbound_dispatch.py](../velvet-elves-backend/app/services/email/inbound_dispatch.py) |
 | HTTP routes (connect / send / webhook / disconnect) | [app/api/v1/integrations.py](../velvet-elves-backend/app/api/v1/integrations.py) |
@@ -475,7 +454,6 @@ This guide closes out the **configuration** portion of these Milestone 4.1 deliv
 
 - [x] Integrate Gmail API (OAuth2 flow, send/receive) — Step 1
 - [x] Integrate Microsoft Graph API for Outlook (OAuth2, send/receive) — Step 2
-- [x] Integrate Apple iCloud email API — Step 3
 - [x] Build email connection flow during account creation — Step 6 (frontend already wired)
 - [x] Define provider-agnostic hooks for future SMS and click-to-call / voice — already in `inbound_dispatch.py` (no config required)
 - [x] Build unified communication log backend — already implemented; verify via Step 7

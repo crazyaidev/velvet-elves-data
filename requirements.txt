@@ -756,7 +756,7 @@ Tech Stack: React + TypeScript (Frontend) | FastAPI (Backend) |
     - Retention: 2 years from last user login; quarterly checks for auto-purge
 
 6.2 Email Integration
-    - MVP providers: Gmail (primary), Outlook, Apple iCloud
+    - MVP providers: Gmail (primary), Outlook
     - Connect email when creating new account
     - Outbound: send via API integration or in-system email
     - Inbound: logged internally, can trigger AI actions
@@ -828,7 +828,7 @@ Tech Stack: React + TypeScript (Frontend) | FastAPI (Backend) |
 ================================================================================
 
 7.1 Email APIs
-    - Gmail API, Microsoft Graph API (Outlook), Apple iCloud
+    - Gmail API, Microsoft Graph API (Outlook)
     - Calendar APIs: Google Calendar, Outlook (schedule appointments,
       send reminders, manage events)
 
@@ -1120,7 +1120,7 @@ Tech Stack: React + TypeScript (Frontend) | FastAPI (Backend) |
 12.1 Mobile App Creation
 12.2 "Orphan Accounts" Marketing & Dashboard
 12.3 AI Agent Custom Video Creator
-12.4 Generic IMAP/SMTP email fallback (iCloud is a named connector only)
+12.4 Generic IMAP/SMTP email fallback
 12.5 Predictive Closing Risk Scoring beyond current drift diagnostics
 12.6 Pattern Detection Across Teams
 12.7 Role-Specific Active Transactions Pages (beyond shared list + workspace)

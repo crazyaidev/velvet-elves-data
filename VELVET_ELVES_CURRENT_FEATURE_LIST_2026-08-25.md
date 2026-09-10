@@ -276,7 +276,6 @@ Do not film these as available. Do not say “coming soon” on camera unless Ja
 | B4 | **Native / mobile app** | Web app only. Responsive desktop-first; not a store app. |
 | B5 | **Two-factor authentication** | In the original requirements. **Not in the source.** Email/password + Google only. |
 | B6 | **Microsoft sign-in** on login/register | Only **Continue with Google** is on those screens. Outlook is for **mailbox** connect, not account login. |
-| B7 | **iCloud Mail** as an inbox the user can connect in Settings | Backend connector exists; Settings → Email & E-signature shows **Gmail and Outlook only**. Do not say “connect iCloud.” |
 | B8 | **Generic IMAP/SMTP** | Explicitly out of MVP. |
 | B9 | **Follow Up Boss** (or any named CRM) | **Generic webhooks** and inbound API keys only. No FUB (or other named) integration. |
 | B10 | **Commission payouts / Stripe Connect payouts** | UI and API exist behind `ve_commission_payouts_v1`, which is **off by default**. Routes 404 while parked. Do not show `/payments/payouts`. |
@@ -334,4 +333,4 @@ Verified against, among others:
 - FSBO share is live: `components/fsbo/FsboShareManagementModal.tsx` + `pages/public/MilestoneViewerPage.tsx`
 - Backend surface: `app/api/v1/router.py`
 
-If a later deploy adds SMS, 2FA, iCloud in Settings, named CRM, or unparks payouts, this file must be revised before those claims go on camera.
+If a later deploy adds SMS, 2FA, named CRM, or unparks payouts, this file must be revised before those claims go on camera.

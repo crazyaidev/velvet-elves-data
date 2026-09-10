@@ -220,7 +220,7 @@ Nine (now more) engines, unified at the UI by posture + Needs You. This is the e
 | Needs You | `needs_you_composer.py`, `NeedsYouPage.tsx` | Residual queue | Send is still a tap |
 | Issue detectors | `agent_issues.py` | Deterministic blockers/warnings/watch — no LLM | No |
 | Suggestions | `suggestion_engine.py` | Deterministic cards (risk/task/comms/relationship) | No |
-| Mailbox census | `mailbox_census.py` | Healthy Gmail/Outlook/iCloud per tenant | No |
+| Mailbox census | `mailbox_census.py` | Healthy Gmail/Outlook per tenant | No |
 
 ### 4.2 Class A library letters (closed set in `_EMAIL_PLAYBOOK`)
 

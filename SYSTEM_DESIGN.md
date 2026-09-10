@@ -80,7 +80,7 @@ Utils           │ Encryption, security, logging helpers
 | File Storage | Supabase Storage | Signed URLs; documents bucket |
 | Hosting | AWS ECS Fargate + ECR; CloudFront for SPAs | Stage and prod; Secrets Manager |
 | Platform mail | SendGrid HTTP API | Welcomes, invites, registration alerts — not SES |
-| User mailboxes | Gmail, Outlook, iCloud | OAuth (Gmail/Outlook) or app-password (iCloud) |
+| User mailboxes | Gmail, Outlook | OAuth |
 | E-sign | DocuSign | HelloSign not wired |
 | Payments | Stripe | Client invoices + public pay links + $49/deal credit wallet |
 | Frontend State | React Query (TanStack) | Server state caching, mutations, optimistic updates |
@@ -1183,7 +1183,7 @@ GET    /api/v1/automation/needs-you
 | Prefix | Purpose |
 |--------|---------|
 | `/onboarding` | Status, company, logo, complete |
-| `/integrations` | Gmail / Outlook / iCloud / DocuSign OAuth, CRM keys |
+| `/integrations` | Gmail / Outlook / DocuSign OAuth, CRM keys |
 | `/documents` | Upload, versions, OCR geometry, e-sign, flag-deletion, generate-from-template |
 | `/document-templates` | Fillable PDF library |
 | `/wizard-runs` | Cross-device wizard drafts |

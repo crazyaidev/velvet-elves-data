@@ -212,7 +212,7 @@ Smoke **W0-S-*** is re-run after every later fix.
 | W0-S-01 | Sign in as `shyna.elene@minafter.com`. Land on an admin dashboard. | Session holds; no console error. |
 | W0-S-02 | Open `/needs-you`. Wait until the header pill is not “Loading”. | Pill shows `N waiting`; empty state only if N=0. Scheduler banner if unhealthy. |
 | W0-S-03 | Open `/admin/confidence`. | Posture cards + status chip + Preview / Draft due emails / Run AI tasks / digest. |
-| W0-S-04 | Open `/settings/connections`. | Gmail/Outlook/iCloud state visible; Test connection does not send mail. |
+| W0-S-04 | Open `/settings/connections`. | Gmail/Outlook state visible; Test connection does not send mail. |
 | W0-S-05 | Open any Active deal. | Posture chip Manual/Assisted/Autopilot; Tasks / Email / Contacts / Activity tabs. |
 | W0-S-06 | 390px: `/needs-you`. | No horizontal overflow; Export CSV and primary actions named (`aria-label` ok). |
 

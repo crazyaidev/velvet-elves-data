@@ -22,7 +22,7 @@ Sources consulted for this plan:
 - Requirements: `requirements.txt` (4.8 Notifications & Reminders, 5.3 Document Emailing, 6.1 to 6.8 Communication Engine, 7.1 Email APIs, 8 AI & Automation).
 - Architecture: `SYSTEM_DESIGN.md`, `milestones.txt`.
 - Prior plans: `MILESTONE_4_2_AI_EMAIL_WORKFLOW.md`, `MILESTONE_4_3_IMPLEMENTATION_PLAN.md`, `MILESTONE_4_1_EMAIL_INTEGRATION_CONFIGURATION_GUIDE.md`, `LISTEDKIT_COMPETITIVE_ANALYSIS_AND_FEATURE_IMPROVEMENT_PLAN.md`, `STYLE_GUIDE.md`, `FRONTEND_UI_WORKFLOW_LOGIC.md`.
-- Backend source: `app/services/ai_email_engine.py`, `app/api/v1/ai_emails.py`, `app/services/email/inbound_dispatch.py`, `app/services/email/base.py`, `app/services/email/{gmail,outlook,icloud}_provider.py`, `app/services/email/factory.py`, `app/services/task_notification_service.py`, `app/services/email_service.py`, `app/services/vendor_proposal_service.py`.
+- Backend source: `app/services/ai_email_engine.py`, `app/api/v1/ai_emails.py`, `app/services/email/inbound_dispatch.py`, `app/services/email/base.py`, `app/services/email/{gmail,outlook}_provider.py`, `app/services/email/factory.py`, `app/services/task_notification_service.py`, `app/services/email_service.py`, `app/services/vendor_proposal_service.py`.
 - Frontend source: `src/pages/AiEmailReviewPage.tsx`, `src/hooks/useAiEmails.ts`, `src/pages/admin/AdminAIGovernancePage.tsx`, `src/utils/constants.ts`.
 - ListedKit public pages (June 2026): the feature pages cited inline in Section 5.
 
@@ -30,7 +30,7 @@ Sources consulted for this plan:
 
 ## 1. Executive Summary
 
-The auto-emailing feature that exists today (Milestone 4.2, extended by 4.3 for vendors) is a **well-built but one-directional** system. It does exactly one job: when an email comes in, it classifies the message, drafts a grounded reply, attaches a confidence score and a list of assumptions, and routes the draft to a human review queue (`/ai-emails`) where the file owner approves, edits, regenerates, or discards it. The send always goes out through the user's own connected Gmail, Outlook, or iCloud account. The architecture is clean, the safeguards are real, and the audit trail is complete.
+The auto-emailing feature that exists today (Milestone 4.2, extended by 4.3 for vendors) is a **well-built but one-directional** system. It does exactly one job: when an email comes in, it classifies the message, drafts a grounded reply, attaches a confidence score and a list of assumptions, and routes the draft to a human review queue (`/ai-emails`) where the file owner approves, edits, regenerates, or discards it. The send always goes out through the user's own connected Gmail or Outlook account. The architecture is clean, the safeguards are real, and the audit trail is complete.
 
 It is not yet the full feature the requirements describe, and it is behind ListedKit on the parts of email automation that real-estate users feel most:
 
@@ -58,7 +58,7 @@ This section is the canonical description of what runs today. It is deliberately
 ### 2.1 The inbound-to-draft pipeline
 
 ```
-Inbound email (Gmail / Outlook / iCloud)
+Inbound email (Gmail / Outlook)
    -> provider webhook (re-fetch message)
    -> dispatch_inbound_email()                         [inbound_dispatch.py]
         - resolve tenant from the user's integration
@@ -111,7 +111,7 @@ This surface already conforms to `STYLE_GUIDE.md` (champagne accents, IBM Plex M
 
 ### 2.6 Providers and outbound primitives
 
-`OutboundEmail` (`email/base.py`) already supports `attachments: list[EmailAttachment]`, `cc`, `bcc`, `in_reply_to`, and AI metadata, and `communication_logs` already carries `attachment_ids`, `message_id_header`, `in_reply_to_header`, and `thread_key`. The provider abstraction (`EmailProvider.send`) is in place for Gmail, Outlook, and iCloud. So the data shapes needed for **attachments and threading** already exist; closing those two gaps is wiring, not new primitives. **[Corrected 2026-06-08: scheduled send is the exception. `OutboundEmail` has no send-at field and there is no scheduled-email table, so Pillar C requires the new `scheduled_emails` table described in Section 15; it is not just wiring.]**
+`OutboundEmail` (`email/base.py`) already supports `attachments: list[EmailAttachment]`, `cc`, `bcc`, `in_reply_to`, and AI metadata, and `communication_logs` already carries `attachment_ids`, `message_id_header`, `in_reply_to_header`, and `thread_key`. The provider abstraction (`EmailProvider.send`) is in place for Gmail and Outlook. So the data shapes needed for **attachments and threading** already exist; closing those two gaps is wiring, not new primitives. **[Corrected 2026-06-08: scheduled send is the exception. `OutboundEmail` has no send-at field and there is no scheduled-email table, so Pillar C requires the new `scheduled_emails` table described in Section 15; it is not just wiring.]**
 
 ---
 
@@ -121,7 +121,7 @@ Mapping the live code to the requirements shows the precise holes.
 
 | Requirement | What it asks for | Status today | Gap to close |
 | --- | --- | --- | --- |
-| 6.2 Email Integration | Gmail/Outlook/iCloud connect, outbound + inbound | Implemented (providers, webhooks, dispatch) | None |
+| 6.2 Email Integration | Gmail/Outlook connect, outbound + inbound | Implemented (providers, webhooks, dispatch) | None |
 | 6.3 AI Email Responsibilities | Auto-respond to doc requests and factual questions, CC owner | Implemented for inbound | Document **attachment** never sent; on-demand initiation missing |
 | 6.4 AI Draft Safeguards | Draft not sent, side-by-side review, assumptions bold, human final say | Implemented well | None for inbound; extend to new flows |
 | 6.5 Tone & Guidelines | Configurable style, no legal advice, disclaimer | Implemented in engine | **No UI** to configure; signature/identity wrong (Section 4.4) |

@@ -941,7 +941,7 @@ failure. This mirrors the AI provider test, which set the precedent for exactly
 the same reason ("I switched to Claude and nothing works").
 
 **`verify_connection` defaults to "cannot verify", not True.** A provider that
-has not implemented a probe (iCloud) never claims health it has not checked.
+has not implemented a probe never claims health it has not checked.
 
 **I-13 solved in code, not data.** The plan proposed renaming the template
 families. That needs a migration, and per `ai-task-executor-automated-tasks` the

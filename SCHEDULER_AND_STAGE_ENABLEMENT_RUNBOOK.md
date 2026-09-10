@@ -26,8 +26,8 @@ database:
 | `POST /internal/schedules/tick` with the *Google* client secret deliberately broken | "no mail can leave" | **2 emails** sent — those users were on **Outlook**, whose refresh uses the *Microsoft* secret I had left working |
 
 Both were my error, and the second is the instructive one: a safety guard that
-covers one provider is not a safety guard. The system has three (Gmail, Outlook,
-iCloud), and a cross-tenant job will find whichever one is live.
+covers one provider is not a safety guard. The system has two (Gmail, Outlook),
+and a cross-tenant job will find whichever one is live.
 
 **Rule that follows: never "test" a tick against a database that has live mail
 credentials you have not personally accounted for.** On the dev DB right now
@@ -106,7 +106,7 @@ third parties is the AI task executor. Choose one:
   select t.name, i.provider, i.provider_email, i.is_active
   from integrations i join users u on u.id = i.user_id
   join tenants t on t.id = u.tenant_id
-  where i.is_active and i.provider in ('gmail','outlook','icloud');
+  where i.is_active and i.provider in ('gmail','outlook');
   ```
 - **(b)** Disconnect any mailbox that is not yours for the duration of the test.
 

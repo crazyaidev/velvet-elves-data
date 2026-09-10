@@ -579,11 +579,10 @@ NOTE: Communication features must align with FRONTEND_UI_WORKFLOW_LOGIC.md
 
 MILESTONE 4.1 - Email Integration (Week 14)
 -----------------------------------------------------------------------------
-STATUS: COMPLETE (Gmail, Outlook, named iCloud connector; generic IMAP deferred)
+STATUS: COMPLETE (Gmail, Outlook; generic IMAP deferred)
 Deliverables:
   [ ] Integrate Gmail API (OAuth2 flow, send/receive)
   [ ] Integrate Microsoft Graph API for Outlook (OAuth2, send/receive)
-  [ ] Integrate Apple iCloud email API
   [ ] Build email connection flow during account creation
   [ ] Define provider-agnostic hooks for future SMS and click-to-call / voice
       integrations
@@ -1104,7 +1103,7 @@ POST-MVP ROADMAP (still not in the shipping product)
 ================================================================================
 
 - Native/hybrid mobile app
-- Generic IMAP/SMTP email fallback (iCloud is a named connector only)
+- Generic IMAP/SMTP email fallback
 - Specific CRM integrations (Follow Up Boss, etc.) — generic webhooks only
 - Advanced predictive analytics beyond current drift diagnostics
 - AI custom video creator for milestones

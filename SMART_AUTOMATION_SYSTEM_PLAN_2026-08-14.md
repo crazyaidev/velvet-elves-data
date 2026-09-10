@@ -290,7 +290,7 @@ Each phase lists: goal, backend, frontend, acceptance, and the finding/doc it cl
 3. **Deploy `GET /automation/preview` to production** so Run AI tasks is never blind.  
 4. **Grant or disable cost sync.** Either attach `ce:GetCostAndUsage` to `velvet-elves-prod-backend-task-role` or skip cost sync in prod until granted (failed sync must not look like a tick failure).  
 5. **Operator page:** if `ai_tasks_completed` > tenant-configured ceiling (default 0 for a brand-new production tenant’s first 24h is too strict; default **alert at ≥ 1** for 48 hours after first enable, then a higher ceiling). CloudWatch on `schedule tick:` log line.  
-6. **Mailbox census endpoint** (admin/platform): count of active Gmail/Outlook/iCloud per tenant, last token health — the runbook SQL as an API so nobody fires a tick blind again.
+6. **Mailbox census endpoint** (admin/platform): count of active Gmail/Outlook per tenant, last token health — the runbook SQL as an API so nobody fires a tick blind again.
 
 **Frontend**
 

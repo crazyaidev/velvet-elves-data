@@ -2432,7 +2432,7 @@ The May 2026 Account-modal catalog below is **historical** (those panes moved to
 
   1. **Company.** Three text fields with hardcoded defaults (Company Name "Velvet Elves Realty", Contact Email, Phone) + **Save changes** button. *Visual-only — no onClick, no persistence.*
 
-  2. **Email Integrations** *(Milestone 4.1).* Section header has a **Refresh** button (spinner during fetch). Provider rows for **Gmail** and **Outlook** (iCloud row hidden behind `SHOW_ICLOUD = false`). Each row shows brand glyph, provider name, connected email or help text, "Connected" green pill + connection date if active, and a **Connect** (orange) or **Disconnect** (outline) button. Errors render as a red banner above the rows. *Fully wired — see §4 actions below.*
+  2. **Email Integrations** *(Milestone 4.1).* Section header has a **Refresh** button (spinner during fetch). Provider rows for **Gmail** and **Outlook**. Each row shows brand glyph, provider name, connected email or help text, "Connected" green pill + connection date if active, and a **Connect** (orange) or **Disconnect** (outline) button. Errors render as a red banner above the rows. *Fully wired — see §4 actions below.*
 
   3. **E-Signature.** Single DocuSign tile with logo, account email, connection date, and **Connect** / **Disconnect** button. Connect launches the 3-step wizard modal (Intro → Authorize popup → Done); see §27.14 in the testing doc / `ConnectEsignWizardModal` for full flow. Disconnect uses a native `confirm()` dialog. *Fully wired.*
 
@@ -2506,9 +2506,8 @@ The May 2026 Account-modal catalog below is **historical** (those panes moved to
 - **Role-based visibility:** None today. *Planned:* gate Branding, Task Templates, and AI Configuration to Admin / Team Lead.
 - **State-based visibility:**
   - Provider rows: "Connected" pill, account email, and Disconnect button only render once an integration is linked. Unconnected rows show help text + Connect button.
-  - iCloud row: hidden behind `SHOW_ICLOUD = false` flag.
   - Snapshot Inbox tile shows live `connected/total` from `/api/v1/integrations`; E-Sign tile flips green when DocuSign is connected; Credits + Templates tiles are hardcoded.
-- **Feature flags:** `SHOW_ICLOUD` (off). No other tenant flags surfaced on this page.
+- **Feature flags:** none on this page.
 - **Responsive behavior:** Sticky left-rail nav hidden below 1024 px; Snapshot tiles wrap to 2x2 on narrow screens. Card body content stacks vertically.
 
 ### 6. Navigation Flows
@@ -3323,7 +3322,7 @@ Non-platform users receive a 404 (route tree does not leak).
 - Rich text editors for template content
 
 **Integrations tab:**
-- Email: Gmail / Outlook / iCloud connection status with Connect/Disconnect buttons
+- Email: Gmail / Outlook connection status with Connect/Disconnect buttons
 - E-Signature: DocuSign / HelloSign connection status
 - Calendar: Google Calendar / Outlook Calendar connection status
 - Each integration: status indicator (Connected/Disconnected), connected account email, Connect/Disconnect/Reconnect buttons
@@ -3611,7 +3610,7 @@ Retired from navigation: standalone `timeline`, `checklist`, `review` (kept as d
 4. **Tagged notes** for checklist printing
 5. **Seller escrow overage reminder defaults**
 6. **Preferred vendor list management**
-7. **Email/calendar integration** connections (Gmail, Outlook, iCloud)
+7. **Email/calendar integration** connections (Gmail, Outlook)
 8. **E-signature provider** connection (DocuSign, HelloSign)
 9. **First-time user overlay tutorial** (skippable, re-viewable)
 10. **Post-first-transaction profile completion prompt** if required fields or checklist templates missing

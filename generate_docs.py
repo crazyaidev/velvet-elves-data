@@ -1267,6 +1267,23 @@ def create_aime_intelligence_workflows_for_jake_and_audri_doc():
     )
 
 
+def create_automation_system_operation_doc():
+    """Generate a .docx of AUTOMATION_SYSTEM_OPERATION.md — how automation
+    actually operates on the live product (audience: reviewers)."""
+    _create_markdown_doc(
+        "AUTOMATION_SYSTEM_OPERATION.md",
+        "AUTOMATION_SYSTEM_OPERATION.docx",
+    )
+
+
+def create_welcome_email_delivery_by_automation_posture_doc():
+    """Generate a .docx of WELCOME_EMAIL_DELIVERY_BY_AUTOMATION_POSTURE.md."""
+    _create_markdown_doc(
+        "WELCOME_EMAIL_DELIVERY_BY_AUTOMATION_POSTURE.md",
+        "WELCOME_EMAIL_DELIVERY_BY_AUTOMATION_POSTURE.docx",
+    )
+
+
 def create_ai_wizard_status_report_doc():
     """Generate a .docx export of AI_WIZARD_TESTING_STATUS_REPORT.md (client
     audience: Audri / Jake).
@@ -3714,7 +3731,7 @@ TESTING_REVIEW_FEATURES = [
         "route": "Settings → Email & E-signature card (/settings/connections). These connections are per-user — every internal user connects their own accounts.",
         "how_to_test": [
             ("Email integrations.", [
-                "Confirm a Gmail row and an Outlook row (iCloud is intentionally hidden for now).",
+                "Confirm a Gmail row and an Outlook row.",
                 "Click Connect on the Gmail row and complete sign-in in the Google popup. After approval the row switches to Connected with your email and the date.",
                 "Repeat on the Outlook row using a Microsoft 365 account.",
                 "Cancel a popup mid-way and confirm the row stays on 'Connect' without an error.",
@@ -3733,7 +3750,6 @@ TESTING_REVIEW_FEATURES = [
         ],
         "future_ideas": [
             "Show a 'Last synced' time and a manual 'Sync now' button per inbox.",
-            "Re-enable the iCloud row once the Apple app-specific-password flow is reviewed.",
             "Show the monthly DocuSign envelope count remaining so users do not hit their quota by surprise.",
         ],
     },
@@ -5028,6 +5044,8 @@ TARGET_BUILDERS = {
     "smart-ai-automation-for-jake": create_smart_ai_automation_for_jake_doc,
     "aime-transaction-workflow-questions": create_aime_transaction_workflow_questions_for_jake_doc,
     "aime-intelligence-workflows": create_aime_intelligence_workflows_for_jake_and_audri_doc,
+    "automation-system-operation": create_automation_system_operation_doc,
+    "welcome-email-delivery-by-automation-posture": create_welcome_email_delivery_by_automation_posture_doc,
     "first-conference-listedkit-advantage-strategy": create_first_conference_listedkit_advantage_strategy_doc,
 }
 
@@ -5171,6 +5189,14 @@ TARGET_ALIASES = {
     "aime-intelligence-workflows": "aime-intelligence-workflows",
     "jake-audri-intelligence": "aime-intelligence-workflows",
     "intelligence-workflows": "aime-intelligence-workflows",
+    "automation_system_operation": "automation-system-operation",
+    "automation_system_operation.md": "automation-system-operation",
+    "automation_system_operation.docx": "automation-system-operation",
+    "automation-system-operation": "automation-system-operation",
+    "welcome_email_delivery_by_automation_posture": "welcome-email-delivery-by-automation-posture",
+    "welcome_email_delivery_by_automation_posture.md": "welcome-email-delivery-by-automation-posture",
+    "welcome_email_delivery_by_automation_posture.docx": "welcome-email-delivery-by-automation-posture",
+    "welcome-email-delivery-by-automation-posture": "welcome-email-delivery-by-automation-posture",
     "first_conference_listedkit_advantage_strategy": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.md": "first-conference-listedkit-advantage-strategy",
     "first_conference_listedkit_advantage_strategy.docx": "first-conference-listedkit-advantage-strategy",

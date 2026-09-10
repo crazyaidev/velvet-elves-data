@@ -2709,7 +2709,7 @@ Settings → Email & E-signature card (/settings/connections). These connections
 **How To Test**
 
 - Email integrations.
-  - Confirm a Gmail row and an Outlook row (iCloud is intentionally hidden for now).
+  - Confirm a Gmail row and an Outlook row.
   - Click Connect on the Gmail row and complete sign-in in the Google popup. After approval the row switches to Connected with your email and the date.
   - Repeat on the Outlook row using a Microsoft 365 account.
   - Cancel a popup mid-way and confirm the row stays on 'Connect' without an error.
@@ -2728,7 +2728,6 @@ Settings → Email & E-signature card (/settings/connections). These connections
 **Future Improvement Suggestions**
 
 - Show a 'Last synced' time and a manual 'Sync now' button per inbox.
-- Re-enable the iCloud row once the Apple app-specific-password flow is reviewed.
 - Show the monthly DocuSign envelope count remaining so users do not hit their quota by surprise.
 
 **Feedback**
