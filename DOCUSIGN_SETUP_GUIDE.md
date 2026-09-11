@@ -409,14 +409,14 @@ Safe to invoke on any in-flight envelope; idempotent if the state is already cur
 
 Any in-flight envelope exposes a **Void Envelope** action in the row's dropdown menu (internal roles only). This calls `POST /api/v1/documents/{id}/esign/void`, flips the document to `voided` locally, and tells DocuSign to revoke the signers' links. Use this before resending if a signer needs to be swapped or the subject was wrong.
 
-## Production migration (later, not now)
+## Production migration
 
-The Apps and Keys page already shows the Velvet Elves app with **Go Live Status: "Ready to Submit / Promote to production"**. This means the demo Integration Key has accumulated enough successful API calls to be eligible for promotion. When ready to ship to real users:
+This sandbox guide does not cover live accounts. Use
+[DOCUSIGN_PRODUCTION_GO_LIVE_GUIDE.md](DOCUSIGN_PRODUCTION_GO_LIVE_GUIDE.md)
+for Jake vs developer split, Go-Live, production redirect URI
+(`https://api.prod.velvetelves.com/api/v1/integrations/docusign/callback`),
+Connect webhook, and AWS Secrets Manager / ECS cutover.
 
-1. On the Apps and Keys page, click **Promote to production** on the Velvet Elves row (or click the green status indicator). DocuSign will run an automated review of recent API requests and either approve immediately or queue for human review (typically 1-3 business days).
-   - Alternative: if Audri prefers to keep the dev Integration Key untouched, generate a brand-new Integration Key in a paid production DocuSign account at https://admin.docusign.com.
-2. Once promoted (or once the new prod key is created), register production redirect URIs against it, e.g. `https://app.velvetelves.com/api/v1/integrations/docusign/callback`.
-3. Swap `DOCUSIGN_OAUTH_BASE_URL` to `https://account.docusign.com` (no `-d`) on the production backend.
-4. Swap `DOCUSIGN_INTEGRATION_KEY`, `DOCUSIGN_SECRET_KEY`, and `DOCUSIGN_REDIRECT_URI` to the production values.
-
-The code requires no changes for the prod swap. It is purely a config change.
+The code requires no changes for the prod swap. It is a config change
+plus DocuSign Go-Live. Do not register the OAuth callback on
+`app.velvetelves.com`.
